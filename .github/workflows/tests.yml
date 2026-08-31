@@ -1,0 +1,45 @@
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install test dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet -r requirements-dev.txt
+
+      # Run per directory, not once from the root. A single root-level pytest
+      # cannot work here: test modules import their own conftest by name (which
+      # needs prepend import mode), and two test files share a basename (which
+      # prepend mode cannot collect together). See scripts/run-tests.py.
+      #
+      # The runner exits non-zero on any failing directory AND on a run that
+      # collected zero tests, so a suite that silently stops discovering
+      # anything cannot report success.
+      # Prove the baseline gate fires before trusting the run it guards. It is
+      # otherwise only reachable through the full ~10-minute sweep, so it would
+      # never be exercised deliberately.
+      - name: Self-test the known-failing gate
+        run: python3 scripts/run-tests.py --selftest
+
+      - name: Run the suite
+        run: python3 scripts/run-tests.py --timeout 600

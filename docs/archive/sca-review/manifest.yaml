@@ -1,0 +1,48 @@
+id: sca-review
+type: skill
+description: "Multi-agent CKLB quality simulation -- reviews findings against check_content and RAG conformance for Navy SCA submission."
+category: security
+requires_tools:
+  - Agent
+  - Bash
+  - Glob
+  - Grep
+  - Read
+  - mcp__codebase-memory-mcp__search_graph
+  - mcp__codebase-memory-mcp__index_status
+  - mcp__codebase-memory-mcp__index_repository
+  - mcp__codebase-memory-mcp__search_code
+  - AskUserQuestion
+requires_topics:
+  - security
+requires_rules:
+  - diagnose-before-fix
+requires_skills: []
+requires_auth: []
+input_contract:
+  parameters:
+    cklb_path:
+      type: string
+      required: true
+      description: "Path to the CKLB file to review"
+    target:
+      type: string
+      required: false
+      description: "Target system profile (default: example-target)"
+    repo:
+      type: string
+      required: false
+      description: "Source code repository path"
+  scope_from: argument
+output_contract:
+  produces: [sca_diff_json, review_summary, systemic_issues, status_changes]
+  format: json
+side_effects: [writes_diff_file, modifies_cklb]
+execution_context: main_thread
+auth_constraint: main_thread_only
+estimated_turns: "30-80"
+preconditions:
+  - cklb_file_exists
+  - source_repo_accessible
+guardrails: []
+threat_model: writes_local

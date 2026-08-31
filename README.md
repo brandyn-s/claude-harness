@@ -2,7 +2,7 @@
 
 A working [Claude Code](https://docs.claude.com/en/docs/claude-code) harness:
 **73 hooks**, **38 ambient rules**, **83 skills**, and the agent
-definitions that tie them together — about 1,573 files.
+definitions that tie them together — about 1,611 files.
 
 It is a configuration repo, but the reusable part is not the config. It is the
 **method**: what to do when a scanner reports zero, when a metric plateaus, when
@@ -104,6 +104,26 @@ fuller setup. `platform-rules/` covers what is host-specific. Requires Python
 > its own runtime directory, which meant every new kind of runtime artifact
 > (session spools, caches, ledgers, receipts) was one missing `.gitignore` rule
 > away from being committed. Keep the two separate.
+
+## Tests
+
+```bash
+pip install -r requirements-dev.txt
+python3 scripts/run-tests.py
+```
+
+~3,900 tests across 44 directories. The runner goes **one directory at a time** on
+purpose — a single root-level `pytest` cannot work here, and `scripts/run-tests.py`
+explains why in its docstring.
+
+It also carries a **known-failing baseline**, printed on every run and gated in
+both directions. Those failures are tests asserting on inventories that this
+curated subset legitimately changed (which hooks are registered, which skills
+exist). They are not deleted, because deleting them would green the suite by
+reducing coverage and leave no signal that coverage had moved. Going *over* the
+baseline is a regression; going *under* it means an entry is stale and should be
+removed — both fail, so the baseline cannot quietly become a place failures go to
+be forgotten.
 
 ## What this is a subset of
 

@@ -1,0 +1,1631 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Historical Claude Code architecture modernization report, evidence frozen 6 August 2026, with a current-state addendum dated 9 August 2026.">
+  <meta name="color-scheme" content="light dark">
+  <title>Claude Code Architecture Modernization — Change Report</title>
+  <style>
+    :root {
+      --page: #f4f2ed;
+      --surface: #ffffff;
+      --surface-soft: #f8f7f3;
+      --ink: #17202a;
+      --muted: #5b6772;
+      --line: #d8d5cd;
+      --accent: #4b56a6;
+      --accent-soft: #eceefe;
+      --good: #176b50;
+      --good-soft: #e8f5ef;
+      --warn: #9a5a12;
+      --warn-soft: #fff2dc;
+      --defer: #67547d;
+      --defer-soft: #f1eafb;
+      --reject: #8d3e48;
+      --reject-soft: #fbeaec;
+      --shadow: 0 14px 36px rgba(31, 38, 46, 0.08);
+      --radius: 18px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --page: #101318;
+        --surface: #181d24;
+        --surface-soft: #20262e;
+        --ink: #eef2f5;
+        --muted: #aeb8c2;
+        --line: #343c46;
+        --accent: #aeb5ff;
+        --accent-soft: #292e50;
+        --good: #7bd9b2;
+        --good-soft: #18392f;
+        --warn: #ffc36f;
+        --warn-soft: #4a341b;
+        --defer: #cfb7ec;
+        --defer-soft: #392d48;
+        --reject: #f3a5ae;
+        --reject-soft: #4a252b;
+        --shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: var(--sans);
+      line-height: 1.55;
+    }
+    a { color: var(--accent); }
+    a:hover { text-decoration-thickness: 2px; }
+    code {
+      font-family: var(--mono);
+      font-size: 0.9em;
+      overflow-wrap: anywhere;
+    }
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: 8px;
+      padding: 10px 14px;
+      background: var(--surface);
+      color: var(--ink);
+      z-index: 20;
+    }
+    .skip-link:focus { left: 8px; }
+    .page {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 72px;
+    }
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background:
+        radial-gradient(circle at 88% 12%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 34%),
+        linear-gradient(145deg, var(--surface), var(--surface-soft));
+      box-shadow: var(--shadow);
+      padding: clamp(28px, 5vw, 62px);
+    }
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+    h1, h2, h3, h4 { line-height: 1.15; text-wrap: balance; }
+    h1 {
+      max-width: 850px;
+      margin: 0;
+      font-size: clamp(2.25rem, 6vw, 4.65rem);
+      letter-spacing: -0.045em;
+    }
+    .lede {
+      max-width: 780px;
+      margin: 22px 0 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.2rem);
+    }
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 26px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 30px;
+      padding: 5px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--surface) 78%, transparent);
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+    .pill::before {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      content: "";
+    }
+    .pill.good::before { background: var(--good); }
+    .pill.warn::before { background: var(--warn); }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .metric {
+      min-height: 118px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+    .metric .value {
+      display: block;
+      font-size: clamp(1.45rem, 3vw, 2rem);
+      font-weight: 750;
+      letter-spacing: -0.035em;
+    }
+    .metric .label {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.3;
+    }
+    .toc {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 18px 0 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+    }
+    .toc a {
+      padding: 7px 10px;
+      border-radius: 9px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      text-decoration: none;
+    }
+    .toc a:hover {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    main { margin-top: 36px; }
+    section {
+      margin-top: 52px;
+      scroll-margin-top: 20px;
+    }
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 0.55fr);
+      gap: 24px;
+      align-items: end;
+      margin-bottom: 22px;
+    }
+    .section-head h2 {
+      margin: 0;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      letter-spacing: -0.035em;
+    }
+    .section-head p {
+      margin: 0;
+      color: var(--muted);
+    }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: 0 8px 24px rgba(31, 38, 46, 0.04);
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 16px;
+    }
+    .summary-card { padding: 26px; }
+    .summary-card h3 { margin: 0 0 12px; font-size: 1.25rem; }
+    .summary-card p { margin: 0; color: var(--muted); }
+    .principle {
+      display: flex;
+      align-items: center;
+      min-height: 100%;
+      padding: 26px;
+      border-left: 5px solid var(--accent);
+      font-size: 1.08rem;
+    }
+    .evolution-thesis {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 24px;
+      padding: 28px;
+      border-top: 5px solid var(--accent);
+    }
+    .evolution-thesis h3 { margin: 0 0 10px; font-size: 1.35rem; }
+    .evolution-thesis p { margin: 0; color: var(--muted); }
+    .evolution-thesis p + p { margin-top: 12px; }
+    .two-curves {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .curve {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--surface-soft);
+    }
+    .curve .label,
+    .era .period,
+    .shift .label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .curve strong { display: block; margin-bottom: 5px; }
+    .curve p { font-size: 0.84rem; }
+    .evolution-arc {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .era {
+      display: grid;
+      grid-template-columns: 170px minmax(0, 1.15fr) minmax(230px, 0.75fr);
+      gap: 22px;
+      align-items: start;
+      padding: 23px;
+    }
+    .era h3 { margin: 0; font-size: 1.12rem; }
+    .era p { margin: 0; color: var(--muted); }
+    .era .response {
+      padding-left: 18px;
+      border-left: 3px solid var(--line);
+      color: var(--ink);
+      font-size: 0.88rem;
+    }
+    .era .response strong { color: var(--accent); }
+    .evolution-callout {
+      margin-top: 14px;
+      padding: 22px 24px;
+      border-left: 5px solid var(--warn);
+    }
+    .evolution-callout h3 { margin: 0 0 8px; font-size: 1.1rem; }
+    .evolution-callout p { margin: 0; color: var(--muted); }
+    .evolution-callout p + p { margin-top: 10px; }
+    .boundary-shift {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .shift { padding: 18px; }
+    .shift h3 { margin: 0 0 7px; font-size: 1rem; }
+    .shift p { margin: 0; color: var(--muted); font-size: 0.86rem; }
+    .model-thesis {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 24px;
+      padding: 28px;
+      border-top: 5px solid var(--accent);
+    }
+    .model-thesis h3 { margin: 0 0 10px; font-size: 1.35rem; }
+    .model-thesis p { margin: 0; color: var(--muted); }
+    .model-thesis p + p { margin-top: 12px; }
+    .evidence-key {
+      display: grid;
+      gap: 9px;
+    }
+    .evidence-kind {
+      padding: 13px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-soft);
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+    .evidence-kind strong {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--ink);
+    }
+    .model-timeline {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .model-marker {
+      padding: 12px 16px;
+      border: 1px dashed var(--accent);
+      border-radius: 12px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-align: center;
+    }
+    .model-era {
+      display: grid;
+      grid-template-columns: 170px minmax(0, 1.05fr) minmax(260px, 0.85fr);
+      gap: 22px;
+      align-items: start;
+      padding: 23px;
+      border-left: 5px solid var(--accent);
+    }
+    .model-identity time,
+    .model-identity .date-range,
+    .model-adaptation .label,
+    .model-policy .label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .model-identity h3 { margin: 0 0 9px; font-size: 1.12rem; }
+    .model-chip {
+      display: inline-block;
+      margin: 2px 4px 0 0;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.68rem;
+      font-weight: 750;
+    }
+    .model-behavior h4,
+    .model-adaptation h4 { margin: 0 0 7px; font-size: 1rem; }
+    .model-behavior p,
+    .model-adaptation p { margin: 0; color: var(--muted); font-size: 0.88rem; }
+    .model-adaptation {
+      padding-left: 18px;
+      border-left: 3px solid var(--line);
+    }
+    .model-adaptation p strong { color: var(--ink); }
+    .model-policy-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .model-policy { padding: 19px; }
+    .model-policy h3 { margin: 0 0 7px; font-size: 1rem; }
+    .model-policy p { margin: 0; color: var(--muted); font-size: 0.85rem; }
+    .model-observation {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 20px;
+      margin-top: 14px;
+      padding: 22px 24px;
+      border-left: 5px solid var(--good);
+    }
+    .model-observation h3 { margin: 0 0 8px; font-size: 1.08rem; }
+    .model-observation p { margin: 0; color: var(--muted); }
+    .model-observation ul { margin: 0; padding-left: 20px; color: var(--muted); }
+    .change-list {
+      display: grid;
+      gap: 14px;
+    }
+    .change-card {
+      display: grid;
+      grid-template-columns: 58px minmax(0, 1fr);
+      gap: 18px;
+      padding: 24px;
+    }
+    .change-num {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 15px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-weight: 800;
+    }
+    .change-card h3 { margin: 2px 0 8px; font-size: 1.22rem; }
+    .change-card > div > p { margin: 0; color: var(--muted); }
+    .before-after {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .state {
+      padding: 14px 15px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-soft);
+    }
+    .state .label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 750;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .files {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 13px;
+    }
+    .file {
+      max-width: 100%;
+      padding: 4px 8px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      overflow-wrap: anywhere;
+      text-decoration: none;
+    }
+    .architecture {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .layer {
+      position: relative;
+      min-height: 154px;
+      padding: 20px;
+    }
+    .layer::after {
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      width: 18px;
+      height: 2px;
+      background: var(--line);
+      content: "";
+    }
+    .layer:nth-child(4n)::after,
+    .layer:last-child::after { display: none; }
+    .layer .index {
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      font-weight: 800;
+    }
+    .layer h3 { margin: 8px 0 7px; font-size: 1.05rem; }
+    .layer p { margin: 0; color: var(--muted); font-size: 0.86rem; }
+    .decision-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .decision { padding: 20px; }
+    .decision h3 { margin: 0 0 10px; font-size: 1rem; }
+    .decision ul { margin: 0; padding-left: 20px; color: var(--muted); }
+    .decision.adopt { border-top: 4px solid var(--good); }
+    .decision.qualify { border-top: 4px solid var(--warn); }
+    .decision.defer { border-top: 4px solid var(--defer); }
+    .decision.reject { border-top: 4px solid var(--reject); }
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    th, td {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      background: var(--surface-soft);
+      color: var(--muted);
+      font-size: 0.74rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: color-mix(in srgb, var(--accent-soft) 45%, transparent); }
+    .tag {
+      display: inline-block;
+      min-width: 58px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+    }
+    .tag.adopt { background: var(--good-soft); color: var(--good); }
+    .tag.defer { background: var(--defer-soft); color: var(--defer); }
+    .tag.reject { background: var(--reject-soft); color: var(--reject); }
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .evidence { padding: 20px; }
+    .evidence .big {
+      display: block;
+      color: var(--accent);
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+    .evidence h3 { margin: 5px 0 7px; font-size: 1rem; }
+    .evidence p { margin: 0; color: var(--muted); font-size: 0.84rem; }
+    .research-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .research-card { padding: 22px; }
+    .research-card h3 { margin: 0 0 10px; }
+    .research-card ul { margin: 0; padding-left: 20px; color: var(--muted); }
+    .callout {
+      margin-top: 14px;
+      padding: 18px 20px;
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--warn);
+      border-radius: 14px;
+      background: var(--warn-soft);
+    }
+    .callout h3 { margin: 0 0 5px; font-size: 1rem; }
+    .callout p { margin: 0; color: var(--ink); }
+    details {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+    }
+    details + details { margin-top: 9px; }
+    summary {
+      cursor: pointer;
+      padding: 15px 18px;
+      font-weight: 700;
+    }
+    details > div {
+      padding: 0 18px 18px;
+      color: var(--muted);
+    }
+    .delivery {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .delivery-step { padding: 20px; }
+    .delivery-step .status {
+      display: inline-block;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .delivery-step.done { border-top: 4px solid var(--good); }
+    .delivery-step.pending { border-top: 4px solid var(--warn); }
+    .delivery-step h3 { margin: 0 0 6px; font-size: 1rem; }
+    .delivery-step p { margin: 0; color: var(--muted); font-size: 0.84rem; }
+    .sources {
+      columns: 2;
+      column-gap: 28px;
+      padding: 24px;
+    }
+    .sources li { break-inside: avoid; margin-bottom: 8px; }
+    footer {
+      margin-top: 56px;
+      padding-top: 22px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 940px) {
+      .metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .architecture { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .layer:nth-child(4n)::after { display: block; }
+      .layer:nth-child(2n)::after { display: none; }
+      .era { grid-template-columns: 150px minmax(0, 1fr); }
+      .era .response { grid-column: 2; }
+      .model-era { grid-template-columns: 150px minmax(0, 1fr); }
+      .model-adaptation { grid-column: 2; }
+      .decision-grid, .delivery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .evidence-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .model-policy-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 680px) {
+      .page { width: min(100% - 20px, 1180px); padding-top: 10px; }
+      .hero { border-radius: 18px; padding: 26px 20px; }
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .section-head, .summary-grid, .research-grid, .evolution-thesis,
+      .two-curves, .era, .boundary-shift, .model-thesis, .model-era,
+      .model-policy-grid, .model-observation { grid-template-columns: 1fr; }
+      .era .response { grid-column: auto; }
+      .model-adaptation { grid-column: auto; }
+      .change-card { grid-template-columns: 1fr; }
+      .before-after, .architecture, .decision-grid, .evidence-grid, .delivery {
+        grid-template-columns: 1fr;
+      }
+      .layer::after { display: none !important; }
+      .sources { columns: 1; }
+    }
+    @media print {
+      :root {
+        --page: #ffffff;
+        --surface: #ffffff;
+        --surface-soft: #f5f5f5;
+        --ink: #111111;
+        --muted: #444444;
+        --line: #cccccc;
+      }
+      body { background: #fff; }
+      .page { width: 100%; padding: 0; }
+      .hero, .card { box-shadow: none; }
+      .toc { display: none; }
+      section { break-inside: auto; }
+      tr, .card, details { break-inside: avoid; }
+      .section-head {
+        break-after: avoid-page;
+        page-break-after: avoid;
+      }
+      details:not([open]) > div { display: block !important; }
+      details summary { list-style: none; }
+      details summary::-webkit-details-marker { display: none; }
+      a { color: inherit; text-decoration: none; }
+      th { position: static; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to report</a>
+  <div class="page">
+    <header class="hero">
+      <p class="eyebrow">Historical architecture report · evidence frozen 6 August 2026</p>
+      <h1>Claude Code architecture modernization</h1>
+      <p class="lede">
+        What changed, why it changed, what was deliberately removed, and the
+        evidence qualified on Claude Code 2.1.223. A dated addendum separates
+        current policy from this frozen historical snapshot.
+      </p>
+      <div class="hero-meta" aria-label="Report status">
+        <span class="pill good">Local source and live macOS qualified</span>
+        <span class="pill good">Live macOS deployed</span>
+        <span class="pill warn">Remote publication and native Windows pending</span>
+        <span class="pill warn">Internal: transcript-derived aggregates</span>
+        <span class="pill">Behavioral source e0681256</span>
+        <span class="pill">Live merge 520e18e7</span>
+      </div>
+    </header>
+
+    <section class="metrics" aria-label="Change summary">
+      <div class="metric"><span class="value">e0681256</span><span class="label">historical qualified behavioral implementation</span></div>
+      <div class="metric"><span class="value">520e18e7</span><span class="label">historical live-macOS merge</span></div>
+      <div class="metric"><span class="value">67.3%</span><span class="label">historical reduction in always-loaded architecture context</span></div>
+      <div class="metric"><span class="value">53.06%</span><span class="label">historical token reduction in the fresh Fable 5 smoke</span></div>
+      <div class="metric"><span class="value">41</span><span class="label">historical recommendations dispositioned</span></div>
+      <div class="metric"><span class="value">2.1.223</span><span class="label">historical qualified Claude Code runtime and floor</span></div>
+    </section>
+
+    <nav class="toc" aria-label="Report sections">
+      <a href="#current-addendum">Current addendum</a>
+      <a href="#executive">Executive outcome</a>
+      <a href="#evolution">How they co-evolved</a>
+      <a href="#models">Model behavior timeline</a>
+      <a href="#changes">Changes and rationale</a>
+      <a href="#architecture">Architecture now</a>
+      <a href="#decisions">Decisions</a>
+      <a href="#validation">Validation</a>
+      <a href="#research">Research basis</a>
+      <a href="#ledger">Recommendation ledger</a>
+      <a href="#boundaries">Boundaries</a>
+      <a href="#delivery">Delivery state</a>
+      <a href="#sources">Primary sources</a>
+    </nav>
+
+    <main id="main">
+      <section id="current-addendum">
+        <div class="section-head">
+          <h2>Current-state addendum — 2026-08-09</h2>
+          <p>This section is current; the original report below is preserved as historical evidence.</p>
+        </div>
+        <div class="summary-grid">
+          <article class="card summary-card">
+            <h3>Delivery and policy changed after the snapshot</h3>
+            <p><a href="https://github.com/brandyn-s/claude-harness/pull/1937">PR #1937</a> closed unmerged. <a href="https://github.com/brandyn-s/claude-harness/pull/1938">PR #1938</a> later merged the 2.1.226 version floors and peer-machine isolation. <a href="https://github.com/brandyn-s/claude-harness/pull/1948">PR #1948</a> merged the full current-runtime reconciliation at <code>1e7a5cc7ee53c2c5f0429b2b500041a6b809a7de</code>. <a href="https://github.com/brandyn-s/claude-harness/pull/1949">PR #1949</a> terminally merged at <code>8d76d4534b5db11200543cb70d136da427385a4a</code>, followed by <a href="https://github.com/brandyn-s/claude-harness/pull/1950">PR #1950</a> at <code>9d810b9b6ca9dc03e6434147804eed8221c7e3c9</code>. Automatic updates are now intentionally enabled, superseding the historical manual-only recommendation and <code>DISABLE_AUTOUPDATER=1</code> claim.</p>
+          </article>
+          <article class="card summary-card">
+            <h3>Current repository contract</h3>
+            <p>Update-blocking variables remain absent. <code>minimumVersion: 2.1.226</code> prevents downgrades; the managed template's <code>requiredMinimumVersion: 2.1.226</code> is a separate startup floor. Qualification-producing workflows require requested/effective runtime receipts through a model-independent contract and mark unobserved fields <code>&lt;unavailable&gt;</code>; Opus 4.7 guidance is historical only.</p>
+          </article>
+          <article class="card summary-card">
+            <h3>Current model and runtime controls</h3>
+            <p>Source preserves the user's explicit <code>/model</code> selection, <code>us.anthropic.claude-opus-5[1m]</code>, with <code>effortLevel: "high"</code>, <code>alwaysThinkingEnabled: true</code>, and <code>switchModelsOnFlag: true</code>. Provider and effective-model fields remain runtime-resolved rather than inferred from this saved intent.</p>
+          </article>
+          <article class="card summary-card">
+            <h3>Compaction and standalone packages</h3>
+            <p>Large active skills now carry an early recovery contract for the 5,000-token-per-skill and 25,000-token-combined post-compaction reattachment limits. The atomic marketplace release closes declared transitive skills, shared policies, and executable helpers without relying on the source checkout at <code>~/.claude</code>. Two consecutive builds were byte-identical, and isolated cached-plugin runtime smokes passed.</p>
+          </article>
+          <article class="card summary-card">
+            <h3>Ambient context reconciled</h3>
+            <p>Main had regressed to 34 always-loaded rules and 526,404 bytes. Current source contains 33 and 152,949 bytes (about 38,237 proxy tokens), a 70.9% reduction. Newer safeguards remain compact, while the metric-based shipping contract correctly remains global because its trigger is a production decision rather than an <code>eval/</code> pathname.</p>
+          </article>
+        </div>
+        <div class="callout">
+          <h3>Evidence boundary</h3>
+          <p>The original <code>e0681256</code>/<code>520e18e7</code> implementation, 271 assertions, 235 mutations, transcript aggregates, cost measurements, file counts, and any present-tense runtime/model statements below are frozen 2026-08-06 evidence—not present-state claims. This addendum is authoritative for the current reconciliation. Current source policy does not prove administrator deployment, inherited shell environment, or runtime behavior. Each installed Claude Code release requires fresh-session qualification.</p>
+        </div>
+        <div class="callout">
+          <h3>Rule and skill context — 2026-08-09</h3>
+          <p>The aggregate rule measurement now fails closed on malformed frontmatter, invalid UTF-8, read failures, and escaping symlinks. CI, local preflight, and the active edit guard block growth above the qualified 250,000-byte hard cap. The 50,000–60,000-byte range remains an informational A/B target, not a correctness gate. Skill discovery is a separate surface: current source has 107 skills, 7 hidden from model discovery, no truncated listings, an estimated 17,963 listing tokens, 26 skills over the soft body cap, 41 over the compaction-reattachment proxy, zero continuity gaps, and <code>skillListingBudgetFraction: 0.03</code>. The earlier 112-skill / 1% inventory described the old installed configuration.</p>
+        </div>
+        <h3>Source, remote, and installed state — 2026-08-09</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>State</th><th>Rule context</th><th>Runtime-policy summary</th></tr></thead>
+            <tbody>
+              <tr><td>Verified behavioral source release <code>9d810b9b</code></td><td>33 rules / 152,949 bytes</td><td>Contained in current <code>origin/main</code>; explicit Opus 5 1M provider-prefixed default, <code>high</code>, switching enabled, 2.1.226 source floor, 3% skill-listing budget, and depth-1 defense in depth.</td></tr>
+              <tr><td>Installed pre-activation baseline <code>~/.claude@a8ce4e54</code></td><td>32 rules / 144,658 bytes</td><td>The prior Fable 5 / 2.1.223 policy is the last committed live baseline; concurrent owner changes are not deployment evidence.</td></tr>
+              <tr><td>Scoped installed deployment candidate</td><td>33 rules / 152,949 bytes in the tested rule scope</td><td>Prepared against the preserved installed lineage. Source-only marketplace publication is outside the bounded apply; activation and parity remain unclaimed.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout">
+          <h3>Current delivery boundary</h3>
+          <p><a href="https://github.com/brandyn-s/claude-harness/pull/1949">PR #1949</a> landed at <code>8d76d4534b5db11200543cb70d136da427385a4a</code>, followed by <a href="https://github.com/brandyn-s/claude-harness/pull/1950">PR #1950</a> at <code>9d810b9b6ca9dc03e6434147804eed8221c7e3c9</code>. Current <code>origin/main</code> contains that verified behavioral release. Both protected source deliveries are terminal; no source/installed parity is claimed by this report.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Current reconciliation area</th><th>Action and rationale</th></tr></thead>
+            <tbody>
+              <tr><td>Update and cross-session policy</td><td>Keep automatic updates enabled, align both 2.1.226 floors, reject update-blocking variables, refuse inbound dialogs after five minutes, and isolate peer machines.</td></tr>
+              <tr><td>Subagent limits</td><td>Reject the removed per-session cap and legacy concurrent-subagent variable. Require <code>CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1</code> as defense in depth. All six active agents deny or omit <code>Agent</code>, which is the primary control; bug #84974 makes depth 1 an imperfect secondary ceiling of at most one child layer on Claude Code 2.1.225/226, not a zero-nesting guarantee.</td></tr>
+              <tr><td>Git and vendor evidence</td><td>Gate the complete committed/staged/unstaged/untracked payload, distinguish session commits from pre-existing clean-ahead work, and make current first-party contract freshness part of the verdict.</td></tr>
+              <tr><td>Model and API runtime</td><td>Use model-independent receipts plus current overlays; verify supported Opus 4.7/4.8 and Claude 5 SDK, JSON, kwargs, dynamic-model, and raw-HTTP examples without whole-block false positives.</td></tr>
+              <tr><td>Multi-agent evidence</td><td>Bind panel and synthesis to one terminal run, exact model/effort, adequate output headroom, valid quorum, and typed failures so truncated or reused runs cannot look like consensus.</td></tr>
+              <tr><td>Skill lifecycle</td><td>Prefer native <code>/context</code>, <code>/doctor</code>, and <code>/mcp</code> diagnostics; add early recovery above the conservative compaction proxy; use the proven native fork-argument contract.</td></tr>
+              <tr><td>Shell and package runtime</td><td>Keep low-frequency zsh word-splitting findings advisory. Close cached-plugin skill/shared/helper paths, reject symlink escapes and inactive capabilities, and execute runtime smokes because strict manifest validation is not a runtime oracle.</td></tr>
+              <tr><td>Evaluation provenance</td><td>Resolve operational LLM evaluations from the current repository model, preserve nested runtime receipts, and label Opus 4.7 studies as frozen historical designs.</td></tr>
+              <tr><td>Metric-driven shipping</td><td>Keep a compact global decision contract and move its detailed procedure and incidents on demand. Path-scoping this rule misses production defaults changed outside evaluation directories.</td></tr>
+              <tr><td>Output grounding</td><td>Require the contract in the four scoped skill prompts and validate sampled outputs through fixtures, replay, and explicit evaluation. Retain the PostToolUse hook only as an advisory payload diagnostic. There is no deterministic runtime final-answer enforcement, and hook silence does not prove compliance.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>2026-08-09 context reconciliation — terminal source release</h3>
+        <p>Terminal marketplace versions are <code>code-intelligence 1.1.14</code>, <code>knowledge-ops 1.1.50</code>, <code>planning-toolkit 1.1.30</code>, <code>research-intel 1.1.29</code>, <code>safety-net 1.1.29</code>, and <code>security-scanner 1.1.8</code>. The root marketplace and all six packages passed strict validation, marketplace synchronization, and the protected architecture-drift gate.</p>
+        <div class="delivery">
+          <article class="card delivery-step done"><span class="status">Merged</span><h3>PR #1949</h3><p>Terminal merge <code>8d76d4534b5db11200543cb70d136da427385a4a</code>.</p></article>
+          <article class="card delivery-step done"><span class="status">Merged</span><h3>PR #1950</h3><p>Terminal merge <code>9d810b9b6ca9dc03e6434147804eed8221c7e3c9</code>; the landed tree matches the reviewed head.</p></article>
+          <article class="card delivery-step done"><span class="status">Verified</span><h3>Remote main</h3><p>Current <code>origin/main</code> contains <code>9d810b9b6ca9dc03e6434147804eed8221c7e3c9</code>; that merge's landed tree matches the reviewed head.</p></article>
+          <article class="card delivery-step pending"><span class="status">Pending</span><h3>Installed <code>~/.claude</code> apply</h3><p>The tested scoped deployment is not active; no source/live parity is claimed.</p></article>
+        </div>
+        <h3>Final source qualification through PR #1950</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Gate</th><th>Terminal source result</th></tr></thead>
+            <tbody>
+              <tr><td>Full preflight</td><td>20/20 gates passed.</td></tr>
+              <tr><td>Deterministic and mutation evals</td><td>270/270 assertions passed; all 233 supported mutations bit, with 37 counting-only assertions explicitly skipped.</td></tr>
+              <tr><td>Hosted regression</td><td>Hooks: 1,650 passed, 60 skipped, 22 subtests. Scripts: 542 passed, 10 skipped, 3 subtests. Per-skill: 2,384 passed, 10 skipped, 32 subtests.</td></tr>
+              <tr><td>Focused reconciliation</td><td>76 model, settings, provenance, and deep-dive tests passed in the final local integration check.</td></tr>
+              <tr><td>Native Claude Code 2.1.226</td><td>PR #1949's 8/8 bounded loopback probes passed; PR #1950 preserved the gate and passed protected merge-group validation.</td></tr>
+              <tr><td>Plugins and marketplace</td><td>Root marketplace plus all six plugins passed strict validation; marketplace synchronization and the architecture-drift gate passed.</td></tr>
+              <tr><td>Secret scan</td><td>Gitleaks passed for both protected deliveries.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- LIVE_ACTIVATION_EVIDENCE_START -->
+        <div class="callout">
+          <h3>Installed activation is pending</h3>
+          <p>Replace only this bounded block after a stopped-session apply has concrete evidence for the installed commit, rollback snapshot or recovery ref, exact scoped inventory, post-apply regression and preflight results, native loopback result, and final source/installed drift verdict. Until then, no installed parity or deployment-complete claim is made.</p>
+        </div>
+        <!-- LIVE_ACTIVATION_EVIDENCE_END -->
+        <div class="callout">
+          <h3>Differential review: APPROVE / LOW</h3>
+          <p>The PR #1949 committed <a href="../claude-config_DIFFERENTIAL_REVIEW_2026-08-09.md">differential review</a>, added at <code>d7889779</code>, reviewed the source tip at <code>5295e30d</code> and returned <strong>APPROVE</strong> with <strong>LOW</strong> overall risk. Its one open finding is a nonblocking LOW near-cap concurrency race: overlapping PreToolUse decisions can validate the aggregate rule corpus against the same snapshot, so the live 250,000-byte guard is not an atomic concurrency guarantee. The current 152,949-byte corpus leaves substantial headroom, but the limitation remains tracked.</p>
+        </div>
+        <h3>2026-08-08 reconciliation verification — merged release</h3>
+        <p>The behavioral and package release tip was <code>7c5af8096446dc12e56cc048d4365b455b76062a</code>, 14 commits above <code>origin/main@8e360044</code>. The report files first landed in <code>837646f3</code>. GitHub later merged the reviewed tree through <a href="https://github.com/brandyn-s/claude-harness/pull/1948">PR #1948</a> at <code>1e7a5cc7ee53c2c5f0429b2b500041a6b809a7de</code>. The installed <code>~/.claude</code> checkout was not modified by that merge, so source/live synchronization remained a separate deployment step.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Release gate</th><th>PR #1948 result</th></tr></thead>
+            <tbody>
+              <tr><td>Full preflight</td><td>19/19 gates passed.</td></tr>
+              <tr><td>Deterministic and mutation evals</td><td>270/270 assertions passed; all 233 supported mutations were detected, with 37 counting-only assertions explicitly skipped by the mutation engine.</td></tr>
+              <tr><td>Regression</td><td>Scripts: 375 passed, 1 skipped, 3 subtests. Hooks: 1,542 passed, 49 skipped, 22 subtests.</td></tr>
+              <tr><td>Native Claude Code 2.1.226</td><td>8/8 loopback probes passed: settings schema, both fork-argument modes, push nonmatch/block, commit block, worker Bash, and cross-checkout fence.</td></tr>
+              <tr><td>Marketplace release</td><td>1,324 packaged files across six plugins. The 1,332-file package-plus-manifest tree was byte-identical across consecutive builds at <code>3b6041e8e37aa784477f804ff42ed1e262e7a0dbe05a87a5f208df8845d8dc62</code>.</td></tr>
+              <tr><td>Plugin runtime</td><td>Root plus all six plugins passed strict validation; all 500 packaged Python files compiled; isolated healthcheck, distill, audit, guard, dependency, escape, rollback, and whole-release atomicity smokes passed.</td></tr>
+              <tr><td>Architecture and replay</td><td>Strict audit passed with zero findings and fresh packages. Zsh replay matched 9/5,648 commands (0.16%); all 29 fixtures passed.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>PR #1948 plugin versions were: <code>code-intelligence 1.1.14</code>, <code>knowledge-ops 1.1.44</code>, <code>planning-toolkit 1.1.27</code>, <code>research-intel 1.1.20</code>, <code>safety-net 1.1.28</code>, and <code>security-scanner 1.1.8</code>.</p>
+        <div class="callout">
+          <h3>GitHub delivery outcome for PR #1948</h3>
+          <p>Remote branch <code>agent/reconcile-architecture-20260808</code> merged through <a href="https://github.com/brandyn-s/claude-harness/pull/1948">PR #1948</a> at <code>1e7a5cc7ee53c2c5f0429b2b500041a6b809a7de</code>. The terminal merge proves protected-branch delivery, but not live apply, administrator deployment, native-Windows qualification, or production approval. The publication base was <code>origin/main@8e360044</code>; the first published report tip was <code>837646f3</code>.</p>
+        </div>
+      </section>
+
+      <section id="executive">
+        <div class="section-head">
+          <h2>Historical snapshot — evidence frozen 2026-08-06</h2>
+          <p>The redesign replaces accumulated workarounds with current native Claude Code contracts and stronger deterministic evidence.</p>
+        </div>
+        <div class="summary-grid">
+          <article class="card summary-card">
+            <h3>What materially improved</h3>
+            <p>
+              The configuration now relies on native skill discovery, native
+              ToolSearch, structured hook execution, bounded agents, fresh
+              worktrees, fail-closed settings protection, reversible rollback,
+              and executable release qualification checks. Receipt creation, connection
+              status, and transcript presence are treated as evidence inputs—not
+              as proof that work succeeded.
+            </p>
+          </article>
+          <aside class="card principle">
+            Keep model context short and discoverable. Enforce only deterministic
+            invariants in hooks. Verify artifacts and runtime state before
+            declaring success.
+          </aside>
+        </div>
+      </section>
+
+      <section id="evolution">
+        <div class="section-head">
+          <h2>Claude Code and the local architecture co-evolved</h2>
+          <p>This is the cumulative story behind the individual releases: the model became a more capable operator while Claude Code became a managed agent runtime. At the same time, the local architecture was learning from real use. Their ownership boundary kept moving.</p>
+        </div>
+
+        <article class="card evolution-thesis">
+          <div>
+            <h3>The architecture was not arbitrary complexity</h3>
+            <p>Claude Code began in February 2025 as a limited research preview with a minimal terminal surface: an agent that could inspect a repository, edit files, run commands, and use Git. Early adopters still had to decide how reusable context, routing, supervision, state, and organizational trust should work around it.</p>
+            <p>When this repository's <a href="EVOLUTION.md">first full configuration landed on 22 February 2026</a>, it captured accumulated operating experience around the runtime that existed then. Over the following months, domain agents became a generic worker; repeated misses became routing and memory; platform failures became hook launchers and worktree guards; session loss became checkpoints and receipts. In parallel, Anthropic kept deepening the native versions of many of those responsibilities. The modernization is therefore a boundary correction—not a repudiation of the learning that produced the architecture.</p>
+          </div>
+          <div class="two-curves" aria-label="The two forces that changed the architecture boundary">
+            <div class="curve">
+              <span class="label">Curve one</span>
+              <strong>The model became a better operator</strong>
+              <p>Hybrid reasoning, parallel tool use, longer horizons, stronger instruction following, memory, and larger context made fixed thinking budgets and repeated prompt scaffolding age quickly.</p>
+            </div>
+            <div class="curve">
+              <span class="label">Curve two</span>
+              <strong>The product became an agent runtime</strong>
+              <p>Skills, plugins, hooks, MCP, ToolSearch, subagents, worktrees, sandboxing, durable sessions, diagnostics, and telemetry moved execution mechanics into Claude Code itself.</p>
+            </div>
+          </div>
+        </article>
+
+        <div class="evolution-arc" aria-label="Claude Code cumulative evolution">
+          <article class="card era">
+            <div><span class="period">Feb–Apr 2025</span><h3>A powerful primitive</h3></div>
+            <p>The <a href="https://www.anthropic.com/news/claude-3-7-sonnet">research preview</a> paired an increasingly capable reasoning model with direct terminal agency. Its minimal initial surface exposed raw power, but provided few native facilities for reusable context, delegation, lifecycle, or enterprise governance.</p>
+            <p class="response"><strong>Natural local response:</strong> build <code>CLAUDE.md</code>, reusable instructions, routers, approval and validation hooks, and external memory around the primitive.</p>
+          </article>
+
+          <article class="card era">
+            <div><span class="period">May–Oct 2025</span><h3>From CLI to connected workspace</h3></div>
+            <p><a href="https://www.anthropic.com/news/claude-4">General availability with Claude 4</a> brought IDE and GitHub Actions workflows; <a href="https://www.anthropic.com/news/claude-code-remote-mcp">remote MCP</a> standardized connections; Claude Code 2.0 added checkpoints and more autonomous operation; sandboxing moved protection closer to the process boundary.</p>
+            <p class="response"><strong>The boundary shifted:</strong> editor integration, remote connections, recovery, and basic containment no longer had to be wholly user-built.</p>
+          </article>
+
+          <article class="card era">
+            <div><span class="period">Oct 2025–Jan 2026</span><h3>Extensibility became a product</h3></div>
+            <p><a href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills">Agent Skills</a> made expertise discoverable and progressively loadable. Plugins began packaging skills, agents, hooks, and MCP servers as a supported unit, with native installation and lifecycle management rather than a loose collection of dotfiles.</p>
+            <p class="response"><strong>Overlap appeared:</strong> custom registries, keyword routers, cache edits, and ambient instruction injection began duplicating an upstream extension system.</p>
+          </article>
+
+          <article class="card era">
+            <div><span class="period">Feb–Apr 2026</span><h3>One agent became a fleet</h3></div>
+            <p>Building on already-available subagents and background tasks, agent teams, maturing worktree isolation, Auto mode, richer context handoffs, and evaluator patterns turned a conversation into an orchestration substrate. Anthropic's own <a href="https://www.anthropic.com/engineering/harness-design-long-running-apps">harness guidance</a> captured the core maintenance problem: every scaffold encodes an assumption about what the model cannot yet do, and those assumptions can expire quickly.</p>
+            <p class="response"><strong>Natural local response:</strong> generic agents, context forks, receipts, workflow gates, and isolation were sensible bridges. As native contracts matured, some bridges became a second scheduler and state machine.</p>
+          </article>
+
+          <article class="card era">
+            <div><span class="period">May–Jun 2026</span><h3>The contracts firmed up</h3></div>
+            <p>Agent views and goals made delegated work visible. Structured hook arguments, plugin dependencies and context estimates, component-level usage attribution, richer subagent feedback, MCP health handling, managed version policy, and OpenTelemetry made the runtime more inspectable and governable.</p>
+            <p class="response"><strong>Bridges became liabilities:</strong> shell-string wrappers, heuristic routers, plugin cache mutation, connection badges, and home-grown attribution could now conflict with stronger native contracts.</p>
+          </article>
+
+          <article class="card era">
+            <div><span class="period">Jul–Aug 2026</span><h3>Native did not mean finished</h3></div>
+            <p>Agent concurrency and nesting caps, stricter sandbox networking, credential masking, transcript-write warnings, richer MCP failures, forked worktrees, and immediate plugin activation made the substrate safer and easier to diagnose. The rapid fixes for worktree escape and a background-task hook bypass also showed why a native feature still needs a qualified version floor.</p>
+            <p class="response"><strong>Durable local role:</strong> pin and qualify the runtime; retain organizational invariants, rollback, semantic acceptance, and independent verification rather than reimplementing the runtime.</p>
+          </article>
+        </div>
+
+        <aside class="card evolution-callout">
+          <h3>The architectural half-life got shorter</h3>
+          <p>A workaround could be correct when introduced and harmful a few releases later. A router can defeat progressive disclosure; a trimmer can hide output Claude Code now persists safely; a prompt hook can burn the context a larger model would otherwise use; a custom workflow can invent a weaker meaning of “complete.” The recurring maintenance question is no longer only “does this work?” It is also “does Claude Code now own this layer?”</p>
+          <p>Anthropic's <a href="https://www.anthropic.com/engineering/how-we-contain-claude">containment retrospective</a> adds an equally important limit: model instructions and repeated approvals are probabilistic and fatigue-prone, while environment boundaries and system primitives can be enforced. Native mechanics should replace duplicate glue, but not domain authority, consequential-action policy, evidence quality, or independent tests.</p>
+        </aside>
+
+        <div class="boundary-shift" aria-label="Architecture ownership before and now">
+          <article class="card shift"><span class="label">Then</span><h3>Make the agent operational</h3><p>Supply discovery, routing, delegation, persistence, recovery, packaging, and enough safety around a powerful but thin terminal agent.</p></article>
+          <article class="card shift"><span class="label">Now</span><h3>Govern the native runtime</h3><p>Configure supported contracts, bound execution, pin qualified versions, observe failures, and remove mechanisms that compete with upstream behavior.</p></article>
+          <article class="card shift"><span class="label">Still local</span><h3>Prove what matters</h3><p>Own organizational policy, domain knowledge, irreversible-action authority, expected artifacts, semantic acceptance, rollback evidence, and regression detection.</p></article>
+        </div>
+      </section>
+
+      <section id="models">
+        <div class="section-head">
+          <h2>The model frontier moved under the architecture</h2>
+          <p>Claude evolved from a model that benefited from explicit reasoning scaffolds into a family of long-horizon agents that allocate their own thinking, delegate readily, and increasingly self-check. The useful local role shifted from prescribing cognition to bounding execution and proving outcomes.</p>
+        </div>
+
+        <article class="card model-thesis">
+          <div>
+            <h3>Architecture should follow behavior, not model branding</h3>
+            <p>Early Claude Code paired Sonnet 3.7 with manual extended-thinking budgets and a simple planning scaffold. By Opus 5, thinking is on by default, effort is the primary control, one million tokens is the normal context window, and Anthropic explicitly says the model may delegate and self-verify without being told. Instructions that once compensated for model limits can therefore become duplicated work, excess narration, or conflicting constraints.</p>
+            <p>The answer is not to trust each stronger model more broadly. It is to remove prompt-level duplication while retaining external controls: scope, authority, isolation, typed failure handling, artifacts, tests, runtime checks, and rollback. Those controls verify the world rather than asking the same model to agree with itself.</p>
+            <p>The timeline covers the releases that materially changed Claude Code behavior or local routing, plus the restricted Mythos lane. Anthropic's dated model roster contains no Haiku 5 as of 6 August 2026.</p>
+          </div>
+          <div class="evidence-key" aria-label="Evidence levels used in the model timeline">
+            <div class="evidence-kind"><strong>Documented behavior</strong>First-party launch, migration, and prompting guidance. These are product claims and API contracts.</div>
+            <div class="evidence-kind"><strong>Local adaptation</strong>Versioned repository evidence begins 22 February 2026. Earlier rows are first-party context and architectural inference, not observed local history.</div>
+            <div class="evidence-kind"><strong>Measured behavior</strong>A fixed ten-day transcript snapshot ending 5 August 2026. It supports current operational findings, not a clean causal comparison between model generations.</div>
+          </div>
+        </article>
+
+        <div class="model-timeline" aria-label="Claude model releases and architecture implications">
+          <article class="card model-era" aria-labelledby="model-claude-3-7">
+            <div class="model-identity">
+              <time datetime="2025-02-24">24 Feb 2025</time>
+              <h3 id="model-claude-3-7"><a href="https://www.anthropic.com/news/claude-3-7-sonnet">Claude 3.7 Sonnet</a></h3>
+              <span class="model-chip">hybrid reasoning</span><span class="model-chip">manual budget</span>
+            </div>
+            <div class="model-behavior">
+              <h4>Reasoning became visible and configurable</h4>
+              <p>Claude could answer normally or use extended thinking with a caller-selected token budget. The Claude Code research preview launched beside it, and Anthropic's initial coding scaffold included an explicit planning tool.</p>
+            </div>
+            <div class="model-adaptation">
+              <span class="label">Recommended adaptation</span>
+              <p>Given the documented surface, detailed plans, fixed thinking budgets, explicit decomposition, and “think before acting” guidance were defensible scaffolds. This repository has no versioned 3.7-era evidence that proves their local effect.</p>
+            </div>
+          </article>
+
+          <article class="card model-era" aria-labelledby="model-claude-4-family">
+            <div class="model-identity">
+              <span class="date-range">22 May–5 Aug 2025</span>
+              <h3 id="model-claude-4-family"><a href="https://www.anthropic.com/news/claude-4">Sonnet 4 &amp; Opus 4</a>, <a href="https://www.anthropic.com/news/claude-opus-4-1">Opus 4.1</a></h3>
+              <span class="model-chip">parallel tools</span><span class="model-chip">multi-file work</span>
+            </div>
+            <div class="model-behavior">
+              <h4>Anthropic shifted Claude toward agentic software work</h4>
+              <p>Claude 4 improved sustained work, instruction following, memory, and parallel tool use. Opus 4.1 sharpened multi-file refactoring, detail tracking, agentic search, and precision rather than changing the interaction model wholesale.</p>
+            </div>
+            <div class="model-adaptation">
+              <span class="label">Recommended adaptation</span>
+              <p>Prompts could move from procedural recipes toward objectives, constraints, and acceptance criteria. Coordination still mattered, but a second hand-authored planner increasingly duplicated capabilities inside the model and Claude Code.</p>
+            </div>
+          </article>
+
+          <article class="card model-era" aria-labelledby="model-claude-4-5-family">
+            <div class="model-identity">
+              <span class="date-range">29 Sep–24 Nov 2025</span>
+              <h3 id="model-claude-4-5-family"><a href="https://www.anthropic.com/news/claude-sonnet-4-5">Sonnet 4.5</a>, <a href="https://www.anthropic.com/news/claude-haiku-4-5">Haiku 4.5</a>, <a href="https://www.anthropic.com/news/claude-opus-4-5">Opus 4.5</a></h3>
+              <span class="model-chip">long-running</span><span class="model-chip">tiered routing</span><span class="model-chip">effort</span>
+            </div>
+            <div class="model-behavior">
+              <h4>A useful model portfolio emerged</h4>
+              <p>Sonnet sustained complex work for much longer; Haiku delivered near-frontier coding at much lower latency and cost; Opus improved deep agentic work and introduced an explicit effort tradeoff. “Use the largest model for everything” stopped being the obvious strategy.</p>
+            </div>
+            <div class="model-adaptation">
+              <span class="label">Recommended adaptation</span>
+              <p>Route by task and measured failure cost: cheap synthesis or lookup to Haiku, bounded implementation to Sonnet, and the hardest judgment to Opus. The local fixed Haiku synthesis path reflects this idea, but every child still needs requested-versus-effective model provenance.</p>
+            </div>
+          </article>
+
+          <article class="card model-era" aria-labelledby="model-claude-4-6-family">
+            <div class="model-identity">
+              <span class="date-range">5–17 Feb 2026</span>
+              <h3 id="model-claude-4-6-family"><a href="https://www.anthropic.com/news/claude-opus-4-6">Opus 4.6</a> &amp; <a href="https://www.anthropic.com/news/claude-sonnet-4-6">Sonnet 4.6</a></h3>
+              <span class="model-chip">adaptive thinking</span><span class="model-chip">1M context</span>
+            </div>
+            <div class="model-behavior">
+              <h4>Thinking became adaptive and context became architectural</h4>
+              <p>Opus planned more carefully, stayed on task longer, and improved debugging and self-correction; adaptive thinking plus effort became the recommended successor to manual budgets. Both 4.6 releases materially improved long-context planning and coding, with one-million-token context arriving as a beta path.</p>
+            </div>
+            <div class="model-adaptation">
+              <span class="label">Observed local response</span>
+              <p>The 22 February starting snapshot mixed new and old assumptions: <code>opus[1m]</code>, global <code>high</code> effort, and a fixed 65,536-token thinking budget. March added a “deep main thread” pattern and Opus-reasoning/Sonnet-execution routing; April retired conflicting effort and compaction overrides. The fixed thinking budget survived until a July probe showed it inert on the active models. The resulting state is documented in <a href="../ARCHITECTURE.md">ARCHITECTURE.md</a>.</p>
+            </div>
+          </article>
+
+          <div class="model-marker">Versioned local architecture evidence begins 22 February 2026. Rows above this marker are upstream history and recommended adaptation—not claims about this repository's earlier behavior.</div>
+
+          <article class="card model-era" aria-labelledby="model-mythos-preview">
+            <div class="model-identity">
+              <time datetime="2026-04-07">7 Apr 2026</time>
+              <h3 id="model-mythos-preview"><a href="https://www.anthropic.com/project/glasswing">Claude Mythos Preview</a></h3>
+              <span class="model-chip">restricted access</span><span class="model-chip">cyber capability</span>
+            </div>
+            <div class="model-behavior">
+              <h4>A specialized safety envelope appeared</h4>
+              <p>Project Glasswing introduced a restricted preview for advanced defensive cybersecurity work. This was not a general Claude Code default or a normal step on the Sonnet/Opus upgrade path.</p>
+            </div>
+            <div class="model-adaptation">
+              <span class="label">Recommended adaptation</span>
+              <p>Capability, access, retention, provider, and safeguard posture belong in the routing contract. A specialized cyber model should be an authorized lane with its own evidence and fallback policy—not an ambient “strongest model” choice.</p>
+            </div>
+          </article>
+
+          <article class="card model-era" aria-labelledby="model-claude-opus-4-7">
+            <div class="model-identity">
+              <time datetime="2026-04-16">16 Apr 2026</time>
+              <h3 id="model-claude-opus-4-7"><a href="https://www.anthropic.com/news/claude-opus-4-7">Claude Opus 4.7</a></h3>
+              <span class="model-chip">xhigh effort</span><span class="model-chip">literal instructions</span><span class="model-chip">self-verification</span>
+            </div>
+            <div class="model-behavior">
+              <h4>Behavior: hard work improved and instructions mattered more</h4>
+              <p>Opus 4.7 improved difficult software engineering, precise instruction attention, long-running work, tool reliability, and self-verification. <strong>Migration contract:</strong> it added a higher effort tier, a tokenizer change, and rejection of non-default sampling parameters.</p>
+            </div>
+            <div class="model-adaptation">
+              <span class="label">Observed local response</span>
+              <p>Stronger instruction following raises the cost of stale, duplicated, or contradictory ambient rules. The architecture created a narrow creative regression fixture for a reported mode-collapse concern, but <a href="DESIGN_RATIONALE.md">the planned 4.6-versus-4.7 gate</a> was never completed and is now superseded. Keep the relative test method; replace the frozen model IDs and do not promote an unmeasured concern into a permanent global workaround.</p>
+            </div>
+          </article>
+
+          <article class="card model-era" aria-labelledby="model-claude-opus-4-8">
+            <div class="model-identity">
+              <time datetime="2026-05-28">28 May 2026</time>
+              <h3 id="model-claude-opus-4-8"><a href="https://www.anthropic.com/news/claude-opus-4-8">Claude Opus 4.8</a></h3>
+              <span class="model-chip">sharper judgment</span><span class="model-chip">1M default</span><span class="model-chip">selective thinking</span>
+            </div>
+            <div class="model-behavior">
+              <h4>Anthropic reported sharper judgment and useful pushback</h4>
+              <p>Anthropic described better judgment, mistake detection, useful pushback, and less wasted thinking on mixed workloads. <strong>Platform companion:</strong> one-million-token context and 128K output became standard, while mid-conversation system messages made long loops easier to steer without rebuilding the prompt.</p>
+            </div>
+            <div class="model-adaptation">
+              <span class="label">Observed local response</span>
+              <p>The creative-model hold was lifted, but explicitly without a clean A/B result. <a href="PLATFORM_NOTES.md">Local platform notes</a> also captured a malformed parallel-tool-call cluster. Stronger judgment therefore justified pruning repetitive reminders—not deleting artifact guards or assuming runtime tool correctness.</p>
+            </div>
+          </article>
+
+          <article class="card model-era" aria-labelledby="model-claude-fable-mythos-5">
+            <div class="model-identity">
+              <span class="date-range">9 Jun; redeployed 1 Jul 2026</span>
+              <h3 id="model-claude-fable-mythos-5"><a href="https://www.anthropic.com/news/claude-fable-5-mythos-5">Claude Fable 5 &amp; Mythos 5</a></h3>
+              <span class="model-chip">long horizon</span><span class="model-chip">delegation</span><span class="model-chip">file memory</span>
+            </div>
+            <div class="model-behavior">
+              <h4>Autonomous work stretched from turns toward hours</h4>
+              <p>Fable 5 targeted the longest, most complex work, used file-backed memory effectively, and delegated subproblems readily; Mythos 5 remained the restricted cyber tier. Anthropic's prompting guidance also warns that high effort can over-plan, over-tidy, or take unrequested actions. A US export-control directive suspended both on 12 June while safeguards were tightened, before a <a href="https://www.anthropic.com/news/redeploying-fable-5">1 July redeployment</a>.</p>
+            </div>
+            <div class="model-adaptation">
+              <span class="label">Observed local response</span>
+              <p>The default moved to Fable, returned to Opus 4.8 to match user intent and stop a visible fallback cascade, and later moved back to Fable. Long runs need concise scope limits, fan-out and duration budgets, grounded progress receipts, resumable artifacts, and typed refusal/fallback handling—not more minute-by-minute narration prompts.</p>
+            </div>
+          </article>
+
+          <article class="card model-era" aria-labelledby="model-claude-sonnet-5">
+            <div class="model-identity">
+              <time datetime="2026-06-30">30 Jun 2026</time>
+              <h3 id="model-claude-sonnet-5"><a href="https://platform.claude.com/docs/en/about-claude/models/whats-new-sonnet-5">Claude Sonnet 5</a></h3>
+              <span class="model-chip">adaptive by default</span><span class="model-chip">new tokenizer</span><span class="model-chip">typed refusal</span>
+            </div>
+            <div class="model-behavior">
+              <h4>The efficient tier became more agentic—and less backward-compatible</h4>
+              <p><strong>Migration contract:</strong> Sonnet 5 made adaptive thinking the default, removed manual budgeted thinking, rejected non-default sampling parameters, and tokenizes the same text at roughly 30% more tokens than Sonnet 4.6. <strong>Behavior:</strong> it improved coding, tool use, progress updates, and self-verification, but low effort can under-think complex work. Prohibited or high-risk cyber requests may return HTTP 200 with <code>stop_reason: "refusal"</code>.</p>
+            </div>
+            <div class="model-adaptation">
+              <span class="label">Observed local response</span>
+              <p>A direct June configuration change made Sonnet 5 the interactive default briefly. A narrow 13-case evaluation applied to the separately deployed detector judge and did not establish general coding superiority. Sonnet remained fallback/worker capacity. Token, cost, context, and output thresholds must be remeasured per model; success logic must inspect stop reasons; effort needs a task-family sweep instead of a universal maximum.</p>
+            </div>
+          </article>
+
+          <article class="card model-era" aria-labelledby="model-claude-opus-5">
+            <div class="model-identity">
+              <time datetime="2026-07-24">24 Jul 2026</time>
+              <h3 id="model-claude-opus-5"><a href="https://platform.claude.com/docs/en/about-claude/models/whats-new-opus-5">Claude Opus 5</a></h3>
+              <span class="model-chip">deep reasoning</span><span class="model-chip">self-verifying</span><span class="model-chip">multi-agent</span>
+            </div>
+            <div class="model-behavior">
+              <h4>Anthropic says self-correction now changes prompting</h4>
+              <p>Anthropic describes Opus 5 as a step change in deep reasoning, long-horizon coding, test-time compute, code review, long context, and multi-agent coordination. It naturally delegates and self-verifies; redundant verification instructions can cause over-verification. It can also narrate more and expand scope unless the boundary is explicit.</p>
+            </div>
+            <div class="model-adaptation">
+              <span class="label">Observed local response</span>
+              <p>A launch-day change used the moving <code>opus</code> alias; the repository default returned to Fable 5 on 2 August. That churn is the warning: aliases are convenient but turn upgrades into unreviewed behavior changes. Qualify each alias movement and keep prompt-level verification lean while preserving independent tests and runtime oracles.</p>
+            </div>
+          </article>
+
+          <div class="model-marker">Transcript measurement is much narrower than the release history: the fixed ten-day snapshot ends 5 August 2026 and is dominated by Opus 5 parents and Sonnet 5 children.</div>
+        </div>
+
+        <aside class="card evolution-callout">
+          <h3>Not every “model regression” is a model regression</h3>
+          <p>Anthropic's <a href="https://www.anthropic.com/engineering/april-23-postmortem">23 April quality postmortem</a> traced reports of worse Claude behavior to Claude Code changes in default effort, preservation of prior thinking, and response presentation—not to the underlying API model. The architecture must therefore record the whole execution tuple: Claude Code version, requested and effective model, effort, provider, context state, prompt/rule revision, tools, and outcome.</p>
+        </aside>
+
+        <article class="card model-observation">
+          <div>
+            <h3>What the local transcripts actually prove</h3>
+            <p>The <a href="CLAUDE_CODE_ARCHITECTURE_REVIEW_2026-08-05.md">fixed ten-day snapshot</a> ending 5 August is dominated by current models, so it cannot tell a clean 3.7-versus-5 story. It does reveal the operational contracts that remain necessary even as model capability rises.</p>
+          </div>
+          <ul>
+            <li>Main-thread assistant messages were 38,691/40,660 (95.2%) Opus 5; child messages were 9,846/10,014 (98.3%) Sonnet 5. That is evidence of routing and workload shape, not a quality ranking.</li>
+            <li>All 16 native Agent calls came from Opus 5 parents, yet substantive child artifacts ran on Sonnet 5 or Sonnet 4.5. Only one call explicitly requested a model and none requested effort.</li>
+            <li>Workflow <code>defaultModel</code> did not reliably attest effective model or effort. Exact per-agent totals depend on logical-attempt deduplication, so they are excluded from the quality conclusion.</li>
+            <li>All 39 workflow receipts said “completed,” yet 4 contained 16 final logical errors; the 2 wholly failed receipts are a subset of those 4. All 16 errors explicitly reported “Prompt is too long,” measuring a context/harness failure—not inferior reasoning.</li>
+            <li>Therefore the defensible conclusion is about provenance and acceptance semantics—not that one model caused better or worse results.</li>
+          </ul>
+        </article>
+
+        <div class="model-policy-grid" aria-label="Model adaptation policy going forward">
+          <article class="card model-policy"><span class="label">01 · Provenance</span><h3>Record the effective tuple</h3><p>Capture requested and effective model, effort, provider, context class, Claude Code version, fallback/refusal state, and prompt revision per parent and child.</p></article>
+          <article class="card model-policy"><span class="label">02 · Qualification</span><h3>Qualify every model movement</h3><p>Run a fixed task-family regression set before changing a pin or alias. Use exact IDs for critical automation and evals; reserve aliases for interactive sessions with a qualification gate. Compare artifacts, correctness, tool errors, fan-out, latency, tokens, refusals, and cost—not vibes.</p></article>
+          <article class="card model-policy"><span class="label">03 · Thinking</span><h3>Use effort, not fossilized budgets</h3><p>Remove fixed thinking-token controls on current models. Sweep effort by task family, allow per-session choice, and verify that requested child effort actually propagated.</p></article>
+          <article class="card model-policy"><span class="label">04 · Prompting</span><h3>Keep a stable core and thin overlay</h3><p>Keep concise objectives, authority limits, non-goals, and expected artifacts. Qualify only a thin model-specific overlay: Opus 5 may need duplicate verifier prompts removed, while Fable long runs still need evidence-grounded progress. A/B either change.</p></article>
+          <article class="card model-policy"><span class="label">05 · Execution</span><h3>Bound stronger agency</h3><p>One-million-token context and stronger delegation do not justify ambient bloat or unbounded fleets. Cap child count, nesting, duration, context transfer, and consequential actions.</p></article>
+          <article class="card model-policy"><span class="label">06 · Acceptance</span><h3>Keep independent oracles</h3><p>Model self-checks are useful evidence, never the final oracle. Require expected files, tests, schemas, runtime state, negative cases, and recoverable rollback; treat refusal and fallback as typed outcomes.</p></article>
+        </div>
+
+        <div class="callout">
+          <h3>Current model control plane: reconciled source and measured execution</h3>
+          <p>From 12 June through 2 August, the source default cycled through Fable 5 → Opus 4.8 → Sonnet 5 → Fable 5 → the moving <code>opus</code> alias → Fable 5: fast adaptation, but not a stable qualification record. The reconciled repository and <a href="../ARCHITECTURE.md">ARCHITECTURE.md</a> now request <code>claude-fable-5</code>, retain <code>claude-sonnet-5[1m]</code> as fallback, set <code>effortLevel: "high"</code> with <code>alwaysThinkingEnabled: true</code>, and disable flag-driven switching with <code>switchModelsOnFlag: false</code>. Native Claude Code 2.1.223 is the sole installation, both zsh and bash resolve it, automatic updates are disabled with <code>DISABLE_AUTOUPDATER</code>, and manual upgrades remain available. The only <code>doctor</code> warning is the noninteractive Keychain write.</p>
+          <p>Fresh session <code>11111111-1111-1111-1111-111111111111</code> produced a schema-v3 receipt with requested and effective Fable 5, zero fallback, and zero refusal. Provider and effective effort were unavailable, so provenance remains explicitly partial rather than inferred. The first direct OAuth attempt failed closed before inference because the Keychain was locked, consuming zero tokens and zero cost; the measured smoke used the existing Keychain workspace credential in-process without exposing it.</p>
+        </div>
+      </section>
+
+      <section id="changes">
+        <div class="section-head">
+          <h2>What changed—and why</h2>
+          <p>Nine change families explain the modernization. Generated marketplace copies and tests account for much of the raw change volume.</p>
+        </div>
+        <div class="change-list">
+          <article class="card change-card">
+            <div class="change-num">01</div>
+            <div>
+              <h3>Release floor and qualification became explicit</h3>
+              <p>The architecture now names the Claude Code behavior it depends on and refuses to silently run below it.</p>
+              <div class="before-after">
+                <div class="state"><span class="label">Before</span>Version drift and changelog-only review could miss security advisories or behavioral regressions.</div>
+                <div class="state"><span class="label">After</span><code>minimumVersion: 2.1.223</code>, installer preflight, CI checks, advisory sweeps, and a five-part non-billable release qualification.</div>
+              </div>
+              <div class="files">
+                <a class="file" href="../settings.json">settings.json</a>
+                <a class="file" href="https://github.com/brandyn-s/claude-harness/blob/e0681256/scripts/check_claude_version.py">scripts/check_claude_version.py at e0681256</a>
+                <a class="file" href="https://github.com/brandyn-s/claude-harness/blob/e0681256/bin/claude-release-qualification.py">bin/claude-release-qualification.py at e0681256</a>
+                <a class="file" href="../.github/workflows/validate.yml">.github/workflows/validate.yml</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card change-card">
+            <div class="change-num">02</div>
+            <div>
+              <h3>Hook execution moved from shell strings to structured exec form</h3>
+              <p>Commands and arguments are now separate, portable values instead of shell text whose quoting and expansion can change meaning.</p>
+              <div class="before-after">
+                <div class="state"><span class="label">Before</span><code>"$HOME/.claude/hooks/run-hook" guard.py</code> depended on HOME, a shell, and correct quoting.</div>
+                <div class="state"><span class="label">After</span>One absolute executable plus an <code>args</code> array; native Windows uses validated Git Bash with <code>run-hook</code> as explicit argv.</div>
+              </div>
+              <div class="files">
+                <a class="file" href="https://github.com/brandyn-s/claude-harness/blob/e0681256/scripts/hook_exec_form.py">scripts/hook_exec_form.py at e0681256</a>
+                <a class="file" href="https://github.com/brandyn-s/claude-harness/blob/e0681256/scripts/wire_hooks.py">scripts/wire_hooks.py at e0681256</a>
+                <a class="file" href="../hooks/run-hook">hooks/run-hook</a>
+                <a class="file" href="../install.sh">install.sh</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card change-card">
+            <div class="change-num">03</div>
+            <div>
+              <h3>Obsolete and high-noise hooks were removed</h3>
+              <p>Model-judgment reminders, duplicate lifecycle state, custom ToolSearch interception, and hard MCP trimming were doing work that the current product handles better—or were creating misleading signals. Registered command hooks fell from 57 to 47.</p>
+              <div class="before-after">
+                <div class="state"><span class="label">Retired</span><code>toolsearch-intercept</code>, <code>mcp-output-trimmer</code>, <code>skill-routing-hint</code>, compact ledgers, prompt reminders, polling nudges, and their manifests/tests.</div>
+                <div class="state"><span class="label">Retained</span>Thin deterministic security guards, bounded post-processing, explicit lifecycle receipts, and native discovery/persistence.</div>
+              </div>
+              <div class="files">
+                <a class="file" href="../hooks/README.md">hooks/README.md</a>
+                <a class="file" href="../settings.example.json">settings.example.json</a>
+                <a class="file" href="../ARCHITECTURE.md">ARCHITECTURE.md</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card change-card">
+            <div class="change-num">04</div>
+            <div>
+              <h3>Configuration changes became guarded and recoverable</h3>
+              <p>A malformed or weakened settings write can no longer be treated as a normal edit, and rollback now has integrity and race protections.</p>
+              <div class="before-after">
+                <div class="state"><span class="label">Before</span>Static checks and manual recovery could detect drift later but did not provide a synchronous last-known-good boundary.</div>
+                <div class="state"><span class="label">After</span>ConfigChange validation for user/project/local settings; snapshots cover <code>settings*</code>, hooks, agents, and <code>~/.claude.json</code>; restore uses descriptor anchoring and compare-and-swap checks.</div>
+              </div>
+              <div class="files">
+                <a class="file" href="https://github.com/brandyn-s/claude-harness/blob/e0681256/hooks/config-change-validate.py">hooks/config-change-validate.py at e0681256</a>
+                <a class="file" href="https://github.com/brandyn-s/claude-harness/blob/e0681256/hooks/manifests/config-change-validate.yaml">config-change manifest at e0681256</a>
+                <a class="file" href="../bin/config_rollback.py">bin/config_rollback.py</a>
+                <a class="file" href="../bin/test_config_rollback.py">rollback tests</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card change-card">
+            <div class="change-num">05</div>
+            <div>
+              <h3>Context and capability loading shifted to native progressive disclosure</h3>
+              <p>Always-on context was pruned while frequently nested skills became name-only and known-broken skills can be disabled without deleting them. The skill-listing budget moved from 0.03 to 0.01.</p>
+              <div class="before-after">
+                <div class="state"><span class="label">Before</span>Custom keyword routing, duplicated tool-search rules, and ambient procedural guidance competed for context.</div>
+                <div class="state"><span class="label">After</span>Native skill discovery, exact ToolSearch selection, <code>skillListingBudgetFraction</code>, explicit skill overrides, and an aggregate rule-context budget.</div>
+              </div>
+              <div class="files">
+                <a class="file" href="../scripts/check-rule-context-budget.py">scripts/check-rule-context-budget.py</a>
+                <a class="file" href="../skills/context-budget/SKILL.md">skills/context-budget/SKILL.md</a>
+                <a class="file" href="../skills/_shared/mcp-tool-select-catalog.md">MCP select catalog</a>
+                <a class="file" href="../rules/mcp-tool-names.md">rules/mcp-tool-names.md</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card change-card">
+            <div class="change-num">06</div>
+            <div>
+              <h3>Agents and worktrees became bounded execution contracts</h3>
+              <p>The design retains fresh-worktree isolation, limits fan-out, depth, and session size, and requires resolved state rather than trusting a completion label.</p>
+              <div class="before-after">
+                <div class="state"><span class="label">Before</span>Multiple overlapping orchestration layers, broad background forks, and receipt-based success could hide prompt-length or child failures.</div>
+                <div class="state"><span class="label">After</span>Depth 1, concurrency 8, session cap 50, small-workflow guidance, retained fresh-base isolation, no automatic dirty deletion, and artifact/state-based completion.</div>
+              </div>
+              <div class="files">
+                <a class="file" href="../rules/agent-delegation.md">rules/agent-delegation.md</a>
+                <a class="file" href="../agents/worker.md">agents/worker.md</a>
+                <a class="file" href="../hooks/subagent-stop.py">hooks/subagent-stop.py</a>
+                <a class="file" href="../hooks/test-hooks/test_worktree_enforcement.py">worktree tests</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card change-card">
+            <div class="change-num">07</div>
+            <div>
+              <h3>MCP and plugin status became evidence, not a badge</h3>
+              <p>Transport success is now separated from auth, tool-list, HTTP, disabled, and unknown states; native persisted output replaces custom hard truncation.</p>
+              <div class="before-after">
+                <div class="state"><span class="label">Before</span>A connected label or empty result could be mistaken for health; a custom trimmer could remove model-visible data and cause immediate repeat calls.</div>
+                <div class="state"><span class="label">After</span>Sanitized state classes, representative direct-probe guidance, native output persistence, supported plugin CLI operations, and measured—not guessed—timeout exceptions.</div>
+              </div>
+              <div class="files">
+                <a class="file" href="../bin/acceptance_probe.py">bin/acceptance_probe.py</a>
+                <a class="file" href="../README.md">README.md</a>
+                <a class="file" href="../agent-memory/topics/architecture.md">architecture memory</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card change-card">
+            <div class="change-num">08</div>
+            <div>
+              <h3>Lifecycle and transcript evidence were simplified and made more honest</h3>
+              <p>Transcripts remain the primary forensic record, but valid storage is no longer described as guaranteed completeness.</p>
+              <div class="before-after">
+                <div class="state"><span class="label">Before</span>Compact checkpoints, session ledgers, rehydration hooks, and “complete transcript” language duplicated state while overstating what storage proved.</div>
+                <div class="state"><span class="label">After</span>Cheap SessionStart, local SessionEnd receipts, queued-turn recovery, schema validation, and explicit reconciliation with artifacts/runtime.</div>
+              </div>
+              <div class="files">
+                <a class="file" href="../hooks/session-start.py">hooks/session-start.py</a>
+                <a class="file" href="https://github.com/brandyn-s/claude-harness/blob/e0681256/hooks/session-end.py">hooks/session-end.py at e0681256</a>
+                <a class="file" href="https://github.com/brandyn-s/claude-harness/blob/e0681256/skills/mega-distill/scripts/recover_queued_turns.py">recover_queued_turns.py at e0681256</a>
+                <a class="file" href="../rules/transcript-over-summary.md">transcript evidence rule</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card change-card">
+            <div class="change-num">09</div>
+            <div>
+              <h3>Distribution now proves parity instead of assuming it</h3>
+              <p>The canonical source, generated marketplace, installer, and runtime are treated as separate states with explicit gates between them.</p>
+              <div class="before-after">
+                <div class="state"><span class="label">Before</span>Generated copies and deployed state could drift while source-level tests remained green.</div>
+                <div class="state"><span class="label">After</span>Two-run marketplace idempotency, byte-for-byte parser parity, strict plugin validation, materialized release candidates, full-tree mutation detection, and hosted platform workflows.</div>
+              </div>
+              <div class="files">
+                <a class="file" href="../scripts/build-marketplace.py">scripts/build-marketplace.py</a>
+                <a class="file" href="https://github.com/brandyn-s/claude-harness/blob/e0681256/scripts/materialize_release_candidate.py">materialize_release_candidate.py at e0681256</a>
+                <a class="file" href="../.claude-plugin/marketplace.json">marketplace.json</a>
+                <a class="file" href="../scripts/test_build_marketplace.py">marketplace tests</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="architecture">
+        <div class="section-head">
+          <h2>The architecture now</h2>
+          <p>Eight layers separate guidance, deterministic enforcement, evidence, quality gates, and deployment.</p>
+        </div>
+        <div class="architecture" aria-label="Eight architecture layers">
+          <article class="card layer"><span class="index">L01</span><h3>Runtime &amp; policy</h3><p>Version floor, permissions, model defaults, worktrees, environment limits.</p></article>
+          <article class="card layer"><span class="index">L02</span><h3>Always-on context</h3><p><code>CLAUDE.md</code>, scoped rules, platform notes, small indexes—not security boundaries.</p></article>
+          <article class="card layer"><span class="index">L03</span><h3>On-demand capability</h3><p>Native skill discovery and bounded agent dispatch without a keyword router.</p></article>
+          <article class="card layer"><span class="index">L04</span><h3>External tools</h3><p>MCP registrations and native ToolSearch with typed status and call evidence.</p></article>
+          <article class="card layer"><span class="index">L05</span><h3>Deterministic automation</h3><p>Structured command hooks, security guards, ConfigChange protection, receipts.</p></article>
+          <article class="card layer"><span class="index">L06</span><h3>Evidence &amp; recovery</h3><p>Acceptance snapshots, transcript recovery, rollback, release qualification checks.</p></article>
+          <article class="card layer"><span class="index">L07</span><h3>Quality gates</h3><p>Regression, mutation, drift, manifest, skill, plugin, and platform checks.</p></article>
+          <article class="card layer"><span class="index">L08</span><h3>Distribution &amp; deploy</h3><p>Canonical source, generated marketplace, installer, preserved live config.</p></article>
+        </div>
+      </section>
+
+      <section id="decisions">
+        <div class="section-head">
+          <h2>Design decisions</h2>
+          <p>The review did not equate “new” or “popular” with “better.” Each proposal received a disposition.</p>
+        </div>
+        <div class="decision-grid">
+          <article class="card decision adopt"><h3>Adopt</h3><ul><li>2.1.223 floor and advisory sweep</li><li>Structured deterministic hooks</li><li>Native skills and ToolSearch</li><li>ConfigChange and rollback</li><li>Bounded agents and artifact verification</li></ul></article>
+          <article class="card decision qualify"><h3>Direct qualification</h3><ul><li>Disposable candidates only</li><li>Same-run regression and mutation evidence</li><li>No live edit while evidence is pending</li><li>No calendar or session-count promotion</li></ul></article>
+          <article class="card decision defer"><h3>Defer</h3><ul><li>OTel MCP/plugin schema projection</li><li>Plugin and sandbox changes not yet qualified</li><li>Global thresholds without usage data</li></ul></article>
+          <article class="card decision reject"><h3>Reject / remove</h3><ul><li>Canary, staged, trial, and time-based rollouts</li><li>Ambient routers and prompt injectors</li><li>Hard MCP truncation</li><li>Background Skill forks by default</li><li>Receipt-exists success</li><li>Aggressive dirty-worktree cleanup</li></ul></article>
+        </div>
+      </section>
+
+      <section id="validation">
+        <div class="section-head">
+          <h2>Validation evidence</h2>
+          <p>Passing tests were supplemented with mutations, real-data smoke tests, independent fuzzing, and nonmutation qualification checks.</p>
+        </div>
+        <div class="evidence-grid">
+          <article class="card evidence"><span class="big">1,479</span><h3>Hook tests passed</h3><p>Plus 48 skips and 9 subtests; platform-specific skips were reported, not hidden.</p></article>
+          <article class="card evidence"><span class="big">384 + 200</span><h3>Scripts and runtime tests</h3><p>Script tests include 3 subtests; the separate runtime suite passed all 200 cases.</p></article>
+          <article class="card evidence"><span class="big">2,300</span><h3>Skill tests passed</h3><p>One skip and 29 subtests in a clean exact clone of <code>9380d5c9</code>; the skill tree is byte-identical at implementation source <code>e0681256</code>.</p></article>
+          <article class="card evidence"><span class="big">57 + 27</span><h3>Manifest and top-level tests</h3><p>Both manifest entrypoints collect and pass the same 57 cases; all 27 top-level tests pass.</p></article>
+          <article class="card evidence"><span class="big">271 / 271</span><h3>Deterministic evals</h3><p>Across 39 skills; all assertions passed.</p></article>
+          <article class="card evidence"><span class="big">235</span><h3>Mutations bit</h3><p>Thirty-six counting/unresolvable checks were explicitly skipped rather than overstated.</p></article>
+          <article class="card evidence"><span class="big">79 / 79</span><h3>Adversarial grammar cases</h3><p>POSIX/Windows quoting, expansion, identity, wrappers, controls, and malformed args.</p></article>
+          <article class="card evidence"><span class="big">5 / 5</span><h3>Release qualification checks</h3><p>Version, static contracts, HOME-less lifecycle, ConfigChange, and full-tree nonmutation.</p></article>
+          <article class="card evidence"><span class="big">0 / 0 / 19</span><h3>Strict audit outcome</h3><p>Zero drift, zero errors, and 19 informational findings.</p></article>
+          <article class="card evidence"><span class="big">84.8 MB</span><h3>Real transcript smoke</h3><p>Zero malformed lines; three bounded slices with manifest totals validated.</p></article>
+          <article class="card evidence"><span class="big">194</span><h3>Manifests loaded</h3><p>106 skills, 50 hooks, 38 rules; no structural, routing, or strict-semantic failures.</p></article>
+          <article class="card evidence"><span class="big">893 / 897</span><h3>Canonical and live payloads</h3><p>Six canonical plugins build cleanly twice; live has four additional files from the preserved <code>cc-monitor</code> owner content.</p></article>
+          <article class="card evidence"><span class="big">67.3%</span><h3>Ambient context removed</h3><p>Always-loaded material fell by 297,839 bytes while full reference text remained available on demand.</p></article>
+          <article class="card evidence"><span class="big">53.06%</span><h3>Fresh-session token reduction</h3><p>The exact Fable 5 smoke also reduced measured cost by 53.07%.</p></article>
+        </div>
+
+        <div class="callout">
+          <h3>Evidence checkpoint</h3>
+          <p>The qualified behavioral implementation is <code>e0681256</code>; this report is a documentation-only descendant. The recoverably deployed live-macOS integration is <code>520e18e7</code>. Source and live qualification passed 5/5. A clean exact clone of <code>9380d5c9</code> remained clean after all 2,300 skill tests, strict audit, marketplace rebuild, and package validation; the skill and marketplace trees are unchanged at <code>e0681256</code>. Remote branch publication, PR, hosted merge, and native-Windows execution remain pending and are not implied by these results.</p>
+          <p>The new <code>pytest.ini</code> makes bare <code>pytest manifests/</code> and <code>python3 -m pytest manifests/</code> collect and pass the same 57 tests. This Mac does not provide the CI-literal <code>python</code> launcher; the otherwise identical <code>python3</code> strict audit passed with zero drift, zero errors, and 19 informational findings. That is a host launcher-name caveat, not a source failure.</p>
+        </div>
+
+        <div class="callout">
+          <h3>Measured context reduction</h3>
+          <p>The always-loaded corpus fell from 442,497 bytes (about 110,624 token-proxy units) to 144,658 bytes (about 36,164), a reduction of 297,839 bytes or 67.3%. The 20 largest ambient files fell from 395,497 to 97,658 bytes. Complete originals remain available on demand under <code>docs/rule-reference/</code>; the optimization removes ambient repetition, not evidence.</p>
+          <p>Fresh Fable 5 session <code>11111111-1111-1111-1111-111111111111</code> measured 98,867 cache tokens and $1.97871 versus the pre-compaction normal reference of 210,641 and $4.21609. The safe reference was 33,354 and $0.671201. That is a 53.06% token reduction, a 53.07% cost reduction, and 63.05% of customization overhead removed. It is one exact-session smoke comparison, not a general causal benchmark.</p>
+        </div>
+
+        <div class="table-wrap" style="margin-top: 14px">
+          <table>
+            <thead><tr><th>Gate</th><th>Result</th><th>What it proves</th></tr></thead>
+            <tbody>
+              <tr><td>Strict skill audit</td><td>0 drift / 0 error / 19 info</td><td>Canonical skills, manifests, and generated marketplace are coherent.</td></tr>
+              <tr><td>Claude plugin validation</td><td>Root + 6 packages pass</td><td>Current package and marketplace manifests satisfy the official validator.</td></tr>
+              <tr><td>Rollback race suite</td><td>77 focused tests pass</td><td>Ten adversarial races reproduced on baseline and were blocked after hardening.</td></tr>
+              <tr><td>Architecture drift</td><td>No hard or advisory drift</td><td>Documented and wired architecture agree.</td></tr>
+              <tr><td>Marketplace build</td><td>893 canonical / 897 live</td><td>Six canonical plugins are two-run clean; live differs only by preserved <code>cc-monitor</code> owner content.</td></tr>
+              <tr><td>Context budget</td><td>442,497 → 144,658 bytes</td><td>Always-loaded context fell 67.3%; full originals remain in the on-demand rule reference.</td></tr>
+              <tr><td>Manifest pytest entrypoints</td><td>57 + 57 pass</td><td>Bare and module invocation collect the same suite; 27 separate top-level tests also pass.</td></tr>
+              <tr><td>Source/live qualification</td><td>5 / 5</td><td>The canonical source and recoverably deployed live macOS tree satisfy the qualification contract.</td></tr>
+              <tr><td>Static analysis</td><td>Changed parser clean</td><td>Ruff, Pyright, and <code>git diff --check</code> pass for the final parser change.</td></tr>
+              <tr><td>Secret scan</td><td>No new leaks</td><td>Redacted scan of 172 branch commits found no newly introduced secret.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="research">
+        <div class="section-head">
+          <h2>Why these changes were chosen</h2>
+          <p>The evidence combined current first-party guidance, recent public lessons, repository behavior, and private session telemetry.</p>
+        </div>
+        <div class="research-grid">
+          <article class="card research-card">
+            <h3>External research</h3>
+            <ul>
+              <li>Claude Code releases 2.1.129–2.1.223 and the preceding three months of change history.</li>
+              <li>Every public Claude-family release since the Claude Code preview, plus current model migration, prompting, lifecycle, refusal, and tokenizer guidance.</li>
+              <li>Current Anthropic guidance for best practices, hooks, permissions, subagents, plugins, and MCP.</li>
+              <li>First-party GitHub security advisories and current architecture-relevant issues.</li>
+              <li>Sixteen community searches and eighteen deeper reads across Reddit, blogs, forums, an empirical paper, and indexed X threads.</li>
+              <li>Community claims remained hypotheses until corroborated by first-party or local evidence.</li>
+            </ul>
+          </article>
+          <article class="card research-card">
+            <h3>Local behavior evidence</h3>
+            <ul>
+              <li>542 transcripts in a fixed ten-day snapshot: 134 main and 408 child sessions.</li>
+              <li>39 workflow receipts; 4 contained final logical errors and 2 were entirely failed despite “completed.”</li>
+              <li>Native Agent calls: 8 ordinary completions, 4 desired isolation blocks, 4 context/background failures.</li>
+              <li>2,264 MCP calls with 141 errors; 450 ToolSearch calls, 436 exact <code>select:</code> queries.</li>
+              <li>A hard-truncated MCP response was immediately requested again—evidence against custom truncation.</li>
+            </ul>
+          </article>
+        </div>
+        <div class="callout">
+          <h3>Internal evidence and interpretation rule</h3>
+          <p>This section contains aggregate findings derived from private Claude sessions and is intended for internal use. Transcript counts, connection states, receipts, and passing processes are not correctness or completeness oracles; they are reconciled with expected artifacts, tests, runtime state, and negative cases.</p>
+        </div>
+      </section>
+
+      <section id="ledger">
+        <div class="section-head">
+          <h2>Full recommendation ledger</h2>
+          <p>All 41 recommendations are preserved here so future changes can distinguish adopted design from direct qualification, deferrals, and explicit rejections. There is no live trial, staged-observation, or time-based promotion state.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Proposal or pattern</th><th>Decision</th><th>Outcome</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Pin Claude Code to 2.1.223 and sweep advisories separately.</td><td><span class="tag adopt">ADOPT</span></td><td>Settings, installer, CI, and qualification updated.</td></tr>
+              <tr><td>2</td><td>Keep always-on guidance short and non-obvious.</td><td><span class="tag adopt">ADOPT</span></td><td>Duplicated procedures pruned into on-demand references.</td></tr>
+              <tr><td>3</td><td>Use native skill discovery; remove keyword routers.</td><td><span class="tag adopt">ADOPT</span></td><td>Custom routing and heavy reminder hooks removed.</td></tr>
+              <tr><td>4</td><td>Keep native ToolSearch and exact selection.</td><td><span class="tag adopt">ADOPT</span></td><td>Interceptor removed; stale anti-ToolSearch rules corrected.</td></tr>
+              <tr><td>5</td><td>Use native persisted output; do not hard-truncate MCP results.</td><td><span class="tag adopt">ADOPT</span></td><td>Custom trimmer and 200K override removed.</td></tr>
+              <tr><td>6</td><td>Distinguish MCP transport, auth, disabled, HTTP, tool-list, unknown, and zero states.</td><td><span class="tag adopt">ADOPT</span></td><td>Acceptance probe emits sanitized typed states.</td></tr>
+              <tr><td>7</td><td>Test critical MCP servers beyond connection status.</td><td><span class="tag adopt">ADOPT</span></td><td>Harness guidance added; authenticated live calls remain follow-up.</td></tr>
+              <tr><td>8</td><td>Use per-server timeouts only when measured.</td><td><span class="tag defer">DEFER</span></td><td>Global 60s stays until latency data supports a directly qualified exception.</td></tr>
+              <tr><td>9</td><td>Manage plugins with supported Claude commands.</td><td><span class="tag adopt">ADOPT</span></td><td>Direct registry/cache mutation demoted to disaster recovery.</td></tr>
+              <tr><td>10</td><td>Measure plugin context cost before expanding packages.</td><td><span class="tag defer">DEFER</span></td><td>Re-evaluate when a disposable configuration can be measured; do not install live merely to observe it.</td></tr>
+              <tr><td>11</td><td>Keep hooks thin, deterministic, bounded, and command-based.</td><td><span class="tag adopt">ADOPT</span></td><td>Heavy/model-judgment hooks removed.</td></tr>
+              <tr><td>12</td><td>Register one executable plus structured args.</td><td><span class="tag adopt">ADOPT</span></td><td>HOME-less POSIX and Git-Bash forms implemented.</td></tr>
+              <tr><td>13</td><td>Protect settings with synchronous ConfigChange validation.</td><td><span class="tag adopt">ADOPT</span></td><td>User/project/local changes fail closed.</td></tr>
+              <tr><td>14</td><td>Snapshot settings, hook/agent state, and <code>~/.claude.json</code>.</td><td><span class="tag adopt">ADOPT</span></td><td>Transactional, integrity-checked rollback hardened against races.</td></tr>
+              <tr><td>15</td><td>Treat permission <code>ask</code> as interaction, not a durable security boundary.</td><td><span class="tag adopt">ADOPT</span></td><td>Deterministic guards remain the enforcement boundary.</td></tr>
+              <tr><td>16</td><td>Preserve fresh worktree isolation; never auto-delete dirty work.</td><td><span class="tag adopt">ADOPT</span></td><td>Fresh-base and resolved-path checks retained.</td></tr>
+              <tr><td>17</td><td>Use one bounded child-execution contract.</td><td><span class="tag adopt">ADOPT</span></td><td>Depth, concurrency, and session limits configured.</td></tr>
+              <tr><td>18</td><td>Do not assume children inherit remote MCP auth/tools.</td><td><span class="tag adopt">ADOPT</span></td><td>Current-session harmless qualification probe required.</td></tr>
+              <tr><td>19</td><td>Define success by expected results, artifacts, tests, and runtime state.</td><td><span class="tag adopt">ADOPT</span></td><td>Receipt wording alone is no longer an oracle.</td></tr>
+              <tr><td>20</td><td>Record requested and effective child model/effort separately.</td><td><span class="tag adopt">ADOPT</span></td><td>Receipt schema v3 separates requested and effective values and marks unavailable provider/effort evidence partial.</td></tr>
+              <tr><td>21</td><td>Background Skill forks as a default execution layer.</td><td><span class="tag reject">REJECT</span></td><td>Fork override removed after 0/2 local success.</td></tr>
+              <tr><td>22</td><td>Treat transcripts as primary but not guaranteed complete.</td><td><span class="tag adopt">ADOPT</span></td><td>Queued-turn recovery and evidence language corrected.</td></tr>
+              <tr><td>23</td><td>Keep SessionStart cheap and SessionEnd receipts local.</td><td><span class="tag adopt">ADOPT</span></td><td>Duplicate ledger/compaction machinery removed.</td></tr>
+              <tr><td>24</td><td>Make release qualification executable.</td><td><span class="tag adopt">ADOPT</span></td><td>Five non-billable qualification checks and CI materialization added.</td></tr>
+              <tr><td>25</td><td>Include filesystem metadata and logical Git state in nonmutation evidence.</td><td><span class="tag adopt">ADOPT</span></td><td>Content, ownership, modes, flags, ACLs, xattrs, root metadata covered.</td></tr>
+              <tr><td>26</td><td>Run reversible transcript-backed architecture checkups.</td><td><span class="tag adopt">ADOPT</span></td><td>Health, drift, budget, and transcript controls retained.</td></tr>
+              <tr><td>27</td><td>Enable sandboxing only after disposable-environment qualification.</td><td><span class="tag defer">DEFER</span></td><td>No staged ring: qualify fully and enable directly, or leave it off.</td></tr>
+              <tr><td>28</td><td>Prefer the native Claude Code installer, especially on Windows.</td><td><span class="tag adopt">ADOPT</span></td><td>Native 2.1.223 is the sole local installation and resolves from zsh and bash. Automatic updates are disabled; deliberate manual upgrades remain available. Native Windows is still unverified.</td></tr>
+              <tr><td>29</td><td>Evaluate community/security plugins individually.</td><td><span class="tag defer">DEFER</span></td><td>Re-evaluate when isolated A/B and native-Windows qualification are available; no observational live install.</td></tr>
+              <tr><td>30</td><td>Defer OTel schema changes until one authenticated event proves the contract.</td><td><span class="tag defer">DEFER</span></td><td>Source templates request metadata-only logging. The separately managed macOS profiles were inspected and currently enable prompt, response, tool, and raw API-body content, an unresolved external P0; backend receipt remains unverified. <code>DISABLE_TELEMETRY</code> is not treated as the Claude Code OTel kill switch.</td></tr>
+              <tr><td>31</td><td>Automatic cleanup of native dirty worktrees or model-issued destructive confirmation.</td><td><span class="tag reject">REJECT</span></td><td>Cleanup remains conservative and independently verified.</td></tr>
+              <tr><td>32</td><td>Guidance, process exit, a badge, or receipt existence as proof of success.</td><td><span class="tag reject">REJECT</span></td><td>Artifact/runtime verification required.</td></tr>
+              <tr><td>33</td><td>Another broad ambient community toolkit.</td><td><span class="tag reject">REJECT</span></td><td>Only individually measured capabilities may be added.</td></tr>
+              <tr><td>34</td><td>Canary, staged-promotion, calendar-wait, or observation-period rollouts.</td><td><span class="tag reject">REJECT</span></td><td>Changes deploy directly after deterministic qualification, regression, mutation, replay, and smoke gates. The gather-family live <code>TRIAL</code>/<code>try-by</code> path was removed as the same pattern under another name.</td></tr>
+              <tr><td>35</td><td>Keep incomplete hidden skills as dormant architecture.</td><td><span class="tag reject">REJECT</span></td><td>The non-runnable <code>sca-review</code> prototype was removed from settings, routing, discovery, and marketplace packaging; its design is archived.</td></tr>
+              <tr><td>36</td><td>Bind evaluation evidence to provider-observed responses.</td><td><span class="tag adopt">ADOPT</span></td><td>API and CLI harnesses distinguish requested/effective model and fallback/refusal state, preserve provider and effort when available, mark unavailable fields partial, and reject missing effective-model evidence.</td></tr>
+              <tr><td>37</td><td>Bind multi-agent synthesis, resume, and quorum to one run identity.</td><td><span class="tag adopt">ADOPT</span></td><td>Roundtable rejects stale output, stamps records, filters current-run successes, and aborts on current-round quorum collapse.</td></tr>
+              <tr><td>38</td><td>Make semantic manifest drift fatal in CI.</td><td><span class="tag adopt">ADOPT</span></td><td>Strict-semantic compilation and a real-corpus mutation protect prose-only tool exclusions.</td></tr>
+              <tr><td>39</td><td>Package shared runtime policy with every referencing plugin.</td><td><span class="tag adopt">ADOPT</span></td><td>Plugin-relative references, isolated resolution, and canonical byte parity are enforced by the builder.</td></tr>
+              <tr><td>40</td><td>Fail closed for declared malformed completion contracts.</td><td><span class="tag adopt">ADOPT</span></td><td>Malformed JSON, path, cwd, and schema declarations block completion; genuinely uncontracted research tasks remain valid.</td></tr>
+              <tr><td>41</td><td>Use documented hook fields for receipts and enrich offline.</td><td><span class="tag adopt">ADOPT</span></td><td>The schema-v3 enrichment run completed. The fresh smoke records requested/effective Fable 5 with zero fallback/refusal; evidence remains <code>partially-enriched</code> because provider and effective effort were unavailable.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="boundaries">
+        <div class="section-head">
+          <h2>Reviewed boundaries and accepted risk</h2>
+          <p>The report separates what was changed from what was intentionally left alone or remains unproven.</p>
+        </div>
+        <details open>
+          <summary>Owner-accepted bearer-token exception</summary>
+          <div>The embedded bearer value was left unchanged by explicit owner direction. Validity testing, rotation, history rewriting, and downstream access-log review are outside this modernization. Its value is not reproduced in this report.</div>
+        </details>
+        <details open>
+          <summary>Externally managed telemetry is a live P0</summary>
+          <div>Repository templates now require metadata-only OTel and reject any enabled content flag. The winning macOS managed profiles were separately inspected and currently enable prompt, response, tool, and raw API-body content. Repository or local settings cannot override that higher-precedence policy; the Jamf/MDM owner must reconcile it, and backend receipt remains unverified.</div>
+        </details>
+        <details open>
+          <summary>Managed startup floor is not deployed</summary>
+          <div>The repository floor, installer preflight, and native installation are aligned at 2.1.223, but the administrator-managed <code>requiredMinimumVersion</code> policy is still undeployed. <code>minimumVersion</code> protects repository installation and qualification; it does not substitute for the managed startup control.</div>
+        </details>
+        <details open>
+          <summary>Native Windows is not yet proven</summary>
+          <div>Windows path and Git-Bash behavior passed structural and simulated tests. An actual hosted <code>windows-2022</code> workflow remains the gate before a native-Windows claim.</div>
+        </details>
+        <details open>
+          <summary>Remote MCP and authenticated product state</summary>
+          <div>Authenticated Claude.ai/Remote Control state and every live remote-MCP inventory were not proven from this host. Critical servers require current-session positive and negative direct probes before use in child tasks.</div>
+        </details>
+        <details open>
+          <summary>Transcript and community coverage</summary>
+          <div>The transcript review is a fixed ten-day snapshot, not all history. Valid JSONL does not prove every assistant message was stored. Direct X API search was unavailable; indexed original URLs were corroborated elsewhere. Popularity was never treated as effectiveness.</div>
+        </details>
+        <details open>
+          <summary>Deliberately deferred operational measurements</summary>
+          <div>Per-server MCP latency, disposable plugin/sandbox qualification, child remote-MCP inheritance, and OTel correlation fields remain measured follow-ups—not hidden source defects. No live change is applied merely to observe it.</div>
+        </details>
+      </section>
+
+      <section id="delivery">
+        <div class="section-head">
+          <h2>Delivery state</h2>
+          <p>Source qualification, remote publication, merge, and live deployment are reported separately.</p>
+        </div>
+        <div class="delivery">
+          <article class="card delivery-step done"><span class="status">Complete</span><h3>Local source</h3><p>The behavioral implementation is qualified at <code>e0681256</code>; the report commit is documentation-only. The source/live qualification contract passes 5/5.</p></article>
+          <article class="card delivery-step done"><span class="status">Deployed</span><h3>Live macOS <code>~/.claude</code></h3><p>Live integration <code>520e18e7</code> is deployed recoverably. Snapshot <code>pre-context-reduction-20260806</code> protects rollback; 239 managed files are pinned to <code>27620385</code>, the earlier snapshot is retained, and 14 owner files were preserved.</p></article>
+          <article class="card delivery-step pending"><span class="status">Pending</span><h3>Remote branch, PR &amp; merge</h3><p>No remote publication, pull request, hosted merge, or <code>origin/main</code> ancestry is claimed yet.</p></article>
+          <article class="card delivery-step pending"><span class="status">Not verified</span><h3>Native Windows</h3><p>Structural and simulated Windows coverage passes, but an actual native-Windows run remains required before making a platform claim.</p></article>
+        </div>
+      </section>
+
+      <section id="sources">
+        <div class="section-head">
+          <h2>Primary sources</h2>
+          <p>The detailed Markdown review contains the complete scope and evidence narrative.</p>
+        </div>
+        <ul class="card sources">
+          <li><a href="CLAUDE_CODE_ARCHITECTURE_REVIEW_2026-08-05.md">Detailed local architecture review</a></li>
+          <li><a href="EVOLUTION.md">Repository architecture evolution history</a></li>
+          <li><a href="https://www.anthropic.com/news/claude-3-7-sonnet">Anthropic: Claude Code research preview</a></li>
+          <li><a href="https://www.anthropic.com/news/claude-4">Anthropic: Claude Code general availability with Claude 4</a></li>
+          <li><a href="https://www.anthropic.com/news/claude-opus-4-1">Anthropic: Claude Opus 4.1</a></li>
+          <li><a href="https://www.anthropic.com/news/claude-sonnet-4-5">Anthropic: Claude Sonnet 4.5</a></li>
+          <li><a href="https://www.anthropic.com/news/claude-haiku-4-5">Anthropic: Claude Haiku 4.5</a></li>
+          <li><a href="https://www.anthropic.com/news/claude-opus-4-5">Anthropic: Claude Opus 4.5</a></li>
+          <li><a href="https://www.anthropic.com/news/claude-opus-4-6">Anthropic: Claude Opus 4.6</a></li>
+          <li><a href="https://www.anthropic.com/news/claude-sonnet-4-6">Anthropic: Claude Sonnet 4.6</a></li>
+          <li><a href="https://www.anthropic.com/project/glasswing">Anthropic: Project Glasswing / Claude Mythos Preview</a></li>
+          <li><a href="https://www.anthropic.com/news/claude-opus-4-7">Anthropic: Claude Opus 4.7</a></li>
+          <li><a href="https://www.anthropic.com/news/claude-opus-4-8">Anthropic: Claude Opus 4.8</a></li>
+          <li><a href="https://www.anthropic.com/news/claude-fable-5-mythos-5">Anthropic: Claude Fable 5 and Mythos 5</a></li>
+          <li><a href="https://www.anthropic.com/news/redeploying-fable-5">Anthropic: redeploying Fable 5 and Mythos 5</a></li>
+          <li><a href="https://platform.claude.com/docs/en/about-claude/models/whats-new-sonnet-5">Anthropic: what's new in Claude Sonnet 5</a></li>
+          <li><a href="https://platform.claude.com/docs/en/about-claude/models/whats-new-opus-5">Anthropic: what's new in Claude Opus 5</a></li>
+          <li><a href="https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5">Anthropic: prompting Claude Fable 5</a></li>
+          <li><a href="https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-sonnet-5">Anthropic: prompting Claude Sonnet 5</a></li>
+          <li><a href="https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5">Anthropic: prompting Claude Opus 5</a></li>
+          <li><a href="https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking">Anthropic: adaptive thinking</a></li>
+          <li><a href="https://platform.claude.com/docs/en/about-claude/models/model-ids-and-versions">Anthropic: model IDs and versioning</a></li>
+          <li><a href="https://platform.claude.com/docs/en/about-claude/model-deprecations">Anthropic: model lifecycle and deprecations</a></li>
+          <li><a href="https://www.anthropic.com/engineering/april-23-postmortem">Anthropic: April 23 Claude Code quality postmortem</a></li>
+          <li><a href="https://www.anthropic.com/news/claude-code-remote-mcp">Anthropic: remote MCP integrations</a></li>
+          <li><a href="https://www.anthropic.com/news/enabling-claude-code-to-work-more-autonomously">Anthropic: checkpoints and more autonomous operation</a></li>
+          <li><a href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills">Anthropic: Agent Skills</a></li>
+          <li><a href="https://www.anthropic.com/engineering/claude-code-sandboxing">Anthropic: Claude Code sandboxing</a></li>
+          <li><a href="https://www.anthropic.com/engineering/harness-design-long-running-apps">Anthropic: harness design for long-running agents</a></li>
+          <li><a href="https://www.anthropic.com/engineering/how-we-contain-claude">Anthropic: how Claude is contained</a></li>
+          <li><a href="https://code.claude.com/docs/en/changelog">Anthropic: cumulative Claude Code changelog</a></li>
+          <li><a href="https://code.claude.com/docs/en/best-practices">Anthropic: Claude Code best practices</a></li>
+          <li><a href="https://code.claude.com/docs/en/hooks">Anthropic: hooks reference</a></li>
+          <li><a href="https://code.claude.com/docs/en/permissions">Anthropic: permissions reference</a></li>
+          <li><a href="https://code.claude.com/docs/en/sub-agents">Anthropic: subagents guide</a></li>
+          <li><a href="https://code.claude.com/docs/en/plugins">Anthropic: plugins reference</a></li>
+          <li><a href="https://code.claude.com/docs/en/monitoring-usage">Anthropic: Claude Code monitoring and OTel configuration</a></li>
+          <li><a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.223">Claude Code v2.1.223 release</a></li>
+          <li><a href="../ARCHITECTURE.md">Repository architecture</a></li>
+          <li><a href="../docs/DESIGN_RATIONALE.md">Design rationale</a></li>
+          <li><a href="../docs/PLATFORM_NOTES.md">Platform notes</a></li>
+        </ul>
+      </section>
+    </main>
+
+    <footer>
+      The original report is frozen evidence from 6 August 2026. The
+      current-state addendum is dated 9 August 2026 and does not rewrite the
+      historical measurements.
+    </footer>
+  </div>
+</body>
+</html>
