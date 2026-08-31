@@ -1635,6 +1635,60 @@ def resolve_plugin_versions(
     return resolved
 
 
+# Discovery metadata for the catalog. `relevance` lets Claude SUGGEST a plugin
+# when the session matches; without it there is no proactive discovery at all.
+# Schema (code.claude.com/docs/en/plugin-relevance): topic + signals, where
+# signals is one or more of cwd / cli / hosts / filesRead / manifestDeps.
+PLUGIN_RELEVANCE = {
+    "safety-net": {
+        "topic": "Claude Code agent safety and hooks",
+        "signals": {
+            "cwd": ["**/.claude/**"],
+            "filesRead": ["**/.claude/settings.json", "**/.claude/hooks/**",
+                          "**/hooks/*.py"],
+        },
+    },
+    "security-scanner": {
+        "topic": "Code security scanning and threat modelling",
+        "signals": {
+            "cli": ["semgrep", "codeql", "gitleaks", "trivy", "bandit"],
+            "filesRead": ["**/*.rego", "**/Dockerfile*"],
+        },
+    },
+    "research-intel": {
+        "topic": "Multi-source technical research",
+        "signals": {
+            "hosts": ["arxiv.org", "api.tavily.com", "api.exa.ai",
+                      "api.firecrawl.dev"],
+        },
+    },
+    "knowledge-ops": {
+        "topic": "Session knowledge capture and recall",
+        "signals": {
+            "filesRead": ["**/agent-memory/**", "**/knowledge-base/**",
+                          "**/AGENTS.md", "**/CLAUDE.md"],
+        },
+    },
+    "planning-toolkit": {
+        "topic": "Plan-before-code and test-driven workflow",
+        "signals": {
+            "filesRead": ["**/docs/plans/**"],
+            "cli": ["pytest"],
+        },
+    },
+    # code-intelligence: intentionally absent, see the note in the export tooling.
+}
+PLUGIN_KEYWORDS = {
+    "safety-net": ["hooks", "security", "guardrails", "enforcement"],
+    "planning-toolkit": ["planning", "tdd", "debugging", "workflow"],
+    "security-scanner": ["security", "sast", "semgrep", "codeql", "threat-model"],
+    "knowledge-ops": ["memory", "knowledge-base", "retrospective", "documentation"],
+    "code-intelligence": ["code-search", "call-graph", "refactoring", "api-docs"],
+    "research-intel": ["research", "web-search", "multi-model", "evaluation"],
+}
+REPO_URL = "https://github.com/brandyn-s/claude-harness"
+
+
 def build_marketplace_json(
     versions: dict | None = None, *, manifest_dir: Path | None = None
 ) -> None:
@@ -1645,28 +1699,29 @@ def build_marketplace_json(
     marketplace = {
         "name": MARKETPLACE_NAME,
         "owner": MARKETPLACE_OWNER,
-        # Scope flag (B10, 2026-06-10): aligns the manifest with the repo's
-        # README scope note — this marketplace distributes to Example
-        # colleagues; several plugins ship org-coupled skills (internal MCP
-        # servers, org infrastructure). External sharing goes through
-        # PORTABLE.md's redaction checklist, not this manifest.
-        "description": "Example-internal Claude Code plugin marketplace. "
-                       "Several plugins reference internal MCP servers and org "
-                       "infrastructure; see PORTABLE.md before sharing outside "
-                       "the org.",
+        "description": "Working Claude Code harness: hooks, ambient rules, and "
+                       "skills, packaged as six installable bundles. Install one "
+                       "bundle or the whole set; each is self-contained.",
+        "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+        "metadata": {"pluginRoot": "./marketplace"},
         "plugins": [],
     }
 
     for plugin_def in PLUGINS:
         version = (versions or {}).get(plugin_def["name"], plugin_def["version"])
-        marketplace["plugins"].append(
-            {
-                "name": plugin_def["name"],
-                "source": f"./marketplace/{plugin_def['name']}",
-                "description": plugin_def["description"],
-                "version": version,
-            }
-        )
+        entry = {
+            "name": plugin_def["name"],
+            "source": f"./marketplace/{plugin_def['name']}",
+            "description": plugin_def["description"],
+            "version": version,
+            "license": "MIT",
+            "repository": REPO_URL,
+        }
+        if plugin_def["name"] in PLUGIN_KEYWORDS:
+            entry["keywords"] = PLUGIN_KEYWORDS[plugin_def["name"]]
+        if plugin_def["name"] in PLUGIN_RELEVANCE:
+            entry["relevance"] = PLUGIN_RELEVANCE[plugin_def["name"]]
+        marketplace["plugins"].append(entry)
 
     (manifest_dir / "marketplace.json").write_text(
         json.dumps(marketplace, indent=2) + "\n", encoding="utf-8", newline="\n"
@@ -1909,7 +1964,7 @@ def main(argv: list[str] | None = None):
         sys.exit(1)
     print()
     print("Users install with:")
-    print(f"  /plugin marketplace add example-org/{MARKETPLACE_NAME}")
+    print(f"  /plugin marketplace add brandyn-s/{MARKETPLACE_NAME}")
     print(f"  /plugin install safety-net@{MARKETPLACE_NAME}")
 
 
