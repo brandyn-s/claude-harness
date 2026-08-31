@@ -61,8 +61,15 @@ jobs:
             echo "::error::Each exemption needs its own written justification."
             exit 1
           fi
-          if grep -q "^paths = \[" .gitleaks.toml && grep -qE "\.\*|\.md|SKILL" .gitleaks.toml; then
+          # STRIP COMMENTS FIRST. The note in .gitleaks.toml explains what a bad
+          # allowlist looks like, and therefore CONTAINS the strings this check
+          # looks for -- so scanning the whole file makes the checker match its own
+          # documentation and fail on a clean file. It did exactly that on the
+          # first run. (Same shape as rules/tdd-mutation-testing.md items 19/32.)
+          code=$(grep -v '^[[:space:]]*#' .gitleaks.toml)
+          if printf '%s' "$code" | grep -qE '\.\*|\*\*|/\.\*'; then
             echo "::error::allowlist looks broadened to a glob; keep it to exact filenames"
+            printf '%s' "$code" | grep -nE '\.\*|\*\*|/\.\*'
             exit 1
           fi
           echo "allowlist is 2 anchored paths, unchanged"
