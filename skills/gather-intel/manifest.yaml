@@ -1,0 +1,41 @@
+id: gather-intel
+type: skill
+description: "Search external sources for Claude Code community knowledge. Searches Reddit, HN, GitHub, blogs, then compares findings against architecture."
+category: planning
+requires_tools:
+  - Agent
+  - Bash
+  - Read
+  - mcp__exa__web_search_exa
+  - mcp__memory-search__memory_search
+  - mcp__tavily__tavily_extract
+  - mcp__tavily__tavily_research
+  - mcp__tavily__tavily_search
+prose_only_tools:
+  - mcp__x-search__*  # explicitly names the retired server; execution uses bin/x-monitor.py
+requires_topics:
+  - architecture.md
+requires_rules:
+  - web-search-preference
+  - compare-by-need
+requires_skills:
+  - capture
+requires_auth: []
+input_contract:
+  parameters:
+    focus:
+      type: string
+      required: false
+      description: "Focus area for intelligence gathering"
+      examples: ["hooks", "MCP patterns", "Windows tips"]
+  scope_from: argument
+output_contract:
+  produces: [community_findings, gap_analysis, transfer_recommendations]
+  format: markdown_report
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "20-50"
+preconditions: []
+guardrails: []
+threat_model: read_only

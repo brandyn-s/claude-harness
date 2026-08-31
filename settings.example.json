@@ -1,0 +1,723 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_comment": [
+    "Genericized template of the live settings.json (which IS tracked in this repo).",
+    "Regenerate after changing hook wiring: the architecture drift gate",
+    "(bin/architecture-drift-check.py, run in CI) fails if the hook events or",
+    "wired hook scripts here fall behind settings.json.",
+    "Hooks dispatch through hooks/run-hook, which resolves the Python interpreter",
+    "per-platform (pythonw.exe on Windows, python3 elsewhere) \u2014 no path edits needed."
+  ],
+  "_comment_env": "Environment variables injected into every Claude Code session",
+  "env": {
+    "BASH_MAX_TIMEOUT_MS": "300000",
+    "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "1",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_CODE_FILE_READ_MAX_OUTPUT_TOKENS": "100000",
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "64000",
+    "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": "0",
+    "CLAUDE_CODE_UNATTENDED_RETRY": "1",
+    "DISABLE_ERROR_REPORTING": "1",
+    "DISABLE_TELEMETRY": "1",
+    "ENABLE_PROMPT_CACHING_1H": "1",
+    "ENABLE_TOOL_SEARCH": "auto:2",
+    "MAX_MCP_OUTPUT_TOKENS": "200000",
+    "MCP_TIMEOUT": "60000"
+  },
+  "_comment_permissions": "Customize allow/deny and additionalDirectories for your environment. The org-specific MCP tool allows from the live config are omitted here; add entries for the MCP servers you actually run. Bare Bash/Read/Write/Edit make narrower Bash(...) allows redundant \u2014 don't add both.",
+  "permissions": {
+    "allow": [
+      "Bash",
+      "Read",
+      "Write",
+      "Edit"
+    ],
+    "deny": [
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/credentials.json)",
+      "Read(**/.credentials.json)",
+      "Read(**/secrets.*)",
+      "Read(~/.claude/daemon/**)",
+      "Edit(~/.ssh/**)",
+      "Edit(~/.aws/**)",
+      "Edit(**/.env)",
+      "Edit(**/.env.*)",
+      "Edit(**/.credentials.json)",
+      "Bash(rm -rf /)",
+      "Bash(rm -rf ~)",
+      "Bash(*chmod 777*)",
+      "Bash(*curl*| bash*)",
+      "Bash(*curl*| sh*)",
+      "WebFetch",
+      "WebSearch"
+    ],
+    "defaultMode": "auto",
+    "additionalDirectories": [
+      "~/Documents",
+      "/tmp/claude"
+    ]
+  },
+  "_comment_mcp": "Do NOT auto-trust project .mcp.json files: an MCP server is arbitrary code, so auto-enabling means cloning a repo can execute code from it. Enable trusted servers per-project via enabledMcpjsonServers instead.",
+  "enableAllProjectMcpServers": false,
+  "enabledMcpjsonServers": [],
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "permission_prompt|elicitation_dialog",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/afplay",
+            "args": [
+              "/System/Library/Sounds/Sosumi.aiff"
+            ]
+          }
+        ]
+      },
+      {
+        "matcher": "idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/afplay",
+            "args": [
+              "/System/Library/Sounds/Glass.aiff"
+            ]
+          }
+        ]
+      }
+    ],
+    "ConfigChange": [
+      {
+        "matcher": "user_settings|project_settings|local_settings",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "config-change-validate.py"
+            ],
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "compaction-continuity.py"
+            ],
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "WorktreeRemove": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "worktree-remove-snapshot.py"
+            ],
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "post-write-edit.py"
+            ],
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "skill-ref-validator.py"
+            ],
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__tavily__tavily_research",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "tavily-research-poll.py"
+            ],
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "post-merge-sync.py"
+            ],
+            "if": "Bash(gh pr merge*)",
+            "timeout": 45
+          },
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "output-secret-redact.py"
+            ],
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "result-injection-guard.py"
+            ],
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*|Bash|Read|Glob|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "loop-detector.py"
+            ],
+            "timeout": 20
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "bash-security-audit.py"
+            ],
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__codebase-memory-mcp__search_code|mcp__codebase-memory-mcp__search_code_semantic|mcp__codebase-memory-mcp__query_graph|mcp__codebase-memory-mcp__search_graph|mcp__memory-search__memory_search",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "query-routing-log.py"
+            ],
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "creative-output-grounding-check.py"
+            ],
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/run-hook",
+            "args": [
+              "mcp-truncation-signal-guard.py"
+            ],
+            "timeout": 8
+          }
+        ],
+        "matcher": "mcp__.*"
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "mcp__.*|Bash|Read|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "post-failure-guide.py"
+            ],
+            "timeout": 20
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "bash-error-classifier.py"
+            ],
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "The Edit failed. If 'File has been modified since read': a hook modified the file between your Read and Edit. Re-read the file with Read, then retry Edit. For files in ~/.claude/, use a Python script via Bash instead (bypasses hook cycle). If 'String to replace not found': re-read and use the exact text from the file.",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "mcp__msgraph__graph_request|mcp__remote-msgraph__graph_request",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Before this graph_request call: (A) GATE CHECK \u2014 graph_request is a wildcard GET tool. Check if a scoped tool exists for this query (e.g., msgraph_list_users, msgraph_get_security_incident). If a scoped tool can do this, respond {\"decision\":\"block\",\"reason\":\"Use the scoped tool [name] instead of the wildcard graph_request.\"}. (B) REASON \u2014 In one sentence, state what data you need and why no scoped tool covers it. (C) VERIFY \u2014 (1) Path uses .us endpoints (GCC High, not .com), (2) $top is set for list queries, (3) OData $filter syntax is correct. If all checks pass, respond {\"ok\": true}. Context: $ARGUMENTS",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__remote-msgraph__call_tool|mcp__msgraph__call_tool",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "kql-schema-hint.py"
+            ],
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "bash-security-guard.py"
+            ],
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "git-destructive-checkout-guard.py"
+            ],
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "bash-tail-buffering-guard.py"
+            ],
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "git-empty-push-guard.py"
+            ],
+            "if": "Bash(git push*)",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "pr-duplicate-preflight.py"
+            ],
+            "if": "Bash(gh pr create*)",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "staged-additions-guard.py"
+            ],
+            "if": "Bash(git commit*)",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "zsh-dialect-guard.py"
+            ],
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "poll-loop-nudge.py"
+            ],
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "destructive-ops-guard.py"
+            ],
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Glob|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "search-path-guard.py"
+            ],
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "pre-agent-dispatch.py"
+            ],
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*|WebSearch|WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "auto-topic-loader.py"
+            ],
+            "timeout": 20
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "pdf-to-text.py"
+            ],
+            "if": "Read(*.pdf)",
+            "timeout": 300
+          },
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "nessus-to-md.py"
+            ],
+            "if": "Read(*.nessus)",
+            "timeout": 300
+          },
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "cklb-to-md.py"
+            ],
+            "if": "Read(*.cklb)",
+            "timeout": 300
+          },
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "xlsx-to-md.py"
+            ],
+            "if": "Read(*.xlsx)",
+            "timeout": 300
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "write-edit-dispatcher.py"
+            ],
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__tavily__tavily_search",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "tavily-search-cap.py"
+            ],
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "read-deny-guard.py"
+            ],
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "block-partial-read.py"
+            ],
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "security-write-confirm.py"
+            ],
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Glob|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/codebase-memory-orientation.sh",
+            "args": [],
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "stale-checkout-before-analysis.py"
+            ],
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "session-start.py"
+            ],
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "session-end.py"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "promise-checker.py"
+            ],
+            "timeout": 20
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "stop-failure-handler.py"
+            ],
+            "timeout": 20
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "subagent-start-context.py"
+            ],
+            "timeout": 20
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "subagent-stop.py"
+            ],
+            "timeout": 20
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "task-completed.py"
+            ],
+            "timeout": 20
+          }
+        ]
+      }
+    ],
+    "TeammateIdle": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "teammate-idle.py"
+            ],
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "prompt-secret-scan.py"
+            ],
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "/absolute/path/to/.claude/bin/statusline-launcher",
+    "padding": 1
+  },
+  "alwaysThinkingEnabled": true,
+  "minimumVersion": "2.1.223"
+}

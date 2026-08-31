@@ -1,0 +1,19 @@
+id: cklb-to-md
+type: hook
+event: PreToolUse
+matcher: "Read"
+if_condition: "Read(*.cklb)"
+action_type: fixer
+description: "Converts STIG Viewer .cklb JSON to Markdown (status x severity summary + rules table + open finding detail) when a .cklb file is read."
+enforces: []
+blocks_patterns: []
+injects: null
+modifies: read_output
+depends_on_files: []
+depends_on_env:
+  - PYTHON_EXE
+exit_codes:
+  "0": "Not a .cklb file, conversion failed (fallback to native Read), or cached .md consumed"
+  "2": "Conversion succeeded; Read blocked with redirect to cached .md"
+output_format: markdown
+incidents: []

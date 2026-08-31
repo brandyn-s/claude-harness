@@ -1,0 +1,33 @@
+id: outcome-over-verification
+type: rule
+description: "Verification is bounded evidence for the requested outcome; verification completeness is never the deliverable."
+applies_to:
+  - "implementations and deployments"
+  - "reviews and investigations"
+  - "plans, verifiers, harnesses, and evidence collection"
+trigger_conditions:
+  - "verification work begins"
+  - "a verifier or harness needs repair"
+  - "another review or check is proposed after decisive evidence exists"
+  - "active verification work reaches 45 minutes without an outcome-bearing state change"
+required_actions:
+  - "define the requested outcome, decisive evidence, first material falsifier, and verification budget"
+  - "prefer native runtime or platform evidence"
+  - "stop when decisive evidence answers the material decision"
+  - "replace or simplify a custom verifier after its first repair fails"
+  - "preserve fresh plumbing and outcome verification"
+prohibited_actions:
+  - "treat verification completeness as a metric or deliverable"
+  - "repeat reviewer cycles until no findings remain"
+  - "grow a harness to prove its own correctness"
+  - "add checks that cannot change the current decision"
+  - "weaken live or outcome proof in the name of speed"
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - date: "2026-08-22"
+    summary: "A Wave 2 delivery task ran for roughly 13 hours after verification machinery became larger than the outcome it was meant to prove."
+    turns_wasted: 0
+    category: scope
+created_date: "2026-08-22"
+last_validated: "2026-08-22"

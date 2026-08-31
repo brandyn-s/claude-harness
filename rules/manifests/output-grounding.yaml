@@ -1,0 +1,37 @@
+id: output-grounding
+type: rule
+description: "Prompt-and-evaluation contract requiring calibrated uncertainty, provenance, and a counterfactual in knowledge-asymmetric creative-discovery outputs; the registered PostToolUse hook is advisory and does not grade the final answer."
+applies_to:
+  - creative_discovery
+  - knowledge_asymmetric_collaboration
+  - skill_output_format
+trigger_conditions:
+  - skill_invocation_scout_frontier
+  - skill_invocation_brainstorm
+  - skill_invocation_deep_dive
+  - skill_invocation_refine
+required_actions:
+  - label_confidence_per_claim
+  - cite_source_or_tag_INFERRED
+  - offer_counterfactual_per_output
+prohibited_actions:
+  - strip_confidence_labels
+  - rationale_text_without_provenance
+  - omit_counterfactual_on_cross_domain_analogies
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - ai_scientist_v2_57_percent_false_data_2026
+  - opus_4_7_kintal_t4_mode_collapse_2026
+  - hyperpolation_ceiling_finding_2026
+created_date: "2026-04-29"
+last_validated: "2026-08-26"
+# RELOCATED 2026-08-26: source is skills/_shared/output-grounding.md, NOT
+# rules/output-grounding.md. It is no longer ambient -- delivery is the
+# REQUIRED-READ pointer in each of the four owner skills' bodies. Authorised by
+# bin/rule_relocation_pilot.py: 438 transcripts, activity 19 sessions, all 19
+# owner-skill invocations, EXPOSED=0, coverage 100.0%. The manifest is KEPT so
+# scout-frontier's requires_rules dependency stays declared and resolvable.
+source: skills/_shared/output-grounding.md
+ambient: false
+

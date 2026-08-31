@@ -1,0 +1,1 @@
+convert this image to grayscale

@@ -1,0 +1,54 @@
+id: gather-openai-endpoints
+type: skill
+description: "Detect drift in OpenAI's data-collection surface (ChatGPT Compliance Logs Platform, Platform Admin/Audit-Log APIs, Codex Analytics, enterprise doc surfaces) by diffing live vendor docs against committed baselines in a dedicated knowledge base."
+category: knowledge
+
+requires_tools:
+  - "Bash"
+  - "Read"
+  - "Write"
+  - "Edit"
+  - "Glob"
+  - "Grep"
+  - "mcp__memory-search__memory_search"
+  - "AskUserQuestion"
+requires_topics: []
+requires_rules:
+  - verify-effectiveness
+  - verify-before-assuming
+  - uncharted-vs-refuted
+  - api-doc-lookup
+  - grading-discipline
+  - web-search-preference
+requires_skills:
+  - gather-claude-endpoints
+requires_auth: []
+
+input_contract:
+  parameters:
+    scope:
+      type: string
+      required: false
+      description: "'full', a channel key (see --list), 'baseline' to establish/refresh baselines, or 'probe' to re-validate existing findings"
+  scope_from: argument
+output_contract:
+  produces: [channel_drift_report, finding_list, updated_baselines]
+  format: markdown_report
+
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "6-15"
+
+preconditions:
+  - "python3 available (stdlib only — no third-party deps)"
+  - "Network egress to developers.openai.com, learn.chatgpt.com, cookbook.openai.com (public docs, no auth)"
+  - "~/Documents/knowledge-base checked out (dedicated KB at reference/openai-data-channels/)"
+  - "skills/_shared/endpoint-drift present (shared drift engine + spec types)"
+  - "Probe leg (optional): Keychain items OPENAI_PLATFORM_ADMIN_API / OPENAI_CHATGPT_ADMIN_API / OPENAI_ORG_ID / OPENAI_WORKSPACE_ID; absent items degrade to SKIPPED_NO_KEY"
+# `guardrails:` names enforcing HOOK ids, not prose. Operating rules (never
+# hand-edit a baseline; refresh only after grading; INSTRUMENT_BLIND
+# invalidates the diff; never auto-write) live in SKILL.md, in front of the
+# model at execution time.
+guardrails: []
+threat_model: writes_local

@@ -1,0 +1,39 @@
+id: mega-distill
+type: skill
+description: "Compaction-recovery front-end for /distill: streams a large or auto-compacted session transcript (>=1 compaction boundary, >5000 lines, or >15MB) and condenses it to a chronological diagnostic signal slice (user turns, assistant text, tool calls, errors inline, compaction markers; drops thinking/images/success-bodies/bookkeeping), splitting only if it exceeds a context window, then hands the whole-session slice to /distill's normal judgment so distill diagnoses the WHOLE session instead of only the ~10% surviving the post-compaction window, and auto-ships the resulting fixes. Replaces the retired per-chunk findings-census design (2026-06-21 red-team); renamed from mega-retro."
+category: maintenance
+
+requires_tools:
+  - "Bash"
+  - "Read"
+  - "Glob"
+  - "Grep"
+  - "Skill"
+  - "mcp__claude_platform__count_message_tokens"
+  - "AskUserQuestion"
+requires_topics: []
+requires_rules: []
+requires_skills:
+  - distill
+  - ship
+requires_auth: []
+
+input_contract:
+  parameters:
+    transcript_path: "optional — path to a session .jsonl; defaults to current session"
+    max_tokens: "optional — per-slice-part token budget (default 180000); splitter prefers compaction boundaries and falls back to diagnostic-record boundaries"
+  scope_from: argument
+output_contract:
+  produces: [condensed_signal_slice, condense_manifest, distill_lessons]
+  format: text_and_markdown
+
+side_effects: [writes_files, modifies_memory, creates_pr, pushes_to_remote]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "8-20"
+
+preconditions:
+  - "Transcript file exists and is large/compacted (Step 0 size gate routes small sessions to /retro)"
+  - "python3 available for the deterministic condense helper"
+guardrails: []
+threat_model: reads_transcript_writes_tmp

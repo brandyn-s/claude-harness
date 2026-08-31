@@ -1,0 +1,21 @@
+id: tdd-quality
+type: rule
+description: "Prevent assertion weakening during TDD -- specific assertions must not be replaced with vague ones to achieve green."
+applies_to:
+  - test_writing
+  - test_modification
+trigger_conditions:
+  - modifying_test_assertions
+  - achieving_green_phase
+required_actions:
+  - maintain_assertion_specificity
+  - check_for_weakened_assertions
+prohibited_actions:
+  - replacing_toBe_with_toBeTruthy
+  - deleting_test_cases_to_pass
+  - weakening_assertions_for_green
+enforced_by: []
+enforcement_coverage: none
+incidents: []
+created_date: "2026-04-06"
+last_validated: "2026-04-15"

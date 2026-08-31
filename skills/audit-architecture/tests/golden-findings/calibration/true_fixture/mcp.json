@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "phantom-server": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["/nonexistent/path/to/server.py"]
+    }
+  }
+}

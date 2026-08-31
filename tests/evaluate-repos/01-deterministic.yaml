@@ -1,0 +1,15 @@
+skill: evaluate-repos
+name: evaluate-repos deterministic invariants
+trigger: /evaluate-repos <repo-url>
+must_happen:
+- Advocate + skeptic agents run in pairs
+- Synthesis surfaces areas of disagreement
+- Output includes uncertainty section
+deterministic:
+- frontmatter_equals:
+    name: evaluate-repos
+- body_contains:
+  - advocate
+  - skeptic
+- references_resolve: true
+- examples_count: '>=2'

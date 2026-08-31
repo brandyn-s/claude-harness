@@ -1,0 +1,12 @@
+# Golden fixture: STALE worklist (gate 2). Well-formed; the test
+# writes a Layer-A trace record for this finding whose timestamp is
+# older than the 30-minute TTL, so gate 2 (stale) must trip.
+findings:
+  - skill: gather-intel
+    code: A1
+    severity: drift
+    label: behavior-fix
+    description: manifest declares WebSearch but the tool is never invoked
+    reproducer:
+      type: grep_absent
+      command: grep -q 'WebSearch' skills/gather-intel/SKILL.md

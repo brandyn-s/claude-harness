@@ -1,0 +1,42 @@
+id: supergoal
+type: skill
+description: "Drive a superplan plan-file to completion autonomously. Wraps Claude Code's built-in /goal with plan-aware termination (derives condition from Demo line + falsifiers), tool-backed per-turn verification, prior-arc check, turn AND token budget enforcement, block-cap-aware loop control, and terminal-doc-on-exit. Headless mode supported. Trigger phrases: supergoal, drive plan, autonomous loop. Do NOT use for interactive feature work, one-shot scripts without a plan file, or plans lacking a Demo line + falsifiers."
+category: orchestration
+
+requires_tools:
+  - Bash
+  - Read
+  - Write
+  - "mcp__memory-search__*"
+  - "AskUserQuestion"
+requires_topics: []
+requires_rules:
+  - never-stop-early
+  - verify-effectiveness
+requires_skills:
+  - supergoal-resume
+  - supergoal-pause
+  - superplan
+requires_auth: []
+
+input_contract:
+  parameters:
+    plan_path:
+      type: string
+      required: true
+      description: "Path to a superplan plan-file (markdown). Must contain a Demo line + falsifiers."
+  scope_from: argument
+output_contract:
+  produces: [loop_state, events_log, terminal_doc]
+  format: markdown_report
+
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "10-100+"
+
+preconditions:
+  - plan-file exists and contains Demo line + falsifiers
+  - ~/.claude/supergoal state directory is writable
+guardrails: []
+threat_model: writes_local

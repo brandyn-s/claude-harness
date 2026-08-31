@@ -1,0 +1,16 @@
+name: context budget release evidence contract
+skill: context-budget
+trigger: "/context-budget after an architecture change"
+
+deterministic:
+- frontmatter_equals:
+    name: context-budget
+- body_contains:
+  - "Static estimates and token-count responses are provisional release evidence"
+  - "fresh-session"
+  - "safe/minimal control"
+  - "pre-change versus post-change"
+  - "input/cache tokens and cost"
+  - "bounded direct smoke/A-B test"
+  - "runtime context impact as **UNVERIFIED**"
+- references_resolve: true

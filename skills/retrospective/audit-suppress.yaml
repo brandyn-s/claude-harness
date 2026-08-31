@@ -1,0 +1,4 @@
+suppressions:
+  - code: C2
+    path: skills/retrospective/SKILL.md
+    reason: "Bash-workflow examples piping the extractor to /tmp/retro-extract.json; /tmp/ resolves under Git Bash on Windows. Command demonstrations, not Python file I/O."

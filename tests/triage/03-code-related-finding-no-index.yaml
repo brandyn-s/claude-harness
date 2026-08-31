@@ -1,0 +1,20 @@
+name: Code-related finding gracefully skips when repo not indexed
+skill: triage
+trigger: "/triage (with a CodeQL alert, target repo NOT indexed)"
+
+must_happen:
+  - Check code-search index status (get_index_status)
+  - Index missing: suggest /index-repo and skip codebase analysis
+  - Continue triage without codebase correlation
+  - Note the gap in the report
+
+must_not_happen:
+  - Call search_code on unindexed repo (silent empty results)
+  - Fail or abort the entire triage because index is missing
+
+output_contains:
+  - '"not indexed" or "/index-repo" suggestion'
+
+guards:
+  - get_index_status returns empty/missing
+skip_ab: false

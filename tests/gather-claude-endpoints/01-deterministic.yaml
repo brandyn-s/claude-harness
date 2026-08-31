@@ -1,0 +1,40 @@
+skill: gather-claude-endpoints
+name: gather-claude-endpoints deterministic invariants
+trigger: /gather-claude-endpoints [scope]
+must_happen:
+- Baseline is loaded from the dedicated KB before any diff is graded
+- diff_channels.py is run (drift is detected mechanically, not by re-reading prose)
+- INSTRUMENT_BLIND and CHANNEL_DEAD are treated as detector/page failures, never as vendor removals
+- Every finding is PROBED against the live API and against our own codebase before grading
+- An impact claim about OUR system cites a grep or file:line, never vendor docs alone
+- The code probe greps the FIELD NAME across EVERY repo, never one expected module
+- Before recommending "ingest and alert on X", the probe checks whether a guard already exists
+- A blocked probe surfaces the blocker to the user; it never silently degrades to doc-inference
+- Severity is re-graded AFTER probing (the probe usually downgrades it)
+- Every finding carries exactly one verdict from ADOPT/TRIAL/DEFER/REJECT
+- Baselines are refreshed only AFTER drift is graded
+- Nothing is auto-written except baseline files
+deterministic:
+- frontmatter_equals:
+    name: gather-claude-endpoints
+- body_contains:
+  # detection layer
+  - INSTRUMENT_BLIND
+  - CHANNEL_DEAD
+  - NO_BASELINE
+  - diff_channels.py
+  - claude-data-channels
+  # probe layer (added v1.1 -- the first run shipped 2 unprobed findings)
+  - 'Step 4b'
+  - API probe
+  - Code probe
+  - Severity basis
+  - UNVERIFIED-BLOCKED
+  - downgraded-by-probe
+  - Silent clamps
+  - FIELD NAME
+  - Never scope to one module
+  - Verdict
+  - Worked example
+- references_resolve: true
+- examples_count: '>=2'

@@ -1,0 +1,19 @@
+id: claude-md-quality
+type: rule
+description: "Standards for CLAUDE.md quality -- concise, actionable, no filler, project-specific instructions only."
+applies_to:
+  - claude_md_authoring
+  - project_configuration
+trigger_conditions:
+  - creating_or_editing_claude_md
+required_actions:
+  - keep_concise_and_actionable
+  - project_specific_only
+prohibited_actions:
+  - generic_filler_content
+  - duplicating_global_rules
+enforced_by: []
+enforcement_coverage: none
+incidents: []
+created_date: "2026-04-01"
+last_validated: "2026-04-15"

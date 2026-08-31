@@ -1,0 +1,24 @@
+id: verify-before-assuming
+type: rule
+description: "Verify MCP capabilities and repo targets before assuming -- run ToolSearch before claiming a tool does not exist."
+applies_to:
+  - mcp_tool_usage
+  - repo_operations
+trigger_conditions:
+  - claiming_mcp_unavailable
+  - targeting_a_repo
+required_actions:
+  - run_toolsearch_before_claiming_missing
+  - verify_current_directory
+  - verify_target_remote
+prohibited_actions:
+  - claiming_unavailable_without_evidence
+  - assuming_mcp_is_read_only
+enforced_by:
+  - verify-before-assuming
+enforcement_coverage: partial
+incidents:
+  - firecrawl_claimed_unavailable_2026_04_12
+  - linear_claimed_unavailable_2026_04_12
+created_date: "2026-03-20"
+last_validated: "2026-04-15"

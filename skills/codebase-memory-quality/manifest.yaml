@@ -1,0 +1,35 @@
+id: codebase-memory-quality
+type: skill
+description: "Finds dead code, unused functions, high fan-out nodes, refactor candidates, and hidden coupling via code-graph degree filtering and structural analysis."
+category: code-intel
+
+requires_tools:
+  - "mcp__codebase-memory-mcp__search_graph"
+  - "mcp__codebase-memory-mcp__query_graph"
+  - "mcp__codebase-memory-mcp__trace_call_path"
+  - "mcp__codebase-memory-mcp__list_projects"
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    query:
+      type: string
+      required: false
+      description: "Quality analysis query (dead code, fan-out, coupling)"
+  scope_from: user_prompt
+output_contract:
+  produces: [dead_code_candidates, quality_metrics, refactor_recommendations]
+  format: markdown_report
+
+side_effects: [none]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "2-5"
+
+preconditions:
+  - Target project indexed in code-graph
+guardrails: []
+threat_model: read_only

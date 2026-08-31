@@ -1,0 +1,17 @@
+skill: code-explore
+name: code-explore deterministic invariants
+trigger: /code-explore <query>
+must_happen:
+- Multi-phrasing search generates 3-5 phrasings before firing
+- Step 1.6 service/module identification before deep dive
+- Low-confidence results trigger cross-check with Grep
+deterministic:
+- frontmatter_equals:
+    name: code-explore
+- body_contains:
+  - Multi-Phrasing
+  - Step 0
+  - search_graph
+- references_resolve: true
+# code-explore is procedural; no Examples section. Code blocks (query_graph etc.)
+# serve as the worked-example surface.

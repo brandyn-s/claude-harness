@@ -1,0 +1,45 @@
+# Suppression file for /audit-architecture
+#
+# Suppress known-OK findings that re-appear every run. Each suppression
+# requires a `reason` explaining WHY this finding is expected. Reviewers
+# see this file in PR review and can challenge any reason.
+#
+# Schema (same as audit-skill's audit-suppress.yaml):
+#   code     (required) — finding code (R5, SC1, etc.)
+#   target   (optional) — literal or glob against the finding's target
+#   path     (optional) — literal or glob against the finding's file path
+#   line     (optional, requires path) — int or range (e.g. "40-45")
+#   reason   (required) — short explanation; unjustified suppressions are
+#                         reviewable but will be challenged
+
+suppressions:
+  - code: R5
+    reason: >
+      Orphan process counts fluctuate with multi-session usage. A count of
+      instances-minus-1 per server is within measurement noise on hosts
+      running concurrent Claude Code sessions. Flag R5 only when the excess
+      is >= 2 instances above the active session count.
+
+  - code: SC1
+    target: windows-performance-probes
+    reason: >
+      Phase 0 CPU/memory/process-dedup probes use Windows-only APIs and
+      correctly SKIP on non-Windows hosts. The SKIP is documented behavior,
+      not a scaling gap.
+
+  - code: H1
+    path: skills/audit-architecture/SKILL.md
+    line: "295-335"
+    reason: >
+      Meta-reference, not a literal citation. The "Concrete FP pattern —
+      broken-reference detection on meta-references" block cites
+      `references/search-waves.md` as an EXAMPLE of what the broken-refs
+      check should NOT flag — the scanner falls into the exact FP it documents.
+      Anchored to a LINE RANGE (not a single line) covering that prose block:
+      a prior single `line: 265` anchor broke when a Windows MSYS caveat was
+      added above it (moved the citation to line 269), and the 260-280 range
+      broke 2026-08-22 when Phase 1 discovery-script wiring above it moved the
+      citation to line 308. The range tolerates small line shifts, and this is
+      the only meta-reference H1 in the file so the range cannot mask a genuine
+      broken ref. Correct until the scanner gains meta-citation recognition —
+      at which point this whole entry should be deleted.

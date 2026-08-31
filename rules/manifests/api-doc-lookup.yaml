@@ -1,0 +1,30 @@
+id: api-doc-lookup
+type: rule
+description: "Read the current vendor contract before implementation, negative capability claims, or instrumentation of a deployed interface."
+applies_to:
+  - api_integration
+  - mcp_server_development
+  - script_writing
+  - api_diagnosis
+  - runtime_instrumentation
+trigger_conditions:
+  - integrating_with_unfamiliar_api
+  - writing_api_client_code
+  - declaring_endpoint_broken_or_absent
+  - instrumenting_documented_interface
+required_actions:
+  - search_endpoint_and_parameters_in_memory
+  - inspect_current_api_docs_directory
+  - verify_against_raw_vendor_contract
+  - distinguish_wrapper_vendor_and_deployment_surfaces
+  - read_contract_before_instrumentation
+prohibited_actions:
+  - writing_api_code_from_training_data_alone
+  - inferring_vendor_absence_from_wrapper_search
+  - diagnosing_from_guessed_parameter_shapes
+  - modifying_shared_deployed_path_before_contract_lookup
+enforced_by: []
+enforcement_coverage: none
+incidents: []
+created_date: "2026-03-30"
+last_validated: "2026-08-05"

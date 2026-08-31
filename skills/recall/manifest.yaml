@@ -1,0 +1,37 @@
+id: recall
+type: skill
+description: "Search the digital garden for prior decisions, lessons, patterns, and failed approaches -- uses file-first search with semantic fallback, then selectively reads matching topic entries into context."
+category: knowledge
+
+requires_tools:
+  - "Read"
+  - "Glob"
+  - "Grep"
+  - "Bash"
+  - "mcp__memory-search__memory_search"
+  - "AskUserQuestion"
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    search_terms:
+      type: string
+      required: true
+      description: "Keywords or phrases to search the knowledge base for"
+  scope_from: argument
+output_contract:
+  produces: [topic_entries, relevance_summary]
+  format: markdown_report
+
+side_effects: [appends_recall_telemetry_jsonl]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "3-6"
+
+preconditions:
+  - "~/Documents/knowledge-base/topics/ directory exists with .md files"
+guardrails: []
+threat_model: writes_local

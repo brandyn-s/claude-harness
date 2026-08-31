@@ -1,0 +1,23 @@
+name: Hook edit triggers regression and effectiveness testing
+skill: validate-changes
+trigger: "/validate-changes hooks/bash-security-guard.py"
+
+must_happen:
+  - Classify as "hook" type
+  - Regression test: pipe known-clean input to hook, verify exit 0
+  - Regression test: verify sibling hooks still fire
+  - Effectiveness test: pipe input that should trigger the new check, verify it catches
+  - Effectiveness test: pipe clean input, verify no false positive
+  - Present validation report
+
+must_not_happen:
+  - Skip the false-positive test (clean input check)
+  - Only test the positive case without the negative case
+
+output_contains:
+  - Regression results
+  - Effectiveness results with both positive and negative cases
+  - Verdict
+
+guards: []
+skip_ab: false

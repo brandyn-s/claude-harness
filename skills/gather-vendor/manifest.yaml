@@ -1,0 +1,52 @@
+id: gather-vendor
+type: skill
+description: "Sync architecture with a third-party LLM vendor's upstream (openai|gemini|grok via argument) — probes pinned-model liveness, sweeps API changelog, deprecations, SDK releases, and release notes, then presents verified findings for user approval."
+category: knowledge
+
+requires_tools:
+  - "Bash"
+  - "Read"
+  - "Write"
+  - "Edit"
+  - "Glob"
+  - "Grep"
+  - "mcp__exa__web_search_exa"
+  - "mcp__tavily__tavily_search"
+  - "mcp__firecrawl__firecrawl_scrape"
+  - "AskUserQuestion"
+requires_topics: []
+requires_rules:
+  - web-search-preference
+  - uncharted-vs-refuted
+  - best-in-class-for-cross-model
+  - eval-shipping-discipline
+  - api-doc-lookup
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    vendor:
+      type: enum
+      required: true
+      description: "openai | gemini | grok"
+    mode:
+      type: enum
+      required: false
+      description: "'full', 'since:YYYY-MM-DD', or a focus area"
+  scope_from: argument
+output_contract:
+  produces: [vendor_intelligence_report, workaround_audit, finding_list]
+  format: markdown_report
+
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "10-25"
+
+preconditions:
+  - "Vendor API key in Keychain (OPENAI_API_KEY / GEMINI_API_KEY / XAI_API_KEY) for the pinned-model probe"
+  - "Tavily or Firecrawl MCP available for web fetches"
+  - "gh CLI for SDK release queries"
+guardrails: []
+threat_model: writes_local

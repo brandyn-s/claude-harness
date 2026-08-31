@@ -1,0 +1,53 @@
+id: plateau-diagnose
+type: skill
+description: "Use when an aggregate metric (F1, recall, precision, accuracy, latency) sits on a plateau and 'what to fix next?' feels open-ended. Six-step recipe finds the cell of the contingency table holding the failure mass and verifies it represents real failure before designing a fix."
+category: measurement
+
+requires_tools:
+  - "Read"
+  - "Grep"
+  - "Glob"
+  - "Write"
+  - "Edit"
+requires_topics: []  # See SKILL.md References for optional user-local context files (not required).
+requires_rules:
+  - verify-instrument-before-fix
+  - verify-effectiveness
+requires_skills:
+  - persona
+  - recall
+requires_auth: []
+
+input_contract:
+  parameters:
+    metric_name:
+      type: string
+      required: true
+      description: "The plateau-ed metric (F1, recall, precision, etc.)"
+    measurement_artifact:
+      type: path
+      required: true
+      description: "Path to the per-query/per-edge output that constructed the metric"
+  scope_from: argument
+output_contract:
+  produces:
+    - failure_cell_identification
+    - source_inspection_verdicts
+    - REAL_vs_INSTRUMENT_classification
+    - fix_recommendation_OR_harness_bug_report
+  format: markdown_report
+
+side_effects:
+  - writes_files  # diagnosis report
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "5-10"
+
+preconditions:
+  - "measurement harness output exists with per-cell data"
+  - "metric is genuinely plateaued (multiple fixes returning diminishing results)"
+  - "triage gate: conventional engineering attempted first"
+guardrails:
+  - context-monitor
+  - verify-before-assuming
+threat_model: read_only

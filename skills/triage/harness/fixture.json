@@ -1,0 +1,34 @@
+{
+  "_about": "Independent oracle for the triage live-arm efficacy measurement. See harness/PROBLEM.md. triage's value-prop is correct PRIORITIZATION + cross-tool CORRELATION of findings. So this fixture is a set of 12 abstracted operational/security findings with (a) a human-curated EXPERT priority ranking (the oracle for rank correlation) and (b) known correlation GROUPS (findings that share a root cause). Findings are ABSTRACTED from documented incidents (rules/incidents/) — no live MCP, no sensitive external data. The arms see only `finding` text (priority/group hidden). Anti-circularity: the expert ranking + groups are human-curated historical ground truth; the producer never sets them. Priorities follow uncontroversial severity logic (active credential exposure = top; cosmetic nudge = bottom).",
+  "scoring": {
+    "rank": "expert_rank is 1=highest priority .. 12=lowest. Metric = Spearman correlation between the arm's ranking and expert_rank (hand-rolled in grade.py, no scipy).",
+    "correlation": "true_groups = sets of finding ids that share ONE root cause. Metric = pair-level precision/recall/F1 of the arm's proposed correlation groups vs true_groups."
+  },
+  "true_groups": [["f1", "f2"], ["f4", "f5"], ["f7", "f11"]],
+  "findings": [
+    {"id": "f1", "expert_rank": 1, "root_cause": "process-env-leak",
+     "finding": "A cloud-provider API token was printed into the session transcript by a wide process-listing diagnostic that inlined environment variables; the value persists in saved logs."},
+    {"id": "f2", "expert_rank": 2, "root_cause": "process-env-leak",
+     "finding": "A second API token was exposed in a tool result by a different process-listing command that also dumped the inlined environment block."},
+    {"id": "f3", "expert_rank": 3, "root_cause": "curl-verbose-secret",
+     "finding": "A verbose curl invocation with an Authorization header echoed the full bearer token to stdout, which landed in the transcript."},
+    {"id": "f4", "expert_rank": 4, "root_cause": "ipv6-split-dns",
+     "finding": "boto3/AWS calls hang for ~48 seconds because IPv6 AAAA records are unreachable over the split-DNS VPN; a documented IPv4 workaround exists."},
+    {"id": "f5", "expert_rank": 5, "root_cause": "ipv6-split-dns",
+     "finding": "An MCP server hangs on startup because its isolated venv lacks the IPv4-forcing patch, so it stalls on an unreachable IPv6 address."},
+    {"id": "f6", "expert_rank": 6, "root_cause": "windows-read-encoding",
+     "finding": "A script crashes with a UnicodeDecodeError on an API response because Windows defaulted the read to cp1252 instead of utf-8."},
+    {"id": "f7", "expert_rank": 9, "root_cause": "windows-crlf-write",
+     "finding": "A committed YAML file fails the linter with a byte-0,0 error because a text write translated LF line endings to CRLF on Windows."},
+    {"id": "f8", "expert_rank": 12, "root_cause": "none",
+     "finding": "A skill's SKILL.md is 503 lines, slightly over the 500-line style guidance (a soft A-grade quality nudge); it still validates."},
+    {"id": "f9", "expert_rank": 7, "root_cause": "none",
+     "finding": "A test run hangs on Windows for one unrelated component (an environment-specific subprocess that blocks); it passes in Linux CI."},
+    {"id": "f10", "expert_rank": 11, "root_cause": "none",
+     "finding": "A documentation page still references a tool that was deprecated two releases ago (doc drift, no functional impact)."},
+    {"id": "f11", "expert_rank": 10, "root_cause": "windows-crlf-write",
+     "finding": "A build step shows spurious modified-file churn on Windows because it rewrites files with CRLF endings that git then normalizes to LF."},
+    {"id": "f12", "expert_rank": 8, "root_cause": "none",
+     "finding": "The merge queue is currently holding several green PRs unmerged (queue timing); no PR is failing, the merge is just delayed."}
+  ]
+}

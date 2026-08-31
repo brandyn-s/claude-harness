@@ -1,0 +1,59 @@
+name: "gather-claude deterministic contract"
+skill: gather-claude
+trigger: "/gather-claude (sync the architecture with what Anthropic shipped)"
+
+must_happen:
+  - Step 0 establishes preconditions and the time window
+  - Step 3 diffs the CHANGELOG with a GENERIC semver split
+  - Step 3b runs the installed-version regression sweep
+  - Step 11b adversarially verifies claims before reporting
+
+deterministic:
+  # === Both A1 HIGH audit findings are ALREADY FIXED — pin the CORRECTED state so
+  # === they cannot silently regress. (Verified 2026-07-25; do not assert the bugs.)
+
+  # FIX 1 (A1 HIGH): the three Tavily tools the body calls are now DECLARED in
+  # allowed-tools. Undeclared tools fail at call time mid-run, after the expensive
+  # search steps have already started.
+  - frontmatter_contains:
+      allowed-tools: "mcp__tavily__tavily_search"
+  - frontmatter_contains:
+      allowed-tools: "mcp__tavily__tavily_extract"
+  - frontmatter_contains:
+      allowed-tools: "mcp__tavily__tavily_map"
+
+  # FIX 2 (A1 medium): the CHANGELOG parser uses a GENERIC semver regex. The prior
+  # hardcoded `2\.1\.\d+` silently left the whole CHANGELOG as one unsplit blob the
+  # moment upstream moved to 2.2/3.0 — a silent-total-miss, the worst failure shape
+  # for a "what's new" skill. Pinning the generic split AND the recorded rationale.
+  - body_contains: "generic semver regex"
+  - body_contains: "the prior pattern was hardcoded to"
+
+  # --- Two MANDATORY sweeps. Both are labelled mandatory in the body because each
+  # was added after a miss; downgrading either to optional restores the blind spot.
+  - body_contains:
+      - "## Step 3b: Installed-Version Regression Sweep (MANDATORY)"
+      - "### Step 4b: Security Advisory Sweep (MANDATORY)"
+
+  # --- Adversarial verification gates the report. Without it the skill reports
+  # upstream claims it never checked against the installed version.
+  - body_contains: "## Step 11b: Adversarial Verification"
+
+  # --- The two-track structure (GitHub API track + Web/docs track) with explicit
+  # graceful degradation when one track is unavailable.
+  - body_contains:
+      - "## GitHub Track"
+      - "## Web Track"
+      - "### Graceful Degradation"
+
+  # --- Watching-table scripts: parse_watching.py reads the incremental baseline,
+  # reconcile_watching.py closes out items that upstream fixed.
+  - script_exists:
+      - scripts/parse_watching.py
+      - scripts/reconcile_watching.py
+
+  - script_runs: "python3 scripts/parse_watching.py --help"
+
+  # --- Every reference cited in the body must resolve. gather-claude cites 9
+  # references across its steps; a dangling one means a step loses its procedure.
+  - references_resolve: true

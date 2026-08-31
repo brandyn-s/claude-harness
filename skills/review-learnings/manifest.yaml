@@ -1,0 +1,38 @@
+id: review-learnings
+type: skill
+description: "Audit, prune, and correct agent persistent memory across all topic files and pattern stores."
+category: maintenance
+requires_tools:
+  - Bash
+  - Read
+  - Glob
+  - Grep
+  - mcp__memory-search__memory_search
+  - mcp__memory-search__memory_stale
+  - mcp__memory-search__memory_stats
+  - AskUserQuestion
+requires_topics:
+  - architecture
+requires_rules:
+  - check-before-change
+requires_skills: []
+requires_auth: []
+input_contract:
+  parameters:
+    focus:
+      type: string
+      required: false
+      description: "Optional focus area (e.g. security topics, stale entries, version cleanup, all topics)"
+  scope_from: argument
+output_contract:
+  produces: [audit_table, drift_report, cleanup_actions, promote_candidates]
+  format: markdown_report
+side_effects: [modifies_memory_files, creates_pr]
+execution_context: main_thread
+auth_constraint: main_thread_only
+estimated_turns: "15-40"
+preconditions:
+  - topic_files_exist
+guardrails:
+  - memory-write-guard
+threat_model: writes_local

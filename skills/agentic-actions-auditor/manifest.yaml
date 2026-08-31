@@ -1,0 +1,37 @@
+id: agentic-actions-auditor
+type: skill
+description: "Audits GitHub Actions workflows for AI agent security vulnerabilities including expression injection, env var intermediaries, and dangerous sandbox configs."
+category: security
+
+requires_tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - AskUserQuestion
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    target:
+      type: string
+      required: false
+      description: "Repo path, owner/repo identifier, or PR URL to audit"
+  scope_from: argument
+output_contract:
+  produces: [findings_report, severity_ratings, data_flow_traces]
+  format: markdown_report
+
+side_effects: [none]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "5-15"
+
+preconditions:
+  - gh CLI authenticated (for remote repos)
+  - .github/workflows/ directory exists (for local repos)
+guardrails: []
+threat_model: read_only

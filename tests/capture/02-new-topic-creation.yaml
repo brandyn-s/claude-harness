@@ -1,0 +1,25 @@
+name: Capture creates new topic page
+skill: capture
+trigger: "/capture (after a session exploring a topic with no existing knowledge base page)"
+
+must_happen:
+  - Scan topics and confirm no match (keyword + semantic search)
+  - Create new page with YAML frontmatter (title, stage=seedling, tags, aliases, cssclasses, created, updated)
+  - Generate 1-3 aliases (abbreviations, short forms, synonyms)
+  - First H2 entry with today's date and descriptive title
+  - Wiki-links to related existing topics on first mention
+  - HTML comment with session context
+  - Push via sync-knowledge.py --push
+
+must_not_happen:
+  - Create a page that duplicates an existing topic (semantic match > 0.7)
+  - Omit YAML frontmatter fields (title, stage, tags, aliases, cssclasses, created, updated)
+  - Set stage to anything other than seedling for a new page
+
+output_contains:
+  - '"New page created" or equivalent'
+  - Filename (kebab-case slug)
+  - Push status
+
+guards: []
+skip_ab: true

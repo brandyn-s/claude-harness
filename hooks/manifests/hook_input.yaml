@@ -1,0 +1,23 @@
+id: hook_input
+type: hook
+# NOT A REGISTERED HOOK. hook_input.py is a shared LIBRARY of canonical
+# accessors for hook input, imported by 3 hooks; it has no event of its own and
+# never fires. event/matcher are null so graph queries cannot report it as part
+# of any enforcement chain. (The manifest schema has no 'library' type; null
+# event is the honest encoding until one exists.)
+event: null
+matcher: null
+if_condition: null
+action_type: guard
+description: "Canonical accessors for Claude Code hook input."
+enforces: []  # TODO: which rules does this hook enforce?
+blocks_patterns: []  # TODO: what does it block?
+injects: null  # TODO: what context does it inject?
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "allow"
+  "2": "block"  # TODO: verify
+output_format: json
+incidents: []

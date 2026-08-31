@@ -1,0 +1,60 @@
+id: search-axis-rotate
+type: skill
+description: "Rotate the SEARCH AXIS to break a stuck search / red-team / optimization. Enumerates the six search axes (representation, diversity, measurement, orchestration, mechanism-class, method-blindspot), rotates to the cheapest untried one, and enforces tested-refuted vs untested-uncharted before any 'wall' claim."
+category: measurement
+
+requires_tools:
+  - "Read"
+  - "Grep"
+  - "Glob"
+  - "Bash"
+  - "AskUserQuestion"
+requires_topics: []
+requires_rules:
+  - uncharted-vs-refuted
+  - verify-effectiveness
+  - verify-instrument-before-fix
+  - reproduce-before-optimize
+  - diagnose-before-fix
+  - verify-before-assuming
+requires_skills:
+  - plateau-diagnose
+  - red-team-axes
+  - recall
+requires_auth: []
+
+input_contract:
+  parameters:
+    plateaued_thing:
+      type: string
+      required: true
+      description: "What plateaued — the metric, search, or optimization that stopped improving"
+    already_tried:
+      type: string
+      required: true
+      description: "What has already been attempted, so the rotation picks an UNTRIED axis"
+
+output_contract:
+  produces:
+    - "axis inventory: the six axes with tried / untried / tested-refuted status per axis"
+    - "selected rotation: the cheapest untried axis plus its concrete next experiment"
+    - "explicit tested-refuted vs untested-uncharted verdict per axis"
+  side_effects: []
+
+invocation:
+  user_invocable: true
+  model_invocable: true
+  effort: medium
+
+enforces:
+  - uncharted-vs-refuted
+  - reproduce-before-optimize
+
+incidents:
+  - date: "2026-07-24"
+    summary: "Manifest absent since authoring — surfaced by the session-start manifest-coverage check (195/203)"
+    turns_wasted: 0
+    category: drift
+
+created_date: "2026-07-24"
+last_validated: "2026-07-24"

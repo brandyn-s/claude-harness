@@ -1,0 +1,44 @@
+id: audit-architecture
+type: skill
+description: "Comprehensive meta-analysis of the Claude Code architecture with runtime probes, coverage analysis, consistency checks, routing health, and ranked findings with batch fixes."
+category: maintenance
+
+requires_tools:
+  - Agent
+  - AskUserQuestion
+  - Bash
+  - Edit
+  - Glob
+  - Grep
+  - Read
+  - Write
+requires_topics:
+  - architecture.md
+requires_rules:
+  - verify-effectiveness
+  - check-before-change
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    focus:
+      type: string
+      required: false
+      description: "Optional focus area: hooks, topics, routing, skills, MCP servers"
+  scope_from: argument
+output_contract:
+  produces: [coverage_matrix, ranked_findings, findings_yaml, oracle_verdicts, scaling_outlook, health_assessment]
+  format: markdown_report
+
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "15-30"
+
+preconditions:
+  - ~/.claude/settings.json exists
+  - ~/.claude.json exists (~/.mcp.json is optional — absent on macOS hosts, where MCP config lives in ~/.claude.json)
+  - ~/.claude/bin/audit-skill-oracle.py exists
+guardrails: []
+threat_model: writes_local

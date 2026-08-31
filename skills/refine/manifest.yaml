@@ -1,0 +1,33 @@
+id: refine
+type: skill
+description: "Lightweight context engineering before execution -- injects applicable project rules as constraints, decomposes multi-step tasks, specifies missing data sources, and identifies skill routing."
+category: planning
+
+requires_tools:
+  - "Read"
+  - "Glob"
+  - "Grep"
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    prompt:
+      type: string
+      required: false
+      description: "The prompt or task to refine before execution"
+  scope_from: user_prompt
+output_contract:
+  produces: [enriched_prompt, constraints, decomposed_steps]
+  format: markdown_report
+
+side_effects: [none]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "2-4"
+
+preconditions: []
+guardrails: []
+threat_model: read_only

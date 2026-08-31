@@ -1,0 +1,93 @@
+{
+  "_about": "MEASURED live A/B for evaluate-repos de-bias claim. Refresh: python3 skills/evaluate-repos/harness/run_live.py. CI asserts on this file.",
+  "model": "claude-opus-4-8",
+  "arms": "with_skill (advocate+skeptic+synthesis) vs baseline (single self-eval)",
+  "run_date": "2026-05-31",
+  "n_runs": 3,
+  "n_patterns": 14,
+  "fixture_sha": "579354cf00e7",
+  "cost_ratio": 3.0,
+  "metrics": {
+    "with_skill": {
+      "n_runs": 3,
+      "decision_accuracy": {
+        "mean": 0.3095,
+        "min": 0.2143,
+        "max": 0.4286,
+        "stdev": 0.0891,
+        "n": 3
+      },
+      "false_dismissal_rate": {
+        "mean": 0.5238,
+        "min": 0.4286,
+        "max": 0.5714,
+        "stdev": 0.0673,
+        "n": 3
+      },
+      "hard_reject_rate": {
+        "mean": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "dismissable_dismissal_rate": {
+        "mean": 0.5833,
+        "min": 0.5,
+        "max": 0.75,
+        "stdev": 0.1179,
+        "n": 3
+      },
+      "over_adoption_rate": {
+        "mean": 0.0476,
+        "min": 0.0,
+        "max": 0.1429,
+        "stdev": 0.0673,
+        "n": 3
+      }
+    },
+    "baseline": {
+      "n_runs": 3,
+      "decision_accuracy": {
+        "mean": 0.7857,
+        "min": 0.7857,
+        "max": 0.7857,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "false_dismissal_rate": {
+        "mean": 0.2857,
+        "min": 0.2857,
+        "max": 0.2857,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "hard_reject_rate": {
+        "mean": 0.2381,
+        "min": 0.1429,
+        "max": 0.2857,
+        "stdev": 0.0673,
+        "n": 3
+      },
+      "dismissable_dismissal_rate": {
+        "mean": 0.5,
+        "min": 0.5,
+        "max": 0.5,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "over_adoption_rate": {
+        "mean": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "stdev": 0.0,
+        "n": 3
+      }
+    }
+  },
+  "verdict": {
+    "verdict": "fix",
+    "reason": "de-bias BACKFIRES: harness false_dismissal 0.5238 is HIGHER than single-pass 0.2857 by 0.2381 (the advocate/skeptic step INCREASED dismissal rather than reducing it \u2014 over-hedging)",
+    "false_dismissal_delta": -0.2381
+  }
+}

@@ -1,0 +1,39 @@
+name: Discovery scans for both PR failures and commit CI failures
+skill: pr-fix
+trigger: "/pr-fix"
+
+must_happen:
+  - Search PRs org-wide by author/reviewer involvement plus the wholly owned org
+  - Deduplicate PRs by repository.nameWithOwner and number
+  - Hydrate statusCheckRollup and mergeQueueEntry before classification
+  - Scan the wholly owned organization plus mapped team repositories for non-PR commit-CI failures from the last 7 days
+  - Run independent PR, commit-CI, approval-gate, branch, dirty-tree, and worktree axes in parallel
+  - Present results with explicit PR and CI state labels
+  - Handle per-repository/API errors as unknown or skipped without failing the entire discovery
+
+must_not_happen:
+  - Only scan for PR failures and miss commit CI failures
+  - Use the repo map as the PR discovery allowlist
+  - Collapse repositories with the same basename across organizations
+  - Treat a failed merge-queue lookup as an explicitly unqueued PR
+  - Fail the entire discovery because one repo errors
+
+output_contains:
+  - Type labels such as [PR-FAIL], [PR-QUEUED], [PR-READY], and [CI]
+  - '"No failures" for clean repos or "All clear" if nothing found'
+
+guards: []
+skip_ab: true
+
+
+# Deterministic assertions runnable by scripts/run-skill-evals.py
+deterministic:
+- frontmatter_equals:
+    name: pr-fix
+- body_contains:
+  - CI
+  - discovery
+  - repository.nameWithOwner
+  - mergeQueueEntry
+- references_resolve: true
+- examples_count: '>=3'

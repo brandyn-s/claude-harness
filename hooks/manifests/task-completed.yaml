@@ -1,0 +1,22 @@
+id: task-completed
+type: hook
+event: TaskCompleted
+matcher: ""
+if_condition: null
+action_type: guard
+description: "Blocks explicit failures and verifies non-empty paths declared by a Completion-Contract in task_description."
+enforces:
+  - subagent-verification
+blocks_patterns:
+  - "explicit structured failure statuses or booleans"
+  - "contracted partial, truncated, prompt-too-long, or completed-with-errors outcomes"
+  - "missing, empty, absolute, or cwd-escaping contracted paths"
+injects: null
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "allow uncontracted research or verified completion"
+  "2": "block explicit failure or unmet completion contract"
+output_format: json
+incidents: []

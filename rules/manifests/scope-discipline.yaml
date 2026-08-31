@@ -1,0 +1,40 @@
+id: scope-discipline
+type: rule
+description: "Ship the primary deliverable with existing tooling first; stop and simplify after 45 minutes without an outcome; keep proof machinery smaller than the production change; require repeated friction before infrastructure investment."
+applies_to:
+  - "every task where 'build infrastructure X to solve problem Y' is tempting"
+  - "multi-day projects with imagined future tooling"
+  - "any time tooling is proposed alongside a user deliverable"
+trigger_conditions:
+  - "user gives a concrete deliverable request"
+  - "first-turn impulse to build a tool/skill/MCP/script"
+  - "halfway-built infrastructure has uncertain delivery path"
+  - "45 minutes pass without an observable outcome"
+  - "proof work or an uncontrolled harness grows beyond the production change"
+required_actions:
+  - "identify user's actual ask (concrete deliverable)"
+  - "ask: can existing tooling deliver in <2 hours?"
+  - "if friction hits 3+ times across tasks, propose tooling as SEPARATE work item"
+  - "after shipping deliverable, propose tooling explicitly as follow-up"
+  - "stop and simplify after 45 minutes without an observable outcome"
+  - "keep proof machinery smaller than the production change and prune any uncontrolled harness"
+prohibited_actions:
+  - "build an MCP/skill/tool as first-turn response to a task"
+  - "claim 'this unlocks a class of work' without 3+ documented friction events"
+  - "expand scope mid-implementation"
+  - "use sunk cost to justify continuing infrastructure that wasn't asked for"
+  - "reset the outcome clock by adding verification"
+  - "let a temporary or one-off harness grow uncontrolled"
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - date: "2026-04-24"
+    summary: "Azure Automation NetSuite sync: user asked to schedule sync; built 17-tool MCP over ~3 hours before the sync was deployed. az CLI scripts could have shipped in ~1 hour"
+    turns_wasted: 8
+    category: scope
+  - date: "2026-04-24"
+    summary: "Coupled with api-doc-lookup: ingesting docs FIRST instead of reverse-engineering from error messages eliminates 5-10x friction multiplier"
+    turns_wasted: 0
+    category: scope
+created_date: "2026-04-24"
+last_validated: "2026-08-21"

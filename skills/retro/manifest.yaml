@@ -1,0 +1,44 @@
+id: retro
+type: skill
+description: "Session review that runs /distill then /capture sequentially with shared context so capture skips incidents already distilled, then ships the session's own uncommitted artifacts via /ship (general repo sweeps stay in /pr-fix). Optionally generates a quick postmortem when distill produced 3+ lessons or one issue consumed 10+ turns. On large/compacted sessions, Step 0 routes to /mega-distill for complete-transcript recovery and Step 3 routes to /mega-capture so both phases see the whole session without duplicating distillation; --full requires verified complete coverage but does not bypass the recovery suitability gate."
+category: maintenance
+
+requires_tools:
+  - AskUserQuestion
+  - "Bash"
+  - "Read"
+  - "Edit"
+  - "Glob"
+  - "Grep"
+  - "Skill"
+  - "mcp__memory-search__memory_search"
+requires_topics: []
+requires_rules: []
+requires_skills:
+  - distill
+  - capture
+  - ship
+  - mega-distill
+  - mega-capture
+requires_auth: []
+
+input_contract:
+  parameters:
+    full:
+      type: boolean
+      required: false
+      description: "Require authoritative transcript resolution and verified complete coverage; does not bypass the large or compacted session suitability gate."
+  scope_from: argument
+output_contract:
+  produces: [distill_lessons, capture_entries, shipped_prs, optional_postmortem]
+  format: markdown_report
+
+side_effects: [writes_files, modifies_memory, creates_pr, pushes_to_remote]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "20-40"
+
+preconditions:
+  - "Session has conversation context to review"
+guardrails: []
+threat_model: writes_local

@@ -1,0 +1,17 @@
+id: query-routing-log
+type: hook
+event: PostToolUse
+matcher: ""
+if_condition: null
+action_type: logger
+description: "Logs tool routing decisions for debugging and optimization."
+enforces: []
+blocks_patterns: []
+injects: null
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "Routing logged"
+output_format: none
+incidents: []

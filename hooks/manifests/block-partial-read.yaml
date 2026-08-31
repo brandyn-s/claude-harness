@@ -1,0 +1,23 @@
+id: block-partial-read
+type: hook
+event: PreToolUse
+matcher: "Read"
+if_condition: null
+action_type: guard
+description: "Blocks partial reads of critical config files to prevent edit failures from incomplete context."
+enforces: []
+blocks_patterns:
+  - "partial read (offset/limit set) on settings.json"
+  - "partial read on rules/*.md"
+  - "partial read on skills/*/SKILL.md"
+  - "partial read on agents/*.md"
+  - "partial read on CLAUDE.md"
+injects: null
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "allow (non-protected files)"
+  "2": "block (partial read on protected file)"
+output_format: json
+incidents: []

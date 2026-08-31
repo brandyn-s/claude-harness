@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Statusline dispatcher: claude-hud (Node) when built, else the portable
+# Python statusline. The fallback is resolved from this launcher's own absolute
+# location, so hook processes that omit HOME still work.
+#
+# Override the hud location with CLAUDE_HUD when claude-hud lives outside
+# ~/Documents/GitHub (e.g. relocated out of TCC-protected dirs on macOS).
+# stdin (the statusline JSON payload) passes through to the child via exec.
+LAUNCHER_DIR="$(cd "$(dirname "$0")" && pwd)"
+CONFIG_DIR="$(cd "$LAUNCHER_DIR/.." && pwd)"
+PROFILE="${HOME:-${USERPROFILE:-}}"
+if [ -n "${CLAUDE_HUD:-}" ]; then
+  HUD="$CLAUDE_HUD"
+elif [ -n "$PROFILE" ]; then
+  HUD="$PROFILE/Documents/GitHub/claude-hud/dist/index.js"
+else
+  HUD=""
+fi
+# Probe node by RUNNING it, not by `command -v`: a present-but-broken node
+# (e.g. Homebrew upgraded llhttp without node -> dyld abort, 2026-06-11)
+# passes an existence check and then renders a BLANK statusline. The probe
+# exercises the dyld load path so breakage degrades to the Python fallback.
+# </dev/null keeps the probe from touching the stdin JSON payload.
+if [ -n "$HUD" ] && [ -f "$HUD" ] && node -e '' </dev/null >/dev/null 2>&1; then
+  exec node "$HUD"
+fi
+exec python3 "$CONFIG_DIR/statusline.py"

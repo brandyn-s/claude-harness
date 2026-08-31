@@ -1,0 +1,27 @@
+{
+  "_comment": "CUSTOMIZE: Update local_paths to match your repo locations. Use absolute paths.",
+  "repos": [
+    "mcp-servers",
+    "mcp-infra",
+    "example-compliance-repo",
+    "example-sbom-tool",
+    "claude-config",
+    ".claude",
+    "claude-knowledge-base",
+    "knowledge-base",
+    "code-search",
+    "code-graph"
+  ],
+  "local_paths": {
+    "mcp-servers": "~/Documents/GitHub/mcp-servers",
+    "mcp-infra": "~/Documents/GitHub/mcp-infra",
+    "claude-config": "~/.claude",
+    "obsidian-infra": "~/Documents/obsidian-infra",
+    "knowledge-base": "~/Documents/knowledge-base",
+    "code-search": "~/Documents/GitHub/code-search",
+    "code-graph": "~/Documents/GitHub/code-graph"
+  },
+  "fork_repos": {
+    "code-search": "example-apps-org/code-search"
+  }
+}

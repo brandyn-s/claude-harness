@@ -1,0 +1,10 @@
+suppressions:
+  - code: H2
+    path: skills/gather-vendor/references/gemini.md
+    reason: Cited dynamically as `references/<vendor>.md` throughout SKILL.md (8 occurrences) — the skill resolves the vendor argument to the per-vendor profile at runtime. H2's citation scan matches literal paths only and cannot resolve the template placeholder.
+  - code: H2
+    path: skills/gather-vendor/references/grok.md
+    reason: Same dynamic `references/<vendor>.md` citation pattern as gemini.md.
+  - code: H2
+    path: skills/gather-vendor/references/openai.md
+    reason: Same dynamic `references/<vendor>.md` citation pattern as gemini.md.

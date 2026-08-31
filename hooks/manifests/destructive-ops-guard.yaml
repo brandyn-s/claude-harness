@@ -1,0 +1,19 @@
+id: destructive-ops-guard
+type: hook
+# event/matcher read from live settings.json 2026-07-26 (registered hook)
+event: PreToolUse
+matcher: "Bash|PowerShell"
+if_condition: null
+action_type: guard
+description: "PreToolUse:Bash|PowerShell destructive-ops guard."
+enforces: []  # TODO: which rules does this hook enforce?
+blocks_patterns: []  # TODO: what does it block?
+injects: null  # TODO: what context does it inject?
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "allow"
+  "2": "block"  # TODO: verify
+output_format: json
+incidents: []

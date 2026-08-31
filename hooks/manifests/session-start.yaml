@@ -1,0 +1,18 @@
+id: session-start
+type: hook
+event: SessionStart
+matcher: ""
+if_condition: null
+action_type: injector
+description: "Initializes session state, loads context, and runs startup modules."
+enforces: []
+blocks_patterns: []
+injects: session_context
+modifies: null
+depends_on_files:
+  - hooks/session_start_modules/*.py
+depends_on_env: []
+exit_codes:
+  "0": "Session initialized"
+output_format: json
+incidents: []

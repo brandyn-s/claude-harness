@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+# Cross-platform Python hook launcher + fire-rate telemetry.
+# Usage: run-hook <script.py> [args...]
+# On Windows (Git Bash): uses pythonw.exe with cygpath to avoid MSYS path corruption
+# On macOS/Linux: uses python3
+#
+# Telemetry: appends one JSONL line per invocation to
+#   ~/.claude/audit/hook-fires-YYYYMMDD.jsonl   {"ts","hook","exit","ms"}
+# so hook fire-rates / block-rates / latency can be audited for obsolescence
+# (see bin/hook-fire-report.py). It is best-effort and NEVER alters the hook's
+# stdout/stderr or exit code — stdout/stderr pass straight through; a logging
+# failure is swallowed. Note: "exit" captures blocking hooks (exit 2) and
+# crashes; warn-only hooks (exit 0 + systemMessage) self-log via manifest_metrics.
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+HOOK_NAME="$1"
+SCRIPT="$SCRIPT_DIR/$1"
+shift
+
+_start="${EPOCHREALTIME:-}"
+
+_log_fire() {
+  local code="$1" ts day ms="null"
+  # Prefer printf's built-in time format (no subprocess; bash >= 4.2); fall back to date.
+  { printf -v ts '%(%s)T' -1; } 2>/dev/null || ts="$(date +%s 2>/dev/null || echo 0)"
+  { printf -v day '%(%Y%m%d)T' -1; } 2>/dev/null || day="$(date +%Y%m%d 2>/dev/null || echo unknown)"
+  if [ -n "$_start" ] && [ -n "${EPOCHREALTIME:-}" ]; then
+    # EPOCHREALTIME is seconds.microseconds; strip the dot for integer microseconds.
+    local s="${_start/./}" e="${EPOCHREALTIME/./}"
+    ms=$(( (10#$e - 10#$s) / 1000 )) 2>/dev/null || ms="null"
+  fi
+  # Claude Code may launch hooks without HOME (#79509). Prefer the explicit
+  # config root, then platform homes, then derive the root from this launcher's
+  # own absolute location. Hook telemetry must not disappear merely because the
+  # parent process omitted a home variable.
+  local config_dir="${CLAUDE_CONFIG_DIR:-}"
+  if [ -z "$config_dir" ]; then
+    local profile="${HOME:-${USERPROFILE:-}}"
+    if [ -n "$profile" ]; then
+      config_dir="$profile/.claude"
+    else
+      config_dir="$(cd "$SCRIPT_DIR/.." && pwd)"
+    fi
+  fi
+  local dir="$config_dir/audit"
+  { mkdir -p "$dir" 2>/dev/null && \
+    printf '{"ts":%s,"hook":"%s","exit":%s,"ms":%s}\n' \
+      "$ts" "$HOOK_NAME" "$code" "$ms" >> "$dir/hook-fires-$day.jsonl"; } 2>/dev/null || true
+}
+
+# Log a timed-out fire as exit=-1 so timeouts stop being invisible.
+#
+# Claude Code enforces each hook's `timeout` by signalling this wrapper, so the
+# `_log_fire` call in run() is never reached for a timed-out hook — the telemetry
+# that exists to audit hook latency was structurally blind to exactly the fires
+# that matter most. Verified 2026-07-26: a hook killed at a 3s limit produced 0
+# telemetry entries, while hook-fire-report showed a reassuring 0.07s p50.
+#
+# This matters beyond tidiness: a killed PreToolUse guard never emits its exit-2
+# block, so the guarded operation proceeds unguarded (also verified). Timeouts
+# have to be observable.
+#
+# The hook MUST run in the background with `wait`. Bash defers a trap until the
+# current foreground child returns, so trapping around a foreground hook makes
+# the wrapper hang for the hook's full duration and log nothing — measured at
+# >8s vs 0.14s for this shape. `wait` is interruptible, so the trap fires
+# promptly, kills the child, and records the fire.
+#
+# Backgrounding costs us stdin: bash points a background job's stdin at
+# /dev/null when the wrapper's own stdin is a PIPE (which is how the hook payload
+# always arrives). The hook then reads nothing and fails to parse its JSON.
+# Duplicating stdin onto fd 3 and redirecting the child from it restores
+# delivery. Verified against a pipe, not a heredoc — a heredoc is a seekable file
+# and passes even in the broken shape, which makes it a false green.
+#
+# SIGKILL cannot be trapped (by design), so a SIGKILL-ed fire is still lost.
+# Raising the timeouts is the primary fix; this is the observability net.
+exec 3<&0
+_child=""
+_log_killed() {
+  [ -n "$_child" ] && kill -TERM "$_child" 2>/dev/null
+  _log_fire -1
+  exit 143
+}
+trap _log_killed TERM INT HUP
+
+# Run the hook with stdout/stderr inherited (passthrough) and stdin delivered
+# from fd 3, capture its exit code, log it, and forward that exact code.
+run() {
+  local code
+  "$@" <&3 &
+  _child=$!
+  wait "$_child" && code=0 || code=$?
+  _log_fire "$code"
+  exit "$code"
+}
+
+case "$(uname -s)" in
+  MINGW*|MSYS*|CYGWIN*)
+    # Convert POSIX path to Windows path (avoids /c/ -> C:\c\ MSYS corruption)
+    SCRIPT="$(cygpath -w "$SCRIPT")"
+    # Windows: prefer pythonw.exe (no console window)
+    for PY in \
+      "$LOCALAPPDATA/Programs/Python/Python314/pythonw.exe" \
+      "$LOCALAPPDATA/Programs/Python/Python313/pythonw.exe" \
+      "$LOCALAPPDATA/Programs/Python/Python312/pythonw.exe"; do
+      if [ -x "$PY" ]; then
+        run "$PY" "$SCRIPT" "$@"
+      fi
+    done
+    run python "$SCRIPT" "$@"
+    ;;
+  *)
+    # macOS / Linux
+    run python3 "$SCRIPT" "$@"
+    ;;
+esac

@@ -1,0 +1,168 @@
+# Curated registry of MCP tool names used by `bin/audit-skill.py` T1 check.
+#
+# Two lists:
+#   - known_phantom: tool names that look plausible but DON'T exist. T1
+#     flags any body or reference text that cites these.
+#   - known_real: tool names (or glob patterns) confirmed to exist on
+#     the canonical the maintainers MCP config. Used by --strict-tools
+#     mode to flag any mcp__* reference NOT in this list as "unknown
+#     tool — verify or add to registry."
+#
+# The phantom list is the immediate value-add (catches the
+# `mcp__code-graph__index_status` typo class). The real list is the
+# growable registry; expand it as new servers come online. The audit
+# defaults to only flagging known_phantom; opt into known_real with
+# `audit-skill --all --strict-tools` (CI does not run --strict-tools
+# yet — too many false positives until the registry is comprehensive).
+#
+# Maintenance: when a new MCP server is added, append its tools or a
+# glob pattern here. When a tool is renamed/removed, add the old name
+# to known_phantom with a `replaced_by:` note so existing references
+# get flagged.
+
+known_phantom:
+  # Each entry: name + replaced_by + note (for context). Add a new
+  # entry every time a phantom is identified — leaving it out lets
+  # the same typo class slip past future audits.
+  #
+  # Growth policy: this list should only contain tools we have
+  # *confirmed* don't exist (by attempting to call them, or by
+  # checking the server's source). Adding speculative entries
+  # produces false positives. The two entries below were both
+  # confirmed via tool-call attempts during the 2026-05 audit.
+  - name: mcp__code-graph__index_status
+    replaced_by: mcp__codebase-memory-mcp__get_architecture (returns nothing if not indexed) or mcp__codebase-memory-mcp__index_status
+    note: was cited in 8 skills before the 2026-05 audit (resolved in PR #970+). code-graph itself retired 2026-06 (consolidated into codebase-memory-mcp) — the replacement is now index_status, a real tool on the unified server.
+  - name: mcp__code-search__index_status
+    replaced_by: mcp__codebase-memory-mcp__index_status
+    note: same typo class as code-graph__index_status; missing the get_ prefix. code-search itself retired 2026-06 (consolidated into codebase-memory-mcp).
+
+  # Class B instances (server-rename casualties), all confirmed absent by
+  # empty ToolSearch `select:` on 2026-07-29. The gateway servers dropped the
+  # `remote-` prefix during the macOS migration; every consumer was wired by
+  # STRING MATCH and so failed SILENTLY.
+  - name: mcp__remote-airlock__
+    replaced_by: mcp__airlock__
+    note: gateway prefix dropped in the macOS migration. Was in triage + investigate allowed-tools (fixed 2026-07-29) and in 3 settings.json hook matchers, which had therefore been inert.
+  - name: mcp__remote-crowdstrike__
+    replaced_by: mcp__crowdstrike__
+    note: same rename class as remote-airlock.
+  - name: mcp__remote-msgraph__
+    replaced_by: mcp__msgraph__
+    note: same rename class. Also appeared in the kql-schema-hint and graph_request hook matchers.
+  - name: mcp__remote-tenable__
+    replaced_by: mcp__tenable__
+    note: same rename class as remote-airlock.
+  - name: mcp__slack__
+    replaced_by: mcp__slack-user__
+    note: the per-user OAuth Slack server is registered as slack-user. Bare mcp__slack__ has never existed on this host.
+
+  # ---- DEFERRED entries: confirmed phantom, NOT yet listed ----------------
+  # These three are verified absent (empty ToolSearch, 2026-07-29) but their
+  # CONSUMERS are not fixed yet, and a phantom entry is severity `drift` — so
+  # listing them here without the consumer fix reds CI on main.
+  #
+  # A guard entry and its fix must ship TOGETHER. Uncomment each line below in
+  # the same PR that repairs its consumers:
+  #
+  # - name: mcp__confluence-fedramp__          # replaced_by: mcp__confluence__
+  #     consumers: skills/gather-internal-intel/{SKILL.md:17,203, manifest.yaml:29}
+  # - name: mcp__036e0c74-1e0e-4bce-ad71-2a678d79b204__   # replaced_by: mcp__slack-user__
+  #     Windows-era claude.ai Slack connector GUID; retired, absent on macOS.
+  #     consumers: skills/gather-internal-intel/SKILL.md (frontmatter + body)
+  # - name: mcp__exa__web_search_advanced_exa
+  #     replaced_by: mcp__exa__web_search_exa (in-query `category:`) OR
+  #     mcp__firecrawl__firecrawl_search (domain filters / operators). NOT a
+  #     pure rename: the retired tool had domain filtering that web_search_exa
+  #     lacks, so each consumer needs a per-site judgement call.
+  #     consumers: api-ingest, capture, gather-claude-endpoints, gather-research,
+  #                mega-distill, pr-fix, retro, vendor-breach
+  #
+  # NOTE: the Linear GUID (mcp__93acadff-...) is NOT a phantom — it is
+  # deliberately dual-listed alongside mcp__linear-server__* for cross-install
+  # compat (mcp-tool-names.md, PR #1185). Do not add it here.
+  # ------------------------------------------------------------------------
+
+  # Class A: missing-`get_`-prefix typos. When a server exposes a
+  # status/health/info query as `get_<thing>`, callers sometimes
+  # drop the prefix. We've only confirmed the two above, but the
+  # class is documented here so a maintainer noticing a third
+  # instance knows to add it.
+  #
+  # Class B: server-rename casualties. When a server is renamed
+  # (e.g., code-graph from a previous incarnation), references to
+  # the old name persist. Track here if/when discovered.
+
+known_real:
+  # Codebase memory (search + graph, consolidated 2026-06 from the retired
+  # code-search + code-graph servers into one unified server). Glob rather
+  # than enumerated — same pattern as the github/slack sections below —
+  # so the registry doesn't go stale again as the server's tool surface grows.
+  - mcp__codebase-memory-mcp__*
+
+  # Memory + research
+  - mcp__memory-search__memory_search
+  - mcp__memory-search__memory_search_batch
+  - mcp__memory-search__memory_check_duplicate
+  - mcp__memory-search__memory_stale
+  - mcp__memory-search__memory_stats
+  - mcp__arxiv-mcp-server__search_papers
+  - mcp__arxiv-mcp-server__read_paper
+
+  # Web search (named variants)
+  - mcp__exa__web_search_exa
+  - mcp__exa__web_search_advanced_exa
+  - mcp__exa__get_code_context_exa
+  - mcp__exa__web_fetch_exa
+  - mcp__exa__crawling_exa
+  - mcp__tavily__tavily_search
+  - mcp__tavily__tavily_extract
+  - mcp__tavily__tavily_research
+  - mcp__tavily__tavily_map
+  - mcp__tavily__tavily_crawl
+  - mcp__firecrawl__firecrawl_search
+  - mcp__firecrawl__firecrawl_extract
+  - mcp__firecrawl__firecrawl_agent
+  - mcp__firecrawl__firecrawl_agent_status
+  - mcp__firecrawl__firecrawl_scrape
+  - mcp__firecrawl__firecrawl_map
+  - mcp__firecrawl__firecrawl_crawl
+  - mcp__firecrawl__firecrawl_check_crawl_status
+  - mcp__x-search__x_search
+  - mcp__x-search__x_search_user
+  - mcp__xai__x_search
+  - mcp__xai__x_search_user
+
+  # Linear (named-variant)
+  - mcp__linear-server__get_status_updates
+  - mcp__linear-server__save_status_update
+
+  # Compliance access framework
+  - mcp__compliance-access-framework__add_confluence_space_group
+  - mcp__compliance-access-framework__assign_group_to_enterprise_app
+  - mcp__compliance-access-framework__create_confluence_space
+  - mcp__compliance-access-framework__create_m365_group
+  - mcp__compliance-access-framework__create_scim_group
+  - mcp__compliance-access-framework__create_slack_channel
+  - mcp__compliance-access-framework__invite_to_workspace
+  - mcp__compliance-access-framework__link_channel_to_idp_group
+  - mcp__compliance-access-framework__preflight_check
+  - mcp__compliance-access-framework__verify_workspace
+
+  # Context7 docs
+  - mcp__context7-docs__query-docs
+  - mcp__context7-docs__resolve-library-id
+
+  # GitHub MCP — large surface, glob pattern
+  - mcp__github__*
+
+  # UUID-namespaced variants (per-environment; treat as wildcard).
+  # We accept ANY mcp__<uuid>__<tool> form as valid because the UUID
+  # corresponds to a real server registration; the per-tool validation
+  # would require server introspection. Pattern is a regex (curly braces
+  # make _load_known_tools classify it as such); `.*` matches any tool
+  # name suffix.
+  - "mcp__[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}__.*"
+
+  # Slack (named variant — same patterns as UUID-namespaced)
+  - mcp__slack__*

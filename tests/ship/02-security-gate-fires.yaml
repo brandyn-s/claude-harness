@@ -1,0 +1,32 @@
+name: Ship triggers Security Gate for deployed-code repositories
+skill: ship
+trigger: "/ship (in mcp-servers, mcp-infra, or compliance-access-framework with sensitive service or policy changes)"
+
+must_happen:
+  - Detect repo is mcp-servers, mcp-infra, or compliance-access-framework
+  - Detect security-sensitive files in the staged diff (Python service code, .yml/.yaml workflows, Dockerfiles, Rego policies, or Terraform IAM/policy/KMS/bucket-policy changes)
+  - Ask user whether to run differential review (yes/skip)
+  - If yes, invoke /differential-review:diff-review on the staged changes
+  - If critical or high findings, fix before proceeding to push
+  - Only proceed to push/PR if user skipped OR no critical/high findings
+
+must_not_happen:
+  - Skip the Security Gate when sensitive files are in diff in any of the three in-scope repositories
+  - Push or create PR while critical/high differential-review findings remain unresolved
+  - Run the Security Gate for repos outside mcp-servers, mcp-infra, and compliance-access-framework
+
+output_contains:
+  - Security-sensitive files detected prompt OR differential review verdict
+
+guards:
+  - Repo is mcp-servers, mcp-infra, or compliance-access-framework
+  - "Diff contains service *.py, .github/workflows/*.yml or *.yaml, Dockerfile*, *.rego, or sensitive Terraform"
+skip_ab: false
+
+deterministic:
+- body_contains:
+  - "**Applies to `mcp-servers`, `mcp-infra`, AND `compliance-access-framework`**"
+  - .github/workflows/*.yaml
+  - Terraform `*.tf`
+  - AskUserQuestion
+  - /differential-review

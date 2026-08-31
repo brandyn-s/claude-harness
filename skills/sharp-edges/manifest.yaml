@@ -1,0 +1,30 @@
+id: sharp-edges
+type: skill
+description: "Identify error-prone APIs, dangerous configurations, and footgun designs that enable security mistakes via pit-of-success analysis."
+category: security
+requires_tools:
+  - Read
+  - Grep
+  - Glob
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+input_contract:
+  parameters:
+    scope:
+      type: string
+      required: false
+      description: "Codebase path or feature area to analyze"
+  scope_from: argument
+output_contract:
+  produces: [sharp_edges_report, severity_classification]
+  format: markdown_report
+side_effects: []
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "10-25"
+preconditions:
+  - codebase_accessible
+guardrails: []
+threat_model: read_only

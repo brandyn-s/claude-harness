@@ -1,0 +1,63 @@
+name: "deep-dive deterministic contract"
+skill: deep-dive
+trigger: "/deep-dive <topic> (multi-provider research with evidence grading)"
+
+# SCOPE NOTE: deep-dive's two A1 HIGH findings live in references/report-template.md
+# (per-provider credit line; Sources-table Provider column). The harness reads only
+# SKILL.md, so it CANNOT assert reference-file CONTENT — `ref_resolves` proves the file
+# exists, not what is in it. Both HIGHs were verified FIXED by hand on 2026-07-25
+# (report-template.md:23 per-provider status, :79 Provider column). What this fixture
+# CAN pin is the SKILL.md-side contract that MANDATES them.
+
+must_happen:
+  - Multiple providers queried, not one
+  - Step 11b runs the cross-model jury before confidence is assigned
+  - Every claim carries an evidence grade and provider attribution
+
+deterministic:
+  # --- MULTI-PROVIDER is a standing user directive (feedback_deep-dive-multi-provider):
+  # follow-up URLs go through Firecrawl + Exa cross-corroboration, never WebFetch direct.
+  # A drift to single-provider silently loses ~30% of signal (2026-03-28 dual-tool test).
+  # All three providers must remain DECLARED, or the call fails mid-research.
+  - frontmatter_contains:
+      allowed-tools: "mcp__exa__web_search_exa"
+  - frontmatter_contains:
+      allowed-tools: "mcp__firecrawl__firecrawl_search"
+  - frontmatter_contains:
+      allowed-tools: "mcp__tavily__tavily_search"
+
+  # --- ...and must remain USED in the procedure, not just declared. Declared-but-unused
+  # is exactly how a multi-provider skill quietly becomes single-provider.
+  - body_contains:
+      - "Firecrawl"
+      - "Exa"
+
+  # --- Step 11b cross-model jury (shipped PR #1141): disjoint jurors, pointwise,
+  # order-swap to control position bias, PoLL majority. This is what makes deep-dive's
+  # confidence labels mean something rather than being one model's assertion.
+  - body_contains:
+      - "Step 11b"
+      - "PoLL"
+      - "order-swap"
+
+  # --- Per-provider accounting drives the report's credit line + Sources Provider
+  # column (the two FIXED HIGHs). Losing this mandate is how the reference regresses.
+  - body_contains: "per-provider"
+
+  # --- Discrepancy flagging: when providers disagree, that disagreement is reported
+  # rather than silently resolved to whichever source was read last.
+  - body_contains: "discrepanc"
+
+  # --- effort: max — deep-dive is deliberately the most expensive research path.
+  - frontmatter_equals:
+      effort: max
+
+  # --- All six references must resolve. evidence-framework.md carries the grading
+  # ladder and report-template.md the (now-corrected) Provider column; a dangling
+  # ref means a step loses the procedure it delegates to.
+  - ref_resolves:
+      - evidence-framework.md
+      - report-template.md
+      - research-methodology.md
+      - transfer-framework.md
+      - measured-efficacy.md

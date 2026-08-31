@@ -1,0 +1,22 @@
+# Corpus entry for true_fixture — known-bad architecture.
+# Phase 2 MUST surface these codes when auditing true_fixture.
+# Corresponds to the six deliberate bugs in
+# tests/golden-findings/calibration/true_fixture/.
+#
+# Live check: run audit-architecture against the fixture and verify
+# every required_code appears in the output. Too expensive for CI;
+# see test_audit_architecture_corpus.py for the static check.
+fixture: true_fixture
+notes: >
+  true_fixture has six deliberate architecture bugs: invalid JSON config (R3),
+  missing script reference (R2), phantom docs entry (D4), undocumented mcp.json
+  server (D5), missing routing rule (C2), and inflated server count in
+  ARCHITECTURE.md (D3).
+required_codes:
+  - R3  # bad-settings.json is not valid JSON
+  - R2  # phantom-server references /nonexistent/path/to/server.py
+  - D4  # documented-phantom in ARCHITECTURE.md but absent from mcp.json
+  - D5  # phantom-server in mcp.json but absent from ARCHITECTURE.md
+  - C2  # phantom-server has no routing rule in routing-rules.json
+  - D3  # ARCHITECTURE.md claims 99 MCP servers (inflated count)
+forbidden_codes: []

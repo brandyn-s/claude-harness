@@ -1,0 +1,59 @@
+name: Capture appends to existing topic page
+skill: capture
+trigger: "/capture (after a session that produced insights about an existing knowledge base topic)"
+
+must_happen:
+  - Extract knowledge from conversation (decisions, breakthroughs, failed approaches, patterns)
+  - Scan existing topic pages (sync-knowledge.py --list + glob)
+  - Build link index (slug -> title mapping)
+  - Match knowledge to existing topics (keyword + memory_search with cosine > 0.7)
+  - Run memory_check_duplicate before writing (skip if similarity >= 0.85)
+  - Read last 2-3 entries of matched page to avoid repetition
+  - Draft entry with wiki-links on first mention of related topics
+  - Append with today's date, update frontmatter (updated field, stage if threshold crossed)
+  - Push via sync-knowledge.py --push
+
+must_not_happen:
+  - Create a new page when an existing page matches
+  - Duplicate an existing entry (memory_check_duplicate should catch)
+  - Write wiki-links to non-existent pages
+  - Repeat-link the same topic within one entry
+  - Skip the push step
+
+output_contains:
+  - Topic page name and entry title
+  - Wiki-links inserted count
+  - Growth stage
+  - Push success/failure status
+
+guards:
+  - memory_check_duplicate called before every write
+skip_ab: true
+
+
+# Deterministic assertions runnable by scripts/run-skill-evals.py
+deterministic:
+- frontmatter_equals:
+    name: capture
+- body_contains:
+  - knowledge-base/topics
+  - Step 0
+- references_resolve: true
+- examples_count: '>=2'
+
+# LLM-driven assertions runnable by scripts/run-skill-llm-evals.py.
+# Activation should be near-deterministic with the directive description style;
+# the response is expected to mention extracted entries and a knowledge-base
+# write. Forbidden: refusal language or generic-LLM fallback.
+llm_eval:
+  invocation:
+    prompt: "capture today's lessons learned about retry logic into the knowledge base"
+    expected_skill_fires: true
+    system_prompt: ""
+    timeout_s: 120
+  expected_output_contains:
+    - knowledge
+  forbidden_output:
+    - "I cannot help"
+    - "as an AI language model"
+    - "I don't have access"

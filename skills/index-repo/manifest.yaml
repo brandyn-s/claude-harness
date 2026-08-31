@@ -1,0 +1,73 @@
+id: index-repo
+type: skill
+description: "Index a repository for code search - host-adaptive between the unified codebase-memory-mcp server and the release-bound split code-search + code-graph plugin. Makes the repo searchable via natural language queries."
+category: code-intel
+
+requires_tools:
+  - Bash
+  - Read
+  - mcp__codebase-memory-mcp__delete_project
+  - mcp__codebase-memory-mcp__index_health
+  - mcp__codebase-memory-mcp__index_repository
+  - mcp__codebase-memory-mcp__index_status
+  - mcp__codebase-memory-mcp__list_projects
+  - mcp__codebase-memory-mcp__query_graph
+  - mcp__code-graph__delete_project
+  - mcp__code-graph__get_architecture
+  - mcp__code-graph__list_projects
+  - mcp__code-graph__query_graph
+  - mcp__code-search__delete_project
+  - mcp__code-search__index_directory
+  - mcp__code-search__list_projects
+  - AskUserQuestion
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    repo_path:
+      type: string
+      required: false
+      description: "Path to the repository to index. Optional — if omitted in index mode, the skill asks the user via AskUserQuestion."
+    mode:
+      type: enum
+      values: [index, audit]
+      default: index
+      required: false
+      description: "Index one repository (default) or audit every existing index without indexing."
+    graph_precision:
+      type: enum
+      values: [heuristic, scip, auto]
+      default: heuristic
+      required: false
+      description: "Split backend only: graph precision tier or explicit automatic SCIP preparation."
+    scip_policy:
+      type: enum
+      values: [preferred, required]
+      default: preferred
+      required: false
+      description: "Split backend auto mode only: allow a visible heuristic fallback or require compiler precision."
+    scip_index:
+      type: string
+      required: false
+      description: "Split backend scip mode only: supplied SCIP index path."
+  scope_from: argument
+output_contract:
+  produces: [index_summary, index_validation_report, index_audit_report, remediation_plan]
+  format: markdown_report
+
+side_effects:
+  - writes_index_cache
+  - changes_active_code_search_project
+  - writes_repository_report_only_with_explicit_user_request
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "3-6"
+
+preconditions:
+  - "ONE backend registered: codebase-memory-mcp (unified) OR code-search + code-graph from the installed codebase-search plugin (split); the unified CLI launcher also works with the MCP disconnected"
+  - "The selected backend's released embedding route is configured; cloud routes require their API key, while supported local routes do not"
+guardrails: []
+threat_model: writes_local

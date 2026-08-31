@@ -1,0 +1,22 @@
+name: Code-related finding triggers codebase correlation (indexed repo)
+skill: triage
+trigger: "/triage (with a CodeQL alert or dependency vuln finding, target repo IS indexed)"
+
+must_happen:
+  - Check code-search index status (get_index_status)
+  - Index exists: proceed with code-search correlation
+  - Use search_code to find all instances of the flagged pattern
+  - Use trace_call_path to assess blast radius
+  - Include file:line references in triage report
+
+must_not_happen:
+  - Call search_code without checking index status first
+  - Skip codebase correlation for code-related findings when index exists
+
+output_contains:
+  - Code-search results or "instances found"
+  - File references
+
+guards:
+  - get_index_status returns populated index
+skip_ab: false

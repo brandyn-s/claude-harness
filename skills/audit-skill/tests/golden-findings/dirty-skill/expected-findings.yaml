@@ -1,0 +1,24 @@
+# Corpus entry: dirty-skill is the catch-all "trigger every check" fixture.
+# Phase 1 audit must surface each listed code or the detection logic
+# regressed.
+fixture: dirty-skill
+required_codes:
+  - H1   # phantom citation to references/missing-ref.md
+  - H2   # references/uncited.md is orphan
+  - H4   # cross-skill citation to nonexistent-skill/references/foo.md
+  - D3a  # bash references nonexistent ~/.claude/skills/dirty-skill/scripts/missing.py
+  - D3b  # uses ${CLAUDE_SKILL_DIR} non-canonical prefix
+  - D3c  # scripts/orphan.py never referenced
+  - M1   # argument-hint "[X]" brackets but manifest required:true
+  - M2   # mcp__unused__never_invoked declared but unused
+  - T1   # known-phantom mcp__code-graph__index_status
+  - C1   # scripts/run.py imports fcntl without platform guard
+  - C4   # scripts/run.py uses literal "$HOME" string
+  - C2   # /tmp/ in bash docs
+  - P1   # {baseDir} and <your-claude-project> placeholders
+forbidden_codes: []
+notes: |
+  Catch-all fixture designed to trigger every detection category in
+  one shot. Required-codes list is the canonical regression invariant;
+  if any are missing after a refactor, that check has regressed and
+  the next maintainer needs to know which.

@@ -1,0 +1,26 @@
+name: audit-skill deterministic invariants
+skill: audit-skill
+trigger: "/audit-skill skills/X/SKILL.md"
+
+must_happen:
+  - Phase 1 mechanical lint runs (H1-H10, C1-C10, M1-M3, T1, B1-B2, P1, Q1-Q3)
+  - Phase 2 agent checks run (A1-A3, B, D, F, G)
+  - Phase 2.5 backfill reproducers for any new behavior findings
+  - Phase 3 oracle gating emits worklist.yaml
+
+deterministic:
+  - frontmatter_equals:
+      name: audit-skill
+  - frontmatter_matches:
+      description: "(audit|skill)"
+  - body_contains:
+      - "Phase 1"
+      - "Phase 2"
+      - "Phase 3"
+      - "oracle"
+      - "## Examples"
+  - body_not_contains:
+      - "TODO:"
+      - "FIXME:"
+  - references_resolve: true
+  - examples_count: ">=2"

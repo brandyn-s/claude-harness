@@ -1,0 +1,49 @@
+id: ship
+type: skill
+description: "Commit, push, and merge pending changes through the full PR lifecycle. Uses a feature branch and PR for every repo; detects fork targeting, stages explicitly, rebuilds marketplace for claude-config, runs the security gate for sensitive repos, pushes, opens the PR, and delegates dynamic merge handling to the verified helper. Default mode confirms MERGED; queue-only mode returns a durable handoff for terminal verification."
+category: shipping
+
+requires_tools:
+  - "Bash"
+  - "Read"
+  - "Glob"
+  - "Grep"
+  - "Skill"
+  - "AskUserQuestion"
+requires_topics: []
+requires_rules:
+  - git-hygiene
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    message:
+      type: string
+      required: false
+      description: "Commit message. Auto-generated from diff if omitted."
+      examples: ["fix: resolve encoding issue in hook", "feat: add bulk export skill"]
+    queue_only:
+      type: boolean
+      required: false
+      description: "Return after a durable auto-merge arm or queue entry; the caller owns terminal verification."
+    session_start:
+      type: string
+      required: false
+      description: "Pre-write HEAD proven by the current session; used to distinguish current-session commits from older ahead commits."
+  scope_from: argument
+output_contract:
+  produces: [commit_sha, pr_url, merge_status]
+  format: git_commits
+
+side_effects: [creates_pr, writes_files, pushes_to_remote]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "5-15"
+
+preconditions:
+  - pending_outgoing_payload
+  - git_repo_detected
+guardrails:
+  - bash-security-guard
+threat_model: writes_remote

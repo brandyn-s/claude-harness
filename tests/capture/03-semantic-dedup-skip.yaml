@@ -1,0 +1,22 @@
+name: Capture skips entry when semantic duplicate detected
+skill: capture
+trigger: "/capture (after a session that repeats an insight already in the knowledge base)"
+
+must_happen:
+  - Run memory_check_duplicate with proposed entry summary
+  - Detect similarity >= 0.85 with existing entry
+  - Report skip with matched entry title, source file, and similarity score
+  - NOT write the duplicate entry
+
+must_not_happen:
+  - Write a duplicate entry despite high semantic similarity
+  - Skip the dedup check entirely
+
+output_contains:
+  - '"Skipped" or "semantically equivalent"'
+  - Matched entry title and source file
+  - Similarity score
+
+guards:
+  - memory_check_duplicate returns "skip" recommendation
+skip_ab: true

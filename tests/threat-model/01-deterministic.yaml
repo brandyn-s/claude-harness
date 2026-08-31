@@ -1,0 +1,16 @@
+skill: threat-model
+name: threat-model deterministic invariants
+trigger: /threat-model <target>
+must_happen:
+- Scope detection routes before threat-model generation
+- '4-section output: Overview, Trust Boundaries, Attack Surface, Criticality'
+- Severity calibration prevents false-positive inflation
+deterministic:
+- frontmatter_equals:
+    name: threat-model
+- body_contains:
+  - scope
+  - trust bound
+  - attack surface
+- references_resolve: true
+- examples_count: '>=2'

@@ -1,0 +1,18 @@
+id: post-merge-sync
+type: hook
+event: PostToolUse
+matcher: "Bash"
+if_condition: null
+action_type: fixer
+description: "Triggers local repo sync after a PR merge to keep clones up to date."
+enforces:
+  - git-hygiene
+blocks_patterns: []
+injects: null
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "Sync completed or not applicable"
+output_format: plaintext
+incidents: []

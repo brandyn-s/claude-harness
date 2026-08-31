@@ -1,0 +1,36 @@
+name: Skill edit triggers all three validation phases
+skill: validate-changes
+trigger: "/validate-changes (after editing a skill SKILL.md file)"
+
+must_happen:
+  - Auto-detect changed files from git diff
+  - Classify as "skill" type
+  - Run regression test (verify frontmatter valid, invoke related skill)
+  - Run effectiveness test (construct scenario exercising the specific change, verify new behavior fires)
+  - Run A/B comparison for behavior changes (compare output with/without change)
+  - Present structured validation report with verdict
+
+must_not_happen:
+  - Skip any of the three phases for behavior changes
+  - Report SHIP without running effectiveness test
+  - Construct generic tests instead of change-specific ones
+
+output_contains:
+  - "Regression: PASS/FAIL"
+  - "Effectiveness: PASS/FAIL"
+  - "A/B: PASS/SKIPPED"
+  - "Verdict: SHIP/FIX FIRST/REVERT"
+
+guards: []
+skip_ab: true  # Meta: this IS the validation skill
+
+
+# Deterministic assertions runnable by scripts/run-skill-evals.py
+deterministic:
+- frontmatter_equals:
+    name: validate-changes
+- body_contains:
+  - regression
+  - A/B
+- references_resolve: true
+- examples_count: '>=2'

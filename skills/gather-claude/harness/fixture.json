@@ -1,0 +1,149 @@
+{
+  "_about": "Independent, hand-curated oracle for the gather-claude live-arm efficacy measurement. See harness/PROBLEM.md. Verdicts are HUMAN-CURATED ground truth established against FIRST-PARTY Anthropic sources (the anthropics/claude-code CHANGELOG.md @ v2.1.158, and code.claude.com docs), verified 2026-05-31 via `gh api .../CHANGELOG.md`. gather-claude's value-prop is first-party-source discipline + version-awareness: catching deprecations/removals a general web search (leaning on stale third-party blogs) would miss. Category names match grade.py: true_primary / outdated / refuted / fabricated.",
+  "grounding": {
+    "method": "deterministic term-overlap on the fetched page text of the arm's OWN cited URL",
+    "threshold": 0.6,
+    "note": "Some first-party docs (code.claude.com) are JS-rendered and may not yield text over plain HTTP; a fetch that returns no text -> grounded=False (conservative, symmetric across both arms). grounding_precision is therefore fetch-dependent; verdict_accuracy / refutation_recall / fabrication_resistance are hand-label-based and fetch-independent (robust secondary metrics)."
+  },
+  "expected_disposition_legend": {
+    "supported": "a correct arm SHOULD assert this is a true, CURRENT Claude Code capability",
+    "not_supported": "a correct arm should NOT assert it as current/true — it is deprecated/removed (outdated), false about CC behavior (refuted), or non-existent (fabricated)"
+  },
+  "claims": [
+    {
+      "id": "hooks-pre-post",
+      "category": "true_primary",
+      "claim": "Claude Code supports hooks, including PreToolUse and PostToolUse events.",
+      "expected_disposition": "supported",
+      "ground_truth": "TRUE + CURRENT. Hooks system documented; CHANGELOG repeatedly references PreToolUse/PostToolUse (e.g. PostToolUse continueOnBlock, updatedToolOutput).",
+      "primary_source_url": "https://docs.claude.com/en/docs/claude-code/hooks",
+      "grounding_terms": ["PreToolUse", "PostToolUse", "hook"]
+    },
+    {
+      "id": "skills-skillmd",
+      "category": "true_primary",
+      "claim": "Claude Code supports Agent Skills defined in SKILL.md files with YAML frontmatter.",
+      "expected_disposition": "supported",
+      "ground_truth": "TRUE + CURRENT. Agent Skills are a documented Claude Code feature (SKILL.md + frontmatter).",
+      "primary_source_url": "https://docs.claude.com/en/docs/claude-code/skills",
+      "grounding_terms": ["SKILL.md", "skill", "frontmatter"]
+    },
+    {
+      "id": "mcp-servers",
+      "category": "true_primary",
+      "claim": "Claude Code can connect to external tools and data via MCP (Model Context Protocol) servers.",
+      "expected_disposition": "supported",
+      "ground_truth": "TRUE + CURRENT. MCP support is core Claude Code functionality.",
+      "primary_source_url": "https://docs.claude.com/en/docs/claude-code/mcp",
+      "grounding_terms": ["MCP", "Model Context Protocol", "server"]
+    },
+    {
+      "id": "rewind-command",
+      "category": "true_primary",
+      "claim": "Claude Code provides a /rewind command (with /undo as an alias) to roll back to an earlier point in the conversation.",
+      "expected_disposition": "supported",
+      "ground_truth": "TRUE + CURRENT. CHANGELOG: '/undo is now an alias for /rewind'; 'Rewind menu: added Summarize up to here'. (A trap: sounds fabricatable but is real — tests whether the arm knows the real feature set.)",
+      "primary_source_url": "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+      "grounding_terms": ["rewind", "undo"]
+    },
+    {
+      "id": "effort-frontmatter",
+      "category": "true_primary",
+      "claim": "Claude Code skills and agents can set an effort level via an `effort:` frontmatter field.",
+      "expected_disposition": "supported",
+      "ground_truth": "TRUE + CURRENT. CHANGELOG: 'effort level applied by skill/agent `effort:` frontmatter'. skill-standards.md documents effort: low|medium|high|max.",
+      "primary_source_url": "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+      "grounding_terms": ["effort", "frontmatter"]
+    },
+    {
+      "id": "agent-resume-param",
+      "category": "outdated",
+      "claim": "The Claude Code Agent tool accepts a `resume` parameter to continue a previously spawned agent.",
+      "expected_disposition": "not_supported",
+      "ground_truth": "OUTDATED/REMOVED. CHANGELOG: 'The Agent tool no longer accepts a `resume` parameter — use SendMessage({to: agentId}) to continue a previously spawned agent.' (removed v2.1.77). A current verdict must reject this.",
+      "primary_source_url": "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+      "grounding_terms": ["resume", "Agent", "parameter"]
+    },
+    {
+      "id": "taskoutput-tool",
+      "category": "outdated",
+      "claim": "The TaskOutput tool is the recommended way to read a background task's output in Claude Code.",
+      "expected_disposition": "not_supported",
+      "ground_truth": "OUTDATED/DEPRECATED. CHANGELOG: 'Deprecated TaskOutput tool in favor of using Read on the background task's output file path.' A current verdict must flag this as deprecated.",
+      "primary_source_url": "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+      "grounding_terms": ["TaskOutput", "deprecated", "background task"]
+    },
+    {
+      "id": "windows-programdata-settings",
+      "category": "outdated",
+      "claim": "On Windows, Claude Code reads enterprise managed settings from C:\\ProgramData\\ClaudeCode\\managed-settings.json.",
+      "expected_disposition": "not_supported",
+      "ground_truth": "OUTDATED/REMOVED. CHANGELOG: 'Breaking change: Removed deprecated Windows managed settings fallback at C:\\ProgramData\\ClaudeCode\\managed-settings.json — use C:\\Program Files\\ClaudeCode\\...'. Current path is under Program Files.",
+      "primary_source_url": "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+      "grounding_terms": ["ProgramData", "managed-settings", "Windows"]
+    },
+    {
+      "id": "opus46-fast-mode-override",
+      "category": "outdated",
+      "claim": "The CLAUDE_CODE_OPUS_4_6_FAST_MODE_OVERRIDE environment variable is the current way to enable fast mode on Opus 4.6.",
+      "expected_disposition": "not_supported",
+      "ground_truth": "OUTDATED/DEPRECATED. CHANGELOG: 'Deprecated CLAUDE_CODE_OPUS_4_6_FAST_MODE_OVERRIDE (will be removed on 06/01). To use fast mode on Opus 4.6, switch with /model claude-opus-4-6[1m]'.",
+      "primary_source_url": "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+      "grounding_terms": ["CLAUDE_CODE_OPUS_4_6_FAST_MODE_OVERRIDE", "deprecated"]
+    },
+    {
+      "id": "posttooluse-blocks-before",
+      "category": "refuted",
+      "claim": "Claude Code PostToolUse hooks run before a tool executes and can block it from running.",
+      "expected_disposition": "not_supported",
+      "ground_truth": "FALSE. PostToolUse runs AFTER the tool; PreToolUse is the pre-execution hook that can block (permissionDecision). PostToolUse can feed a rejection reason back (continueOnBlock) but the tool already ran. A correct verdict rejects the 'runs before / blocks' claim.",
+      "primary_source_url": "https://docs.claude.com/en/docs/claude-code/hooks",
+      "grounding_terms": ["PostToolUse", "before", "block"]
+    },
+    {
+      "id": "skills-always-forked",
+      "category": "refuted",
+      "claim": "Claude Code skills always run in an isolated forked subagent context by default.",
+      "expected_disposition": "not_supported",
+      "ground_truth": "FALSE. Skills run in the MAIN conversation context by default; forking is opt-in via the `context: fork` frontmatter field. 'Always ... by default' is false.",
+      "primary_source_url": "https://docs.claude.com/en/docs/claude-code/skills",
+      "grounding_terms": ["context", "fork", "skill"]
+    },
+    {
+      "id": "fab-parallelism-frontmatter",
+      "category": "fabricated",
+      "claim": "Claude Code's SKILL.md supports a `parallelism:` frontmatter field to run a skill's steps concurrently.",
+      "expected_disposition": "not_supported",
+      "ground_truth": "FABRICATED. No `parallelism:` SKILL.md frontmatter field exists (not in docs or CHANGELOG @ v2.1.158). Correct verdict: UNCHARTED/unsupported.",
+      "primary_source_url": null,
+      "grounding_terms": ["parallelism", "frontmatter", "concurrently"]
+    },
+    {
+      "id": "fab-maxparallelsubagents",
+      "category": "fabricated",
+      "claim": "Claude Code's settings.json supports a `maxParallelSubagents` key to cap the number of concurrent subagents.",
+      "expected_disposition": "not_supported",
+      "ground_truth": "FABRICATED. No `maxParallelSubagents` settings.json key exists (not in docs/CHANGELOG). Correct verdict: UNCHARTED/unsupported.",
+      "primary_source_url": null,
+      "grounding_terms": ["maxParallelSubagents", "settings.json"]
+    },
+    {
+      "id": "fab-bisect-command",
+      "category": "fabricated",
+      "claim": "Claude Code provides a /bisect command that automatically finds which tool call introduced a regression.",
+      "expected_disposition": "not_supported",
+      "ground_truth": "FABRICATED. No /bisect command exists in Claude Code (not in docs/CHANGELOG). Correct verdict: UNCHARTED/unsupported.",
+      "primary_source_url": null,
+      "grounding_terms": ["/bisect", "regression", "tool call"]
+    },
+    {
+      "id": "fab-costbudget-setting",
+      "category": "fabricated",
+      "claim": "Claude Code's settings.json supports a `costBudgetUSD` key that halts the session when the spend limit is exceeded.",
+      "expected_disposition": "not_supported",
+      "ground_truth": "FABRICATED. No `costBudgetUSD` settings.json key exists (not in docs/CHANGELOG). Correct verdict: UNCHARTED/unsupported.",
+      "primary_source_url": null,
+      "grounding_terms": ["costBudgetUSD", "settings.json", "spend limit"]
+    }
+  ]
+}

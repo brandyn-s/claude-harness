@@ -1,0 +1,38 @@
+id: validate-changes
+type: skill
+description: "Validate architecture changes (skills, hooks, rules, memory, MCP servers) with regression, effectiveness, and A/B testing adapted to change type. Trigger phrases: 'validate changes', 'test this', 'A/B test', 'regression test', 'did the change work'. Do NOT use for code testing (use pytest/TDD), deployment verification (use /mcp-diagnose), or STIG verification (use /stig-verify)."
+category: maintenance
+requires_tools:
+  - AskUserQuestion
+  - Bash
+  - Glob
+  - Grep
+  - Read
+  - Skill
+  - mcp__memory-search__memory_check_duplicate
+  - mcp__memory-search__memory_search
+requires_topics: []
+requires_rules:
+  - verify-effectiveness
+  - validate-to-improve
+requires_skills:
+  - gather-claude
+requires_auth: []
+input_contract:
+  parameters:
+    files:
+      type: string
+      required: false
+      description: "File paths to validate (auto-detected from the committed, staged, unstaged, and untracked git-state union if omitted)"
+  scope_from: argument
+output_contract:
+  produces: [regression_results, effectiveness_results, ab_comparison, verdict]
+  format: markdown_report
+side_effects: []
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "10-25"
+preconditions:
+  - git_repo_detected
+guardrails: []
+threat_model: read_only

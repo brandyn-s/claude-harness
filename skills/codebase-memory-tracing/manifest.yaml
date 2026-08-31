@@ -1,0 +1,37 @@
+id: codebase-memory-tracing
+type: skill
+description: "Traces function call chains, finds callers and callees, analyzes change impact with risk classification, and detects git diff blast radius via the code-graph knowledge graph."
+category: code-intel
+
+requires_tools:
+  - Grep
+  - mcp__codebase-memory-mcp__detect_changes
+  - mcp__codebase-memory-mcp__get_code_snippet
+  - mcp__codebase-memory-mcp__query_graph
+  - mcp__codebase-memory-mcp__search_graph
+  - mcp__codebase-memory-mcp__trace_call_path
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    target:
+      type: string
+      required: false
+      description: "Function name or call path to trace"
+  scope_from: argument
+output_contract:
+  produces: [call_chain, risk_classification, impact_summary]
+  format: markdown_report
+
+side_effects: [none]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "2-5"
+
+preconditions:
+  - Target project indexed in code-graph
+guardrails: []
+threat_model: read_only

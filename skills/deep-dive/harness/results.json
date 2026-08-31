@@ -1,0 +1,81 @@
+{
+  "_about": "MEASURED live A/B for deep-dive efficacy (calibration + counterfactual). Re-graded 2026-05-31 against corrected fixture (v1 wrong_terms false-failed verbose correct answers). Refresh: python3 skills/deep-dive/harness/run_live.py. CI asserts on this file.",
+  "model": "claude-opus-4-8",
+  "arms": "with_skill (3-layer framework) vs baseline (plain + confidence)",
+  "run_date": "2026-05-31",
+  "n_runs": 3,
+  "n_questions": 15,
+  "fixture_sha": "7ffac4dca15f",
+  "cost_ratio": 4.0,
+  "metrics": {
+    "with_skill": {
+      "n_runs": 3,
+      "accuracy": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "calibration_discrimination": {
+        "mean": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "stdev": 0.0,
+        "n": 1
+      },
+      "currency_accuracy": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "false_premise_reject_rate": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "counterfactual_substantive_rate": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      }
+    },
+    "baseline": {
+      "n_runs": 3,
+      "accuracy": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "calibration_discrimination": null,
+      "currency_accuracy": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "false_premise_reject_rate": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "counterfactual_substantive_rate": null
+    }
+  },
+  "verdict": {
+    "verdict": "trim",
+    "reason": "confidence discrimination 0.0 within noise (0.05); labels not buying calibrated confidence",
+    "calibration_discrimination": 0.0
+  }
+}

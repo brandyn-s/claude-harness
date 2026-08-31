@@ -1,0 +1,18 @@
+id: skill-alias
+type: hook
+event: UserPromptSubmit
+matcher: ""
+if_condition: null
+action_type: fixer
+description: "Resolves skill aliases and abbreviations to canonical skill names."
+enforces: []
+blocks_patterns: []
+injects: null
+modifies: user_prompt
+depends_on_files:
+  - hooks/skill-rules.json
+depends_on_env: []
+exit_codes:
+  "0": "Alias resolved or not applicable"
+output_format: json
+incidents: []

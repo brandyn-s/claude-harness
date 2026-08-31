@@ -1,0 +1,34 @@
+id: modal
+type: skill
+description: "Offload compute-heavy, egress-safe work to Modal serverless GPUs/containers: parallel batch fan-out, Sandboxes for untrusted/LLM-generated code, GPU model hosting, and durable long-running jobs."
+category: operations
+requires_tools:
+  - AskUserQuestion
+  - Bash
+  - Read
+  - Write
+requires_topics: []
+requires_rules:
+  - platform-constraints
+requires_skills: []
+requires_auth: []
+input_contract:
+  parameters:
+    task:
+      type: string
+      required: false
+      description: "What to offload to Modal"
+      examples: ["fan out this eval over 500 queries", "sandbox this generated exploit"]
+  scope_from: argument
+output_contract:
+  produces: [modal_app, execution_results]
+  format: json
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "3-10"
+preconditions:
+  - modal CLI installed and authenticated (run `modal setup`)
+guardrails:
+  - bash-security-guard
+threat_model: writes_local

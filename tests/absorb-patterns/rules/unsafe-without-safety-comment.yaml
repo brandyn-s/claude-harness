@@ -1,0 +1,21 @@
+rules:
+  - id: unsafe-without-safety-comment
+    patterns:
+      - pattern: |
+          unsafe {
+            ...
+          }
+      - pattern-not-inside: |
+          // SAFETY: ...
+          unsafe {
+            ...
+          }
+    message: >
+      `unsafe` block without a `// SAFETY:` comment explaining why it's sound.
+      Every unsafe block must document the invariants that make it safe.
+      (alex + cyphar: security-first Rust developers require // SAFETY: on all unsafe)
+    languages: [rust]
+    severity: WARNING
+    metadata:
+      source: absorb-alex,absorb-cyphar
+      pattern-maturity: stage-2

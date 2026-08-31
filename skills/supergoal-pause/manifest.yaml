@@ -1,0 +1,31 @@
+id: supergoal-pause
+type: skill
+description: "Pause an active supergoal loop without losing the prior-arc lineage. Records `paused_at` in the state file; the verification hook checks this flag at the start of each Stop and returns ok=false with reason `paused` until /supergoal-resume is invoked. Use instead of Ctrl-C when the user needs to inspect intermediate state or amend the plan. Trigger phrase: supergoal-pause. Do NOT use for hard-stopping a runaway loop (Ctrl-C is correct for that)."
+category: orchestration
+
+requires_tools:
+  - Bash
+requires_topics: []
+requires_rules: []
+requires_skills:
+  - supergoal
+  - supergoal-resume
+  - superplan
+requires_auth: []
+
+input_contract:
+  parameters: {}
+  scope_from: none
+output_contract:
+  produces: [state_update]
+  format: text
+
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "1"
+
+preconditions:
+  - an active supergoal arc exists at ~/.claude/supergoal/.active
+guardrails: []
+threat_model: writes_local

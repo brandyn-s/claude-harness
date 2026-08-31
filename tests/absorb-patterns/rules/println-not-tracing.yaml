@@ -1,0 +1,27 @@
+rules:
+  - id: println-instead-of-tracing
+    patterns:
+      - pattern-either:
+          - pattern: println!(...)
+          - pattern: eprintln!(...)
+          - pattern: dbg!(...)
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
+    message: >
+      Use `tracing` macros (info!, warn!, error!, debug!) instead of
+      println!/eprintln!/dbg!() in production code. Structured logging is
+      queryable in CloudWatch/Datadog; println is not.
+      (Dustin + jonhoo + dtolnay: consistent across all absorbed Rust developers)
+    languages: [rust]
+    severity: WARNING
+    metadata:
+      source: absorb-dustin,absorb-jonhoo
+      pattern-maturity: stage-2

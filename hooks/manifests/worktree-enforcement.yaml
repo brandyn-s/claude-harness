@@ -1,0 +1,22 @@
+id: worktree-enforcement
+type: hook
+event: PreToolUse
+matcher: "Write|Edit|Bash"
+if_condition: null
+action_type: guard
+description: "Enforces worktree isolation for protected repo edits -- blocks writes outside active worktree."
+enforces:
+  - git-hygiene
+  - subagent-verification
+blocks_patterns:
+  - writes_to_protected_repo_outside_worktree
+injects: null
+modifies: null
+depends_on_files:
+  - hooks/protected-repos.json
+depends_on_env: []
+exit_codes:
+  "0": "Write allowed"
+  "2": "Blocked: write to protected repo requires worktree"
+output_format: plaintext
+incidents: []

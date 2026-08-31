@@ -1,0 +1,152 @@
+{
+  "_description": "Synthetic payloads for probing encoding-missing-open hook coverage. Each fixture describes a real scanner-flagged surface; the probe drives it through the relevant hook and records BLOCK/ALLOW. Per audit-rules SKILL.md gate procedure for hook-enforced + high-rate rules. Fixtures stored separately so the patched hook does not fire on literal `open('foo.json')` strings inside the probe script (per 2026-05-22 incident lessons).",
+  "_created": "2026-05-26",
+  "fixtures": [
+    {
+      "id": "write-py-no-mode-open",
+      "surface": "Write of .py with bare open('foo.json')",
+      "tool": "Write",
+      "file_path": "test_no_mode.py",
+      "content_lines": [
+        "import json",
+        "with open('settings.json') as f:",
+        "    data = json.load(f)"
+      ],
+      "hook": "post-write-edit.py",
+      "expected": "ALLOW",
+      "rationale": "Bare open() defaults to text mode + cp1252 on Windows. On non-Windows hosts (verified 2026-06-27: this host's open() already defaults to UTF-8), check_python_encoding's _encoding_guard_active() gate downgrades this to a WARN systemMessage, not a block — the hard block cost 264 false stops/14d with zero safety benefit here. Set CLAUDE_ENCODING_GUARD_FORCE=1 to exercise the BLOCK path on a non-Windows host."
+    },
+    {
+      "id": "write-py-urlopen",
+      "surface": "Write of .py with urlopen(req) — scanner false positive class",
+      "tool": "Write",
+      "file_path": "test_urlopen.py",
+      "content_lines": [
+        "from urllib.request import urlopen",
+        "with urlopen('https://example.com') as r:",
+        "    body = r.read()"
+      ],
+      "hook": "post-write-edit.py",
+      "expected": "ALLOW",
+      "rationale": "urlopen is a different function; encoding does not apply."
+    },
+    {
+      "id": "write-py-os-open",
+      "surface": "Write of .py with os.open() — file descriptor, no encoding",
+      "tool": "Write",
+      "file_path": "test_os_open.py",
+      "content_lines": [
+        "import os",
+        "fd = os.open('lock', os.O_CREAT | os.O_EXCL | os.O_WRONLY)",
+        "os.close(fd)"
+      ],
+      "hook": "post-write-edit.py",
+      "expected": "ALLOW",
+      "rationale": "os.open returns a file descriptor; encoding is meaningless."
+    },
+    {
+      "id": "write-py-encoding-present",
+      "surface": "Write of .py with encoding='utf-8'",
+      "tool": "Write",
+      "file_path": "test_with_encoding.py",
+      "content_lines": [
+        "with open('data.json', encoding='utf-8') as f:",
+        "    text = f.read()"
+      ],
+      "hook": "post-write-edit.py",
+      "expected": "ALLOW",
+      "rationale": "Hook should pass when encoding is present."
+    },
+    {
+      "id": "write-py-binary-mode",
+      "surface": "Write of .py with binary mode 'rb'",
+      "tool": "Write",
+      "file_path": "test_binary.py",
+      "content_lines": [
+        "with open('data.bin', 'rb') as f:",
+        "    raw = f.read()"
+      ],
+      "hook": "post-write-edit.py",
+      "expected": "ALLOW",
+      "rationale": "Binary mode does not need encoding."
+    },
+    {
+      "id": "write-json-with-open-literal",
+      "surface": "Write of .json containing the literal string 'open(...)'",
+      "tool": "Write",
+      "file_path": "test.json",
+      "content_lines": [
+        "{",
+        "  \"example\": \"open('settings.json')\"",
+        "}"
+      ],
+      "hook": "post-write-edit.py",
+      "expected": "ALLOW",
+      "rationale": "Hook only fires on .py paths; non-.py extension should be skipped."
+    },
+    {
+      "id": "bash-inline-python-c-no-encoding",
+      "surface": "Bash with python -c \"import json; print(json.load(open('settings.json')))\"",
+      "tool": "Bash",
+      "command": "python -c \"import json; print(json.load(open('settings.json')))\"",
+      "hook": "bash-security-guard.py",
+      "expected": "ALLOW",
+      "rationale": "check_inline_python_encoding (PR #904) catches this when _encoding_guard_active() is true. On non-Windows hosts (verified 2026-06-27) the guard no-ops (264 false stops/14d, zero safety benefit — non-Windows open() already defaults to UTF-8). Set CLAUDE_ENCODING_GUARD_FORCE=1 to exercise the BLOCK path here."
+    },
+    {
+      "id": "bash-inline-python-c-with-encoding",
+      "surface": "Bash python -c with encoding='utf-8' present",
+      "tool": "Bash",
+      "command": "python -c \"import json; print(json.load(open('settings.json', encoding='utf-8')))\"",
+      "hook": "bash-security-guard.py",
+      "expected": "ALLOW",
+      "rationale": "Encoding present should pass."
+    },
+    {
+      "id": "bash-heredoc-python-no-encoding",
+      "surface": "Bash heredoc python with bare open()",
+      "tool": "Bash",
+      "command": "python <<'EOF'\nimport json\nwith open('settings.json') as f:\n    print(json.load(f))\nEOF",
+      "hook": "bash-security-guard.py",
+      "expected": "ALLOW",
+      "rationale": "check_heredoc_python_encoding catches this when _encoding_guard_active() is true. On non-Windows hosts (verified 2026-06-27) the guard no-ops (264 false stops/14d, zero safety benefit — non-Windows open() already defaults to UTF-8). Set CLAUDE_ENCODING_GUARD_FORCE=1 to exercise the BLOCK path here."
+    },
+    {
+      "id": "bash-inline-urlopen",
+      "surface": "Bash python -c with urlopen — scanner false positive class",
+      "tool": "Bash",
+      "command": "python -c \"from urllib.request import urlopen; print(urlopen('https://example.com').read())\"",
+      "hook": "bash-security-guard.py",
+      "expected": "ALLOW",
+      "rationale": "urlopen is not open; encoding does not apply."
+    },
+    {
+      "id": "edit-py-add-bare-open",
+      "surface": "Edit of .py inserting bare open('foo.json')",
+      "tool": "Edit",
+      "file_path": "existing.py",
+      "old_string": "import json",
+      "new_string": "import json\nwith open('settings.json') as f:\n    data = json.load(f)",
+      "hook": "post-write-edit.py",
+      "expected": "ALLOW",
+      "rationale": "Edit produces .py content with bare open(); hook fires (WARN) on post-write of the .py. On non-Windows hosts (verified 2026-06-27) check_python_encoding's _encoding_guard_active() gate downgrades this to a WARN systemMessage, not a block — the hard block cost 264 false stops/14d with zero safety benefit here. Set CLAUDE_ENCODING_GUARD_FORCE=1 to exercise the BLOCK path on a non-Windows host."
+    },
+    {
+      "id": "write-md-with-python-fence",
+      "surface": "Write of .md containing a python code fence with open() — display-only",
+      "tool": "Write",
+      "file_path": "guide.md",
+      "content_lines": [
+        "Example:",
+        "",
+        "```python",
+        "with open('foo.json') as f:",
+        "    data = json.load(f)",
+        "```"
+      ],
+      "hook": "post-write-edit.py",
+      "expected": "ALLOW",
+      "rationale": "Hook only fires on .py paths; markdown is not source. Scanner V1 may still false-positive on this — that is the instrument-side gap."
+    }
+  ]
+}

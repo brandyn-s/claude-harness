@@ -1,0 +1,19 @@
+id: atomic_write
+type: hook
+event: PostToolUse
+matcher: "Write|Edit"
+if_condition: null
+action_type: fixer
+description: "Ensures file writes are atomic to prevent partial writes from interruptions."
+enforces:
+  - platform-constraints
+blocks_patterns: []
+injects: null
+modifies: file_write_operations
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "Write completed atomically"
+  "2": "Atomic write failed"
+output_format: plaintext
+incidents: []

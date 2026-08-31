@@ -1,0 +1,36 @@
+id: superplan-loop
+type: skill
+description: "Compose with native Claude Code /loop to re-check supergoal progress on a cadence. Re-runs /superplan-status every N minutes (default 10) and surfaces any concerning signals (stall streak rising, prior-arc count >= 3, wallclock budget >70% spent). Read-only nudge layer; does not modify state. Trigger phrase: superplan-loop. Do NOT use for one-shot status checks (use /superplan-status), driving the loop itself (use /supergoal), or interactive editing (use /supergoal-pause then edit)."
+category: planning
+
+requires_tools:
+  - Bash
+  - Read
+requires_topics: []
+requires_rules: []
+requires_skills:
+  - supergoal
+  - supergoal-pause
+  - superplan-status
+requires_auth: []
+
+input_contract:
+  parameters:
+    interval_minutes:
+      type: integer
+      required: false
+      description: "Polling interval in minutes. Default 10."
+  scope_from: argument
+output_contract:
+  produces: [status_snapshot]
+  format: markdown_report
+
+side_effects: []
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "ongoing (loop)"
+
+preconditions:
+  - an active supergoal arc exists
+guardrails: []
+threat_model: read_only

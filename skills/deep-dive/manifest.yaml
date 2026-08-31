@@ -1,0 +1,54 @@
+id: deep-dive
+type: skill
+description: "General-purpose research skill that dynamically generates research questions, searches web and academic sources with convergence-based iteration, and saves evidence-graded reports."
+category: knowledge
+
+requires_tools:
+  - Agent
+  - Bash
+  - Read
+  - Write
+  - Glob
+  - Grep
+  - "mcp__tavily__tavily_search"
+  - "mcp__tavily__tavily_extract"
+  - "mcp__tavily__tavily_research"
+  - "mcp__tavily__tavily_crawl"
+  - "mcp__tavily__tavily_map"
+  - "mcp__memory-search__memory_search"
+  - "mcp__exa__web_search_exa"
+  - "mcp__exa__web_fetch_exa"
+  - "mcp__firecrawl__firecrawl_search"
+  - "mcp__firecrawl__firecrawl_scrape"
+  - "mcp__firecrawl__firecrawl_map"
+  - "mcp__firecrawl__firecrawl_crawl"
+  - "mcp__firecrawl__firecrawl_check_crawl_status"
+  - "mcp__firecrawl__firecrawl_extract"
+  - "AskUserQuestion"
+prose_only_tools:
+  - mcp__xai__*  # explicitly names the retired X-search MCP surface; execution uses bin/x-monitor.py
+requires_topics: []
+requires_rules:
+  - web-search-preference
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    topic:
+      type: string
+      required: false
+      description: "Topic or question to research"
+  scope_from: argument
+output_contract:
+  produces: [research_report, evidence_graded_findings, source_table]
+  format: markdown_report
+
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "15-30"
+
+preconditions: []
+guardrails: []
+threat_model: writes_local

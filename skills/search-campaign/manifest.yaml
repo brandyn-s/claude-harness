@@ -1,0 +1,25 @@
+id: search-campaign
+type: skill
+description: "Run a large parallel adversarial/search campaign as a repeatable generate → evaluate → track → rotate → select loop, optimizing diversity × robustness when the target gives no direct feedback."
+category: workflow
+requires_tools:
+  - "Workflow"
+  - "Agent"
+  - "Task"
+  - "TaskCreate"
+  - "TaskUpdate"
+  - "Skill"
+  - "Bash"
+  - "Read"
+  - "Write"
+  - "Edit"
+  - "Grep"
+  - "Glob"
+requires_topics: []
+requires_rules:
+  - verify-effectiveness
+  - eval-shipping-discipline
+requires_skills: []  # composition with /search-axis-rotate + /red-team-axes is in the SKILL.md body (Phase 4); requires_skills must reference manifest-set skills only
+requires_auth: []
+input_contract: "Optional objective/target string (e.g. a competition or search goal). With no argument, resume the active campaign from its RUNLOG + dashboard state."
+output_contract: "A running campaign: parallel generation + sharded evaluation, a refreshed RUNLOG + interactive dashboard (with over-time snapshots), and — when axes are exhausted or the objective is met — a selected breadth × robustness × value portfolio, shipped and recorded."

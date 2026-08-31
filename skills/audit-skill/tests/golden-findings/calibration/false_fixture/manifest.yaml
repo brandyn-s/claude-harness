@@ -1,0 +1,24 @@
+id: false-fixture
+type: skill
+description: "Bug-shaped but benign — for oracle TNR calibration."
+category: testing
+requires_tools:
+  - Bash
+  - Read
+input_contract:
+  parameters:
+    target:
+      type: string
+      required: true
+      description: "Target identifier"
+  scope_from: argument
+output_contract:
+  produces: [test_artifact]
+  format: text
+side_effects: [none]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "1"
+preconditions: []
+guardrails: []
+threat_model: read_only

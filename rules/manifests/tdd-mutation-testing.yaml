@@ -1,0 +1,41 @@
+id: tdd-mutation-testing
+type: rule
+description: "Interpret a mutation's verdict correctly -- a PASS can indict the fixture, the mutation, or an overwritten knob rather than the test; a FAIL can bite for the wrong reason; and the harness itself manufactures false verdicts."
+applies_to:
+  - mutation_testing
+  - test_verification
+  - guard_validation
+trigger_conditions:
+  - mutation_passed_unexpectedly
+  - mutation_failed_unexpectedly
+  - verifying_a_guard_actually_bites
+  - claiming_a_test_covers_a_branch
+required_actions:
+  - attribute_the_verdict_to_a_cause_before_acting
+  - assert_the_fixture_reaches_the_mutated_line
+  - assert_anchor_occurs_exactly_once_before_writing
+  - syntax_check_the_mutated_artifact
+  - clear_pycache_on_restore
+  - pin_live_state_before_trusting_a_verdict
+  - rerun_a_mutation_that_reads_live_state
+  - restore_from_a_cp_backup_not_git_checkout
+  - derive_the_bound_instead_of_pinning_both_sides
+prohibited_actions:
+  - deleting_a_guard_because_its_mutation_passed
+  - trusting_a_verdict_from_an_unvalidated_harness
+  - reverting_a_mutation_with_git_checkout_over_uncommitted_work
+  - asserting_a_repeated_token_by_presence_instead_of_count
+  - reading_a_timeout_as_inconclusive_rather_than_caught
+  - trusting_a_single_verdict_on_a_test_that_reads_live_state
+  - mutating_the_reader_instead_of_pinning_the_state
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - "2026-07-26 cc-monitor fact-checker: 2 of 4 mutations passed on wrong-shaped fixtures; trusting them would have deleted two live guards"
+  - "2026-07-27 code-graph #416: both row-cap regression tests passed with the fix mutated OFF -- Execute() overwrote the knob the tests set"
+  - "2026-07-29 mcp-infra: 8 mutations, 2 passed -- one an inert edit (bad mutation), one a repeated-token weak assertion (bad test), same symptom opposite diagnoses"
+  - "2026-07-31 mcp-infra #764/#765: four literals described as asserting a relationship; the lockstep mutation passed all four and shipped a zero-headroom cap"
+  - "2026-07-31 mcp-servers #931: a report freeze file stored a DERIVED total as a co-equal literal; one stale lane published coverage_pct=100.2"
+  - "2026-07-31 claude-config #1834: find_session_pid ancestry test ran green/failed/green on the IDENTICAL tree; a shell-skipping mutation MISSED because the parent zsh exited between probes -- pinning made the same mutation CAUGHT 3/3"
+created_date: "2026-07-31"
+last_validated: "2026-07-31"

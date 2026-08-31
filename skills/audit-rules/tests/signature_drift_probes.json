@@ -1,0 +1,33 @@
+{
+  "_description": "Drift guard for scan_violations.py RULE_BLOCK_SIGNATURES. Each probe pairs a mapped block-signature substring with a known-positive payload that should make its guard emit that signature in the block REASON. If a hook's output string is renamed/reworded, the matching probe fails — catching the silent mis-attribution the scanner's net-silent split would otherwise suffer (a source-grep guard cannot: post-write-edit splits 'without' + \"encoding='utf-8' at\" across two f-string lines, so the substring only exists at runtime). Payloads live here, NOT as .py literals, so writing the test never trips the running guards. __PAD300__ is replaced by the test with >300 filler chars to force the inline-python oversize hard-block path.",
+  "probes": [
+    {
+      "rule": "encoding-missing-open",
+      "signature": "[inline-encoding-guard]",
+      "hook": "bash-security-guard.py",
+      "tool": "Bash",
+      "command": "python3 -c \"import json; d=json.load(open('/tmp/x.json'))\""
+    },
+    {
+      "rule": "encoding-missing-open",
+      "signature": "[heredoc-encoding-guard]",
+      "hook": "bash-security-guard.py",
+      "tool": "Bash",
+      "command": "python3 <<'EOF'\nimport json\nd = json.load(open('/tmp/x.json'))\nEOF"
+    },
+    {
+      "rule": "encoding-missing-open",
+      "signature": "without encoding='utf-8' at",
+      "hook": "post-write-edit.py",
+      "tool": "Write",
+      "content": "import json\nwith open('config.json') as f:\n    d = json.load(f)\n"
+    },
+    {
+      "rule": "inline-python-c",
+      "signature": "[inline-python-guard] BLOCKED",
+      "hook": "bash-security-guard.py",
+      "tool": "Bash",
+      "command": "python3 -c \"import os  # shell-active $ marker keeps this un-extractable __PAD300__\""
+    }
+  ]
+}

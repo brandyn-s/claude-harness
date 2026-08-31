@@ -1,0 +1,38 @@
+id: superplan
+type: skill
+description: "Context-aware planning for non-trivial tasks involving MCP tools, agents, or cross-domain work. Loads operational knowledge, identifies tools, estimates effort."
+category: planning
+requires_tools:
+  - AskUserQuestion
+  - Bash
+  - Edit
+  - Grep
+  - Read
+  - mcp__codebase-memory-mcp__*
+  - mcp__memory-search__memory_search
+requires_topics:
+  - architecture.md
+  - skill-authoring.md
+requires_rules:
+  - agent-delegation
+  - search-efficiency
+requires_skills:
+  - brainstorm
+requires_auth: []
+input_contract:
+  parameters:
+    task:
+      type: string
+      required: true
+      description: "Task description or goal"
+  scope_from: argument
+output_contract:
+  produces: [plan_document, dependency_graph, execution_recommendation]
+  format: markdown_report
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "10-30"
+preconditions: []
+guardrails: []
+threat_model: read_only

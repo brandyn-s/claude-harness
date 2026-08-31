@@ -1,0 +1,21 @@
+skill: superplan
+name: superplan deterministic invariants
+trigger: /superplan <task>
+must_happen:
+- Phase 0 preflight verifies cited entities exist
+- Phase 3.5 baseline measurement if claim is size-of-effect
+- Plan persisted to docs/plans/ with hash lock
+deterministic:
+- frontmatter_equals:
+    name: superplan
+- body_contains:
+  - Phase 0
+  - Phase 3
+  - preflight
+  - execution_budget
+  - repair_cycles
+  - full_suite_runs
+  - live_probes
+  - nonblocking_findings
+- references_resolve: true
+- examples_count: '>=2'

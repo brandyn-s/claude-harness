@@ -1,0 +1,20 @@
+name: Description-only edit skips A/B phase
+skill: validate-changes
+trigger: "/validate-changes (after editing only skill descriptions or argument-hints)"
+
+must_happen:
+  - Detect changes are metadata-only (no behavior change)
+  - Run regression test (verify file loads)
+  - Skip A/B phase with explanation
+  - Report verdict
+
+must_not_happen:
+  - Run A/B comparison for metadata-only changes
+  - Block shipping on description-only edits
+
+output_contains:
+  - "A/B: SKIPPED"
+  - "Verdict: SHIP"
+
+guards: []
+skip_ab: true

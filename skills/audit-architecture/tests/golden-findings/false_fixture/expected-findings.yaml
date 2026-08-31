@@ -1,0 +1,17 @@
+# Corpus entry for false_fixture — clean architecture.
+# Phase 2 must NOT surface any of these codes when auditing false_fixture.
+# Regression guard: if a code below appears, either the audit false-positives
+# or the fixture drifted toward the true_fixture bugs.
+fixture: false_fixture
+notes: >
+  false_fixture is a correct architecture: valid JSON config, all referenced
+  files exist, servers documented in both ARCHITECTURE.md and mcp.json, routing
+  rules present, server count accurate.
+required_codes: []
+forbidden_codes:
+  - R3  # valid-settings.json parses correctly
+  - R2  # all script paths in mcp.json exist on disk
+  - D4  # no phantom docs entries in ARCHITECTURE.md
+  - D5  # all mcp.json servers documented in ARCHITECTURE.md
+  - C2  # all servers have routing rules
+  - D3  # server count in ARCHITECTURE.md is accurate

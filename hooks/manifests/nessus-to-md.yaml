@@ -1,0 +1,19 @@
+id: nessus-to-md
+type: hook
+event: PreToolUse
+matcher: "Read"
+if_condition: "Read(*.nessus)"
+action_type: fixer
+description: "Converts Tenable .nessus XML to Markdown (severity summary + findings tables) when a .nessus file is read."
+enforces: []
+blocks_patterns: []
+injects: null
+modifies: read_output
+depends_on_files: []
+depends_on_env:
+  - PYTHON_EXE
+exit_codes:
+  "0": "Not a .nessus file, conversion failed (fallback to native Read), or cached .md consumed"
+  "2": "Conversion succeeded; Read blocked with redirect to cached .md"
+output_format: markdown
+incidents: []

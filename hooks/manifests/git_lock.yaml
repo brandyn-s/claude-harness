@@ -1,0 +1,20 @@
+id: git_lock
+type: hook
+event: none
+matcher: null
+if_condition: null
+action_type: fixer
+description: "Library module (no standalone execution): O_EXCL advisory file lock with timeout + stale-lock reclamation. Imported by post-merge-sync.py to serialize read-modify-write updates to shared state across near-simultaneous sessions."
+enforces:
+  - git-hygiene
+blocks_patterns: []
+injects: null
+modifies: "~/.claude/.locks/ lockfiles (transient)"
+depends_on_files:
+  - "~/.claude/.locks/"
+depends_on_env: []
+exit_codes:
+  "0": "n/a — imported module; raises TimeoutError to callers on lock timeout"
+output_format: none
+incidents:
+  - "Pre-2026-06: expected at ~/.claude/scripts/git_lock.py which install.sh never shipped — ImportError fallback made the lock a silent no-op (fixed by moving module into hooks/, PR #1120)"

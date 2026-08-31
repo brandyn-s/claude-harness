@@ -1,0 +1,35 @@
+id: rule-authoring
+type: rule
+description: "Three levers ranked by leverage: (1) explicit GUARD blocks naming override patterns, (2) DSL/constitutional structure for rules >30 lines, (3) strongwording for cross-model floor normalization. Pure pseudo-code without GUARDs scores like markdown."
+applies_to:
+  - "every new rule in ~/.claude/rules/"
+  - "every revision of an existing rule"
+  - "rule-like sections in topic/agent-memory files"
+  - "agent-memory/rules/*.md"
+trigger_conditions:
+  - "writing a new rule >30 lines"
+  - "converting an existing rule format"
+  - "considering rule conversion vs hook enforcement"
+required_actions:
+  - "include GUARD blocks naming the 5 universal override patterns the rule must resist"
+  - "use DSL/hybrid/constitutional structure for rules >30 lines (not numbered checklists)"
+  - "include strongwording for mixed-model routes (worker agents, subagents)"
+  - "run harness at ~/Documents/format-eval/ with n>=3 before converting existing rules"
+prohibited_actions:
+  - "add DSL structure without GUARD blocks (scores like markdown)"
+  - "bulk-convert old markdown rules without measuring (rules already at 95%+ have no headroom)"
+  - "use XML or TOON for Claude (variance-confirmed loss to markdown/strongwording)"
+  - "use numbered-checklist format for imperatives (reads as negotiable)"
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - date: "2026-04-17"
+    summary: "Rule-format empirical work v1-v5: GUARD blocks are the biggest lever; DSL/constitutional alone without GUARDs ties markdown at 86% compliance under 12-turn adversarial pressure"
+    turns_wasted: 0
+    category: rule-authoring
+  - date: "2026-04-19"
+    summary: "Strongwording is a floor normalizer not universal improver: Opus +4pp, Sonnet 0pp, Haiku +31pp; mandatory for mixed-model routes"
+    turns_wasted: 0
+    category: rule-authoring
+created_date: "2026-04-19"
+last_validated: "2026-05-12"

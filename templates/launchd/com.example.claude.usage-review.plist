@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.example.claude.usage-review</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/zsh</string>
+		<string>-lc</string>
+		<string>mkdir -p "$HOME/.claude/audit/launchd" &amp;&amp; caffeinate -i python3 "$HOME/Documents/GitHub/mcp-servers/scripts/compliance_chat_weekly.py" >> "$HOME/.claude/audit/launchd/usage-review.log" 2>&amp;1</string>
+	</array>
+	<!-- Monday 07:30 — the weekly Chat usage-review queue is ready before the
+	     work week starts. Preflight aborts loudly (zero API calls) if
+	     ANTHROPIC_COMPLIANCE_ACCESS_KEY / ANTHROPIC_API_KEY are absent from
+	     env + Keychain (claude/<VAR>); outputs land OUTSIDE git checkouts in
+	     ~/Documents/usage-review/<date>/. -->
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Weekday</key>
+		<integer>1</integer>
+		<key>Hour</key>
+		<integer>7</integer>
+		<key>Minute</key>
+		<integer>30</integer>
+	</dict>
+	<key>RunAtLoad</key>
+	<false/>
+	<key>ProcessType</key>
+	<string>Background</string>
+</dict>
+</plist>

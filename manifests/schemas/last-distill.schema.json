@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "last-distill",
+  "title": "last-distill.json",
+  "description": "Runtime marker written by /distill after each invocation. Codex writes $HOME/.codex/last-distill.json; Claude Code writes $HOME/.claude/last-distill.json. Read by /distill for same-session dedup and by explicit analysis workflows such as /gather-claude.",
+  "type": "object",
+  "required": ["session_id", "timestamp", "lesson_count", "lessons"],
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "description": "Canonical session id at write time: CODEX_THREAD_ID in Codex; CLAUDE_CODE_SESSION_ID in Claude Code, with legacy CLAUDE_SESSION_ID fallback. The literal 'unknown' if none is set."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp (datetime.now(timezone.utc).isoformat()). Used by /distill's same-session dedup gate to skip messages older than 2 hours."
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Session metrics from distill Step 1b. Values are typically integers (turn counts, file counts), but freeform strings like '$3 (vs $20 plan)' or '~3.5hr' are allowed for diagnostic context. Readers treat unknown fields as opaque.",
+      "additionalProperties": {"type": ["integer", "string", "number"]}
+    },
+    "lesson_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of lessons in this run. MUST equal len(lessons)."
+    },
+    "lessons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "tier", "target"],
+        "properties": {
+          "title": {"type": "string"},
+          "tier": {"type": "string", "pattern": "^(T[0-5](-hook|-startup|-ci)?|SKILL-ROUTED)$"},
+          "target": {"type": "string"},
+          "friction": {
+            "type": "string",
+            "enum": ["tool-failure", "skill-misfire", "rule-gap", "rule-overload", "context-waste", "permission-gap", "missing-capability"]
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

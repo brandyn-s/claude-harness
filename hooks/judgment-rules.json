@@ -1,0 +1,52 @@
+{
+  "_meta": {
+    "purpose": "Middle-tier enforcement for JUDGMENT_SOFT patterns — failure modes that recur at 12-40% breadth across the local session corpus (measured 2026-06-21, mega-distill corpus-mode) yet CANNOT be caught by a tool-call hook because they are judgments, not mechanical command shapes. The corpus showed these already have ambient rules that under-enforce under cognitive load (skills-over-rules). This hook injects the SPECIFIC judgment reminder when the relevant work-type is detected in a user prompt — the in-context middle tier between hard hooks (mechanical) and ambient rules (always-on, ignorable).",
+    "source": "knowledge-base/plans/2026-06-20-mega-distill-corpus-mode-report.md + the actionability triage",
+    "design": "data-driven like skill-rules.json: add a pattern = add an entry, no code edit. fail-silent, non-blocking, one reminder per prompt (the highest-breadth match), logged for effectiveness audit.",
+    "h2_validation": "the patterns were confirmed NOT to be a rule-anchoring artifact — a blind vocabulary-neutral re-extract (12-session control) independently reproduced 95% of the same clusters."
+  },
+  "rules": [
+    {
+      "id": "prove-the-instrument",
+      "breadth_pct": 40,
+      "triggers": ["accuracy", "is it clean", "no findings", "is it complete", "is it benign", "consensus", "sentiment", "is the scan complete", "comprehensive", "did we catch", "is that all", "how reliable", "is it correct", "verify the number", "is it actually clean"],
+      "reminder": "PROVE THE INSTRUMENT (recurs in ~40% of large sessions): before publishing any measured/audited number or 'clean/complete/benign' verdict, validate the instrument — confirm the cursor/page is exhausted (one page is never 'complete'), confirm no field was silently dropped or capped, and for perception/consensus questions require >=2 independent instruments reconciled by ID. A number from an unvalidated tool is indistinguishable from a correct one. (verify-effectiveness.md / verify-instrument-before-fix.md)"
+    },
+    {
+      "id": "plumbing-not-outcome",
+      "breadth_pct": 15,
+      "triggers": ["is it working", "did it work", "is it done", "is this done", "is it fixed", "confirm it works", "ready to ship", "done and ready", "did the fix work", "is it actually", "prove it works", "is the feature done"],
+      "reminder": "OUTCOME, NOT PLUMBING (recurs in ~15% of large sessions; 3 corrections THIS session): 'tests pass / merged / Completed' is plumbing — it is NOT evidence the thing works. Completed != correct (admin-locked skips return exit 0; merged != live). Demonstrate the OUTCOME on real input — run the live path enough times to exercise each branch — before claiming done. (verify-effectiveness.md two-part validation)"
+    },
+    {
+      "id": "state-the-objective",
+      "breadth_pct": 17,
+      "triggers": ["what's the best approach", "what is the best approach", "should i exempt", "down-rank", "which option is better", "is this a good design", "recommend a strategy", "what should our", "how should we architect"],
+      "reminder": "STATE THE OPTIMIZATION TARGET FIRST (recurs in ~17% of large sessions): when a recommendation or grade depends on an unstated objective (security vs DR vs cost vs availability; one user vs a team), surface and CONFIRM the objective BEFORE designing or grading — do not silently optimize the most salient one. Multi-mode artifacts need per-mode rubrics. (red-team-rubric-discipline.md / grading-discipline.md)"
+    },
+    {
+      "id": "count-is-not-risk",
+      "breadth_pct": 12,
+      "triggers": ["how many findings", "how many vulnerabilities", "finding count", "how many exposures", "how risky", "risk level", "how many spill", "how bad is", "how many secrets"],
+      "reminder": "COUNT IS NOT RISK + ACCOUNT TO 100% (recurs in ~12% of large sessions): never present a raw finding/exposure COUNT as a risk measure — pair every count with its coverage/scan-status ('0 findings' on an INACTIVE resource is a blind spot, not a clean bill), and separate exploitable from best-practice-gap. Before stating any percentage, confirm the categories SUM to 100% of the measured total (no hand-waved remainder). (grading-discipline.md)"
+    },
+    {
+      "id": "enforcement-not-surface",
+      "breadth_pct": 13,
+      "triggers": ["what severity", "how severe", "is it exploitable", "world-readable", "over-permissioned", "is this exposed", "how critical is", "rate the severity", "is it publicly accessible"],
+      "reminder": "GRADE THE ENFORCEMENT MODEL, NOT THE OBSERVED SURFACE (recurs in ~13% of large sessions): before assigning a cloud-security finding's severity, identify the enforcement layer that could neutralize the observed surface (org SCP principal-exception, centralized root mgmt, account-level block-public-access overriding a bucket policy). Granted-scope != exercisable-capability; surface != effective. Read the runtime decision, not the prose/Description. (red-team-rubric-discipline.md / security-critical-search-verification.md)"
+    },
+    {
+      "id": "verify-vendor-behavior",
+      "breadth_pct": 31,
+      "triggers": ["does aws support", "does the api support", "is it supported by", "the docs say", "is it possible to", "does govcloud", "is that the default behavior", "does it allow", "according to the docs"],
+      "reminder": "VERIFY VENDOR BEHAVIOR BEFORE ASSERTING IT (recurs in ~31% of large sessions): a confident 'X behaves like Y' about a third-party system (IAM/policy semantics, API shape, region capability, default behavior) needs a 30-second source check or live probe — NOT training-knowledge confidence — especially when same-corpus evidence is already in front of you. Reconcile against any retrieved doc/KB before stating it. (verify-before-assuming.md)"
+    },
+    {
+      "id": "cross-every-seam",
+      "breadth_pct": 12,
+      "triggers": ["is it deployed", "fully deployed", "is it live", "is this live", "apply finished", "apply complete", "did it deploy", "is it in production", "did the apply", "is it actually deployed", "has it deployed", "is it running in prod"],
+      "reminder": "CROSS EVERY SEAM TO THE REAL SINK (recurs THIS session 4x: #528 investigate-query, #690 health date_diff, #693 brief-render, + the 'is it deployed?' loop): merged != applied != resource-updated != code-correct != RUNS-on-real-data. 'Green CI / merged / IAM-verified / unit-test-green' is NOT deployed — a unit test that STUBS the sink never crosses the seam that breaks (the bug lives in the seam: query-vs-real-schema, producer-vs-consumer, esp. CROSS-REPO mcp-servers<->mcp-infra). Verify with ONE real run that crosses every seam to the real sink (real Athena query against real data / real Lambda invoke / the deployed artifact's actual code / the consumer actually renders the producer's output), and for a deployed resource check the resource's own state (LastModified advanced, ResolvedImageUri == the commit), never the workflow's green check. (verify-effectiveness.md multi_seam invariant)"
+    }
+  ]
+}

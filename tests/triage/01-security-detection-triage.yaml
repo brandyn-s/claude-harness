@@ -1,0 +1,39 @@
+name: CrowdStrike critical detection triage
+skill: triage
+trigger: "/triage CrowdStrike critical"
+
+must_happen:
+  - Load topic files (security.md, crowdstrike.md) BEFORE any queries
+  - Check connectivity to CrowdStrike MCP
+  - Query with time filter (default last 24h) and reasonable limit
+  - Score each finding on 4 dimensions (severity 40%, asset criticality 25%, exposure 20%, context 15%)
+  - Check known patterns from topic memory and flag/deprioritize matches
+  - Extract structured summary table before correlation
+  - Correlate CRITICAL/HIGH findings across other tools (Tenable, Graph)
+  - Present triage table with composite scores and recommended actions
+  - Assign confidence levels (HIGH=2+ tools, MEDIUM=single + pattern, LOW=single ambiguous)
+
+must_not_happen:
+  - Query tools before loading topic files
+  - Execute write operations without user approval
+  - Skip severity scoring for any finding
+  - Present raw tool output without structured summary
+
+output_contains:
+  - Severity score table with composite column
+  - Recommended action per finding
+  - Confidence level per finding
+
+guards: []
+skip_ab: true
+
+
+# Deterministic assertions runnable by scripts/run-skill-evals.py
+deterministic:
+- frontmatter_equals:
+    name: triage
+- body_contains:
+  - Article
+  - severity
+- references_resolve: true
+- examples_count: '>=3'

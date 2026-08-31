@@ -1,0 +1,18 @@
+id: post-write-edit
+type: hook
+event: PostToolUse
+matcher: "Write|Edit"
+if_condition: null
+action_type: fixer
+description: "Consolidated Write/Edit hook: encoding check, py_compile, secret scan, ruff format, markdown fix, terraform fmt."
+enforces:
+  - platform-constraints
+blocks_patterns: []
+injects: null
+modifies: "file content (auto-format, encoding fixes)"
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "checks passed or auto-fixed"
+output_format: json
+incidents: []

@@ -1,0 +1,45 @@
+id: reproduce-before-optimize
+type: rule
+description: "On an empirical task with a known-working reference, the deliverable is a REPRODUCED number, not an analysis. Run the reference VERBATIM and confirm the metric before building your own version — reviewing/decoding a reference is not running it, and an approximation diverges silently."
+applies_to:
+  - "every EMPIRICAL task where the deliverable is a MEASURED metric (competition score, benchmark number, eval result, reproduction target)"
+  - "AND a known-working REFERENCE exists (public winning solution/notebook, shipped baseline, published SOTA, prior working run)"
+  - "fires hardest when a scarce/irreversible resource is spent to 'learn' (submission quota, paid eval run, deploy)"
+trigger_conditions:
+  - "stuck well below a public/known reference score"
+  - "impulse to build your own version after reading the reference"
+  - "about to spend a submission / paid run / deploy to see what happens"
+  - "a 'here's what we're doing wrong' theory with no reproduced number behind it"
+  - "flip-flopped 2+ times on 'the answer'"
+  - "about to declare a ceiling / plateau / diminishing returns"
+required_actions:
+  - "identify the deliverable METRIC and the known-working REFERENCE"
+  - "obtain the reference's ACTUAL artifact and run it VERBATIM; confirm it reproduces the metric in your environment"
+  - "if it reproduces, optimize from that baseline with MEASURED deltas, one change at a time"
+  - "if it does NOT reproduce, debug the env/reference delta — that gap IS the finding"
+  - "spend a scarce resource only on the verbatim reference or a cheaply pre-validated candidate"
+  - "before the next action, restate the just-made diagnosis and confirm the action obeys it"
+prohibited_actions:
+  - "build your own version after only reviewing/decoding the reference"
+  - "substitute an approximation that 'captures the key idea' for the exact reference"
+  - "claim an improvement with no reproduced baseline to measure against"
+  - "spend submission quota / paid runs / deploys to learn from an unverified premise"
+  - "present an unreproduced theory as a diagnosis rather than a hypothesis"
+  - "declare a ceiling or reachable frontier while a known-good reference is unreproduced"
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - date: "2026-07-05"
+    summary: "Kaggle JED: stuck at 7.5 vs public top ~95-100 with a public winning method in hand. Decoded pilkwang's 80,089-char / 2,152-line attack.py into a ~10-line approximation, dropping ~99.9% of the machinery — never ran theirs, so it timed out"
+    turns_wasted: 10
+    category: empirical
+  - date: "2026-07-07"
+    summary: "One turn after writing 'don't copy the number, size to budget', submitted cd-667 (blind N=667 extrapolated from pilkwang's env) — timed out. A diagnosis that did not gate the next action"
+    turns_wasted: 3
+    category: empirical
+  - date: "2026-07-24"
+    summary: "'Stop immediately assuming that you are reaching a ceiling or reachable frontier at the slightest inconvenience. In fact, I never want you to assume that' — the fortnight's most-repeated frustration, corrected ~4x across 3 sessions"
+    turns_wasted: 4
+    category: empirical
+created_date: "2026-07-07"
+last_validated: "2026-07-24"

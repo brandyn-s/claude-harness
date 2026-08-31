@@ -1,0 +1,8 @@
+# Golden fixture: MALFORMED worklist — violates the act-on format
+# (gate 1). The finding has no reproducer block at all and is missing
+# the severity/label fields, so the oracle loader cannot construct a
+# Finding from it.
+findings:
+  - skill: gather-repos
+    code: D2
+    description: finding with no reproducer block and missing fields

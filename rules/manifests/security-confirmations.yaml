@@ -1,0 +1,31 @@
+id: security-confirmations
+type: rule
+description: "Notify precisely for routine writes; require one named, bounded authorization envelope for high-risk operations and their completion evidence."
+applies_to:
+  - "state-changing security, identity, collaboration, provisioning, and approval operations"
+  - "credential-bearing reads"
+  - "standing-control weakening, permission bypass, production apply, and review gates"
+  - "outbound third-party writes and unattended remote action loops"
+trigger_conditions:
+  - "any covered write or credential-bearing read"
+  - "any named high-risk gate"
+  - "material source, plan, graph, account, authority, or safety drift"
+  - "a residual plan after a partial apply"
+required_actions:
+  - "name the exact tool, action, and target before or with routine writes"
+  - "verify effective state after destructive or consequential writes"
+  - "obtain explicit named authorization for control, deployment, review, bypass, or third-party gates"
+  - "within an unchanged authorization envelope, continue read-only checks, polling, receipts, and live readback without asking again"
+  - "re-ask only for material drift or before applying a residual plan after a partial apply"
+prohibited_actions:
+  - "claim an advisory notification proves consent"
+  - "self-approve authored or last-pushed changes"
+  - "route around a permission denial through another tool"
+  - "silently restore a blanket confirmation gate for routine writes"
+  - "ask again inside an unchanged authorization envelope"
+enforced_by:
+  - security-write-confirm
+enforcement_coverage: partial
+incidents: []
+created_date: "2026-02-15"
+last_validated: "2026-08-21"

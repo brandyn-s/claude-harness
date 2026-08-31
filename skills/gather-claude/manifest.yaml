@@ -1,0 +1,48 @@
+id: gather-claude
+type: skill
+description: "Sync architecture with Anthropic upstream — audits existing workarounds against CHANGELOG, searches GitHub issues/PRs, security advisories, docs, and first-party release-notes channels for new features, fixes, and deprecations, then presents verified findings for user approval."
+category: knowledge
+
+requires_tools:
+  - "Bash"
+  - "Read"
+  - "Write"
+  - "Edit"
+  - "Glob"
+  - "Grep"
+  - "mcp__exa__web_search_exa"
+  - "mcp__tavily__tavily_map"
+  - "mcp__tavily__tavily_extract"
+  - "mcp__tavily__tavily_search"
+  - "mcp__firecrawl__firecrawl_scrape"
+  - "AskUserQuestion"
+requires_topics:
+  - architecture.md
+requires_rules:
+  - platform-constraints
+  - subagent-verification
+  - web-search-preference
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    mode:
+      type: enum
+      required: false
+      description: "'full', 'since:YYYY-MM-DD', or focus area like 'hooks', 'MCP', 'agents'"
+  scope_from: argument
+output_contract:
+  produces: [anthropic_intelligence_report, workaround_audit, finding_list]
+  format: markdown_report
+
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "25-50"
+
+preconditions:
+  - "gh CLI authenticated with anthropics/claude-code repo access"
+  - "Tavily or Exa MCP available for web searches"
+guardrails: []
+threat_model: writes_local

@@ -1,0 +1,19 @@
+id: kql-schema-hint
+type: hook
+event: PreToolUse
+matcher: "mcp__remote-msgraph__call_tool"
+if_condition: "called tool is msgraph_run_hunting_query AND query has multi-column '| project' without a prior '| getschema' for that table this session"
+action_type: advisory
+description: "Soft systemMessage nudge (never blocks) toward running '<Table> | getschema' before Defender Advanced Hunting queries that project specific columns from a table not yet schema-checked this session. Session-scoped table memory comes from scanning the transcript JSONL for prior getschema calls."
+enforces: []
+blocks_patterns: []
+injects: "systemMessage hint to run '<Table> | getschema' first"
+modifies: null
+depends_on_files:
+  - "session transcript JSONL (read-only, for prior getschema detection)"
+depends_on_env: []
+exit_codes:
+  "0": "continue (with or without hint)"
+output_format: json
+incidents:
+  - "2026-05-28 retro RC1: session burned 3 wrong-from-memory KQL column names (RiskScore, RiskLevel, CvssScore) before running getschema; ambient msgraph.md guidance wasn't applied under conversational pressure"

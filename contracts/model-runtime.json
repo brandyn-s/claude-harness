@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 2,
+  "settingsDefaults": {
+    "requestedModel": "claude-fable-5[1m]",
+    "fallbackModels": [
+      "claude-opus-5[1m]"
+    ],
+    "requestedEffort": "high",
+    "switchModelsOnFlag": true,
+    "effectiveModel": "runtime-unknown",
+    "effectiveEffort": "runtime-unknown"
+  },
+  "entrypoints": [
+    {
+      "id": "repository-settings-default",
+      "owner": "claude-config",
+      "provider": "runtime-resolved",
+      "modelSource": "settings.json:model",
+      "contextClass": "runtime-resolved",
+      "retentionClass": "account-and-model-contract-required",
+      "retentionEvidence": "The global default is 1P-format by invariant (2026-08-18: provider-prefixed IDs live only in launcher exports); provider, account, and retention remain runtime-verified facts."
+    },
+    {
+      "id": "external-shell-launchers",
+      "owner": "iterm-config",
+      "provider": "entrypoint-specific",
+      "modelSource": "external:ANTHROPIC_MODEL",
+      "contextClass": "runtime-resolved",
+      "retentionClass": "provider-and-account-contract-required",
+      "retentionEvidence": "external launcher and provider contract must be verified independently"
+    },
+    {
+      "id": "cui-bedrock-govcloud-project",
+      "owner": "claude-config",
+      "provider": "aws-bedrock-govcloud",
+      "modelSource": "templates/cui-bedrock-govcloud/settings.json:env.ANTHROPIC_MODEL",
+      "contextClass": "1m-pinned",
+      "retentionClass": "organization-cloud-contract",
+      "retentionEvidence": "templates/cui-bedrock-govcloud/README.md"
+    }
+  ],
+  "requiredReceiptFields": [
+    "requestedModel",
+    "effectiveModel",
+    "requestedEffort",
+    "effectiveEffort",
+    "provider",
+    "entrypoint",
+    "contextClass",
+    "switchReason",
+    "refusalState",
+    "cliVersion"
+  ],
+  "receiptContract": {
+    "schemaVersion": 3,
+    "object": "runtime_provenance",
+    "unknownValue": "runtime-unknown",
+    "capturePhases": {
+      "SessionStart": [
+        "effectiveModel"
+      ],
+      "SessionEnd": [],
+      "transcriptEnrichment": [
+        "requestedModel",
+        "effectiveModel",
+        "switchReason",
+        "refusalState",
+        "cliVersion"
+      ]
+    },
+    "limitations": "SessionEnd exposes reason plus common hook fields only. Requested/effective effort, provider, entrypoint, and context class remain runtime-unknown unless a separate authoritative runtime event supplies them."
+  }
+}

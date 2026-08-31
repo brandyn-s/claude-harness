@@ -1,0 +1,17 @@
+skill: audit-architecture
+name: audit-architecture deterministic invariants
+trigger: /audit-architecture
+must_happen:
+- Phase 0 runtime health gates run before Phase 1
+- Phase 7 oracle self-challenge prevents false closure
+- All 8 dimensions evaluated with documented criteria
+deterministic:
+- frontmatter_equals:
+    name: audit-architecture
+- body_contains:
+  - Phase 0
+  - Phase 7
+  - oracle
+# references_resolve skipped: audit-architecture intentionally cites
+# references/search-waves.md inside an audit-example block (synthetic fixture).
+- examples_count: '>=2'

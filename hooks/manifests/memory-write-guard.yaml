@@ -1,0 +1,20 @@
+id: memory-write-guard
+type: hook
+event: PreToolUse
+matcher: "Write|Edit"
+if_condition: null
+action_type: guard
+description: "Blocks prompt injection patterns and oversized entries in memory file writes (ASI06)."
+enforces: []
+blocks_patterns:
+  - "injection patterns in memory entries"
+  - "entries exceeding 2500 chars"
+injects: null
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "allow (non-memory files pass through)"
+  "2": "block (injection detected or oversized)"
+output_format: json
+incidents: []

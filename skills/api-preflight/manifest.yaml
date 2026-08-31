@@ -1,0 +1,44 @@
+id: api-preflight
+type: skill
+description: "Extracts authentication requirements, permission scopes, token types, and constraint chains before writing code against an API."
+category: knowledge
+
+requires_tools:
+  - AskUserQuestion
+  - Bash
+  - Read
+  - mcp__codebase-memory-mcp__search_code
+  - mcp__firecrawl__firecrawl_agent
+  - mcp__firecrawl__firecrawl_agent_status
+  - mcp__firecrawl__firecrawl_extract
+  - mcp__memory-search__memory_search
+requires_topics: []
+requires_rules:
+  - api-doc-lookup
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    api_name:
+      type: string
+      required: true
+      description: "Name of the API to check constraints for"
+    use_case:
+      type: string
+      required: true
+      description: "Description of the intended API usage"
+  scope_from: argument
+output_contract:
+  produces: [constraint_map, permission_table, constraint_chains, preflight_checklist]
+  format: markdown_report
+
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "5-12"
+
+preconditions:
+  - API docs indexed in code-search (recommended)
+guardrails: []
+threat_model: writes_local

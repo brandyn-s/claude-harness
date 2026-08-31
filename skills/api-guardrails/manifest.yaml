@@ -1,0 +1,30 @@
+id: api-guardrails
+type: skill
+description: "Checklists for reducing hallucinations and increasing output consistency in Claude API applications, system prompts, and prompt pipelines."
+category: knowledge
+
+requires_tools: ["Glob", "Grep", "Read"]
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    target:
+      type: string
+      required: false
+      description: "System prompt or code file to review"
+  scope_from: argument
+output_contract:
+  produces: [checklist_assessment, recommendations]
+  format: markdown_report
+
+side_effects: [none]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "3-8"
+
+preconditions: []
+guardrails: []
+threat_model: read_only

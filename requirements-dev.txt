@@ -1,0 +1,10 @@
+# Test + lint dependencies. Install with:
+#   pip install -r requirements-dev.txt
+#
+# These are the libraries the hook scripts and tests import at runtime
+# beyond the Python stdlib. CI installs them in .github/workflows/validate.yml.
+
+pyyaml        # hooks/rule_context_budget.py, hooks/skill-routing-hint.py, manifests/compile.py
+openpyxl      # hooks/xlsx-to-md.py + test_xlsx_to_md.py
+pytest        # hooks/test-hooks/, skills/*/tests/, scripts/test_chatgpt.py
+requests      # scripts/chatgpt.py + scripts/test_chatgpt.py

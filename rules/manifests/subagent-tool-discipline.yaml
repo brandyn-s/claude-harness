@@ -1,0 +1,42 @@
+id: subagent-tool-discipline
+type: rule
+description: "Subagent-side discipline: never cite specific line numbers from un-read portions of truncated Reads; emit explicit INSUFFICIENT_CONTEXT on overflow, not silent termination. Distinct from subagent-verification.md (parent-side)."
+applies_to:
+  - "every Agent dispatch where subagent makes Read calls"
+  - "subagent citations of specific lines/functions/types"
+  - "subagent handling of 'Prompt is too long' / context-overflow errors"
+trigger_conditions:
+  - "subagent about to cite a line number, function name, type, or specific source reference"
+  - "any tool call returns 'Prompt is too long' or context-overflow"
+  - "Read output shows truncation indicators '(... N lines truncated ...)'"
+required_actions:
+  - "before citing line numbers: confirm Read covered that content; re-read if needed"
+  - "if Read truncated and finding cites un-read portion: re-read OR note 'partial scope, lines N-M only'"
+  - "on context overflow: STOP, emit final report with structure: Attempted/Completed/Failed at/Not attempted"
+  - "list skipped sections explicitly (parent cannot infer them)"
+prohibited_actions:
+  - "cite specific line numbers without reading those lines"
+  - "report findings when Read output was truncated without disclosure"
+  - "terminate silently after 'Prompt is too long' or context overflow"
+  - "assume parent knows what was skipped"
+  - "continue 'best effort' work after context overflow (next attempt also fails)"
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - date: "2026-04-29"
+    summary: "Exp 6 MAST mode 3.1: 6 of 15 failing traces (40%) silent-terminated on 'Prompt is too long' early in dispatch; parent received apparently-successful empty result"
+    turns_wasted: 6
+    category: subagent
+  - date: "2026-04-29"
+    summary: "Exp 6 MAST mode 3.2: 4 of 15 failing traces (27%) cited line numbers past line 10 in long files where only first ~10 lines were read; inferred citations presented as verified"
+    turns_wasted: 4
+    category: subagent
+created_date: "2026-04-29"
+last_validated: "2026-05-12"
+# RELOCATED 2026-08-26: source is skills/_shared/subagent-tool-discipline.md and
+# delivery is the SubagentStart hook (hooks/subagent-start-context.py), which fires
+# before the child's first tool call. NOT ambient. Manifest KEPT so the
+# requires_rules dependencies in verify-search-result and audit-fix stay declared.
+source: skills/_shared/subagent-tool-discipline.md
+ambient: false
+delivered_by: subagent-start-context.py

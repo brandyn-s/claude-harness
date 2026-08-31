@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "topic-checksums",
+  "title": "topic-checksums.json",
+  "description": "SHA-256 integrity baseline for agent-memory topic files. Written by hooks/subagent-stop.py after a legitimate auto-capture. Verified by session-start checks against tampering (red-team remediation, 2026-03-04).",
+  "type": "object",
+  "additionalProperties": {
+    "type": "string",
+    "pattern": "^[a-f0-9]{64}$",
+    "description": "Lowercase hex SHA-256 digest of the topic file's UTF-8 bytes."
+  }
+}

@@ -1,0 +1,14 @@
+# Golden fixture: a dispatchable act-on worklist. All three Step-0
+# gates pass when the test pairs this with a fresh Layer-A trace
+# record (the trace cannot be a static fixture — a frozen timestamp
+# would age past the 30-minute TTL, which is exactly what gate 2
+# rejects; tests generate it at runtime).
+findings:
+  - skill: gather-repos
+    code: D2
+    severity: drift
+    label: behavior-fix
+    description: SKILL.md cites scripts/sync.py but the script is missing
+    reproducer:
+      type: grep
+      command: grep -q 'scripts/sync.py' skills/gather-repos/SKILL.md

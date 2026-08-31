@@ -1,0 +1,40 @@
+id: eval-shipping-discipline
+type: rule
+description: "Ship decisions on metric deltas (MRR/HR@1/recall/precision/F1) require bootstrap CI on per-query data, not just policy thresholds. Both off-mode and production-mode must validate."
+applies_to:
+  - "production default changes driven by an eval metric"
+  - "fusion weight changes / hybrid retrieval params"
+  - "rerank toggles affecting ranking stack"
+  - "any PR claiming 'X beats Y by N pp'"
+trigger_conditions:
+  - "proposing a ship based on aggregate metric delta"
+  - "claiming significance from a policy-threshold pass"
+  - "rerank=off result used to justify rerank=on default change"
+required_actions:
+  - "verify per-query data is saved by the eval script (fix script first if not)"
+  - "compute paired bootstrap CI (n_bootstraps >= 10000) on the metric delta"
+  - "report 95% CI [lo, hi] and 'excludes zero' verdict"
+  - "run production-stack verification at rerank=on if production uses rerank=on"
+  - "include point estimate + CI bounds + n_bootstraps in PR description"
+prohibited_actions:
+  - "ship default change because metric cleared policy threshold alone"
+  - "ship at rerank=off when production runs rerank=on (without re-verification)"
+  - "skip bootstrap CI as 'overkill' for ship decisions"
+  - "ship past the production-stack gate due to API throughput blocking"
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - date: "2026-05-06"
+    summary: "Policy threshold +0.005 met, but bootstrap CI [+0.0033, +0.0278] from same per-query data was the trustworthy gate"
+    turns_wasted: 0
+    category: measurement
+  - date: "2026-05-06"
+    summary: "Pattern 3 gap: eval scripts not saving per-query data forced fresh API re-run for bootstrap CI"
+    turns_wasted: 1
+    category: instrumentation
+  - date: "2026-05-06"
+    summary: "Off-mode and production-stack divergence: rerank-off delta can be equalized OR amplified by rerank-on; verify both"
+    turns_wasted: 0
+    category: measurement
+created_date: "2026-05-06"
+last_validated: "2026-05-12"

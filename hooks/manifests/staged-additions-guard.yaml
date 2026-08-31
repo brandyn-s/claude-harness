@@ -1,0 +1,25 @@
+id: staged-additions-guard
+type: hook
+event: PreToolUse
+matcher: "Bash"
+if_condition: "Bash(git commit*)"
+action_type: guard
+description: "BLOCK `git commit` when staged ADDITIONS (X=='A') coexist with unstaged MODIFICATIONS (Y=='M') — the PR #317 forgot-to-stage signature where new files are staged but edits to tracked files are silently dropped from the commit."
+enforces:
+  - git-hygiene
+blocks_patterns:
+  - "git commit with staged additions while tracked-file modifications remain unstaged"
+injects: null
+modifies: null
+depends_on_files: []
+depends_on_env:
+  - "CLAUDE_GIT_COMMIT_ALLOW_PARTIAL"
+exit_codes:
+  "0": "allow (no staged-A + unstaged-M coexistence, auto-staging shapes like -a/-am/--all, --amend/--allow-empty, or bypassed via CLAUDE_GIT_COMMIT_ALLOW_PARTIAL=1)"
+  "2": "block (staged additions coexist with unstaged modifications)"
+output_format: json
+incidents:
+  - date: "2026-05-14"
+    summary: "git add <specific paths> staged only new files; 4 modified tracked files silently dropped from PR #317 — gate script was dead code on main until follow-up PR #318"
+    turns_wasted: 4
+    category: git-hygiene

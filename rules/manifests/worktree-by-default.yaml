@@ -1,0 +1,38 @@
+id: worktree-by-default
+type: rule
+description: "Non-trivial work runs in a dedicated worktree. Uncommitted experimental files in the main checkout can vanish from hook firings, post-merge cleanup, branch deletion side effects, and post-checkout hooks. Worktree setup ~5s; recovery from wiped uncommitted files = hours plus API spend."
+applies_to:
+  - "every non-trivial coding or experimentation task in a git repo"
+  - "multi-step refactors / experiments with intermediate artifacts"
+  - "long-running scripts that produce in-progress state"
+  - "work with API spend or >60s compute"
+  - "cross-repo writes from inside a worktree (plan/report/output to second repo)"
+trigger_conditions:
+  - "starting any non-trivial work (>5 file edits, multi-step, follow-on phases possible)"
+  - "writing to a different repo's main checkout from within a worktree"
+  - "running a script that produces intermediate artifacts"
+required_actions:
+  - "evaluate task: multi-file? intermediate artifacts? scripts >60s? multi-commit? api spend?"
+  - "create worktree with home/absolute macOS path: git -C <repo> worktree add ~/worktrees/<repo>-<topic> -b <type>/<short-desc> (or use the EnterWorktree tool)"
+  - "cd into worktree, do ALL work there"
+  - "commit + push from worktree; PR + auto-merge as usual"
+  - "after PR merges: git worktree remove from main checkout"
+  - "cross-repo writes: write + cd to other repo + branch + commit + push + PR + auto-merge in SAME turn"
+prohibited_actions:
+  - "edit in main checkout for non-trivial work because 'worktree is overkill'"
+  - "rely on 'I'll commit before any cleanup runs' — hook firing timing unknown"
+  - "[WINDOWS-ONLY, inactive on macOS] use /c/path with git worktree add (Git Bash mangles to C:/c/...); on macOS ~/path and $HOME/path are correct"
+  - "write a plan/report/output file to repo B's main checkout while continuing work in repo A's worktree (commit in same turn or use temp location)"
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - date: "2026-05-04"
+    summary: "A4 multi-query experiment in code-search: 3 uncommitted files vanished mid-experiment when PR #96 auto-merged with --delete-branch (~$1 API + 30 min compute lost)"
+    turns_wasted: 4
+    category: data-loss
+  - date: "2026-05-06"
+    summary: "plan-file-vanish: wrote plan to knowledge-base/plans/ from inside code-graph worktree, continued working 30 min; file vanished. Recreate cost ~5 min + 1 PR to knowledge-base"
+    turns_wasted: 2
+    category: data-loss
+created_date: "2026-05-04"
+last_validated: "2026-05-12"

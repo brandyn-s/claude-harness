@@ -1,0 +1,13 @@
+# Golden fixture: NO-TRACE worklist (gate 3). Well-formed, but the
+# finding it references has no Layer-A trace record (act-on was never
+# run against it), so gate 3 (no-trace) must trip.
+findings:
+  - skill: scout-skills
+    code: D4
+    severity: drift
+    label: behavior-fix
+    description: verify_skip.py quorum threshold contradicts the prose
+    reproducer:
+      type: bash
+      command: grep -c 'quorum' skills/scout-skills/scripts/verify_skip.py
+      expected_exit: 0

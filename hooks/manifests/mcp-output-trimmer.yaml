@@ -1,0 +1,18 @@
+id: mcp-output-trimmer
+type: hook
+event: PostToolUse
+matcher: ""
+if_condition: null
+action_type: fixer
+description: "Trims oversized MCP tool output to prevent context budget exhaustion."
+enforces:
+  - search-efficiency
+blocks_patterns: []
+injects: null
+modifies: tool_output
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "Output within limits or trimmed"
+output_format: plaintext
+incidents: []

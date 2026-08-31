@@ -1,0 +1,577 @@
+# Calibration set for the audit-skill oracle. 30 labeled findings:
+# 15 expected_fires: true (Layer A should return STILL-FIRES)
+# 15 expected_fires: false (Layer A should return STALE — bug-shaped
+#                           but the predicate should NOT match)
+#
+# Each finding has a deterministic reproducer pointing into one of
+# the two calibration fixtures:
+#   true_fixture/   — contains the bugs the calibration targets
+#   false_fixture/  — contains bug-shaped-but-correct patterns
+#
+# TPR = correct STILL-FIRES on expected_fires=true / total expected_fires=true
+# TNR = correct STALE on expected_fires=false / total expected_fires=false
+#
+# The oracle is calibrated for autonomous use when TPR >= 0.95 and
+# TNR >= 0.80 (the documented floor; lower TNR means too many false
+# positives bleeding into fix-task lists). See SPEC.md §"Calibration".
+
+findings:
+  # ===== 15 known-true =====
+  - skill: true-fixture
+    code: H1
+    severity: drift
+    label: behavior-fix
+    description: Phantom citation to references/missing-ref.md
+    expected_fires: true
+    reproducer:
+      type: grep
+      command: |
+        grep -q 'references/missing-ref.md' skills/audit-skill/tests/golden-findings/calibration/true_fixture/SKILL.md && \
+          test ! -e skills/audit-skill/tests/golden-findings/calibration/true_fixture/references/missing-ref.md
+
+  - skill: true-fixture
+    code: T1
+    severity: drift
+    label: behavior-fix
+    description: Phantom MCP tool reference
+    expected_fires: true
+    reproducer:
+      type: grep
+      command: |
+        grep -q 'mcp__code-graph__index_status' skills/audit-skill/tests/golden-findings/calibration/true_fixture/SKILL.md
+
+  - skill: true-fixture
+    code: P1
+    severity: drift
+    label: behavior-fix
+    description: Unresolved {baseDir} placeholder OUTSIDE backticks
+    expected_fires: true
+    reproducer:
+      type: bash
+      command: |
+        grep -nE '\{baseDir\}' skills/audit-skill/tests/golden-findings/calibration/true_fixture/SKILL.md | \
+          grep -v '`' >/dev/null
+      expected_exit: 0
+
+  - skill: true-fixture
+    code: P1
+    severity: drift
+    label: behavior-fix
+    description: <your-claude-project> placeholder outside backticks
+    expected_fires: true
+    reproducer:
+      type: bash
+      command: |
+        grep -nE '<your-claude-project>' skills/audit-skill/tests/golden-findings/calibration/true_fixture/SKILL.md | \
+          grep -v '`' >/dev/null
+      expected_exit: 0
+
+  - skill: true-fixture
+    code: D3a
+    severity: drift
+    label: behavior-fix
+    description: Bash command references nonexistent script
+    expected_fires: true
+    reproducer:
+      type: bash
+      command: |
+        grep -q '/usr/bin/nonexistent-script.py' skills/audit-skill/tests/golden-findings/calibration/true_fixture/SKILL.md && \
+          test ! -e /usr/bin/nonexistent-script.py
+      expected_exit: 0
+
+  - skill: true-fixture
+    code: D3b
+    severity: drift
+    label: behavior-fix
+    description: Non-canonical CLAUDE_SKILL_DIR prefix
+    expected_fires: true
+    reproducer:
+      type: grep
+      command: |
+        grep -q 'CLAUDE_SKILL_DIR' skills/audit-skill/tests/golden-findings/calibration/true_fixture/SKILL.md
+
+  - skill: true-fixture
+    code: C2
+    severity: info
+    label: doc-fix
+    description: Hardcoded /tmp/ path in bash docs
+    expected_fires: true
+    reproducer:
+      type: grep
+      command: |
+        grep -qE '/tmp/calibration' skills/audit-skill/tests/golden-findings/calibration/true_fixture/SKILL.md
+
+  - skill: true-fixture
+    code: M1
+    severity: info
+    label: doc-fix
+    description: argument-hint brackets `[X]` but no manifest required field set
+    expected_fires: true
+    reproducer:
+      type: grep
+      command: |
+        grep -q 'argument-hint: "\[X\]"' skills/audit-skill/tests/golden-findings/calibration/true_fixture/SKILL.md
+
+  - skill: true-fixture
+    code: M2
+    severity: info
+    label: doc-fix
+    description: Unused MCP tool in allowed-tools (mcp__unused-tool__never_called)
+    expected_fires: true
+    reproducer:
+      type: bash
+      command: |
+        if grep -q 'mcp__unused-tool__never_called' skills/audit-skill/tests/golden-findings/calibration/true_fixture/SKILL.md; then
+          body_count=$(grep -c 'never_called' skills/audit-skill/tests/golden-findings/calibration/true_fixture/SKILL.md)
+          if [ "$body_count" -le 1 ]; then exit 0; else exit 1; fi
+        else
+          exit 1
+        fi
+      expected_exit: 0
+
+  - skill: true-fixture
+    code: H1
+    severity: drift
+    label: behavior-fix
+    description: Cited references/missing-ref.md does not exist on disk
+    expected_fires: true
+    reproducer:
+      type: file_missing
+      path: skills/audit-skill/tests/golden-findings/calibration/true_fixture/references/missing-ref.md
+
+  - skill: true-fixture
+    code: T1
+    severity: drift
+    label: behavior-fix
+    description: known-phantom mcp__code-graph__index_status appears in frontmatter allowed-tools
+    expected_fires: true
+    reproducer:
+      type: grep
+      command: |
+        grep -q 'allowed-tools:.*mcp__code-graph__index_status' skills/audit-skill/tests/golden-findings/calibration/true_fixture/SKILL.md
+
+  - skill: true-fixture
+    code: P1
+    severity: drift
+    label: behavior-fix
+    description: Placeholder string appears in body prose (not inside fenced code or backticks)
+    expected_fires: true
+    reproducer:
+      type: bash
+      command: |
+        awk '/^```/ {inblock = !inblock; next} !inblock && /\{baseDir\}/ {found=1} END {exit !found}' \
+          skills/audit-skill/tests/golden-findings/calibration/true_fixture/SKILL.md
+      expected_exit: 0
+
+  - skill: true-fixture
+    code: D3a
+    severity: drift
+    label: behavior-fix
+    description: Bash references /usr/bin/nonexistent-script.py
+    expected_fires: true
+    reproducer:
+      type: file_missing
+      path: /usr/bin/nonexistent-script.py
+
+  - skill: true-fixture
+    code: Q3
+    severity: info
+    label: doc-fix
+    description: Description mentions calibration but the body header is missing the substring "Do NOT use for"
+    expected_fires: true
+    reproducer:
+      type: bash
+      command: |
+        # The frontmatter description includes "Do NOT use for"; the BODY does not have a "When NOT to use" section.
+        if grep -qE '^## When NOT' skills/audit-skill/tests/golden-findings/calibration/true_fixture/SKILL.md; then
+          exit 1
+        fi
+        exit 0
+      expected_exit: 0
+
+  - skill: true-fixture
+    code: M1
+    severity: info
+    label: doc-fix
+    description: argument-hint uses optional bracket form
+    expected_fires: true
+    reproducer:
+      type: grep
+      command: |
+        grep -qE 'argument-hint: "\[' skills/audit-skill/tests/golden-findings/calibration/true_fixture/SKILL.md
+
+  # ===== 15 known-false (bug-shaped but benign) =====
+  - skill: false-fixture
+    code: P1
+    severity: drift
+    label: behavior-fix
+    description: "{baseDir} appears ONLY inside backticks — false positive risk if reproducer is too narrow"
+    expected_fires: false
+    reproducer:
+      type: bash
+      command: |
+        awk '/^```/ {inblock = !inblock; next} !inblock && /\{baseDir\}/ {match_line=NR; line=$0; for (i = 1; i <= length(line); i++) { c = substr(line, i, 1); if (c == "`") inbt = !inbt; if (substr(line, i, 9) == "{baseDir}" && !inbt) found=1 } } END {exit !found}' \
+          skills/audit-skill/tests/golden-findings/calibration/false_fixture/SKILL.md
+      expected_exit: 0
+
+  - skill: false-fixture
+    code: P1
+    severity: drift
+    label: behavior-fix
+    description: <your-project> appears in backticked example — should NOT fire
+    expected_fires: false
+    reproducer:
+      type: bash
+      command: |
+        awk '/^```/ {inblock = !inblock; next} !inblock && /<your-project>/ {line=$0; for (i = 1; i <= length(line); i++) { c = substr(line, i, 1); if (c == "`") inbt = !inbt; if (substr(line, i, 13) == "<your-project>" && !inbt) found=1 } } END {exit !found}' \
+          skills/audit-skill/tests/golden-findings/calibration/false_fixture/SKILL.md
+      expected_exit: 0
+
+  - skill: false-fixture
+    code: H1
+    severity: drift
+    label: behavior-fix
+    description: references/details.md DOES exist — should NOT fire
+    expected_fires: false
+    reproducer:
+      type: file_missing
+      path: skills/audit-skill/tests/golden-findings/calibration/false_fixture/references/details.md
+
+  - skill: false-fixture
+    code: T1
+    severity: drift
+    label: behavior-fix
+    description: known-phantom mentioned only in prose-about-the-registry, NOT as a tool invocation
+    expected_fires: false
+    reproducer:
+      type: grep
+      command: |
+        grep -qE '^allowed-tools:.*mcp__code-graph__index_status' skills/audit-skill/tests/golden-findings/calibration/false_fixture/SKILL.md
+
+  - skill: false-fixture
+    code: C2
+    severity: info
+    label: doc-fix
+    description: /tmp/ appears only inside a comment line — should NOT fire
+    expected_fires: false
+    reproducer:
+      type: bash
+      command: |
+        # Look for /tmp/ on a non-comment bash line
+        awk '/^```bash/ {inb=1; next} /^```/ {inb=0; next} inb && !/^[[:space:]]*#/ && /\/tmp\// {f=1} END {exit !f}' \
+          skills/audit-skill/tests/golden-findings/calibration/false_fixture/SKILL.md
+      expected_exit: 0
+
+  - skill: false-fixture
+    code: D3a
+    severity: drift
+    label: behavior-fix
+    description: bash references `echo "safe-line"` only — no script invocation, so no missing-script
+    expected_fires: false
+    reproducer:
+      type: grep
+      command: |
+        grep -qE '^\s*python\s+/usr/bin/' skills/audit-skill/tests/golden-findings/calibration/false_fixture/SKILL.md
+
+  - skill: false-fixture
+    code: D3b
+    severity: drift
+    label: behavior-fix
+    description: No CLAUDE_SKILL_DIR placeholder — should NOT fire
+    expected_fires: false
+    reproducer:
+      type: grep
+      command: |
+        grep -q 'CLAUDE_SKILL_DIR' skills/audit-skill/tests/golden-findings/calibration/false_fixture/SKILL.md
+
+  - skill: false-fixture
+    code: M2
+    severity: info
+    label: doc-fix
+    description: All allowed-tools (Bash, Read) are used — no dead declaration
+    expected_fires: false
+    reproducer:
+      type: bash
+      command: |
+        # Look for any MCP tool in allowed-tools (false_fixture only has Bash + Read = builtins)
+        grep -qE 'allowed-tools:.*mcp__' skills/audit-skill/tests/golden-findings/calibration/false_fixture/SKILL.md
+
+  - skill: false-fixture
+    code: H1
+    severity: drift
+    label: behavior-fix
+    description: The cited references/details.md is present — should NOT fire
+    expected_fires: false
+    reproducer:
+      type: file_exists
+      path: skills/audit-skill/tests/golden-findings/calibration/false_fixture/references/nonexistent-ref.md
+
+  - skill: false-fixture
+    code: M1
+    severity: info
+    label: doc-fix
+    description: argument-hint uses required <X> form
+    expected_fires: false
+    reproducer:
+      type: grep
+      command: |
+        grep -qE 'argument-hint: "\[' skills/audit-skill/tests/golden-findings/calibration/false_fixture/SKILL.md
+
+  - skill: false-fixture
+    code: Q1
+    severity: info
+    label: doc-fix
+    description: Body is well under 5000 words
+    expected_fires: false
+    reproducer:
+      type: bash
+      command: |
+        wc -w < skills/audit-skill/tests/golden-findings/calibration/false_fixture/SKILL.md | awk '{exit ($1 > 5000) ? 0 : 1}'
+      expected_exit: 0
+
+  - skill: false-fixture
+    code: Q2
+    severity: drift
+    label: behavior-fix
+    description: Description under 1024 chars
+    expected_fires: false
+    reproducer:
+      type: bash
+      command: |
+        awk '/^description:/ {sub(/^description: /, ""); print length($0); exit}' \
+          skills/audit-skill/tests/golden-findings/calibration/false_fixture/SKILL.md | \
+          awk '{exit ($1 > 1024) ? 0 : 1}'
+      expected_exit: 0
+
+  - skill: false-fixture
+    code: Q3
+    severity: info
+    label: doc-fix
+    description: Description has "Do NOT use for" already
+    expected_fires: false
+    reproducer:
+      type: bash
+      command: |
+        ! grep -q 'Do NOT use for' skills/audit-skill/tests/golden-findings/calibration/false_fixture/SKILL.md
+      expected_exit: 0
+
+  - skill: false-fixture
+    code: C1
+    severity: drift
+    label: behavior-fix
+    description: No Python scripts to import fcntl — no POSIX-only issue
+    expected_fires: false
+    reproducer:
+      type: bash
+      command: |
+        find skills/audit-skill/tests/golden-findings/calibration/false_fixture/scripts -name "*.py" 2>/dev/null | head -1 | xargs -I {} grep -l "import fcntl" {} 2>/dev/null | head -1 | grep -q .
+      expected_exit: 0
+
+  - skill: false-fixture
+    code: H4
+    severity: drift
+    label: behavior-fix
+    description: No cross-skill citations in this fixture
+    expected_fires: false
+    reproducer:
+      type: grep
+      command: |
+        grep -qE '\b[a-z][a-z0-9-]+/references/' skills/audit-skill/tests/golden-findings/calibration/false_fixture/SKILL.md
+
+  # ===== ERROR pathway (added 2026-05-26) =====
+  # The pre-2026-05-25 oracle collapsed instrument failures (grep rc>=2,
+  # python SyntaxError, etc.) into STALE / STILL-FIRES. PR #979 and #981
+  # closed the conflation. These calibration entries pin the new contract:
+  # an ERROR-class predicate must observe ERROR — never STALE, never
+  # STILL-FIRES. A regression here means the conflation is back.
+  #
+  # Each entry sets `expected_status: ERROR`. The calibration test buckets
+  # these separately from expected_fires=true/false and asserts a TPR
+  # (correct ERROR classification) of 1.0. The control cases (intentional
+  # raise → STILL-FIRES, real no-match → STALE) live in the regular
+  # expected_fires=true/false sets above.
+
+  - skill: error-pathway
+    code: GREP_ERR
+    severity: drift
+    label: behavior-fix
+    description: grep reproducer with nonexistent file path → ERROR (rc=2)
+    expected_status: ERROR
+    reproducer:
+      type: grep
+      command: |
+        grep -q anything /nonexistent/path/that/does/not/exist.txt
+
+  - skill: error-pathway
+    code: GREPABSENT_ERR
+    severity: drift
+    label: behavior-fix
+    description: grep_absent reproducer with nonexistent file path → ERROR (rc=2)
+    expected_status: ERROR
+    reproducer:
+      type: grep_absent
+      command: |
+        grep -q anything /nonexistent/path/that/does/not/exist.txt
+
+  - skill: error-pathway
+    code: GREP_BAD_REGEX
+    severity: drift
+    label: behavior-fix
+    description: grep reproducer with malformed regex → ERROR (rc=2)
+    expected_status: ERROR
+    reproducer:
+      type: grep
+      command: |
+        grep -qE '[unclosed-char-class' skills/audit-skill/tests/golden-findings/calibration/findings.yaml
+
+  - skill: error-pathway
+    code: PY_SYNTAX_ERR
+    severity: drift
+    label: behavior-fix
+    description: python snippet with SyntaxError → ERROR (instrument failure, not predicate)
+    expected_status: ERROR
+    reproducer:
+      type: python
+      command: |
+        this is not valid python ::
+
+  - skill: error-pathway
+    code: PY_IMPORT_ERR
+    severity: drift
+    label: behavior-fix
+    description: python snippet with ModuleNotFoundError → ERROR (instrument failure)
+    expected_status: ERROR
+    reproducer:
+      type: python
+      command: |
+        import this_module_definitely_does_not_exist_xyzzy_calibration
+
+  - skill: error-pathway
+    code: PY_NAME_ERR
+    severity: drift
+    label: behavior-fix
+    description: python snippet with NameError (typo) → ERROR (instrument failure)
+    expected_status: ERROR
+    reproducer:
+      type: python
+      command: |
+        some_undefined_variable_that_does_not_exist_in_scope
+
+  # Control: intentional raise of RuntimeError IS a predicate result —
+  # must STILL stay STILL-FIRES even after the ERROR pathway lands.
+  # This guards against an over-correction that would route every
+  # rc!=0 python to ERROR.
+  - skill: error-pathway
+    code: PY_RAISE_CONTROL
+    severity: drift
+    label: behavior-fix
+    description: python intentional raise (RuntimeError) stays STILL-FIRES — author's predicate
+    expected_fires: true
+    reproducer:
+      type: python
+      command: |
+        raise RuntimeError("predicate fired — bug present")
+
+  # Control: rc=1 from grep "no match" stays STALE, not ERROR.
+  # Guards against the symmetric over-correction. Target an existing
+  # repo file (cross-platform: works on Linux container + Windows
+  # Git Bash) — /etc/hostname is Linux-only.
+  - skill: error-pathway
+    code: GREP_NOMATCH_CONTROL
+    severity: drift
+    label: behavior-fix
+    description: grep with no match stays STALE — predicate result, not error
+    expected_fires: false
+    reproducer:
+      type: grep
+      # Target false_fixture/SKILL.md (a small, stable fixture file
+      # whose content is known) instead of findings.yaml — the latter
+      # contains ALL calibration entries including this one, so any
+      # literal needle written here appears self-referentially and
+      # the grep matches itself.
+      command: |
+        grep -q "a-string-that-is-not-in-the-false-fixture-SKILL-md" skills/audit-skill/tests/golden-findings/calibration/false_fixture/SKILL.md
+
+  # ===== bash ERROR pathway (added 2026-05-26) =====
+  # Closes the third executable-reproducer conflation surface after
+  # grep (PR #979) and python (PR #981). The bash contract routes
+  # rc=126/127 and rc>=128 to ERROR — not STALE — distinguishing
+  # instrument failure (typo, missing binary, signal kill) from a
+  # legitimate "predicate didn't fire" result. See oracle/SPEC.md
+  # "Exit-code contract for bash".
+
+  - skill: error-pathway
+    code: BASH_COMMAND_NOT_FOUND
+    severity: drift
+    label: behavior-fix
+    description: bash with nonexistent command → ERROR (rc=127)
+    expected_status: ERROR
+    reproducer:
+      type: bash
+      command: |
+        this-command-definitely-does-not-exist-xyzzy-calibration arg1 arg2
+      expected_exit: 0
+
+  - skill: error-pathway
+    code: BASH_SIGNAL_KILL
+    severity: drift
+    label: behavior-fix
+    description: bash subprocess killed by signal → ERROR (rc>=128)
+    expected_status: ERROR
+    reproducer:
+      type: bash
+      # Kill self with SIGKILL → rc=128+9=137. The rc>=128 branch of
+      # the bash contract routes this to ERROR (the process died
+      # without returning a predicate result). The non-executable
+      # case (rc=126) is platform-dependent in Git Bash on Windows
+      # (bash tries to interpret the file as a shell script and
+      # returns rc=2 or rc=1 depending on content), so we exercise
+      # the signal path here instead — same routing target, more
+      # portable.
+      command: |
+        bash -c 'kill -KILL $$'
+      expected_exit: 0
+
+  # Control: when expected_exit IS the instrument-failure code (e.g.
+  # explicitly testing "command should not exist", expected_exit=127),
+  # the equality branch wins and STILL-FIRES is the right verdict.
+  # Guards against over-correction.
+  - skill: error-pathway
+    code: BASH_EXPECTED_127_CONTROL
+    severity: drift
+    label: behavior-fix
+    description: bash with expected_exit=127 testing command-absence stays STILL-FIRES
+    expected_fires: true
+    reproducer:
+      type: bash
+      command: |
+        this-command-definitely-does-not-exist-xyzzy-calibration
+      expected_exit: 127
+
+  # Control: real predicate result (rc=0 matching expected_exit=0)
+  # stays STILL-FIRES.
+  - skill: error-pathway
+    code: BASH_RC0_MATCHES_CONTROL
+    severity: drift
+    label: behavior-fix
+    description: bash rc=0 matching expected_exit=0 stays STILL-FIRES
+    expected_fires: true
+    reproducer:
+      type: bash
+      command: |
+        true
+      expected_exit: 0
+
+  # Control: rc=1 with expected_exit=0 stays STALE (legitimate
+  # predicate-doesn't-fire result, not an instrument failure).
+  - skill: error-pathway
+    code: BASH_RC1_NONMATCHING_CONTROL
+    severity: drift
+    label: behavior-fix
+    description: bash rc=1 (intentional false) with expected_exit=0 stays STALE
+    expected_fires: false
+    reproducer:
+      type: bash
+      command: |
+        false
+      expected_exit: 0

@@ -1,0 +1,49 @@
+id: api-ingest
+type: skill
+description: "Ingests API documentation from URLs, OpenAPI specs, PDFs, or Postman collections into ~/Documents/api-docs/ and indexes with codebase-memory-mcp for semantic retrieval."
+category: knowledge
+
+requires_tools:
+  - Agent
+  - Bash
+  - Glob
+  - Read
+  - Write
+  - mcp__codebase-memory-mcp__index_repository
+  - mcp__codebase-memory-mcp__index_status
+  - mcp__codebase-memory-mcp__search_code_semantic
+  - mcp__context7-docs__query-docs
+  - mcp__context7-docs__resolve-library-id
+  - mcp__firecrawl__*
+  - AskUserQuestion
+requires_topics: []
+requires_rules:
+  - api-doc-lookup
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    source:
+      type: string
+      required: true
+      description: "URL or local filepath to API docs"
+    name:
+      type: string
+      required: false
+      description: "API name (kebab-case) for output directory"
+  scope_from: argument
+output_contract:
+  produces: [reference_md, constraints_md, codebase_memory_index]
+  format: markdown_report
+
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "8-15"
+
+preconditions:
+  - ~/Documents/api-docs/ directory exists or can be created
+  - ~/Documents/api-docs/constraint_graph.py exists OR Phase 4.5a bootstrap writes the stub (see SKILL.md Phase 4.5a-bootstrap)
+guardrails: []
+threat_model: writes_local

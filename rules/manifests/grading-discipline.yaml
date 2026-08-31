@@ -1,0 +1,39 @@
+id: grading-discipline
+type: rule
+description: "Every system grade requires memory_search for stale docs, mtime-stamped source per metric, pre-registered rubric thresholds, and an axis table BEFORE the aggregate letter."
+applies_to:
+  - "any letter-grade or accuracy assessment of a measured system"
+  - "'is X working?' verdicts where user can't validate by reading"
+  - "code-graph / code-search grade requests"
+  - "STIG/SRG compliance grading"
+trigger_conditions:
+  - "producing a letter grade on a system the user asked about"
+  - "ranking system aspects against a rubric"
+  - "verdict-style output that downstream actions depend on"
+required_actions:
+  - "memory_search the system being graded BEFORE citing baselines"
+  - "sort candidate source docs by mtime; prefer newest authoritative state-doc"
+  - "pre-register rubric thresholds (per-axis, in the output)"
+  - "produce axis table FIRST; aggregate letter (if any) AFTER, with collapse rule named"
+  - "currency-stamp every metric [FRESH/STALE/OLD/UNKNOWN]"
+  - "separate 'what's open' (gap/leverage docs) from 'what's the state' (posture snapshots)"
+prohibited_actions:
+  - "produce a single letter grade without axis table"
+  - "skip memory_search because 'I trust the latest file-based doc'"
+  - "leave thresholds implicit ('they're obvious')"
+  - "omit freshness stamps on metric citations"
+  - "let adversarial-fixture floor drive aggregate grade (separate axes)"
+  - "cite a gap-inventory doc as if it were the state doc"
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - date: "2026-05-10"
+    summary: "code-graph grade: cited accuracy-gap-inventory.md as state doc; posture-snapshot.md (same day, 6h newer) had superseded the 17.6% HTTP_CALLS precision with 113-edge ~0% misresolution; 80%-stale grade published"
+    turns_wasted: 2
+    category: grading
+  - date: "2026-05-10"
+    summary: "Python aggregate D+ anchored on Flask adversarial F1=0.49; mcp-servers production F1=0.989 in same file unweighted; separate axes would have shown A on production"
+    turns_wasted: 1
+    category: grading
+created_date: "2026-05-11"
+last_validated: "2026-05-12"

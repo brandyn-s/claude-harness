@@ -1,0 +1,17 @@
+id: pre-agent-dispatch
+type: hook
+event: PreToolUse
+matcher: "Agent"
+if_condition: null
+action_type: injector
+description: "Warns when dispatching workers that reference authenticated remote MCPs. Non-blocking advisory."
+enforces: []
+blocks_patterns: []
+injects: "systemMessage warning about auth limitation"
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "continue with optional warning"
+output_format: json
+incidents: []

@@ -1,0 +1,31 @@
+id: supergoal-resume
+type: skill
+description: "Resume a paused supergoal loop. Verifies the plan SHA-256 still matches (refuses if tampered while paused), clears `paused_at` in the state file, and emits a `resumed` event. Trigger phrase: supergoal-resume. Do NOT use for starting a fresh loop (use /supergoal) or re-running a completed loop (use /supergoal --force-rerun)."
+category: orchestration
+
+requires_tools:
+  - Bash
+requires_topics: []
+requires_rules: []
+requires_skills:
+  - supergoal
+  - supergoal-pause
+  - superplan
+requires_auth: []
+
+input_contract:
+  parameters: {}
+  scope_from: none
+output_contract:
+  produces: [state_update]
+  format: text
+
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "1"
+
+preconditions:
+  - a paused supergoal arc exists with intact plan SHA-256
+guardrails: []
+threat_model: writes_local

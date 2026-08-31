@@ -1,0 +1,42 @@
+# Audit suppressions for manifest-gen.
+# See skills/audit-skill/SKILL.md for the schema.
+suppressions:
+  - code: A3
+    target: "coverage 100% across whole tree"
+    reason: |
+      Original Success Criteria advertised "100% for claude-config components".
+      Updated SKILL.md to describe 100% as aspirational (some upstream skills
+      and hooks like audit-skill, supergoal*, superplan*, and the
+      write-edit-dispatcher hook are intentionally unmanifested or out of
+      scope for manifest-gen to author). The reproducer greps for the
+      literal "100%" string in `query_engine.py coverage` output and will
+      continue to fire as long as components remain unmanifested by design.
+  - code: D4
+    target: "scaffold_extended.py absolute Path.home() paths"
+    reason: |
+      Reproducer greps KB_DIR/MCP_DIR/TF_DIR/SESSION_MANIFEST_DIR constants
+      in scaffold_extended.py to demonstrate they use absolute Path.home()
+      paths. That's correct and intentional — the fix was to update the
+      "Domains and Scaffolds" table in SKILL.md to show those absolute paths
+      explicitly (instead of misleading relative-looking paths). The
+      reproducer remains true after the doc fix because the code is
+      unchanged on purpose.
+  - code: F3
+    target: "compile.py semantic split into hard/soft"
+    reason: |
+      Reproducer greps for `sem_errors = [i` to demonstrate compile.py
+      splits semantic issues into MISSING_SOURCE (hard) and DRIFT (soft).
+      That split is correct and is now documented in SKILL.md Phase 3.
+      The reproducer remains true after the doc fix because the code is
+      unchanged on purpose.
+  - code: A3
+    target: "12% experiment citation"
+    reason: |
+      Unverified finding — the originally cited internal experiment artifact
+      is not preserved. Softened the SKILL.md language from "The experiment
+      showed that machine inference from prose gets dependencies wrong 12%
+      of the time" to "Historically observed: machine inference from prose
+      gets dependencies wrong often enough that a human read pass is
+      required ... treat the rate as 'non-negligible' rather than exact."
+      The manual reproducer asks for a supporting artifact; none exists, so
+      the doc has been adjusted instead.

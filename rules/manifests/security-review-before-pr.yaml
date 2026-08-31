@@ -1,0 +1,20 @@
+id: security-review-before-pr
+type: rule
+description: "Security review checklist before creating PRs -- SHA-pinned actions, secret scanning, dependency audit."
+applies_to:
+  - pr_creation
+  - ci_cd_changes
+trigger_conditions:
+  - creating_pr
+  - modifying_github_actions
+required_actions:
+  - sha_pin_github_actions
+  - run_gitleaks
+  - check_dependency_audit
+prohibited_actions:
+  - tag_references_in_github_actions
+enforced_by: []
+enforcement_coverage: none
+incidents: []
+created_date: "2026-03-10"
+last_validated: "2026-04-15"

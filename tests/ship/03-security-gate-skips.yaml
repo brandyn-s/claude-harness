@@ -1,0 +1,26 @@
+name: Ship skips Security Gate when no sensitive files are touched
+skill: ship
+trigger: "/ship (in mcp-servers/mcp-infra with only documentation changes, or in any other repo regardless of file types)"
+
+must_happen:
+  - Detect the full outgoing range contains no security-sensitive files OR repo is outside mcp-servers, mcp-infra, and compliance-access-framework
+  - Skip Step 4 Security Gate entirely
+  - Proceed directly through Step 5 push/PR/merge
+
+must_not_happen:
+  - Run the Security Gate for repos outside mcp-servers, mcp-infra, and compliance-access-framework
+  - Prompt for differential review when the diff has no sensitive files
+  - Block shipping on metadata-only changes (docs, version bumps, frontmatter edits)
+
+output_contains:
+  - PR URL
+
+guards: []
+skip_ab: true
+
+deterministic:
+- body_contains:
+  - If the repo is outside `mcp-servers`, `mcp-infra`, and
+  - full committed outgoing range contains none of the
+  - skip this step entirely
+  - $CONFIG_ROOT/bin/pr-merge-verified.py

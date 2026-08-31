@@ -1,0 +1,4 @@
+suppressions:
+  - code: C2
+    path: skills/api-ingest/SKILL.md
+    reason: "Bash-workflow example; /tmp/ is the conventional POSIX scratch path and resolves under Git Bash on Windows. Command demonstration, not Python file I/O."

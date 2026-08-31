@@ -1,0 +1,30 @@
+id: uncharted-vs-refuted
+type: rule
+description: "Distinguish uncharted territory (no evidence either way) from refuted (positive counter-evidence). Absence of supporting evidence is not refutation."
+applies_to:
+  - claim_assessment
+  - gap_analysis
+  - sparse_literature_topics
+  - audit_verdicts
+trigger_conditions:
+  - assessing_claim_with_sparse_literature
+  - drafting_refutation
+  - gap_analysis_in_research_synthesis
+  - no_one_has_done_this_claim
+required_actions:
+  - classify_search_outcome_explicitly
+  - document_search_queries_and_sources
+  - distinguish_world_claim_from_literature_claim
+  - suggest_investigation_paths_for_uncharted
+prohibited_actions:
+  - asserted_refutation_for_uncharted_territory
+  - search_failure_treated_as_world_truth
+  - conflate_speculative_proposal_with_refutable_claim
+  - default_to_refutation_when_evidence_sparse
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - dada_surrealism_uncharted_misclassified_as_refuted_2026_04_29
+  - oblique_strategies_for_llms_search_failure_treated_as_world_truth_2026_04_29
+created_date: "2026-04-29"
+last_validated: "2026-04-29"

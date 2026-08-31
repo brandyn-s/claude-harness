@@ -1,0 +1,40 @@
+id: red-team-rubric-discipline
+type: rule
+description: "Severity follows goal classification. For multi-mode artifacts, classify findings by affected mode BEFORE grading; otherwise the grade is implicit, applied to the wrong rubric for half the findings."
+applies_to:
+  - "every red-team / critique / audit of a multi-mode artifact"
+  - "skill drafts spanning discovery + rubric modes"
+  - "system audits with production + adversarial axes"
+  - "'what's wrong with this' reviews"
+trigger_conditions:
+  - "applying severity scores to findings on a multi-mode system"
+  - "proposing fixes without enumerating optimization targets per mode"
+  - "graded findings affect both creative and validation use-cases"
+required_actions:
+  - "enumerate the artifact's modes/goals/use-cases"
+  - "state the optimization target per mode EXPLICITLY"
+  - "classify each finding by which mode/goal it affects"
+  - "before proposing fixes, run pre-mortem: 'would primary value goal survive all fixes?'"
+  - "surface framework in output ('I'm grading against X for mode A')"
+prohibited_actions:
+  - "produce severity scores without naming the optimization target"
+  - "apply single rubric to multi-mode artifact silently"
+  - "rate findings HIGH because rigor-against-mode-A definition fits, ignoring mode-B trade-off"
+  - "blanket-fix-all without pre-mortem verifying primary value survives"
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - date: "2026-04-05"
+    summary: "/absorb v3 red-team: 14 -> 6 deferred for 'lack of evidence'; 3/3 challenged DEFER flipped to IMPLEMENT (softening-bias via implicit evidence threshold)"
+    turns_wasted: 3
+    category: review
+  - date: "2026-04-19"
+    summary: "sbom-rs CDX 1.7: rejected 7/7 IMPLEMENTs as additive; additive doesn't need full red-team per compare-by-need (implicit change-type framework)"
+    turns_wasted: 4
+    category: review
+  - date: "2026-04-30"
+    summary: "/persona red-team: graded 14 findings against rubric-mode validity; half would damage discovery-mode wildness (implicit single-mode target)"
+    turns_wasted: 3
+    category: review
+created_date: "2026-04-30"
+last_validated: "2026-05-12"

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.example.claude.garden</string>
+	<!-- zsh -lc = login shell, so PATH and ~/.zshenv (claude, brew python3,
+	     non-secret config) resolve exactly as they do in a terminal.
+	     Output redirects inside the shell so $HOME expands; no plist
+	     placeholders needed. caffeinate -i holds off idle sleep for the
+	     duration of the run. -->
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/zsh</string>
+		<string>-lc</string>
+		<string>mkdir -p "$HOME/.claude/audit/launchd" &amp;&amp; caffeinate -i claude -p "/garden" >> "$HOME/.claude/audit/launchd/garden.log" 2>&amp;1</string>
+	</array>
+	<!-- Nightly 03:30. Missed runs (laptop asleep/off) coalesce into one
+	     run at next wake. -->
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Hour</key>
+		<integer>3</integer>
+		<key>Minute</key>
+		<integer>30</integer>
+	</dict>
+	<key>RunAtLoad</key>
+	<false/>
+	<key>ProcessType</key>
+	<string>Background</string>
+</dict>
+</plist>

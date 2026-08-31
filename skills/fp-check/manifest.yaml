@@ -1,0 +1,42 @@
+id: fp-check
+type: skill
+description: "Verify suspected security bugs as true or false positives using multi-phase analysis with specialized subagents."
+category: security
+requires_tools:
+  - Agent
+  - AskUserQuestion
+  - Bash
+  - Glob
+  - Grep
+  - Read
+requires_topics:
+  - security.md
+requires_rules:
+  - subagent-verification
+  - diagnose-before-fix
+requires_skills: []
+requires_auth: []
+input_contract:
+  parameters:
+    finding:
+      type: string
+      required: false
+      description: "Security finding to verify"
+  scope_from: argument
+output_contract:
+  produces: [verdict, evidence_chain, confidence_score, exploitability_rating]
+  format: markdown_report
+  field_constraints:
+    verdict: "TRUE POSITIVE | FALSE POSITIVE"
+    confidence_score: "HIGH | MEDIUM | LOW"
+    exploitability_rating: "EASY | MEDIUM | HARD | NOT_EXPLOITABLE (required when verdict=TRUE POSITIVE; omit for FALSE POSITIVE)"
+side_effects: [code_execution, file_creation]
+execution_context: parallel_workers
+auth_constraint: subagent_safe
+estimated_turns: "15-30"
+preconditions:
+  - finding_specified
+guardrails:
+  - pre-agent-dispatch
+  - subagent-start-context
+threat_model: code_execution

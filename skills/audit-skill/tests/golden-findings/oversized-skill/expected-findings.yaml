@@ -1,0 +1,8 @@
+fixture: oversized-skill
+required_codes:
+  - Q1   # SKILL.md body > 5000 words
+  - Q2   # description > 1024 chars
+forbidden_codes: []
+notes: |
+  Built specifically to trip Q1 (word count) and Q2 (description
+  length). If either stops firing, those checks have regressed.

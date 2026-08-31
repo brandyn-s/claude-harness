@@ -1,0 +1,23 @@
+name: Full preflight checks all systems
+skill: preflight
+trigger: "/preflight"
+
+must_happen:
+  - Check git state (uncommitted changes, unpushed commits, current branch)
+  - Check AWS credentials (sts get-caller-identity)
+  - Check MCP server connections (code-search, code-graph loaded)
+  - Check API keys if relevant (OPENAI_API_KEY, VOYAGE_API_KEY)
+  - Check disk/index state (code-search get_index_status, code-graph list_projects, memory-search memory_stats)
+  - Report as checklist with [x]/[ ] markers
+
+must_not_happen:
+  - Skip any check category
+  - Report false positives (only flag actual blockers)
+  - Hang on a check (each should have a timeout)
+
+output_contains:
+  - Checklist format with [x] or [ ] markers
+  - "Ready to proceed" or specific blocker with fix command
+
+guards: []
+skip_ab: true

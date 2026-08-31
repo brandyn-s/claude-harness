@@ -1,0 +1,29 @@
+name: healthcheck deterministic invariants
+skill: healthcheck
+trigger: "/healthcheck"
+
+# Qualitative expectations (not run by the deterministic harness).
+must_happen:
+  - All 11 checks run to completion
+  - Summary table includes per-check PASS/WARN/FAIL
+  - Severity precedence rule (Manifest+Drift: FAIL=2 vs WARN=1) honored
+  - Auto-safe issues offered for fix interactively
+
+# Deterministic assertions — runnable via scripts/run-skill-evals.py.
+deterministic:
+  - frontmatter_equals:
+      name: healthcheck
+  - frontmatter_contains:
+      description: "health check"
+  - frontmatter_matches:
+      allowed-tools: "Bash"
+  - body_contains:
+      - "Check 1:"
+      - "Check 11:"
+  - body_not_contains:
+      - "TODO: write this check"
+  - references_resolve: true
+  - examples_count: ">=5"
+  - ref_resolves:
+      - report-format.md
+      - examples.md

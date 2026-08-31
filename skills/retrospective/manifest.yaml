@@ -1,0 +1,40 @@
+id: retrospective
+type: skill
+description: "Deep multi-session analysis of transcripts, git history, PRs, and learning reports. Runs 13 passes covering metrics, skill usage, anti-patterns, security gate rates, and pattern emergence."
+category: maintenance
+
+requires_tools:
+  - Bash
+  - Glob
+  - Grep
+  - Read
+  - Skill
+  - Write
+  - mcp__memory-search__memory_search
+  - AskUserQuestion
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    window:
+      type: string
+      required: false
+      description: "Time window and optional focus, e.g. 48h, 7d security, 1w infrastructure"
+  scope_from: argument
+output_contract:
+  produces: [retrospective_report, terminal_summary]
+  format: markdown_report
+
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "30-60"
+
+preconditions:
+  - "Session transcripts exist in ~/.claude/projects/"
+  - "scripts/retro-extract.py is reachable at runtime — either because ~/.claude IS the claude-config checkout (common Mac deploy model, script already at $HOME/.claude/scripts/retro-extract.py) or because claude-config is cloned separately (e.g. $HOME/claude-config); the skill resolves both locations, falling back to git toplevel"
+guardrails: []
+threat_model: writes_local

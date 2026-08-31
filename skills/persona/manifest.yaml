@@ -1,0 +1,62 @@
+id: persona
+type: skill
+description: "Dispatch framework personas at a problem. Use when a metric is plateau-ed and conventional engineering returned diminishing results, or to verify dispatch reproducibly finds known answers. Three modes — discovery (loose problem, manual synthesis), rubric (structured, pre-registered scoring), meta (manual-only iteration of rubric)."
+category: discovery
+
+requires_tools:
+  - "Bash"
+  - "Edit"
+  - "Glob"
+  - "Grep"
+  - "Read"
+  - "Write"
+  - "AskUserQuestion"
+requires_topics:
+  - persona-dispatch-framework.md
+requires_rules:
+  - red-team-rubric-discipline
+  - verify-effectiveness
+requires_skills:
+  - brainstorm
+  - fp-check
+  - scout-frontier
+  - triage
+requires_auth: []
+
+input_contract:
+  parameters:
+    problem:
+      type: string
+      required: true
+      description: "Problem statement (looser for discovery, structured for rubric)"
+    mode:
+      type: enum
+      required: true
+      description: "discovery | rubric | meta"
+    persona_set:
+      type: list[string]
+      required: false
+      description: "Override default persona slate"
+  scope_from: argument
+output_contract:
+  produces:
+    - per_persona_responses
+    - synthesis_or_rubric_scores
+    - kappa_report  # rubric mode only
+    - matrix_iteration_log  # meta mode only
+  format: markdown_report
+
+side_effects:
+  - writes_files  # outputs to knowledge-base or session dir
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "10-30"
+
+preconditions:
+  - "triage gate: conventional engineering tried first (Article VI)"
+  - "for rubric mode: structured problem with pre-registered scoring criteria"
+guardrails:
+  - creative-output-grounding-check
+  - context-monitor
+  - bash-security-guard
+threat_model: writes_local

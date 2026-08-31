@@ -1,0 +1,24 @@
+id: clean-skill
+type: skill
+description: "Minimal fixture for audit-skill unit tests."
+category: testing
+requires_tools:
+  - Bash
+  - Read
+input_contract:
+  parameters:
+    target:
+      type: string
+      required: true
+      description: "Target identifier"
+  scope_from: argument
+output_contract:
+  produces: [report]
+  format: text
+side_effects: [none]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "1-2"
+preconditions: []
+guardrails: []
+threat_model: read_only

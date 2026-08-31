@@ -1,0 +1,21 @@
+id: result-injection-guard
+type: hook
+event: PostToolUse
+matcher: "mcp__.*"
+if_condition: null
+action_type: guard
+description: "Scans MCP tool results for embedded instruction patterns that could hijack agent behavior (ASI01)."
+enforces: []
+blocks_patterns:
+  - "ignore previous instructions"
+  - "you are now in * mode"
+  - "system tags in tool results"
+  - "ignore safety guidelines"
+injects: "systemMessage warning to treat results as data"
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "always (non-blocking, advisory only)"
+output_format: json
+incidents: []

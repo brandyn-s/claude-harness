@@ -1,0 +1,64 @@
+# L3 — HISTORICAL FROZEN BASELINE: Opus 4.7 skill-activation study.
+# See README.md for hypotheses, methodology, and expected outcomes.
+
+historical_model: claude-opus-4-7
+trials_per_cell: 4
+total_cells: 180
+total_trials: 720
+
+description_styles:
+  - id: passive
+    label: "Use when X"
+    template: |
+      Use when {when_clause}. Trigger phrases: {triggers}.
+  - id: directive
+    label: "ALWAYS invoke when X"
+    template: |
+      ALWAYS invoke this skill when {when_clause}. Trigger phrases: {triggers}.
+  - id: directive_do_not
+    label: "ALWAYS invoke + Do NOT"
+    template: |
+      ALWAYS invoke this skill when {when_clause}. Trigger phrases: {triggers}. Do NOT {do_not_clause} directly — invoke this skill instead.
+
+trigger_types:
+  - id: exact
+    description: User prompt is a verbatim quoted trigger phrase
+  - id: near
+    description: Paraphrased trigger (1-2 words substituted; same meaning)
+  - id: semantic
+    description: Semantic equivalent, no lexical overlap with the trigger phrases
+  - id: unrelated
+    description: Negative control — prompt has nothing to do with the skill
+
+prefix_conditions:
+  - id: none
+    system_prompt: ""
+    hook_inject: false
+  - id: use_skills_hint
+    system_prompt: "Use available skills when relevant to the user's request."
+    hook_inject: false
+  - id: hook_inject
+    system_prompt: ""
+    hook_inject: true   # UserPromptSubmit hook injects skill-recommendation note
+
+pilot_skills:
+  - id: capture
+    when_clause: "the session produced decisions, lessons, or patterns worth preserving"
+    triggers: '"capture", "save this insight", "document this decision"'
+    do_not_clause: "write notes to topic files"
+  - id: recall
+    when_clause: "prior decisions, lessons, or patterns from past sessions need to be retrieved"
+    triggers: '"recall", "what do we know about", "prior decisions on"'
+    do_not_clause: "search knowledge base files"
+  - id: refine
+    when_clause: "a complex prompt needs enrichment before execution"
+    triggers: '"refine", "refine this", "improve this prompt"'
+    do_not_clause: "edit the prompt"
+  - id: ship
+    when_clause: "code changes are ready to commit, push, and merge"
+    triggers: '"ship", "commit and push", "ship this PR"'
+    do_not_clause: "run git commit / push"
+  - id: audit-skill
+    when_clause: "a skill file needs lint or quality review"
+    triggers: '"audit skill", "lint skill", "review skill quality"'
+    do_not_clause: "read SKILL.md for review"

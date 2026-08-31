@@ -1,0 +1,32 @@
+id: git-empty-push-guard
+type: hook
+event: PreToolUse
+matcher: "Bash"
+if_condition: null
+action_type: guard
+description: "BLOCK `git push` of a branch with 0 commits ahead of upstream. Catches the visible symptom of cross-session-git-index-race (shared-HEAD confusion in concurrent worktrees) before the broken push lands and requires reflog cherry-pick recovery."
+enforces:
+  - git-hygiene
+  - worktree-by-default
+blocks_patterns:
+  - "git push origin <branch> where <branch>..<upstream> count == 0"
+  - "git push (bare) where currently checked-out branch has 0 commits ahead"
+  - "git push -u origin <branch> (when upstream already exists with 0 commits ahead)"
+injects: null
+modifies: null
+depends_on_files: []
+depends_on_env:
+  - "CLAUDE_GIT_PUSH_ALLOW_EMPTY"
+exit_codes:
+  "0": "allow (default, or bypassed via CLAUDE_GIT_PUSH_ALLOW_EMPTY=1, or skip-flagged --force/--tags/--delete/--mirror/sha-refspec)"
+  "2": "block (empty-equivalent push, cross-session-race signature)"
+output_format: json
+incidents:
+  - date: "2026-04-17"
+    summary: "Cross-session git index race: 2nd session commit captured files staged by 1st session"
+    turns_wasted: 2
+    category: git-hygiene
+  - date: "2026-05-04"
+    summary: "4 recurrences in one session of empty-push symptom (B1 design ship, Family C PR #184, Family B ship, ACC-013 PR #188); each cost 5-10 min reflog cherry-pick recovery"
+    turns_wasted: 30
+    category: git-hygiene

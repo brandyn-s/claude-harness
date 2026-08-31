@@ -1,0 +1,98 @@
+{
+  "fp_rate_cap": 0.5,
+  "cap_note": "Documented quality bound. SKILL.md Key Principle #4: 'Know when to stop: 50%+ FP rate means you've gone too generic.' METHODOLOGY.md 'Security audit triage' row: acceptable FP rate <50%. verify_variants.main defaults fp_rate_cap to 0.5. The gate's value-prop is to BLOCK a pattern whose FP rate exceeds the cap.",
+  "oracle_rule": "Hand-derived from the documented contract, NOT from verify_variants.py output. FP gate: FP rate > cap => FAIL (pattern generalized too far); FP rate <= cap => PASS. CRITICAL: sampled_fp absent on a real match set => the gate has NO evidence the FP rate is under cap, so per harness-pattern.md ('skipped checks ... don't masquerade as passes') the correct verdict is UNVERIFIED/non-PASS, NOT a bare PASS. Baseline gate: Level-0 pattern must match seed_file:seed_line => match present => PASS; seed line/file mismatch => FAIL.",
+  "fp_gate_scenarios": [
+    {
+      "id": "fp_above_cap",
+      "class": "fp_gate",
+      "n_matches": 200,
+      "sampled_fp": 150,
+      "fp_rate_cap": 0.5,
+      "oracle_verdict": "FAIL",
+      "note": "FP rate 150/200 = 75% > 50% cap. Documented contract: pattern generalized too far, gate MUST fail. This is the gate delivering its value-prop."
+    },
+    {
+      "id": "fp_at_cap_boundary",
+      "class": "fp_gate",
+      "n_matches": 100,
+      "sampled_fp": 50,
+      "fp_rate_cap": 0.5,
+      "oracle_verdict": "PASS",
+      "note": "FP rate 50/100 = 50% == cap (<= cap). Boundary: 'exceeds ~50%' means strictly greater; 50% is still acceptable. Oracle PASS."
+    },
+    {
+      "id": "fp_below_cap",
+      "class": "fp_gate",
+      "n_matches": 100,
+      "sampled_fp": 10,
+      "fp_rate_cap": 0.5,
+      "oracle_verdict": "PASS",
+      "note": "FP rate 10/100 = 10% < 50% cap. Within acceptable bound. Oracle PASS."
+    },
+    {
+      "id": "fp_no_sample_large_matchset",
+      "class": "fp_gate",
+      "n_matches": 5000,
+      "sampled_fp": null,
+      "fp_rate_cap": 0.5,
+      "oracle_verdict": "UNVERIFIED",
+      "note": "THE WAVE-1 BUG. A pattern matching 5000 lines with NO FP sample. The gate has zero evidence the FP rate is under cap. Documented harness principle (harness-pattern.md sec.2): 'never launders verdicts up the stack: skipped checks report skipped + reason and dont masquerade as passes.' Correct verdict is UNVERIFIED/non-PASS. The current check_fp_gate returns a bare passed=True ('gate informational only') => INERT GATE. A bare PASS here is a CONTRACT VIOLATION; UNVERIFIED is acceptable, PASS is not."
+    },
+    {
+      "id": "fp_no_matches",
+      "class": "fp_gate",
+      "n_matches": 0,
+      "sampled_fp": null,
+      "fp_rate_cap": 0.5,
+      "oracle_verdict": "PASS",
+      "note": "Zero matches => no false positives possible => FP rate trivially 0%. A PASS is legitimate here (vacuously within cap). This scenario guards against over-correction: the fix must NOT start failing the empty-match case."
+    }
+  ],
+  "baseline_scenarios": [
+    {
+      "id": "baseline_seed_hit",
+      "class": "baseline",
+      "seed_file": "api/users.py",
+      "seed_line": 42,
+      "matches": [
+        {"file": "src/api/users.py", "line": "42", "snippet": "cursor.execute(f\"... {user_id}\")"},
+        {"file": "src/api/orders.py", "line": "88", "snippet": "cursor.execute(f\"... {oid}\")"}
+      ],
+      "oracle_verdict": "PASS",
+      "note": "Level-0 pattern matches seed api/users.py:42 (endswith match on file, exact line). Baseline sound => PASS."
+    },
+    {
+      "id": "baseline_wrong_line",
+      "class": "baseline",
+      "seed_file": "api/users.py",
+      "seed_line": 42,
+      "matches": [
+        {"file": "src/api/users.py", "line": "99", "snippet": "cursor.execute(f\"... {user_id}\")"},
+        {"file": "src/api/orders.py", "line": "88", "snippet": "cursor.execute(f\"... {oid}\")"}
+      ],
+      "oracle_verdict": "FAIL",
+      "note": "WAVE-1 SAYS THIS PART IS SOUND. Right file, wrong line (99 != 42). Seed bug not actually matched => baseline invalid => oracle FAIL. Confirms the baseline gate works."
+    },
+    {
+      "id": "baseline_wrong_file",
+      "class": "baseline",
+      "seed_file": "api/users.py",
+      "seed_line": 42,
+      "matches": [
+        {"file": "src/api/orders.py", "line": "42", "snippet": "cursor.execute(f\"... {oid}\")"}
+      ],
+      "oracle_verdict": "FAIL",
+      "note": "Right line number, wrong file. Seed api/users.py never matched => oracle FAIL."
+    },
+    {
+      "id": "baseline_no_matches",
+      "class": "baseline",
+      "seed_file": "api/users.py",
+      "seed_line": 42,
+      "matches": [],
+      "oracle_verdict": "FAIL",
+      "note": "Level-0 pattern matched nothing => cannot have matched the seed => oracle FAIL."
+    }
+  ]
+}

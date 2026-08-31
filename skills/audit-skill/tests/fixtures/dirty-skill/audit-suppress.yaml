@@ -1,0 +1,15 @@
+# Fixture coverage for the suppression-hygiene checks (B9/F3, 2026-06-10).
+# Both entries are deliberately inert as SUPPRESSIONS — they exist to make
+# the S1/S2 findings fire in the known-bad fixture:
+suppressions:
+  # S1 trigger: past its expires date — must NOT suppress H1 (which the
+  # fixture still fires, asserted by test_dirty_skill_triggers_expected)
+  # and must emit an S1 "expired suppression" finding.
+  - code: H1
+    reason: "S1 fixture entry — expired, so H1 keeps firing and S1 is emitted"
+    expires: "2020-01-01"
+  # S2 trigger: orphaned mechanical-code suppression — dirty-skill has no
+  # .sh-only scripts dir, so C3 never fires, this matches nothing, and an
+  # S2 "orphaned suppression" finding is emitted.
+  - code: C3
+    reason: "S2 fixture entry — matches no finding by construction"

@@ -1,0 +1,17 @@
+rules:
+  - id: missing-non-exhaustive-pub-enum
+    patterns:
+      - pattern: |
+          pub enum $NAME { ... }
+      - pattern-not: |
+          #[non_exhaustive]
+          pub enum $NAME { ... }
+    message: >
+      Public enum `$NAME` is missing `#[non_exhaustive]`. Adding new variants
+      without it is a semver-breaking change.
+      (jonhoo + BurntSushi + sfackler: consistent across 3 independent developers)
+    languages: [rust]
+    severity: WARNING
+    metadata:
+      source: absorb-jonhoo,absorb-burntsushi,absorb-sfackler
+      pattern-maturity: stage-2

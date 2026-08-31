@@ -1,0 +1,16 @@
+skill: verify-search-result
+name: verify-search-result deterministic invariants
+trigger: /verify-search-result <result>
+must_happen:
+- 'Three-verdict output: CONFIRMED, FALSE POSITIVE, AMBIGUOUS'
+- CALLS edge verification strategy per edge type
+- Artifact includes file:line + source excerpt + rationale
+deterministic:
+- frontmatter_equals:
+    name: verify-search-result
+- body_contains:
+  - CONFIRMED
+  - 'FALSE'
+  - AMBIGUOUS
+- references_resolve: true
+- examples_count: '>=2'

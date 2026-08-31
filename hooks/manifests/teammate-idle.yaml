@@ -1,0 +1,17 @@
+id: teammate-idle
+type: hook
+event: TeammateIdle
+matcher: ""
+if_condition: null
+action_type: injector
+description: "Fires quality gate when an Agent Team teammate completes work -- triggers review."
+enforces: []
+blocks_patterns: []
+injects: quality_gate_prompt
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "Quality gate injected"
+output_format: plaintext
+incidents: []

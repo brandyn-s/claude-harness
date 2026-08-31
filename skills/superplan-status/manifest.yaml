@@ -1,0 +1,33 @@
+id: superplan-status
+type: skill
+description: "Report the current state of an active supergoal loop in-conversation. Reads ~/.claude/supergoal/<slug>/state.json and the last 5 entries of events.jsonl; emits a compact summary. Read-only; does not modify state. Trigger phrase: superplan-status. Do NOT use for halting the loop (use /supergoal-pause), monitoring on a cadence (use /superplan-loop), or modifying state."
+category: planning
+
+requires_tools:
+  - Bash
+  - Read
+requires_topics: []
+requires_rules: []
+requires_skills:
+  - supergoal
+  - supergoal-pause
+  - supergoal-resume
+  - superplan-loop
+requires_auth: []
+
+input_contract:
+  parameters: {}
+  scope_from: none
+output_contract:
+  produces: [status_snapshot]
+  format: text
+
+side_effects: []
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "1"
+
+preconditions:
+  - an active supergoal arc exists at ~/.claude/supergoal/.active
+guardrails: []
+threat_model: read_only

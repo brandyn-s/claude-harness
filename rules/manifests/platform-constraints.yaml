@@ -1,0 +1,26 @@
+id: platform-constraints
+type: rule
+description: "macOS (zsh) platform gotchas: python3 paths, encoding, network/DNS, module size. Windows 11 + Git Bash rules retained as inactive reference."
+applies_to:
+  - "all Python scripts"
+  - "all Bash/zsh commands"
+  - "all file I/O operations"
+trigger_conditions:
+  - "writing or executing any code"
+required_actions:
+  - "invoke python3 (no bare python on macOS)"
+  - "always encoding='utf-8' in Python open()"
+  - "use ~ / /Users absolute paths (no drive letters)"
+  - "write complex commands to files first"
+  - "in zsh, quote/array-expand vars (no word-splitting); use safe pgrep -f forms"
+prohibited_actions:
+  - "pip install --upgrade all outdated packages at once"
+  - "use text=True in subprocess for external API calls"
+  - "pgrep -af / ps aux / ps -ef when launcher env has inlined secrets"
+enforced_by:
+  - post-write-edit
+  - bash-security-guard
+enforcement_coverage: partial
+incidents: []
+created_date: "2026-02-15"
+last_validated: "2026-04-12"

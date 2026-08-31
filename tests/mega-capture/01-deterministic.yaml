@@ -1,0 +1,22 @@
+name: "mega-capture deterministic contract"
+skill: mega-capture
+trigger: "/mega-capture (large or auto-compacted session needing whole-transcript capture)"
+
+deterministic:
+  - frontmatter_contains:
+      when_to_use: ">5000 lines"
+  - frontmatter_contains:
+      when_to_use: ">15MB"
+  - body_contains: "Coverage-complete"
+  - body_contains: "$CLAUDE_CODE_SESSION_ID"
+  - body_contains: "$CODEX_THREAD_ID"
+  - body_contains: "$HOME/.codex/sessions"
+  - body_contains: "\"type\":\"compacted\""
+  - body_contains: "paired counts"
+  - body_contains: "in Claude Code use the Skill tool; in Codex"
+  - body_contains: "scripts/transcript_condense.py"
+  - body_contains: "enumerate only the paths listed in the manifest"
+  - body_not_contains: "$HOME/.claude/bin/transcript_condense.py"
+  - body_contains: "--max-tokens 180000"
+  - body_contains: "COVERAGE LEDGER"
+  - body_contains: "/capture"

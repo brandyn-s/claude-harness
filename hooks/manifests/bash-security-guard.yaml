@@ -1,0 +1,32 @@
+id: bash-security-guard
+type: hook
+event: PreToolUse
+matcher: "Bash"
+if_condition: null
+action_type: guard
+description: "Blocks credential exposure, data exfiltration, destructive commands, direct pushes to protected repos."
+enforces:
+  - git-hygiene
+  - security-confirmations
+  - platform-constraints
+blocks_patterns:
+  - "cat ~/.ssh/* | cat ~/.aws/*"
+  - "curl * | bash"
+  - "rm -rf / | rm -rf ~"
+  - "chmod 777"
+  - "git push origin main (protected repos)"
+  - "gh pr merge --admin"
+injects: null
+modifies: null
+depends_on_files:
+  - protected-repos.json
+depends_on_env: []
+exit_codes:
+  "0": "allow (or auto-fix via updated_input)"
+  "2": "block"
+output_format: json
+incidents:
+  - date: "2026-03-04"
+    summary: "Subagent pushed directly to main, merged 7 files without review"
+    turns_wasted: 15
+    category: security

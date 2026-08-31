@@ -1,0 +1,42 @@
+name: Clean session with no errors
+skill: distill
+trigger: "/distill (in a session with no tool failures, no abandoned approaches, no user corrections)"
+
+must_happen:
+  - Scan conversation for pain points (tool failures, abandoned approaches, platform issues, API surprises, repeated mistakes, silent failures, accuracy failures, rule gaps)
+  - Report "nothing to distill" if no errors found
+  - Write distill coordination marker to last-distill.json
+
+must_not_happen:
+  - Manufacture lessons from successful work
+  - Create entries for routine operations that succeeded
+  - Write to any persistence tier (rules, memory, topic files)
+
+output_contains:
+  - nothing to distill / clean session
+
+guards: []
+skip_ab: true
+
+
+# Deterministic assertions runnable by scripts/run-skill-evals.py
+deterministic:
+- frontmatter_equals:
+    name: distill
+- body_contains:
+  - T0
+  - T1
+  - T2
+  - tier
+  - CODEX_THREAD_ID
+  - .codex
+  - CONFIG_ROOT
+  - SKILLS_ROOT
+  - go directly to Step 5 with
+  - scripts/write_marker.py
+  - "--clean"
+  - zero-lesson coordination marker
+- body_not_contains:
+  - say so and stop
+- references_resolve: true
+- examples_count: '>=2'

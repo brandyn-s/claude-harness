@@ -1,0 +1,25 @@
+id: config-change-validate
+type: hook
+event: ConfigChange
+matcher: "user_settings|project_settings|local_settings"
+if_condition: null
+action_type: guard
+description: "Validates blockable settings sources before Claude Code applies changes to the running session."
+enforces: []
+blocks_patterns:
+  - "malformed or non-object settings"
+  - "missing, unreadable, unsafe, or oversized settings"
+  - "disableAllHooks=true"
+  - "explicit empty hooks object in user settings"
+  - "removal of required protected user hooks"
+  - "provider-prefixed (Bedrock/GovCloud) model ID on model, fallbackModel, or any env value"
+injects: null
+modifies: null
+depends_on_files:
+  - "~/.claude/settings.json"
+depends_on_env:
+  - "CLAUDE_CONFIG_ALLOW_PROTECTED_HOOK_REMOVAL (operator-set before session start; exact value 1 authorizes intentional removal)"
+exit_codes:
+  "0": "allow silently or block via structured decision JSON"
+output_format: json
+incidents: []

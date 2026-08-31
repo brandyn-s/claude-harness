@@ -1,0 +1,29 @@
+id: best-in-class-for-cross-model
+type: rule
+description: "For cross-model / cross-provider validation, corroboration, or panel tasks, every arm must be its vendor's best-in-class (flagship) model — a mid-tier arm confounds the comparison. Availability blocks do not silently lower the bar."
+applies_to:
+  - cross_provider_validation
+  - second_rater_independence_checks
+  - multi_model_panels
+  - ab_between_model_families
+trigger_conditions:
+  - running_cross_model_comparison
+  - selecting_second_rater
+  - choosing_panel_arm
+  - flagship_model_blocked_or_unavailable
+required_actions:
+  - name_each_arms_model_and_tier
+  - confirm_every_arm_is_vendor_flagship
+  - probe_reachability_live_before_full_run
+  - surface_availability_block_instead_of_silent_downgrade
+prohibited_actions:
+  - silent_downgrade_to_mid_tier_on_availability_block
+  - treat_vendor_diversity_as_satisfying_validity
+  - use_cheaper_model_as_second_opinion_without_measured_tie
+  - cost_or_speed_framing_to_justify_weaker_arm
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - confounded_cross_model_finding_from_nova_pro_mid_tier_arm_2026_06_29
+created_date: "2026-06-29"
+last_validated: "2026-07-05"

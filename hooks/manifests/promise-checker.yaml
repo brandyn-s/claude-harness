@@ -1,0 +1,20 @@
+id: promise-checker
+type: hook
+event: Stop
+matcher: ""
+if_condition: null
+action_type: guard
+description: "Checks for unfulfilled promises or incomplete tasks before session end."
+enforces:
+  - verify-effectiveness
+  - validate-to-improve
+blocks_patterns: []
+injects: null
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "No unfulfilled promises detected"
+  "2": "Unfulfilled promises found"
+output_format: plaintext
+incidents: []

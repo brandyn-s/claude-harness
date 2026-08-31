@@ -1,0 +1,43 @@
+id: evaluate-repos
+type: skill
+description: "Dispatches advocate/skeptic agent pairs for debiased evaluation of external patterns against the current architecture, with delta-finding and red-team annotation."
+category: knowledge
+
+requires_tools:
+  - Read
+  - Grep
+  - Glob
+  - Agent
+  - Bash
+  - AskUserQuestion
+  - Edit
+  - Write
+requires_topics:
+  - architecture.md
+requires_rules:
+  - compare-by-need
+  - subagent-verification
+requires_skills:
+  - gather-repos
+requires_auth: []
+
+input_contract:
+  parameters:
+    source:
+      type: string
+      required: false
+      description: "Inventory source: repo name, finding description, or 'from last gather-repos'"
+  scope_from: argument
+output_contract:
+  produces: [delta_table, advocate_skeptic_arguments, delivery_classifications]
+  format: markdown_report
+
+side_effects: [writes_files]
+execution_context: parallel_workers
+auth_constraint: any
+estimated_turns: "15-30"
+
+preconditions:
+  - Inventory from gather-repos or ad-hoc pattern description
+guardrails: []
+threat_model: writes_local

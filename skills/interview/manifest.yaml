@@ -1,0 +1,36 @@
+id: interview
+type: skill
+description: "Adversarial stress-test for plans, designs, or proposals — asks 5-8 probing questions that expose hidden assumptions, missing edge cases, and untested dependencies before committing to implementation."
+category: planning
+
+requires_tools:
+  - AskUserQuestion
+  - "Read"
+  - "Grep"
+  - "Glob"
+  - "mcp__memory-search__memory_search"
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    artifact:
+      type: string
+      required: false
+      description: "The plan, design, or proposal to interrogate"
+  scope_from: user_prompt
+output_contract:
+  produces: [probing_questions, revised_spec]
+  format: markdown_report
+
+side_effects: [none]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "5-10"
+
+preconditions:
+  - "A plan, design, or proposal exists (minimum 4 steps)"
+guardrails: []
+threat_model: read_only

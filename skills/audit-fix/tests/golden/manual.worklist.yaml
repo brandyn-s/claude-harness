@@ -1,0 +1,13 @@
+# Golden fixture: well-formed YAML whose finding carries a
+# `type: manual` reproducer — "no auto-check possible" (the first
+# bullet of the Step-0 prose). Manual findings violate the
+# dispatchable-worklist contract, so this trips gate 1 (malformed).
+findings:
+  - skill: gather-repos
+    code: M1
+    severity: info
+    label: unverified
+    description: tone of the error messages needs human judgment
+    reproducer:
+      type: manual
+      description: read the skill and judge the tone by hand

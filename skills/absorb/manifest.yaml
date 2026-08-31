@@ -1,0 +1,46 @@
+id: absorb
+type: skill
+description: "Study a GitHub developer's public practices, extract patterns better than current architecture, and integrate improvements with compare-by-need gates."
+category: knowledge
+
+requires_tools:
+  - Agent
+  - Bash
+  - Edit
+  - Glob
+  - Grep
+  - Read
+  - Write
+  - mcp__exa__*
+  - mcp__memory-search__*
+  - AskUserQuestion
+requires_topics:
+  - architecture.md
+requires_rules:
+  - compare-by-need
+  - check-before-change
+  - git-hygiene
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    github_username:
+      type: string
+      required: true
+      description: "GitHub username to profile"
+  scope_from: argument
+output_contract:
+  produces: [developer_profile, gap_analysis, recommendations, knowledge_base_entry]
+  format: markdown_report
+
+side_effects: [writes_files, modifies_memory, creates_pr]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "30-60"
+
+preconditions:
+  - gh CLI authenticated
+  - knowledge-base/topics/ directory exists
+guardrails: []
+threat_model: writes_local

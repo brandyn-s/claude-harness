@@ -1,0 +1,22 @@
+id: config-guard
+type: hook
+event: PreToolUse
+matcher: "Write|Edit"
+if_condition: null
+action_type: guard
+description: "Self-protection: blocks attempts to disable hooks via settings.json edits."
+enforces: []
+blocks_patterns:
+  - "disableAllHooks=true in settings.json"
+  - "removing hook entries from settings.json"
+  - "empty hooks object {} in settings.json"
+  - "deleting hook .py files"
+injects: null
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "allow or warn"
+  "2": "block"
+output_format: json
+incidents: []

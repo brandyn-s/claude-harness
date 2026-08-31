@@ -1,0 +1,37 @@
+id: differential-review
+type: skill
+description: "Security-focused code review for PRs, commits, and diffs with blast radius calculation, test coverage checks, adversarial modeling, and markdown report generation."
+category: security
+
+requires_tools:
+  - Read
+  - Write
+  - Grep
+  - Glob
+  - Bash
+  - AskUserQuestion
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    target:
+      type: string
+      required: false
+      description: "PR number, commit range, or branch to review"
+  scope_from: argument
+output_contract:
+  produces: [findings_report, blast_radius, severity_ratings, attack_scenarios]
+  format: markdown_report
+
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "8-20"
+
+preconditions:
+  - Git repository with diff history
+guardrails: []
+threat_model: writes_local

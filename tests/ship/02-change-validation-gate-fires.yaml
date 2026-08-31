@@ -1,0 +1,31 @@
+name: Ship triggers marketplace rebuild for claude-config source changes
+skill: ship
+trigger: "/ship (in claude-config repo with outgoing payload touching skills/, hooks/, rules/, or agents/)"
+
+must_happen:
+  - Detect claude-config repo via git remote
+  - Detect source-file changes under skills/, hooks/, rules/, or agents/ across committed, staged, unstaged, and untracked lanes
+  - Run python scripts/build-marketplace.py to rebuild plugin bundles
+  - Stage marketplace/ and .claude-plugin/ alongside the source changes
+  - Proceed to PR creation with both source and bundle changes in one commit
+
+must_not_happen:
+  - Ship a source-only change without rebuilding the marketplace bundle
+  - Stage marketplace/ via git add -A (must be explicit by path)
+  - Use git diff --name-only HEAD as the detector (misses untracked new skill files)
+
+output_contains:
+  - "build-marketplace.py or marketplace rebuild evidence"
+  - PR URL
+
+guards:
+  - Full outgoing payload contains skills/, hooks/, rules/, or agents/ files
+skip_ab: false
+
+deterministic:
+- body_contains:
+  - scripts/outgoing_payload.py
+  - "`all_paths`"
+  - python3 scripts/build-marketplace.py
+  - python3 bin/preflight-skill.py
+  - git add marketplace/ .claude-plugin/

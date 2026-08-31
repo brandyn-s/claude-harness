@@ -1,0 +1,25 @@
+id: agent-delegation
+type: rule
+description: "Risk-tiered direct-versus-agent routing, bounded output contracts, and a prohibition on background Skill forks."
+applies_to:
+  - "Agent tool calls"
+  - "worker dispatch"
+  - "task routing"
+trigger_conditions:
+  - "user request matches keyword table"
+  - "multi-step task requiring domain context"
+required_actions:
+  - "map keywords to topic files using routing table"
+  - "include output contract for analysis agents"
+  - "check auth constraint before dispatching"
+  - "select delegation from task topology and shared-state risk"
+prohibited_actions:
+  - "dispatch to remote MCP-dependent task via subagent"
+  - "run a background Skill fork as a separate orchestration model"
+enforced_by:
+  - pre-agent-dispatch
+  - subagent-start-context
+enforcement_coverage: partial
+incidents: []
+created_date: "2026-02-15"
+last_validated: "2026-04-12"

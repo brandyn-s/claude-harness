@@ -1,0 +1,343 @@
+# Calibration set for the audit-rules transcript_pattern reproducer.
+# 10 known-true + 10 known-false + 5 known-ERROR = 25 labeled findings.
+#
+# Each finding's command is a deterministic JSON-emitting echo so the
+# calibration tests only the oracle's predicate machinery, not the
+# scanner. End-to-end calibration of scan_violations.py against
+# synthetic transcripts is deferred to Phase 4.
+#
+# Threshold convention: 10.0% (promotion-trigger). Findings with
+# session_rate_pct >= 10 should fire (STILL-FIRES); < 10 should not.
+# expected_fires: true → known-bug, must STILL-FIRES
+# expected_fires: false → known-clean, must STALE
+# expected_fires: error → known-broken-instrument, must ERROR
+
+findings:
+  # ===== 10 known-true (above threshold → STILL-FIRES) =====
+  - skill: audit-rules-calibration
+    code: V1
+    severity: drift
+    label: behavior-fix
+    description: rule X session rate above threshold
+    expected_fires: true
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"violations\": {\"rule_x\": {\"session_rate_pct\": 44.2}}}'"
+      metric_path: "violations.rule_x.session_rate_pct"
+      threshold: 10.0
+      threshold_op: gte
+
+  - skill: audit-rules-calibration
+    code: V2
+    severity: drift
+    label: behavior-fix
+    description: high-violation rule (97%)
+    expected_fires: true
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"violations\": {\"r\": {\"session_rate_pct\": 97.6}}}'"
+      metric_path: "violations.r.session_rate_pct"
+      threshold: 10.0
+      threshold_op: gte
+
+  - skill: audit-rules-calibration
+    code: V3
+    severity: drift
+    label: behavior-fix
+    description: exactly at threshold (boundary case)
+    expected_fires: true
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"violations\": {\"r\": {\"session_rate_pct\": 10.0}}}'"
+      metric_path: "violations.r.session_rate_pct"
+      threshold: 10.0
+      threshold_op: gte
+
+  - skill: audit-rules-calibration
+    code: V4
+    severity: drift
+    label: behavior-fix
+    description: nested dot-path navigation
+    expected_fires: true
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"a\": {\"b\": {\"c\": 50.0}}}'"
+      metric_path: "a.b.c"
+      threshold: 10.0
+      threshold_op: gte
+
+  - skill: audit-rules-calibration
+    code: V5
+    severity: drift
+    label: behavior-fix
+    description: gt operator (strictly greater than)
+    expected_fires: true
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"r\": 15.0}'"
+      metric_path: "r"
+      threshold: 10.0
+      threshold_op: gt
+
+  - skill: audit-rules-calibration
+    code: V6
+    severity: drift
+    label: behavior-fix
+    description: lte operator (low-rate alert)
+    expected_fires: true
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"compliance\": 5.0}'"
+      metric_path: "compliance"
+      threshold: 10.0
+      threshold_op: lte
+
+  - skill: audit-rules-calibration
+    code: V7
+    severity: drift
+    label: behavior-fix
+    description: integer metric (not float)
+    expected_fires: true
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"count\": 50}'"
+      metric_path: "count"
+      threshold: 10
+      threshold_op: gte
+
+  - skill: audit-rules-calibration
+    code: V8
+    severity: drift
+    label: behavior-fix
+    description: very high rate (90+)
+    expected_fires: true
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"r\": 93.0}'"
+      metric_path: "r"
+      threshold: 10.0
+      threshold_op: gte
+
+  - skill: audit-rules-calibration
+    code: V9
+    severity: drift
+    label: behavior-fix
+    description: list index in metric path
+    expected_fires: true
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"rules\": [{\"name\": \"x\", \"rate\": 25.0}]}'"
+      metric_path: "rules.0.rate"
+      threshold: 10.0
+      threshold_op: gte
+
+  - skill: audit-rules-calibration
+    code: V10
+    severity: drift
+    label: behavior-fix
+    description: realistic audit-rules JSON shape
+    expected_fires: true
+    reproducer:
+      type: transcript_pattern
+      command: |
+        echo '{"sessions_scanned": 42, "violations": {"encoding-missing-open": {"count": 4772, "unique_sessions": 39, "session_rate_pct": 92.9}}}'
+      metric_path: "violations.encoding-missing-open.session_rate_pct"
+      threshold: 10.0
+      threshold_op: gte
+
+  # ===== 10 known-false (below threshold → STALE) =====
+  - skill: audit-rules-calibration
+    code: F1
+    severity: info
+    label: doc-fix
+    description: zero rate (clean session)
+    expected_fires: false
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"r\": 0.0}'"
+      metric_path: "r"
+      threshold: 10.0
+      threshold_op: gte
+
+  - skill: audit-rules-calibration
+    code: F2
+    severity: info
+    label: doc-fix
+    description: just below threshold (9.9)
+    expected_fires: false
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"r\": 9.9}'"
+      metric_path: "r"
+      threshold: 10.0
+      threshold_op: gte
+
+  - skill: audit-rules-calibration
+    code: F3
+    severity: info
+    label: doc-fix
+    description: low rate (2%)
+    expected_fires: false
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"r\": 2.0}'"
+      metric_path: "r"
+      threshold: 10.0
+      threshold_op: gte
+
+  - skill: audit-rules-calibration
+    code: F4
+    severity: info
+    label: doc-fix
+    description: gt boundary (equal does not fire under strict gt)
+    expected_fires: false
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"r\": 10.0}'"
+      metric_path: "r"
+      threshold: 10.0
+      threshold_op: gt
+
+  - skill: audit-rules-calibration
+    code: F5
+    severity: info
+    label: doc-fix
+    description: lt comparison (high rate does NOT trigger lt alert)
+    expected_fires: false
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"r\": 50.0}'"
+      metric_path: "r"
+      threshold: 10.0
+      threshold_op: lt
+
+  - skill: audit-rules-calibration
+    code: F6
+    severity: info
+    label: doc-fix
+    description: lte with rate above threshold (does NOT fire)
+    expected_fires: false
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"r\": 80.0}'"
+      metric_path: "r"
+      threshold: 10.0
+      threshold_op: lte
+
+  - skill: audit-rules-calibration
+    code: F7
+    severity: info
+    label: doc-fix
+    description: nested path with low rate
+    expected_fires: false
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"a\": {\"b\": {\"c\": 3.0}}}'"
+      metric_path: "a.b.c"
+      threshold: 10.0
+      threshold_op: gte
+
+  - skill: audit-rules-calibration
+    code: F8
+    severity: info
+    label: doc-fix
+    description: zero with empty rules dict
+    expected_fires: false
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"violations\": {\"r\": {\"session_rate_pct\": 0}}}'"
+      metric_path: "violations.r.session_rate_pct"
+      threshold: 10.0
+      threshold_op: gte
+
+  - skill: audit-rules-calibration
+    code: F9
+    severity: info
+    label: doc-fix
+    description: gt with rate matching threshold exactly (fails strict gt)
+    expected_fires: false
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"r\": 0.0}'"
+      metric_path: "r"
+      threshold: 10.0
+      threshold_op: gt
+
+  - skill: audit-rules-calibration
+    code: F10
+    severity: info
+    label: doc-fix
+    description: low integer metric
+    expected_fires: false
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"count\": 5}'"
+      metric_path: "count"
+      threshold: 10
+      threshold_op: gte
+
+  # ===== 5 known-ERROR (instrument failure → ERROR) =====
+  - skill: audit-rules-calibration
+    code: E1
+    severity: drift
+    label: behavior-fix
+    description: command rc!=0 (instrument failure)
+    expected_fires: error
+    reproducer:
+      type: transcript_pattern
+      command: "false"
+      metric_path: "r"
+      threshold: 10.0
+      threshold_op: gte
+
+  - skill: audit-rules-calibration
+    code: E2
+    severity: drift
+    label: behavior-fix
+    description: non-JSON output (instrument failure)
+    expected_fires: error
+    reproducer:
+      type: transcript_pattern
+      command: "echo 'not valid json'"
+      metric_path: "r"
+      threshold: 10.0
+      threshold_op: gte
+
+  - skill: audit-rules-calibration
+    code: E3
+    severity: drift
+    label: behavior-fix
+    description: metric_path navigates nowhere (typo)
+    expected_fires: error
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"other_key\": 50.0}'"
+      metric_path: "r"
+      threshold: 10.0
+      threshold_op: gte
+
+  - skill: audit-rules-calibration
+    code: E4
+    severity: drift
+    label: behavior-fix
+    description: non-numeric metric value (string)
+    expected_fires: error
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"r\": \"high\"}'"
+      metric_path: "r"
+      threshold: 10.0
+      threshold_op: gte
+
+  - skill: audit-rules-calibration
+    code: E5
+    severity: drift
+    label: behavior-fix
+    description: null metric value
+    expected_fires: error
+    reproducer:
+      type: transcript_pattern
+      command: "echo '{\"r\": null}'"
+      metric_path: "r"
+      threshold: 10.0
+      threshold_op: gte

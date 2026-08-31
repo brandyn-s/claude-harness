@@ -1,0 +1,39 @@
+id: bash-tail-buffering-guard
+type: hook
+event: PreToolUse
+matcher: "Bash"
+if_condition: null
+action_type: guard
+description: "Block long-running Bash commands piped to filtering tools (head/tail/grep without --line-buffered) that buffer stdout until the source command exits, making progressive monitoring impossible. v3 (2026-06-12): producer matching is token-anchored at the command position, so long-running names inside file paths (pytest-e2e.log) no longer false-positive."
+enforces:
+  - platform-constraints
+blocks_patterns:
+  - "python ... | tail -N (without -f)"
+  - "go run/test ... | head -N"
+  - "cargo ... | grep PATTERN"
+  - "pytest ... | tail"
+  - "docker run ... | head"
+  - "git clone ... | tail"
+  - "npm run/test ... | filter"
+  - "cli index_repository ... | filter"
+injects: null
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "allow"
+  "2": "block (with fix-options stderr explanation)"
+output_format: json
+incidents:
+  - date: "2026-03-16"
+    summary: "code-graph index: Go slog output never appeared because of pipe buffering"
+    turns_wasted: 3
+    category: monitoring
+  - date: "2026-05-02"
+    summary: "code-search PSM-full eval: 838-query run piped to | tail -80, showed 0 lines for ~5 min before re-spawning monitoring"
+    turns_wasted: 1
+    category: monitoring
+  - date: "2026-05-10"
+    summary: "3rd recurrence triggered promotion from prose rule to structural enforcement"
+    turns_wasted: 1
+    category: monitoring

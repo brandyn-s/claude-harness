@@ -1,0 +1,18 @@
+id: bash-security-audit
+type: hook
+event: PostToolUse
+matcher: "Bash"
+if_condition: null
+action_type: logger
+description: "Logs Bash commands for security audit trail."
+enforces:
+  - security-confirmations
+blocks_patterns: []
+injects: null
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "Command logged"
+output_format: none
+incidents: []

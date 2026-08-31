@@ -1,0 +1,71 @@
+id: scout-frontier
+type: skill
+description: "Scouting paradigm-distinct technical approaches across any domain — oblique reframing, cross-domain analogy generation, frontier-technique discovery. Combinational variation at scale with verification. Searches academic frontier (arXiv, ICSE/FSE/POPL/PLDI), industrial state-of-the-art, and adjacent-domain transfer with mode-collapse mitigation."
+category: research
+
+requires_tools:
+  - AskUserQuestion
+  - Bash
+  - Read
+  - Write
+  - mcp__arxiv-mcp-server__*
+  - mcp__arxiv-mcp-server__search_papers
+  - mcp__exa__*
+  - mcp__exa__web_search_exa
+  - mcp__exa__crawling_exa
+  - mcp__exa__web_fetch_exa
+  - mcp__firecrawl__*
+  - mcp__firecrawl__firecrawl_search
+  - mcp__firecrawl__firecrawl_scrape
+  - mcp__tavily__*
+  - mcp__tavily__tavily_search
+  - mcp__tavily__tavily_extract
+requires_topics:
+  - llm-creativity-ceiling.md
+  - knowledge-asymmetric-collaboration.md
+requires_rules:
+  - output-grounding
+  - uncharted-vs-refuted
+requires_skills:
+  - deep-dive
+  - gather-intel
+  - gather-research
+  - scout
+  - scout-skills
+requires_auth: []
+
+input_contract:
+  parameters:
+    target_problem:
+      type: string
+      required: false
+      description: "Problem to scout paradigm-distinct approaches for"
+    domains:
+      type: list[string]
+      required: false
+      description: "Override default search domains"
+  scope_from: argument
+output_contract:
+  produces:
+    - paradigm_inventory
+    - cross_domain_analogies
+    - frontier_papers
+    - per_recommendation_confidence_and_provenance
+    - counterfactual_per_recommendation
+  format: markdown_report_with_user_verification_required
+
+side_effects:
+  - writes_files  # scout report
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "15-30"
+
+preconditions:
+  - "At least one web-search MCP provider connected (tavily | exa | firecrawl); arxiv-mcp-server + firecrawl recommended for full operation. SKILL.md Preflight checks this at runtime and degrades or hard-stops accordingly."
+  - "Provider API keys configured for whichever servers are used (e.g., TAVILY_API_KEY, EXA_API_KEY)"
+  - "target_problem is open-ended (not a closed bug-shaped problem)"
+guardrails:
+  - creative-output-grounding-check
+  - context-monitor
+  - tavily-search-cap
+threat_model: read_only

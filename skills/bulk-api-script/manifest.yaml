@@ -1,0 +1,33 @@
+id: bulk-api-script
+type: skill
+description: "Ensures Python script approach for bulk data operations (>100 results) instead of MCP pagination."
+category: operations
+requires_tools:
+  - AskUserQuestion
+  - Bash
+  - Write
+requires_topics: []
+requires_rules:
+  - bulk-data
+  - platform-constraints
+requires_skills: []
+requires_auth: []
+input_contract:
+  parameters:
+    api_operation:
+      type: string
+      required: false
+      description: "API and operation to script"
+      examples: ["CrowdStrike export alerts", "Graph list all users"]
+  scope_from: argument
+output_contract:
+  produces: [python_script, execution_results]
+  format: json
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "5-15"
+preconditions: []
+guardrails:
+  - bash-security-guard
+threat_model: writes_local

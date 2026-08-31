@@ -1,0 +1,17 @@
+id: subagent-start-context
+type: hook
+event: SubagentStart
+matcher: ".*"
+if_condition: null
+action_type: injector
+description: "Auto-injects topic file content into worker agents via additionalContext. Parses 'Load topics:' from dispatch prompt."
+enforces: []
+blocks_patterns: []
+injects: "concatenated topic file content as additionalContext"
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "continue with injected context"
+output_format: json
+incidents: []

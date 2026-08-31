@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.example.claude.hook-fire-report</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/zsh</string>
+		<string>-lc</string>
+		<string>mkdir -p "$HOME/.claude/audit/launchd" &amp;&amp; python3 "$HOME/.claude/bin/hook-fire-report.py" >> "$HOME/.claude/audit/launchd/hook-fire-report.log" 2>&amp;1</string>
+	</array>
+	<!-- Monday 09:00 — weekly hook fire-rate/obsolescence report over the
+	     telemetry that hooks/run-hook appends to ~/.claude/audit/. -->
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Weekday</key>
+		<integer>1</integer>
+		<key>Hour</key>
+		<integer>9</integer>
+		<key>Minute</key>
+		<integer>0</integer>
+	</dict>
+	<key>RunAtLoad</key>
+	<false/>
+	<key>ProcessType</key>
+	<string>Background</string>
+</dict>
+</plist>

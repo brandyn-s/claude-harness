@@ -1,0 +1,36 @@
+name: recall deterministic invariants
+skill: recall
+trigger: "/recall <terms>"
+
+must_happen:
+  - File-first search runs before semantic fallback
+  - Confidence bands HIGH/MED/FILE applied with documented thresholds
+  - Selective deep-read after index scan (two-pass strategy)
+  - Telemetry append (JSONL)
+
+deterministic:
+  - frontmatter_equals:
+      name: recall
+  - frontmatter_contains:
+      description: "knowledge"
+  - body_contains:
+      - "knowledge-base/topics"
+      - "cosine"
+  - body_matches:
+      - "0\\.7"  # candidate threshold
+      - "0\\.65" # secondary threshold
+  - references_resolve: true
+  - examples_count: ">=3"
+
+# LLM-driven assertions runnable by scripts/run-skill-llm-evals.py
+llm_eval:
+  invocation:
+    prompt: "recall what we learned about retry timeout tuning in past sessions"
+    expected_skill_fires: true
+    timeout_s: 120
+  expected_output_contains:
+    - knowledge
+  forbidden_output:
+    - "I cannot help"
+    - "I don't have access to past sessions"
+    - "as an AI language model"

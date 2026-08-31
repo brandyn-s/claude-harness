@@ -1,0 +1,16 @@
+skill: gather-research
+name: gather-research deterministic invariants
+trigger: /gather-research <focus>
+must_happen:
+- Adversarial search fires for HIGH/MEDIUM findings
+- Citation freshness windows enforced
+- Transfer-difficulty rating per finding
+deterministic:
+- frontmatter_equals:
+    name: gather-research
+- body_contains:
+  - adversarial
+  - Wave 1
+  - Wave 2
+- references_resolve: true
+- examples_count: '>=2'

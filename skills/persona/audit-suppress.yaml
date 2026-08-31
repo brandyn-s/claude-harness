@@ -1,0 +1,11 @@
+suppressions:
+  - code: D2
+    reason: |
+      Reproducer is a structural grep for the literal "status": "missing"/"git_error"/"unknown"
+      strings in dispatch.py — these are dict-literal return values that MUST exist in source
+      for check_pre_registration() to work correctly. The finding asks for a docstring fix
+      (the docstring undercounts return variants); the docstring was updated in 2026-05-25
+      to enumerate all 6 statuses explicitly. The reproducer cannot detect the docstring fix
+      because it only inspects the value-side of the dict literals. Reviewer: confirm the
+      docstring at check_pre_registration() lists all 6 statuses before accepting this
+      suppression.

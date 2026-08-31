@@ -1,0 +1,45 @@
+id: audit-skill
+type: skill
+description: "Audit a skill (or all skills) for external-contract drift, content hygiene, and behavior gaps. Three-phase audit — mechanical lint (Phase 1), agent-driven scenario checks (Phase 2), oracle reverify gate (Phase 3). Trigger phrases: 'audit skill', 'check skill drift', 'verify skill before ship'. Do NOT use for one-line fixes that touch no contracts (the --strict mode in pre-commit handles those), or for brand-new skills before frontmatter validation has been run."
+category: maintenance
+
+requires_tools:
+  - Agent
+  - AskUserQuestion
+  - Bash
+  - Grep
+  - Read
+  - Write
+  - Edit
+requires_topics:
+  - engineering-philosophy.md
+requires_rules:
+  - verify-effectiveness
+  - check-before-change
+requires_skills:
+  - superplan
+requires_auth: []
+
+input_contract:
+  parameters:
+    skill_name:
+      type: string
+      required: false
+      description: "Skill to audit. Pass --all to audit every skill under ~/.claude/skills/."
+  scope_from: argument
+output_contract:
+  produces: [phase1_lint_findings, phase2_scenario_findings, phase3_oracle_verdicts, ranked_report]
+  format: markdown_report
+
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "10-30"
+
+preconditions:
+  - ~/.claude/bin/audit-skill.py exists
+  - ~/.claude/bin/audit-skill-oracle.py exists
+guardrails: []
+threat_model: read_only
+prose_only_tools:  # mentioned in SKILL.md prose, deliberately not used (B9/F4; reconcile-skill-tools honors this)
+  - AskUserQuestion  # mention describes the M4 finding class, not an invocation

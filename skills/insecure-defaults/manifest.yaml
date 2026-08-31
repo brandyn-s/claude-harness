@@ -1,0 +1,37 @@
+id: insecure-defaults
+type: skill
+description: "Detect fail-open insecure defaults -- hardcoded secrets, weak auth, permissive security configs that let apps run insecurely in production."
+category: security
+
+requires_tools:
+  - "Read"
+  - "Grep"
+  - "Glob"
+  - "Bash"
+  - "AskUserQuestion"
+requires_topics: []
+requires_rules:
+  - search-efficiency
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    target:
+      type: string
+      required: false
+      description: "File path or directory to scan"
+  scope_from: argument
+output_contract:
+  produces: [findings_report, defaults_ndjson]
+  format: markdown_report
+
+side_effects: [appends_defaults_history_jsonl]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "10-20"
+
+preconditions:
+  - "Target codebase accessible on local filesystem"
+guardrails: []
+threat_model: read_only

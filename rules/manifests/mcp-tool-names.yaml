@@ -1,0 +1,25 @@
+id: mcp-tool-names
+type: rule
+description: "Exact-probe the live MCP surface; use the on-demand routing catalog only as a discovery snapshot, with explicit Tailscale and NetCloud scope guards."
+applies_to:
+  - mcp_tool_discovery
+  - tool_search
+  - tailscale_operations
+  - netcloud_operations
+trigger_conditions:
+  - needing_mcp_tool
+  - searching_for_tool_capabilities
+required_actions:
+  - exact_probe_candidate_on_live_surface
+  - treat_shared_catalog_as_non_authoritative_snapshot
+  - read_vendor_topic_for_tailscale_or_netcloud
+prohibited_actions:
+  - guessing_tool_names
+  - trusting_snapshot_over_live_probe
+  - using_tailscale_mcp_as_corp_tailnet_evidence
+  - netcloud_write_without_named_target_verb_and_confirmation
+enforced_by: []
+enforcement_coverage: none
+incidents: []
+created_date: "2026-03-20"
+last_validated: "2026-08-05"

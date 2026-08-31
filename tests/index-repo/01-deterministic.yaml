@@ -1,0 +1,22 @@
+skill: index-repo
+name: index-repo deterministic invariants
+trigger: /index-repo <path>
+must_happen:
+- Unified indexing retains its hard readiness gate
+- Split indexing follows one installed release-bound workflow
+- Backend lifecycle deltas remain non-gating telemetry
+- Audit remediation requires user approval
+deterministic:
+- frontmatter_equals:
+    name: index-repo
+- body_contains:
+  - claude plugin list --json
+  - single release-bound workflow
+  - non-gating lifecycle telemetry
+  - files_added
+  - index_delta.mode
+  - skip_report
+  - rev-parse --show-toplevel
+  - partial index
+- references_resolve: true
+- examples_count: '>=2'

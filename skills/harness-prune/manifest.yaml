@@ -1,0 +1,34 @@
+id: harness-prune
+type: skill
+description: "Audit the harness (skills, hooks, rules) for stale model-version compensations and superseded library workarounds; append dated prune candidates to the KB backlog. Split from /garden 2026-06-11 (B8c/F2); owns the harness staleness surface while /garden owns KB + agent-memory (B8c/F3)."
+category: meta
+
+requires_tools:
+  - "Read"
+  - "Grep"
+  - "Bash"
+  - "Write"
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters: {}
+  scope_from: argument
+output_contract:
+  produces: [harness_pruning_candidates, prune_audit_report]
+  format: markdown_report
+
+side_effects: [writes_files]
+execution_context: any
+auth_constraint: any
+estimated_turns: "5-12"
+
+preconditions:
+  - "~/.claude/skills, hooks, rules present (the scan surface)"
+guardrails: []
+# Invariant (enforced by SKILL.md Success Criteria, not a manifest ref):
+# never edits the harness in-place — backlog appends only; pruning goes
+# through normal PR review.
+threat_model: local_only

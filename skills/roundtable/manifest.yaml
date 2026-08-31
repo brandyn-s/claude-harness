@@ -1,0 +1,82 @@
+id: roundtable
+type: skill
+description: "Run a multi-agent adversarial roundtable on any target context. Three LLMs (Claude Fable 5, Grok 4.6, GPT-5.6 Sol by default) produce independent assessments, then engage in forced critique, defend/concede, and resolution. Built-in null-control injection, falsifier-required claims, and embedding-based auto-stop."
+category: review
+
+requires_tools:
+  - "Agent"
+  - "Bash"
+  - "Edit"
+  - "Glob"
+  - "Grep"
+  - "Read"
+  - "Write"
+  - "AskUserQuestion"
+requires_topics: []
+requires_rules:
+  - platform-constraints
+  - red-team-rubric-discipline
+  - symmetric-evidentiary-burden
+requires_skills:
+  - brainstorm
+  - distill
+  - fp-check
+  - triage
+requires_auth:
+  - anthropic_api_key
+  - xai_api_key
+  - openai_api_key
+
+input_contract:
+  parameters:
+    target_context:
+      type: string_or_path
+      required: true
+      description: "What to review (skill draft, design proposal, security finding, plan)"
+    rounds:
+      type: int
+      required: false
+      description: "Number of debate rounds (2-5, default 5)"
+    anthropic_model:
+      type: string
+      required: false
+      description: "Qualified Anthropic arm override via ROUNDTABLE_ANTHROPIC_MODEL; default claude-opus-5"
+    anthropic_effort:
+      type: string
+      required: false
+      description: "Qualified Anthropic effort override via ROUNDTABLE_ANTHROPIC_EFFORT; default high"
+    covered_model_retention_approved:
+      type: bool
+      required: false
+      description: "Must be true via ROUNDTABLE_COVERED_MODEL_RETENTION_APPROVED=1 for Fable 5 or Mythos 5"
+  scope_from: argument
+output_contract:
+  produces:
+    - per_model_round_1_assessments
+    - debate_round_transcripts
+    - per_claim_falsifier
+    - convergence_verdict
+    - null_control_check_results
+    - nested_runtime_receipts
+    - terminally_gated_meta_synthesis
+  format: markdown_report
+
+side_effects:
+  - writes_files  # debate transcripts and synthesis
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "15-40"
+
+preconditions:
+  - "ANTHROPIC_API_KEY, XAI_API_KEY, OPENAI_API_KEY set"
+  - "Fable 5 or Mythos 5 overrides require approved 30-day retention and ROUNDTABLE_COVERED_MODEL_RETENTION_APPROVED=1"
+  - "output directory is new or empty, except an Agent D seed at round_1/agent_d.md when injection is enabled"
+  - "target context is non-trivial (not a bug-shaped problem with obvious answer)"
+guardrails:
+  - context-monitor
+  - bash-security-guard
+  - block-partial-read
+  - creative-output-grounding-check
+threat_model: read_only
+prose_only_tools:  # mentioned in SKILL.md prose, deliberately not used (B9/F4; reconcile-skill-tools honors this)
+  - Task  # 'not as Claude-driven Task tool invocations' — explicitly negated

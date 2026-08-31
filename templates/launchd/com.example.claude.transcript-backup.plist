@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.example.claude.transcript-backup</string>
+
+	<!-- Snapshots ~/.claude/projects/**/*.jsonl to ~/claude-transcript-backups/.
+	     Transcripts are the authoritative record for every session-history and
+	     retrospective claim, and they are protected today only by
+	     cleanupPeriodDays: 36500 — a setting whose governing bug
+	     (anthropics/claude-code#41458) is still OPEN: a user ran 99999 for two
+	     months and lost 490 sessions anyway. This is the only control that does
+	     not depend on that mechanism.
+
+	     zsh -lc matches the other agents here so PATH/~/.zshenv resolve as they
+	     do in a terminal. No caffeinate: the run is ~12s on 1.9 GB because
+	     rsync's link-dest option hardlinks everything unchanged.
+
+	     Note the option is named WITHOUT its leading dashes above, and must
+	     stay that way: XML forbids a double hyphen anywhere inside a comment.
+	     CFPropertyList (what plutil and launchd read plists with) tolerates
+	     it and the agent loads fine, but Python's plistlib is strict expat
+	     and raises ExpatError — which on 2026-08-12 made a WORKING agent get
+	     misreported as having no template at all. -->
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/zsh</string>
+		<string>-lc</string>
+		<string>mkdir -p "$HOME/.claude/audit/launchd" &amp;&amp; "$HOME/.claude/bin/backup-transcripts.sh" >> "$HOME/.claude/audit/launchd/transcript-backup.log" 2>&amp;1</string>
+	</array>
+
+	<!-- Daily 02:00, BEFORE the 03:30 garden run and before a typical first
+	     session of the day. The retention sweep this guards against fires at
+	     Claude Code STARTUP, so the backup wants to be the earlier event. -->
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Hour</key>
+		<integer>2</integer>
+		<key>Minute</key>
+		<integer>0</integer>
+	</dict>
+
+	<!-- Unlike the other agents this one DOES run at load. If the laptop was
+	     asleep at 02:00, launchd coalesces the missed run to next wake — which
+	     may land AFTER the day's first session has already started and already
+	     triggered a sweep. Running at login closes that window, and a redundant
+	     run is nearly free. -->
+	<key>RunAtLoad</key>
+	<true/>
+
+	<key>ProcessType</key>
+	<string>Background</string>
+</dict>
+</plist>

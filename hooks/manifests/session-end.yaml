@@ -1,0 +1,20 @@
+id: session-end
+type: hook
+event: SessionEnd
+matcher: ""
+if_condition: null
+action_type: logger
+description: "Atomically records bounded model/fallback/refusal provenance plus a transcript pointer for offline enrichment."
+enforces: []
+blocks_patterns: []
+injects: null
+modifies: ~/.claude/session-end-receipts/*.json
+depends_on_files:
+  - hooks/atomic_write.py
+  - bin/enrich-session-end-receipts.py
+depends_on_env:
+  - ANTHROPIC_MODEL
+exit_codes:
+  "0": "Bounded receipt saved or capture failed open"
+output_format: none
+incidents: []

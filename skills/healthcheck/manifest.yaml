@@ -1,0 +1,37 @@
+id: healthcheck
+type: skill
+description: "Quick architecture health check -- runs hook tests, validates config syntax, checks skill frontmatter, verifies memory consistency, detects stale file paths, ARCHITECTURE.md drift, dead routing references, and MCP index integrity."
+category: maintenance
+
+requires_tools:
+  - Agent
+  - AskUserQuestion
+  - Bash
+  - Glob
+  - Grep
+  - Read
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    focus:
+      type: enum
+      required: false
+      description: "hooks, config, skills, memory, paths, drift, routing, targets, orphans, manifest, indexes -- or omit for all"
+  scope_from: argument
+output_contract:
+  produces: [health_report, pass_fail_summary]
+  format: markdown_report
+
+side_effects: [none]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "5-15"
+
+preconditions:
+  - "~/.claude/ directory is a git repo with hooks, skills, rules"
+guardrails: []
+threat_model: read_only

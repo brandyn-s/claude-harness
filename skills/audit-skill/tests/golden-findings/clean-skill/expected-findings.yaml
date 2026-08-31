@@ -1,0 +1,32 @@
+# Corpus entry: clean-skill is the canonical "no findings expected" fixture.
+# Phase 1 audit must produce zero findings against it. Any code firing
+# here means audit-skill has started false-positiving on well-formed input.
+fixture: clean-skill
+required_codes: []
+forbidden_codes:
+  - H1
+  - H2
+  - H4
+  - D3a
+  - D3b
+  - D3c
+  - M1
+  - M2
+  - T1
+  - C1
+  - C2
+  - C3
+  - C4
+  - B1
+  - P1
+  - Q1
+  - Q2
+  - Q3
+notes: |
+  This is the calibration anchor for false-positive prevention. The
+  fixture is constructed with: complete description (WHAT/WHEN/Do NOT),
+  references that exist, scripts referenced in the body, allowed-tools
+  matching manifest, no placeholder syntax, no POSIX-only constructs,
+  no oversized body, no missing tests/. Any new audit-skill check
+  must produce zero findings on this fixture or the new check has a
+  false-positive bug.

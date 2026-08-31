@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.example.x-monitor-daily</string>
+	<!-- zsh -lc = login shell, so PATH (brew python3) resolves exactly as in
+	     a terminal. Keys come from the login Keychain (XAI_API_KEY /
+	     TAVILY_API_KEY / FIRECRAWL_API_KEY generic passwords) — zero secrets
+	     in this file. The runner wraps each stage in caffeinate -i. -->
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/zsh</string>
+		<string>-lc</string>
+		<string>mkdir -p "$HOME/.claude/audit/launchd" &amp;&amp; "$HOME/.claude/bin/x-monitor-daily.sh" >> "$HOME/.claude/audit/launchd/x-monitor-daily.log" 2>&amp;1</string>
+	</array>
+	<!-- Daily 07:45 local (before the 08:15 red-main sweep). Missed runs
+	     (laptop asleep) coalesce into one run at next wake. The 2-day sweep
+	     window means a skipped day is still covered by the next run. -->
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Hour</key>
+		<integer>7</integer>
+		<key>Minute</key>
+		<integer>45</integer>
+	</dict>
+	<key>RunAtLoad</key>
+	<false/>
+	<key>ProcessType</key>
+	<string>Background</string>
+</dict>
+</plist>

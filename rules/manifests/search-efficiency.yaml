@@ -1,0 +1,35 @@
+id: search-efficiency
+type: rule
+description: "Bound search output, reject shell-aborted or semantic phantom zeroes, protect zsh command handoffs, and use framework-first code analysis."
+applies_to:
+  - "Read tool calls"
+  - "Grep tool calls"
+  - "Glob tool calls"
+  - "shell commands"
+  - "commands handed to users"
+  - "semantic memory search"
+trigger_conditions:
+  - "any file reading or searching task"
+  - "reporting a negative search finding"
+  - "handing a shell command to the user"
+required_actions:
+  - "bound discovery output before reading content"
+  - "verify exit status and stderr before a negative finding"
+  - "quote zsh-active arguments and resolve handoff placeholders"
+  - "search bare entity name before hypothesis-qualified semantic queries"
+  - "discover framework idioms before generic value-pattern audits"
+prohibited_actions:
+  - "treat an aborted or truncated search as exhaustive"
+  - "claim hook coverage for commands handed to the user"
+  - "infer no prior work from a qualified semantic query alone"
+enforced_by:
+  - zsh-dialect-guard
+  - search-path-guard
+enforcement_coverage: partial
+incidents:
+  - date: "2026-03-30"
+    summary: "PSM credential audit missed 12/55 credentials due to head_limit burying results"
+    turns_wasted: 8
+    category: drift
+created_date: "2026-03-15"
+last_validated: "2026-08-05"

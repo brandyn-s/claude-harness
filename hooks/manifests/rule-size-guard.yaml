@@ -1,0 +1,23 @@
+id: rule-size-guard
+type: hook
+# Executed by the registered write-edit-dispatcher rather than wired as a
+# second standalone process.
+event: PreToolUse
+matcher: "Write|Edit"
+if_condition: null
+action_type: guard
+description: "Blocks growth past a 38,000-byte per-file rule budget or 250,000-byte aggregate always-loaded rule budget; warns above 225,000 bytes and permits budget-reducing remediation."
+enforces: []
+blocks_patterns:
+  - "non-reducing top-level rules/*.md writes above 38,000 UTF-8 bytes"
+  - "writes that grow the unconditional top-level rule corpus above 250,000 UTF-8 bytes"
+injects: "stderr remediation guidance for warnings, blocks, and over-budget reductions"
+modifies: null
+depends_on_files:
+  - hooks/rule_context_budget.py
+depends_on_env: []
+exit_codes:
+  "0": "allow or warn"
+  "2": "block"
+output_format: plaintext
+incidents: []

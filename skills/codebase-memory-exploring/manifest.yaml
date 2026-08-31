@@ -1,0 +1,32 @@
+id: codebase-memory-exploring
+type: skill
+description: "Explores codebase structure, lists functions and classes, shows API endpoints, and maps module relationships via the code-graph knowledge graph."
+category: code-intel
+
+requires_tools:
+  - "mcp__codebase-memory-mcp__*"
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    query:
+      type: string
+      required: false
+      description: "Structural query about the codebase"
+  scope_from: user_prompt
+output_contract:
+  produces: [module_hierarchy, function_list, relationship_map]
+  format: markdown_report
+
+side_effects: [none]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "2-5"
+
+preconditions:
+  - Target project indexed in code-graph
+guardrails: []
+threat_model: read_only

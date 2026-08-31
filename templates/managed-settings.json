@@ -1,0 +1,4 @@
+{
+  "_comment": "Deployment template only. requiredMinimumVersion is a managed-settings-only startup block; deploying this file to the platform-specific managed settings path requires separate administrator action.",
+  "requiredMinimumVersion": "2.1.226"
+}

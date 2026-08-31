@@ -1,0 +1,25 @@
+id: validate-to-improve
+type: rule
+description: "Never stop at PASS -- every validation produces a fix list for correctness, test quality, thresholds, consistency, resilience, and doc drift."
+applies_to:
+  - testing
+  - validation
+  - code_review
+trigger_conditions:
+  - test_validation_cycle_complete
+  - declaring_something_done
+required_actions:
+  - assess_correctness
+  - assess_test_quality
+  - assess_thresholds
+  - present_fix_list_alongside_results
+prohibited_actions:
+  - declaring_done_without_fix_list
+  - presenting_pass_without_improvement_assessment
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - memory_search_incident_2026_03_20
+  - skills_polish_incident_2026_03_20
+created_date: "2026-03-20"
+last_validated: "2026-04-15"

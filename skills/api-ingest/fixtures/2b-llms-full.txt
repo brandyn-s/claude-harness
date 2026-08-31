@@ -1,0 +1,57 @@
+# fixture-2b-llms-full API Documentation
+
+## Authentication
+
+This API uses bearer token authentication. Include the token in the
+`Authorization: Bearer {token}` header for every request.
+
+Token creation: https://api.example.test/settings/api-keys
+
+## Base URL
+
+Production: https://api.example.test/v1
+Sandbox:    https://sandbox.example.test/v1
+
+## Endpoints
+
+### GET /widgets
+
+List all widgets. Supports cursor pagination via `cursor` query param.
+Max page size: 100. Default: 25.
+
+### POST /widgets
+
+Create a new widget. Body: `{ "name": "<string>", "color": "<string>" }`.
+Returns 201 with the created widget.
+
+### GET /widgets/{id}
+
+Fetch a single widget by ID.
+
+### DELETE /widgets/{id}
+
+Delete a widget. Returns 204 on success.
+
+## Rate Limits
+
+- 100 requests/minute per API key (default tier)
+- 1000 requests/minute (enterprise tier)
+- Burst allowance: 20 requests within 1 second
+
+Headers returned: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`.
+
+## Errors
+
+All errors return JSON with shape: `{ "error": { "code": "<string>", "message": "<string>" } }`.
+
+Common codes:
+- `invalid_token` — 401
+- `not_found` — 404
+- `rate_limited` — 429
+- `internal` — 500
+
+## Webhooks
+
+Webhook signatures use HMAC-SHA256 with the shared secret. The signature
+is sent in the `X-Webhook-Signature` header. Always use a timing-safe
+compare when validating.

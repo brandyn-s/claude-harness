@@ -1,0 +1,636 @@
+{
+  "skip_patterns": [
+    "^/remember\\b",
+    "\\bexplain (how|why|what)\\b.{0,20}(claude|the system|routing|hooks|this (architecture|config))\\b",
+    "\\btell me about (claude(?!\\s+(code\\s+)?(spend|cost|usage|transcripts?|users?))|the system|this (architecture|config)|routing|hooks)\\b",
+    "\\bhelp me understand.{0,20}\\b(routing|hooks|architecture|config|the system|claude)\\b(?!\\s*(fail\\w*|error\\w*|bug\\w*|issue\\w*|problem\\w*|broken|not working|outage\\w*))"
+  ],
+  "rules": [
+    {
+      "pattern": "\\b(sync[- ]?repos?|pull repos?|fetch repos?|update local|refresh (clones?|repos?|local)|repo status)\\b",
+      "skill": "pull-repos",
+      "agent": null,
+      "desc": "Fetch+rebase or report git status of all managed local repo clones",
+      "priority": "high"
+    },
+    {
+      "pattern": "\\b(triage|investigate detect\\w*|alert\\w* review)\\b",
+      "skill": "triage",
+      "agent": null,
+      "desc": "Step-by-step triage workflow (generic, any domain)",
+      "priority": "critical"
+    },
+    {
+      "pattern": "\\b(bulk export|paginate|large dataset|>100 results|export all)\\b",
+      "skill": "bulk-api-script",
+      "agent": null,
+      "desc": "Python script for bulk data (not MCP pagination)",
+      "priority": "critical"
+    },
+    {
+      "pattern": "\\b(cross[- ]tool|correlat\\w*|detection.{0,20}vuln|multiple hosts|multi[- ]domain)\\b",
+      "skill": "investigate",
+      "agent": null,
+      "desc": "Cross-tool investigation and correlation (generic, any domain)",
+      "priority": "critical"
+    },
+    {
+      "pattern": "\\b(review (agent )?memory|what have agents learned|prune\\b.{0,20}(memory|learnings)|review learnings)\\b",
+      "skill": "review-learnings",
+      "agent": null,
+      "desc": "Audit agent persistent memory",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(gather research|research (intelligence|frontier|papers|findings)|what'?s new in research|academic (intelligence|papers|findings)|arXiv|AI agent\\w* research|conference (papers|findings|talks))",
+      "skill": "gather-research",
+      "agent": null,
+      "desc": "Research frontier — papers, conferences, frameworks, benchmarks",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(scout[- ]?frontier|paradigm scout|find[- ]?(a )?different approach|oblique( reframing)?|cross[- ]?domain analog\\w*|frontier (technique|approach|improvement|discover\\w*)\\w*|novel approach for (a |the )?system (I (don'?t|do not)|not) (under|fully )stand|industrial state[- ]of[- ]the[- ]art)\\b",
+      "skill": "scout-frontier",
+      "agent": null,
+      "desc": "Combinational variation at scale with verification (output-grounding rule applies; LLM creativity tradeoff curve)",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(gather intel|community (intelligence|learn\\w*)|what'?s new (externally|in the community)|external intelligence)",
+      "skill": "gather-intel",
+      "agent": null,
+      "desc": "External intelligence and architecture gap analysis",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(gather[- ]?claude|anthropic (intelligence|updates|changelog|what'?s new)|sync.{0,10}(upstream|anthropic)|what'?s new in claude( code)?|claude code (updates|changelog|releases))\\b",
+      "skill": "gather-claude",
+      "agent": null,
+      "desc": "First-party Anthropic intelligence - issues, PRs, docs, releases",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(gather[- ]?vendor|gather[- ]?(openai|gemini|grok|xai)|what'?s new (in|with) (chatgpt|openai|gemini|grok|xai)|(openai|gemini|grok|xai) (changelog|updates|deprecat\\w*)|did (openai|google|xai) (deprecate|retire|ship)|is the gemini flagship current|is x-monitor'?s api current)\\b",
+      "skill": "gather-vendor",
+      "agent": null,
+      "desc": "First-party OpenAI/Gemini/xAI intelligence - pinned-model probe, API changelog, deprecations, SDK releases (vendor via argument)",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(internal intel|team (learnings|discuss\\w*|learned)|slack discussions|what has the team (learned|discussed)|internal intelligence)",
+      "skill": "gather-internal-intel",
+      "agent": null,
+      "desc": "Search Slack/Linear/Confluence for operational learnings",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(deep[- ]?research|research (this|the) topic|vendor comparison|technology (deep[- ]?dive|comparison|evaluation)|compliance (deep[- ]?dive|comparison)|how does.{1,40}compare)\\b",
+      "skill": "deep-dive",
+      "agent": null,
+      "desc": "General-purpose deep research on any topic",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(capture|/capture|lesson learned|write up|document this|ADR|decision record|extract learnings|save what we learned|write.{0,10}(decision|lesson|insight|narrative))\\b",
+      "skill": "capture",
+      "agent": null,
+      "desc": "Capture knowledge base entry (decision, session, or insight)",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(/garden|garden health|tend.{0,10}garden|curate.{0,10}knowledge|prune.{0,10}topics|garden.{0,10}(check|report|status))\\b",
+      "skill": "garden",
+      "agent": null,
+      "desc": "Curate digital garden — orphans, stages, MoC coverage, merge candidates",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(stig|srg|compliance assessment|example-target|security posture|red[- ]team findings|update findings|compensating controls)\\b",
+      "skill": "stig-assess",
+      "agent": null,
+      "desc": "STIG/SRG compliance assessment",
+      "priority": "critical"
+    },
+    {
+      "pattern": "\\b(audit\\w* (the )?(architecture|system|config)|red[- ]?team (the )?(architecture|system|config)|architecture (review|audit|assessment)|system health)\\b",
+      "skill": "audit-architecture",
+      "agent": null,
+      "desc": "Architecture audit and validation",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(plan (how|to|for|out)|design (an?|the) approach|how (should|would|can) (I|we) (build|create|implement|migrate|automate|integrate)|superplan)\\b",
+      "skill": "superplan",
+      "agent": null,
+      "desc": "Context-aware planning — loads agent memory, MCP capabilities, topic files",
+      "priority": "high"
+    },
+    {
+      "pattern": "\\b(refine (this|my)|improve (this|my) prompt|before (I|we) (run|execute|start) this|enrich (this|my) (prompt|request)|what (am I|are we) missing|help me prepare|what do I need to (consider|include|think about)|before we (start|begin|kick off))\\b",
+      "skill": "refine",
+      "agent": null,
+      "desc": "Context engineering - inject governance constraints before execution",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(debug|debugg\\w*|bisect|reproduce.{0,15}(bug|issue|error)|root cause|why (is|does|did).{0,20}(fail|crash|break|error|wrong))\\b",
+      "skill": "systematic-debugging",
+      "agent": null,
+      "desc": "Structured debugging — reproduce, isolate, bisect, fix",
+      "priority": "high"
+    },
+    {
+      "pattern": "\\b(TDD|test.?driven|red.?green.?refactor|write (the )?test(s)? first|failing test)\\b",
+      "skill": "test-driven-development",
+      "agent": null,
+      "desc": "Test-driven development — tests first, then implementation",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(threat model|attack (surface|vector)|STRIDE|risk assessment|security (design|architecture) review|red[- ]?team(?!.{0,25}(architecture|system|config|finding)))\\b",
+      "skill": "threat-model",
+      "agent": null,
+      "desc": "Threat modeling and attack surface analysis",
+      "priority": "high"
+    },
+    {
+      "pattern": "\\b(insecure default|fail.?open|hardcoded (secret|credential|password|key)|env.?var.{0,10}default|missing (auth|validation))\\b",
+      "skill": "insecure-defaults",
+      "agent": null,
+      "desc": "Scan for insecure defaults and fail-open patterns",
+      "priority": "high"
+    },
+    {
+      "pattern": "\\b(variant analysis|similar (bug|vuln\\w*|pattern)|find (all|other) (instance|occurrence|case)s?|same (bug|vuln\\w*|pattern) elsewhere)\\b",
+      "skill": "variant-analysis",
+      "agent": null,
+      "desc": "Find variants of a known vulnerability across codebase",
+      "priority": "high"
+    },
+    {
+      "pattern": "\\b(mcp.{0,5}(diagnos|debug|broken|down|fail|timeout|unhealthy)|server.{0,10}(unhealthy|failing|timing out)|ecs.{0,5}(health|status|task))\\b",
+      "skill": "mcp-diagnose",
+      "agent": null,
+      "desc": "Diagnose MCP server health — ECS, CloudWatch, connectivity",
+      "priority": "high"
+    },
+    {
+      "pattern": "\\b(retro|what (happened|went wrong|did we do)|session (review|summary)|last (session|week).{0,10}(review|retro|summary))\\b",
+      "skill": "retro",
+      "agent": null,
+      "desc": "Session retrospective — review what happened, distill learnings",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(validate (the )?change|verify (the )?(fix|implementation|change)|did (this|the) (fix|change) work|check.{0,10}(before|after))\\b",
+      "skill": "validate-changes",
+      "agent": null,
+      "desc": "Validate implementation changes before shipping",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(is (my|the|our)\\s+[\\w-]+\\s+(broken|working|not working)|are (my|the|our)\\s+[\\w-]+s?\\s+(broken|working|not working)|health.?check|run tests|check (config|hooks|skills|settings|architecture))\\b",
+      "skill": "healthcheck",
+      "agent": null,
+      "desc": "Quick architecture health check — hooks, config, skills, settings",
+      "priority": "medium"
+    },
+    {
+      "pattern": "(spend\\w*|expense\\w*|ramp|budget\\w*|vendor\\w*|merchant\\w*|card\\w*|fund\\w*).{0,40}compli\\w*|compli\\w*.{0,40}(spend\\w*|expense\\w*|ramp|budget\\w*|vendor\\w*|merchant\\w*|card\\w*|fund\\w*)",
+      "skill": null,
+      "agent": "worker",
+      "desc": "Finance compliance (compound: finance keyword near compliance)",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(spend\\w*|transaction\\w*|expense\\w*|budget\\w*|vendor\\w*|merchant\\w*|receipt\\w*|reimburs\\w*|card (lock|unlock)|(lock|unlock) (this |my |the )?card|fund\\w*|ramp)\\b",
+      "skill": null,
+      "agent": "worker",
+      "desc": "Finance/Ramp operations query",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(candidate\\w*|recrui\\w*|hiring|requisition\\w*|posting\\w*|applicant\\w*|offer\\w*|interview\\w*|ashby|open role\\w*|(recrui\\w*|hiring|talent\\w*|candidate\\w*).{0,20}pipeline)\\b",
+      "skill": null,
+      "agent": "worker",
+      "desc": "Recruiting/ATS (Ashby) operations query",
+      "priority": "low"
+    },
+    {
+      "pattern": "(confluence|wiki\\w*|knowledge base).{0,30}(STIG|CMMC|security|compli\\w*|vulnerabilit\\w*|detect\\w*)|(STIG|CMMC|security|compli\\w*|vulnerabilit\\w*|detect\\w*).{0,30}(confluence|wiki\\w*|knowledge base)",
+      "skill": null,
+      "agent": "worker",
+      "desc": "Confluence + security compound (routes to security-ops, not project-ops)",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(confluence|wiki\\w*|knowledge base|documentation|docs)\\b",
+      "skill": null,
+      "agent": "worker",
+      "desc": "Confluence documentation query",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(project\\w*|milestone\\w*|cycle\\w*|initiative\\w*|sprint\\w*|backlog|kanban|linear|my (open )?issue\\w*|(linear|project\\w*|sprint\\w*|backlog).{0,20}issue\\w*)\\b",
+      "skill": null,
+      "agent": "worker",
+      "desc": "Project management/Linear query",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(detect\\w*|vulnerabilit\\w*|alert\\w*|compli\\w*|hash\\w*|contain\\w*|IOC\\w*|block\\w*|allowlist\\w*|sign\\w*[- ]?in|MFA|sensor\\w*|STIG\\w*|CMMC|crowd(strike|score)|tenable|airlock|entra|risky user\\w*|conditional access|threat intel\\w*|OTP|execution histor\\w*|finding\\w*|host(s|name)?\\w*.{0,20}(running|offline|online|Windows|Linux|Mac))\\b",
+      "skill": null,
+      "agent": "worker",
+      "desc": "Security operations query",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(runbook|azure automation|powershell|\\.ps1|graph api script|mail[- ]send)\\b",
+      "skill": null,
+      "agent": "worker",
+      "desc": "PowerShell runbook development",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(tailscale|tailnet|device\\w*.{0,15}(route|tag|key|auth)|dns.{0,10}(nameserver|split|search|magic)|acl.{0,10}polic|exit.node|subnet.route|approve.{0,5}device|device.{0,5}approv)\\b",
+      "skill": null,
+      "agent": "worker",
+      "desc": "Tailscale network infrastructure operations",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(slack|post (a )?message|send (a )?message.{0,15}(channel|slack)|check (slack )?threads?|channel (topic|purpose)|slack (channel|thread|message|notification)|message.{0,10}(team|channel))\\b",
+      "skill": null,
+      "agent": "worker",
+      "desc": "Slack messaging and channel operations",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(security alerts?|dependabot|code scanning|CVE|fix vulnerabilit\\w*|github alerts?)\\b",
+      "skill": "security-alerts",
+      "agent": null,
+      "desc": "Scan repos for dependabot + CodeQL alerts and auto-fix",
+      "priority": "high"
+    },
+    {
+      "pattern": "\\b(pr[- ]?fix|fix CI|stuck PR|failing check|stale branch|clean.*branch|broken CI|failed workflow)\\b",
+      "skill": "pr-fix",
+      "agent": null,
+      "desc": "Discover and fix failing CI across repos, clean stale branches",
+      "priority": "high"
+    },
+    {
+      "pattern": "\\b(ship it|ship this|commit and (push|merge)|send it|merge (this|it|everything))\\b",
+      "skill": "ship",
+      "agent": null,
+      "desc": "Full PR lifecycle: commit, push, PR, CI, merge, sync",
+      "priority": "high",
+      "must_activate": true
+    },
+    {
+      "pattern": "\\b((claude|anthropic).{0,60}(chatgpt|openai)|(chatgpt|openai).{0,60}(claude|anthropic)|enterprise ai monitor|cross[- ]provider ai monitor|multi[- ]provider ai monitor)\\b",
+      "skill": "enterprise-ai-monitor",
+      "agent": null,
+      "desc": "Route cross-provider Claude and OpenAI monitoring requests without collapsing provider contracts",
+      "priority": "high"
+    },
+    {
+      "pattern": "\\b((chatgpt|openai|codex).{0,35}(monitor|monitoring|compliance|telemetry|otel|audit|usage|cost|spend|finding|coverage|health|admin inventory)|(monitor|monitoring).{0,20}(chatgpt|openai|codex))\\b",
+      "skill": "openai-monitor",
+      "agent": null,
+      "desc": "Route OpenAI, ChatGPT, and Codex monitoring requests to provider-native evidence",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(claude.{0,40}(spend\\w*|cost\\w*|usage)|(spend\\w*|cost\\w*|usage).{0,40}claude|transcript\\w*|chat\\w*|conversation\\w*|active users|who used claude|compliance api|OTel|telemetry|invite user|(claude|admin|list|get|delete)[- ]?\\w*[- ]?workspace\\w*)\\b",
+      "skill": "cc-monitor",
+      "agent": null,
+      "desc": "Route Claude monitoring queries to Compliance API, Admin API, or OTel",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(SCA review|software composition|review.{0,10}CKLB|simulate SCA|prepare.{0,10}submission)\\b",
+      "skill": "sca-review",
+      "agent": null,
+      "desc": "SCA review simulation for CKLB assessment quality",
+      "priority": "high"
+    },
+    {
+      "pattern": "\\b(verify.{0,10}CKLB|check.{0,10}assessment|grounding|stig.{0,10}verify|validate.{0,10}findings)\\b",
+      "skill": "stig-verify",
+      "agent": null,
+      "desc": "Verify CKLB quality by grounding evidence against source repo",
+      "priority": "high"
+    },
+    {
+      "pattern": "\\b(index.{0,5}repo|set up search|index this (repo|project|codebase))\\b",
+      "skill": "index-repo",
+      "agent": null,
+      "desc": "Index repo for both code-search and code-graph",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(find (code|function|class)|where is|how does.{0,20}work|what calls|blast radius|dead code|callers of|who uses|trace.{0,10}(call|data|dependency))\\b",
+      "skill": "code-explore",
+      "agent": null,
+      "desc": "Route code exploration to code-search or code-graph",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(weekly update|what happened this week|weekly report|standup report|weekly summary|week in review)\\b",
+      "skill": "weekly-update",
+      "agent": null,
+      "desc": "Generate weekly update from repo activity and Slack",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(brainstorm|ideate|explore ideas|think through|what if we|creative session|blue ?sky)\\b",
+      "skill": "brainstorm",
+      "agent": null,
+      "desc": "Structured brainstorming with diverge/converge phases",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(PR (fail|broke|blocked|fix)|fix (the |this )?PR|CI (fail|broke)|merge conflict|failed check)\\b",
+      "skill": "pr-fix",
+      "agent": null,
+      "desc": "Diagnose and fix failing PR checks or merge conflicts",
+      "priority": "high"
+    },
+    {
+      "pattern": "\\b(distill|extract (pattern|lesson|insight)|what did (we|I) learn|pattern extraction|session (review|distill))\\b",
+      "skill": "distill",
+      "agent": null,
+      "desc": "Extract patterns and lessons from session transcripts",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(run semgrep|SAST|static analysis|semgrep scan|code scan|security scan)\\b",
+      "skill": "semgrep",
+      "agent": null,
+      "desc": "Run Semgrep SAST scan with custom rules",
+      "priority": "high"
+    },
+    {
+      "pattern": "\\b(false positive|fp check|is this (a )?real (finding|vuln|alert)|verify (finding|alert)|triage finding)\\b",
+      "skill": "fp-check",
+      "agent": null,
+      "desc": "Evaluate whether a security finding is a false positive",
+      "priority": "high"
+    },
+    {
+      "pattern": "\\b(recall|what do (I|we) know about|search memory|check memory|remember.{0,10}about)\\b",
+      "skill": "recall",
+      "agent": null,
+      "desc": "Search agent memory and knowledge base for a topic",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(scan repos|what repos|repo (inventory|survey|scan)|gather.{0,5}repos|list.{0,10}repos)\\b",
+      "skill": "gather-repos",
+      "agent": null,
+      "desc": "Inventory and evaluate repositories across orgs",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(semgrep rule|write.{0,10}rule|custom (semgrep |SAST )?rule|detection rule)\\b",
+      "skill": "semgrep-rule-creator",
+      "agent": null,
+      "desc": "Create custom Semgrep rules for specific patterns",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(codeql|code.?ql|QL query|variant.{0,5}codeql|codeql scan)\\b",
+      "skill": "codeql",
+      "agent": null,
+      "desc": "Run CodeQL queries for vulnerability analysis",
+      "priority": "high"
+    },
+    {
+      "pattern": "\\b(sarif|scan results?|parse (scan|results)|review (scan|findings))\\b",
+      "skill": "sarif-parsing",
+      "agent": null,
+      "desc": "Parse and analyze SARIF scan output files",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(evaluate repos|repo (eval|assessment|quality)|code (health|quality).{0,10}repo)\\b",
+      "skill": "evaluate-repos",
+      "agent": null,
+      "desc": "Deep evaluation of repo quality, CI, and architecture",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(obsidian|vault|knowledge.{0,5}(graph|base)|note.{0,5}(system|vault))\\b",
+      "skill": "obsidian",
+      "agent": null,
+      "desc": "Manage Obsidian vault structure and sync",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(cross.?repo|multi.?repo|across repos|all repos|org.?wide (change|update|scan))\\b",
+      "skill": "cross-repo",
+      "agent": null,
+      "desc": "Coordinate changes across multiple repositories",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(diff(erential)? review|what changed (between|since)|compare (version|commit|branch|release)|delta review)\\b",
+      "skill": "differential-review",
+      "agent": null,
+      "desc": "Review changes between versions or commits",
+      "priority": "medium",
+      "must_activate": true
+    },
+    {
+      "pattern": "\\b(sharp edge|gotcha|footgun|common mistake|pitfall|watch out|easy to get wrong)\\b",
+      "skill": "sharp-edges",
+      "agent": null,
+      "desc": "Document known sharp edges, gotchas, and pitfalls",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(ship[- ]?hook|install[- ]?hook|install.{0,10}staged.{0,10}hook)\\b",
+      "skill": "ship-hook",
+      "agent": null,
+      "desc": "Install staged hook specs from /distill T0 classification",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(verify.{0,10}(before|completion|done|finished|complete)|before (claiming|marking).{0,10}(done|complete))\\b",
+      "skill": "verification-before-completion",
+      "agent": null,
+      "desc": "Pre-completion verification checklist",
+      "priority": "medium",
+      "must_activate": true
+    },
+    {
+      "pattern": "\\b(execute.{0,10}plan|follow.{0,10}plan|run.{0,10}plan|implement.{0,10}plan)\\b",
+      "skill": "subagent-driven-development",
+      "agent": null,
+      "desc": "Execute implementation plans with parallel agents",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(subagent.{0,5}(driven|dev)|delegate.{0,10}(implement|code|build)|agent.{0,5}per.{0,5}task)\\b",
+      "skill": "subagent-driven-development",
+      "agent": null,
+      "desc": "Dispatch one fresh subagent per implementation task",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(api guard|system prompt.{0,10}(review|check|audit)|prompt (injection|safety|security))\\b",
+      "skill": "api-guardrails",
+      "agent": null,
+      "desc": "Review Claude API apps for prompt safety and guardrails",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(audit.{0,5}rules?|rule (compliance|effectiveness|violation)|measure.{0,10}rules?)\\b",
+      "skill": "audit-rules",
+      "agent": null,
+      "desc": "Measure rule compliance from session transcripts",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(retrospective|what went (well|wrong)|multi.?session review|period review)\\b",
+      "skill": "retrospective",
+      "agent": null,
+      "desc": "Multi-session retrospective — patterns across sessions",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(scout|discover.{0,10}repos|full pipeline.{0,10}repos|scan.{0,10}evaluate)\\b",
+      "skill": "scout",
+      "agent": null,
+      "desc": "Full pipeline: discover repos then evaluate with advocate/skeptic",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(explore.{0,10}(codebase|code|repo)|list (function|class|module)|codebase (structure|overview|map))\\b",
+      "skill": "codebase-memory-exploring",
+      "agent": null,
+      "desc": "Explore codebase structure via code-graph",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(code quality|dead code|unused (function|import|variable)|high (fan.?out|complexity))\\b",
+      "skill": "codebase-memory-quality",
+      "agent": null,
+      "desc": "Find dead code, unused functions, quality issues via code-graph",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(call (chain|graph|path)|who calls|callers? of|callees? of|trace.{0,10}(function|method|call))\\b",
+      "skill": "codebase-memory-tracing",
+      "agent": null,
+      "desc": "Trace function call chains and dependencies via code-graph",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(guardrail|proxy rule|secret scan rule|PII rule|block.{0,10}(prompt|pattern))\\b",
+      "skill": "guardrail",
+      "agent": null,
+      "desc": "Manage claude-proxy guardrail rules in S3",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(interview.{0,10}(plan|design|proposal)|stress.?test.{0,10}(plan|design)|adversarial (review|question|challenge)|poke holes)\\b",
+      "skill": "interview",
+      "agent": null,
+      "desc": "Adversarial stress-test for plans, designs, and proposals",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(productionize.{0,10}mcp|deploy.{0,10}mcp|onboard.{0,10}mcp|mcp.{0,10}(to |into )?(ecs|fargate|production))\\b",
+      "skill": "mcp-create",
+      "agent": null,
+      "desc": "Deploy MCP servers to Example ECS Fargate infrastructure",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(scout.{0,5}skills?|mine.{0,10}skills?|skills? registry|context7.{0,10}skills?)\\b",
+      "skill": "scout-skills",
+      "agent": null,
+      "desc": "Mine Context7 skills registry for transferable patterns",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(email|outlook|mailbox|inbox|mail folder|send (an )?email|read (my )?email)\\b",
+      "skill": null,
+      "agent": "worker",
+      "desc": "Mailbox (Outlook/M365) query via mailbox-mcp",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(x\\.ai|xai|grok|x(\\s+|/)(twitter|post)|twitter search|tweet|text.to.speech|tts)\\b",
+      "skill": null,
+      "agent": "worker",
+      "desc": "X.AI / X (Twitter) / Grok / image-gen / TTS via xai MCP",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(aws (cost|spend|billing|bill)|cost explorer|cost optimi\\w*|savings plan|reserved instance|compute optimizer|free tier|aws budget|graviton migration)\\b",
+      "skill": null,
+      "agent": "worker",
+      "desc": "AWS cost/billing via awslabs.billing-cost-management-mcp-server",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(provision (a )?workspace|(create|new|tear ?down|deprovision) (a )?(team )?workspace|compliance access (framework)?|m365.{0,10}provision|scim group)\\b",
+      "skill": "provision",
+      "agent": null,
+      "desc": "Cross-platform workspace provisioning via compliance-access-framework",
+      "priority": "medium"
+    },
+    {
+      "pattern": "\\b(firecrawl|scrape (a )?(url|page|site)|crawl (a )?(site|url)|headless browser|browser automation|extract structured data from (a )?page)\\b",
+      "skill": null,
+      "agent": "worker",
+      "desc": "Firecrawl — web scraping, structured extraction, browser automation",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(hologram|iot device\\w*|sim (card|activation)|activate (a )?sim|cellular (modem|connectivity|data)|data (plan|session)s?)\\b",
+      "skill": null,
+      "agent": "worker",
+      "desc": "Hologram IoT device / SIM / data-plan management",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(netcloud|vendor-router|router\\w*.{0,15}(config|reboot|fleet|health|alert)|net device\\w*|reboot (the )?router|fleet (router|connectivity))\\b",
+      "skill": null,
+      "agent": "worker",
+      "desc": "VendorRouter NetCloud router/fleet management",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(jamf|jamf pro|\\bMDM\\b|mobile device management|computer inventory|configuration profiles?|FileVault|patch polic\\w*)\\b",
+      "skill": null,
+      "agent": "worker",
+      "desc": "Jamf Pro MDM - macOS endpoint management, inventory, policies, CMMC reporting",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(lucid|lucidchart|lucidspark|lucid (doc|diagram|folder)|diagram\\w*.{0,10}(search|doc|folder))\\b",
+      "skill": null,
+      "agent": "worker",
+      "desc": "Lucid diagram / document management",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(box[- ]?admin|box\\s+(users?|groups?|folders?|files?|retention|legal hold|shield|barriers?|storage polic\\w*|webhooks?|collaborat\\w*|enterprise events?|device pinners?|security classification)|(retention polic\\w*|legal hold|shield (information )?barrier|storage polic\\w*)\\b.{0,12}\\bbox\\b)",
+      "skill": null,
+      "agent": "worker",
+      "desc": "Box enterprise content admin (users, groups, retention, legal holds, shield barriers) via box-admin MCP",
+      "priority": "low"
+    },
+    {
+      "pattern": "\\b(athena|athena query|query.{0,15}(athena|otel|cowork)|presto sql|aws sql)\\b",
+      "skill": null,
+      "agent": "worker",
+      "desc": "AWS Athena SQL queries (OTel/cost log analysis)",
+      "priority": "low"
+    }
+  ]
+}

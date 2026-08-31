@@ -1,0 +1,46 @@
+id: readiness-review
+type: skill
+description: "Assess whether a vibe-coded internal tool is ready to put in a technical SME's hands — orchestrates a shape-adapted, capability-first readiness review (resolve reason-to-exist, validate core output vs an independent oracle, verify live, adversarial-hammer) and emits ONE go/no-go handoff verdict. Review-only; fixes are a separate confirmed pass."
+category: review
+
+requires_tools:
+  - "Bash"
+  - "Read"
+  - "Grep"
+  - "Glob"
+  - "AskUserQuestion"
+requires_topics: []
+requires_rules:
+  - scope-discipline
+  - check-before-change
+  - grading-discipline
+  - verify-effectiveness
+requires_skills:
+  - lab-review
+  - service-review
+requires_auth: []
+
+input_contract:
+  parameters:
+    repo:
+      type: string
+      required: true
+      description: "Repo name or path to the internal tool being assessed for SME handoff"
+  scope_from: argument
+output_contract:
+  produces:
+    - readiness_report
+    - prioritized_worklist
+    - go_no_go_verdict
+  format: markdown_report
+
+side_effects: []
+execution_context: main_thread
+estimated_turns: "8-20"
+
+preconditions:
+  - "the target repo is cloned locally (or a path is passed)"
+  - "the tool can be booted locally OR the live-verify blocker is documented"
+guardrails:
+  - bash-security-guard
+threat_model: read_only

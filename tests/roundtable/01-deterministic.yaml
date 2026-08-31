@@ -1,0 +1,70 @@
+name: "roundtable deterministic contract"
+skill: roundtable
+trigger: "/roundtable <target> (multi-model adversarial review)"
+
+# SCOPE NOTE — what this fixture can and cannot pin.
+# roundtable's AUDIT-FINDINGS are all SCRIPT-INTERNAL (harness.py round_2
+# convergence subdir, anonymize_peers flag drop, synthesize.py rounds_completed
+# inflation). The eval harness only reads SKILL.md, so it structurally CANNOT pin
+# those — they belong to the 5 pytest files in skills/roundtable/tests/, which CI
+# already runs. This fixture therefore pins the SKILL.md CONTRACT layer plus script
+# existence/invocability, and deliberately does not duplicate pytest's coverage.
+
+must_happen:
+  - Preflight probes the pinned non-Anthropic arms before spending API budget
+  - R1 independent, R2 forced critique, R3-R4 pre-reg + defend/concede, R5 consolidated
+  - Null-control injected and falsifiers required before any claim is reported
+
+deterministic:
+  # --- Cross-model validity is the skill's entire reason to exist: three DIFFERENT
+  # vendors, not three Claude models. best-in-class-for-cross-model.md makes this a
+  # standing rule, so a drift to same-family jurors silently voids the result.
+  - body_contains:
+      - "Grok"
+      - "GPT-5"
+
+  # --- The round protocol. R1 must be INDEPENDENT (no peer context) or the whole
+  # panel collapses toward the first opinion; R2's forced critique is what makes it
+  # adversarial rather than a chorus.
+  - body_contains:
+      - "R1"
+      - "defend/concede"
+
+  # --- Two validity instruments that distinguish this from "ask three models":
+  # a null-control arm detects a panel that agrees with anything, and
+  # falsifier-required claims stop unfalsifiable consensus being reported as finding.
+  - body_contains:
+      - "null-control"
+      - "falsifier"
+
+  # --- Embedding-based auto-stop is the cost control (rounds halt on convergence
+  # instead of always burning all 5). Its subdir bug is pytest's job; that the
+  # MECHANISM stays documented is this fixture's job.
+  - body_contains: "auto-stop"
+
+  # --- Pre-registration: R3-R4 commit to scoring criteria BEFORE seeing responses.
+  - body_contains: "pre-registration"
+
+  # --- Load-bearing scripts. harness.py orchestrates the rounds; synthesize.py
+  # produces the consolidated output; the three vendor adapters are what make the
+  # panel cross-vendor at all — losing one silently narrows the panel.
+  - script_exists:
+      - scripts/harness.py
+      - scripts/synthesize.py
+      - scripts/adapters/anthropic_adapter.py
+      - scripts/adapters/openai_adapter.py
+      - scripts/adapters/xai_adapter.py
+
+  # --- The orchestrator must stay invocable. An import-time break here is a silent
+  # whole-skill outage; --help exercises argparse construction end-to-end.
+  - script_runs: "python3 scripts/harness.py --help"
+
+  # --- Judge-reliability protocol and cost tradeoffs are cited decision references.
+  - ref_resolves:
+      - judge-reliability-protocol.md
+      - cost-tradeoffs.md
+      - when-to-use.md
+
+  # --- Script-internal correctness lives in pytest; assert the suite is present so a
+  # future refactor cannot quietly delete the only real coverage of harness.py.
+  - tests_count: ">=1"

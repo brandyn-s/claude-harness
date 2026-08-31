@@ -1,0 +1,35 @@
+id: semgrep-rule-creator
+type: skill
+description: "Create production-quality custom Semgrep rules with test-first methodology and iterative refinement."
+category: security
+requires_tools:
+  - Bash
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - WebFetch
+  - AskUserQuestion
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+input_contract:
+  parameters:
+    pattern:
+      type: string
+      required: false
+      description: "Vulnerability pattern or code pattern to detect"
+  scope_from: argument
+output_contract:
+  produces: [semgrep_rule_yaml, test_file, validation_results]
+  format: git_commits
+side_effects: [writes_rule_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "10-25"
+preconditions:
+  - semgrep_installed
+guardrails: []
+threat_model: writes_local

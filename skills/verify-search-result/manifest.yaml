@@ -1,0 +1,55 @@
+id: verify-search-result
+type: skill
+description: "Use when a CALLS-edge claim, semantic-search top-K result, or code-localize verdict needs verification before informing a security-critical decision (auth, crypto, sanitization, taint flow, privilege boundary, secrets, access control). Reads the cited source, produces a CONFIRMED/FALSE-POSITIVE/AMBIGUOUS verdict with file:line + source excerpt."
+category: verification
+
+requires_tools:
+  - "Bash"
+  - "Glob"
+  - "Grep"
+  - "Read"
+  - "mcp__codebase-memory-mcp__*"
+  - "AskUserQuestion"
+requires_topics:
+  - security.md
+requires_rules:
+  - security-critical-search-verification
+  - subagent-tool-discipline
+  - verify-before-assuming
+requires_skills:
+  - code-explore
+requires_auth: []
+
+input_contract:
+  parameters:
+    search_result:
+      type: object
+      required: true
+      description: "Tool output (CALLS edge JSON, semantic-search top-K, or localize verdict) to verify"
+    security_concept:
+      type: string
+      required: true
+      description: "Auth/crypto/sanitization/taint/privilege/secrets/access-control concept the result is meant to inform"
+  scope_from: argument
+output_contract:
+  produces:
+    - verdict  # CONFIRMED | FALSE-POSITIVE | AMBIGUOUS
+    - cited_file_line
+    - source_excerpt_3_to_5_lines
+    - rationale
+  format: structured_verification_artifact
+
+side_effects:
+  - none  # purely read + emit verdict
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "2-5"
+
+preconditions:
+  - "target repo indexed in code-graph and/or code-search"
+  - "search result includes a cited file:line"
+guardrails:
+  - verify-before-assuming
+  - block-partial-read
+  - search-path-guard
+threat_model: read_only

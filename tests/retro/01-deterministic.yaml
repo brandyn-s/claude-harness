@@ -1,0 +1,67 @@
+name: "retro deterministic contract"
+skill: retro
+trigger: "Session wrap-up behavior and scope boundaries"
+
+deterministic:
+- frontmatter_contains:
+    allowed-tools: "AskUserQuestion"
+- frontmatter_contains:
+    allowed-tools: "Skill"
+- body_contains:
+  - "invoke `/mega-distill`"
+  - "compaction boundary"
+  - "$CLAUDE_CODE_SESSION_ID"
+  - "nodeRepl.requestMeta"
+  - "~/.codex/sessions"
+  - "chronological signal slice"
+  - "$CODEX_THREAD_ID"
+  - "paired counts"
+  - "`--full` does not override"
+  - "small, uncompacted `--full`"
+  - "in Claude Code use the Skill tool; in Codex"
+- body_contains:
+  - "Step 1 is already complete"
+  - "invoke `/mega-capture`"
+  - "same transcript"
+  - "If distill found nothing, invoke the selected capture path"
+  - "`/mega-capture` for a complete-transcript session"
+- body_not_contains: "fans out one"
+- body_not_contains: "chunks the COMPLETE file"
+- body_not_contains: "capture slice"
+- body_contains:
+  - "## Step 0: Large-session detection"
+  - "## Step 1: Run Distill"
+  - "## Step 2: Bridge Context"
+  - "## Step 3: Run Capture"
+  - "## Step 4: Quick Postmortem"
+  - "## Step 5: Ship Session Artifacts"
+- body_contains:
+  - "THIS session produced"
+  - "Repo cleanup beyond that"
+  - "use `/pr-fix`"
+- body_contains:
+  - "emit it inline in chat — do NOT write a file"
+  - "/retro itself produces no extra files on disk"
+- body_contains:
+  - "10+ turns"
+  - "3+ lessons"
+- body_contains:
+  - "T5 (skip) rows are filtered out"
+  - "T5 lessons are never forwarded to capture"
+- ref_resolves: "postmortem-templates.md"
+- body_contains:
+  - "/distill"
+  - "/capture"
+  - "/ship"
+  - "/ship --queue-only"
+  - "/mega-distill"
+  - "/mega-capture"
+- body_not_contains:
+  - "T3:"
+  - "/tmp/claude/merge-"
+  - "python3 ~/.claude/bin/pr-merge-verified.py"
+  - "nohup python3"
+  - "retro-merge-XXXXXX"
+- body_contains:
+  - "STATE_ROOT"
+  - "durable merge-queue handoff"

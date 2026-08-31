@@ -1,0 +1,56 @@
+name: gitleaks
+
+# Secret scanning on every PR and push to main.
+#
+# Uses no repository secrets, so it runs identically on fork pull requests.
+# `fetch-depth: 0` is required: gitleaks scans history, and a shallow clone
+# would silently reduce the scan to the tip commit.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install gitleaks
+        run: |
+          set -euo pipefail
+          VERSION=8.30.1
+          curl -sSfL -o /tmp/gitleaks.tar.gz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz"
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
+          sudo install -m 0755 /tmp/gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+
+      # A scanner that reports zero without ever having matched anything is
+      # indistinguishable from a broken invocation. Prove the rules load and
+      # fire on a known-positive before trusting this job's zero.
+      - name: Qualify the scanner against a known-positive control
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/ctl
+          printf 'aws_secret_access_key = "%s"\n' \
+            "kZ9qWm3TbXr7LpNvE2sYuHc8JdFgQa5RiOzT1wVb" > /tmp/ctl/control.txt
+          if gitleaks dir /tmp/ctl --no-banner --exit-code 9 \
+               --report-format json --report-path /tmp/ctl.json; then
+            echo "::error::control did NOT fire - the ruleset is not loading"
+            exit 1
+          fi
+          echo "control fired as expected"
+
+      - name: Scan history
+        run: gitleaks git . --no-banner --redact --exit-code 1
+
+      - name: Scan working tree
+        run: gitleaks dir . --no-banner --redact --exit-code 1

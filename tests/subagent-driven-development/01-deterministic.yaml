@@ -1,0 +1,16 @@
+name: "subagent-driven development review-efficiency contract"
+skill: subagent-driven-development
+trigger: "Execute an implementation plan with bounded subagents and reviews"
+
+deterministic:
+  - body_contains: "Risk-based review"
+  - body_contains: "one combined spec-and-quality reviewer"
+  - body_contains: "one repair batch"
+  - body_contains: "A second rejection stops"
+  - body_contains: "complete issue set"
+  - body_contains: "Do not poll"
+  - body_contains: "bounded task surface"
+  - body_contains: "acceptance matrix"
+  - body_contains: "Scope-change barrier"
+  - body_contains: "interrupt active agents"
+  - body_contains: "cancel out-of-scope work"

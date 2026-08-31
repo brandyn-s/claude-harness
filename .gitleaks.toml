@@ -1,0 +1,16 @@
+# Secret scanning for this repository.
+#
+# IMPORTANT — deliberate difference from the private original: that config
+# allowlisted whole PATH GLOBS (`agent-memory/topics/*.md`, `skills/*/SKILL.md`,
+# `projects/*/settings.json`), which removed ~343 files — the highest-risk ones —
+# from the gate entirely. A gate narrowed until it passes is worse than the gap
+# it hid, because nothing signals that coverage moved.
+#
+# Here there are NO path allowlists. Individual reviewed findings go in
+# `.gitleaksignore` as per-finding fingerprints, so each suppression is
+# attributable to a decision about that specific line.
+
+title = "claude-harness"
+
+[extend]
+useDefault = true

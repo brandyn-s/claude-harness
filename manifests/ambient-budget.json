@@ -1,0 +1,122 @@
+{
+  "$comment": [
+    "Ambient rule corpus budget. THE CEILING IS DERIVED, NOT PINNED:",
+    "    allowed = baseline_unconditional_bytes + sum(entry.bytes for entry in ledger)",
+    "so raising it REQUIRES appending a ledger entry with a byte count and a reason.",
+    "A bare edit of a stored ceiling is impossible because no ceiling is stored.",
+    "",
+    "This replaces the per-file 10,000-byte cap that used to apply to ten named rules.",
+    "That cap was a one-time descope mechanism (the test tuple was literally named",
+    "formerly_dominant) frozen into a permanent constraint, and it failed in a specific",
+    "measurable way: it is a CLIFF, so every repair converged to just under it and the",
+    "next append breached it again. git-hygiene.md went breach -> repair FOUR times in",
+    "16 days, each repair landing at ~9,800 of 10,000; 13 dedicated cap-repair PRs",
+    "shipped between 2026-07-01 and 2026-08-26; the size guard fired in 39 of 82",
+    "sessions in one week. It also MISALLOCATED: three files sat under 500 bytes of",
+    "headroom while 16,395 bytes went unused across the other seven, so a lesson landed",
+    "wherever there was room instead of in its topical home.",
+    "",
+    "A delta gate has no cliff to converge on. Growth is still possible -- it is just",
+    "explicit, justified, and recorded here instead of discovered when CI goes red.",
+    "",
+    "Per-file size is still bounded: hooks/rule-size-guard.py keeps WARN 35,000 /",
+    "BLOCK 38,000 on every rules/*.md, so dropping the 10,000 cap does not leave a",
+    "single file unbounded. The corpus is additionally bounded by WARN 225,000 /",
+    "BLOCK 250,000 in hooks/rule_context_budget.py.",
+    "",
+    "HOW TO LAND A LESSON WHEN THE GATE BINDS, cheapest first:",
+    "  1. Relocate equivalent bytes out of ambient in the SAME change -- to",
+    "     rules/incidents/<name>.md or docs/rule-reference/<name>.md, which already",
+    "     hold ~963 KB and cost nothing until read. Net zero, no ledger entry needed.",
+    "  2. Route the lesson to a lazily-loaded tier instead (agent-memory/topics/ for a",
+    "     domain gotcha, a skill step for an activity discipline). No ambient cost.",
+    "  3. Add a paths: frontmatter block if the rule is genuinely path-scoped -- it then",
+    "     leaves the unconditional corpus entirely.",
+    "  4. Only if none of the above fit: append a ledger entry below and say why the",
+    "     bytes must be ambient.",
+    "",
+    "A NEGATIVE entry is how the ceiling ratchets DOWN. Record a relocation that",
+    "permanently removes ambient bytes so the freed budget cannot be silently reused.",
+    "",
+    "The A/B-qualified target band is 50,000-60,000 bytes (rule_context_budget.py).",
+    "The baseline below is 3.6x the top of it, so this gate stops the growth; it does",
+    "not fix the level. Ratchet entries are the mechanism for closing that gap."
+  ],
+  "baseline_unconditional_bytes": 214063,
+  "baseline_measured_at": "2026-08-26",
+  "baseline_provenance": "rule_context_budget.unconditional_rule_bytes() over 34 files at origin/main 3fc057f3",
+  "ledger": [
+    {
+      "date": "2026-08-26",
+      "rule": "output-grounding.md",
+      "bytes": -2823,
+      "reason": "Relocated to skills/_shared/output-grounding.md as a REQUIRED READ for its four owner skills. bin/rule_relocation_pilot.py measured SAFE over 438 transcripts: activity 19 sessions, all 19 owner-skill invocations, EXPOSED=0, coverage 100.0%; instrument validated known-positive 4/4, known-negative 0. Negative so the saving cannot be silently re-spent."
+    },
+    {
+      "date": "2026-08-26",
+      "rule": "rule-authoring.md",
+      "bytes": -6438,
+      "reason": "Path-scoped: the trigger IS a file path (rules/*.md and rule-like topic/shared files), so the rule leaves the unconditional corpus and is delivered when such a file is touched. Body also compacted 6,438 -> 5,011 B with measured evidence moved to docs/rule-reference/. paths: delivery is proven (5 rules, ~97,843 B) but its TIMING is unmeasured -- the injection envelope is not persisted to transcripts. Accepted because authoring is iterative and rule-size-guard enforces byte limits independently; NOT transferable to a single-tool-call decision. Negative so the saving cannot be silently re-spent."
+    },
+    {
+      "date": "2026-08-26",
+      "rule": "subagent-tool-discipline.md",
+      "bytes": -7015,
+      "reason": "Relocated to skills/_shared/ and injected by the SubagentStart hook, which fires before the child's first tool call -- so delivery is in time by construction. Measured 45/438 sessions dispatch a subagent at all (10.3%), so 393 main sessions carried it for nothing. Body compacted for the hook's 9,550-char budget; the original 7,015 B would have consumed ~73% of it and crowded out worker topic files. Its parent-side siblings (subagent-verification, agent-delegation) have the SAME utilization but NO in-time mechanism, so they stay ambient. Negative so the saving cannot be silently re-spent."
+    },
+    {
+      "date": "2026-08-29",
+      "rule": "tdd-mutation-testing.md",
+      "bytes": -52,
+      "reason": "Relocated 1,932 B of narrative to rules/incidents/ (three dated sections) and spent 1,880 B on item 41: a mutation harness that passes bare test NAMES to `python -m unittest` resolves them as MODULE names, so every mutant reports _FailedTest and a nonzero exit reads as CAUGHT. Measured: a falsely-clean 7/7 became a genuine 8/8 once the harness ran the module and matched the parsed FAILED set. Ambient because it governs how a verdict is READ, and a wrong verdict licenses deleting a live guard. Net negative."
+    },
+    {
+      "date": "2026-08-29",
+      "rule": "diagnose-before-fix.md",
+      "bytes": 592,
+      "reason": "Two forbidden-shortcut lines: forming a third hypothesis about a collapsed error path instead of emitting the discriminating field (measured 4 hours / 3 wrong fixes, ended by one error_type field), and treating a probe that passes while the real lane fails as noise rather than as the finding. Full narrative relocated to incidents (+2,013 B). Ambient because both fire during active debugging, before any file is chosen, so no path- or skill-scoped delivery reaches them."
+    },
+    {
+      "date": "2026-08-29",
+      "rule": "verify-effectiveness.md",
+      "bytes": 791,
+      "reason": "Derived-over-pinned assertions plus the vacuity floor. Measured 5/5 in one session across different artifact classes (tool preset, installer constant, JSON registry selector, CI env pin, terraform mirror): every PINNED pair had drifted or was one edit from drifting, every DERIVED assertion held, because two literals pass the LOCKSTEP edit that is the normal way such a pair changes. Evidence table relocated to incidents (+3,041 B). Ambient because it governs how a test is WRITTEN at authoring time."
+    },
+    {
+      "date": "2026-08-29",
+      "rule": "agent-delegation.md",
+      "bytes": 979,
+      "reason": "First recorded UNDER-delegation instance; every prior incident in this rule is an over-delegation failure, so the rule had no counterweight. Measured 0.6% delegation (12 of 2,045 calls) on a session whose costliest phase spent 1,130 turns and 35% of its errors working three independent hypotheses serially. Narrative relocated to incidents (+2,093 B). Ambient because it is a routing decision made BEFORE any dispatch exists, so the SubagentStart hook that carries subagent-tool-discipline cannot deliver it in time."
+    },
+    {
+      "date": "2026-08-29",
+      "rule": "verify-effectiveness.md + skill-standards.md",
+      "bytes": 1986,
+      "reason": "Two distilled lessons from a mail-purge session that published three false all-clears. verify-effectiveness.md (+816): an INDETERMINATE cell tallied beside definitive ones exits 0 -- grade MEASURED against EXPECTED and report a zero with its denominator. Ambient because it fires while COMPOSING any verification summary, which is not a file-path trigger, so paths: delivery cannot reach it; the measured narrative (2,446 B) went to rules/incidents/verify-effectiveness.md instead of the ambient body, and only the GUARD plus a 6-line contract stayed. Third instance of the class across three domains (github-ci-patterns pytest exit 2/3/4; a refuses() helper returning True on any exception), which is what promoted it from a KB page to a rule. skill-standards.md (+1,170): quote frontmatter values containing a colon-space -- an unquoted plain YAML scalar reads ': ' as a mapping separator so the whole block fails to parse, measured as a 0/14 rubric score, and the diagnostic that 0/14 with A1_frontmatter failing means NEVER PARSED rather than thirteen defects. Kept ambient because it must fire at authoring time, before the file exists to path-match on. Covers THIS change only: the corpus was already 2,515 B over the ceiling on origin/main before this branch (measured by running the assertion at origin/main), and that pre-existing overage is deliberately NOT laundered into this entry -- it needs its own descope decision."
+    },
+    {
+      "date": "2026-08-30",
+      "rule": "platform-constraints.md",
+      "bytes": 833,
+      "reason": "ECHO A RESOLVED ID AND STOP IF IT IS EMPTY. An empty shell capture interpolated into an AWS `--ids`-family argument does not error \u2014 it returns a DIFFERENT resource's data, which reads as a successful answer. Measured 2026-08-29: an empty `--group-ids \"\"` returned some other security group whose egress rules were one step from being published as a release runner's security posture. Ambient because it fires on any shell capture feeding a cloud CLI, before any file is chosen, so no path- or skill-scoped delivery reaches it."
+    },
+    {
+      "date": "2026-08-30",
+      "rule": "scope-discipline.md",
+      "bytes": 1148,
+      "reason": "GUARD for 'the option the user picked from my menu just failed, so the task is blocked'. A failing option means the MENU was wrong, not that the task is impossible. Measured 2026-08-27: three GA-grant paths were offered, the recommended one 400'd, and the work was reported blocked while a one-call alternative sat in the agent's own option list and in memory as verified. Ambient because a GUARD only fires if it is loaded when the dead end is reached; it has no file trigger."
+    },
+    {
+      "date": "2026-08-30",
+      "rule": "verify-effectiveness.md",
+      "bytes": 1702,
+      "reason": "Greening a red gate by narrowing its detector: build the truth table over the FULL population before adopting a fix that shrinks what a check looks at, and baseline unresolvable members explicitly rather than subtracting them silently. Measured 2026-08-29 (mcp-servers #1362): a catalog gate was red on 4 uncatalogued dirs and requiring an entrypoint looked principled, but the truth table over all 34 showed EIGHT catalogued servers were lock-only too, so the change would have dropped 8 servers from the audit while reporting success. Ambient because it fires while choosing a fix for a red gate, before any file is edited."
+    },
+    {
+      "date": "2026-08-30",
+      "rule": "verify-before-assuming.md",
+      "bytes": 740,
+      "reason": "Two additions to the primary-evidence and deployed-state checks. (a) Read EVERY section of the release notes before advising on upgrade priority: `Added` reads as optional while `Fixed`/`Security` carries the cross-tenant leaks, auth bypasses and session-invalidation repairs that decide the recommendation, and version distance is not a proxy for diff size. (b) One already-observed staleness signal \u2014 a create that returns 'already exists', a resource whose id you did not author \u2014 invalidates the WHOLE state read, not just the item that produced it. Ambient because both fire while forming a claim, before any file is chosen."
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+id: loop-detector
+type: hook
+event: PostToolUse
+matcher: "mcp__.*|Bash|Read|Glob|Grep"
+if_condition: null
+action_type: guard
+description: "Detects no-op loops (3+ identical calls) and retry storms (4+ consecutive failures). ASI08."
+enforces: []
+blocks_patterns:
+  - "same tool + same args repeated 3+ times"
+  - "same tool failing 4+ consecutive times"
+injects: "systemMessage to redirect agent"
+modifies: null
+depends_on_files: []
+depends_on_env:
+  - CLAUDE_SESSION_ID
+exit_codes:
+  "0": "always (non-blocking, advisory)"
+output_format: json
+incidents: []

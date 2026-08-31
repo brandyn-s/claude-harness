@@ -1,0 +1,40 @@
+id: manifest-gen
+type: skill
+description: "Generate or refresh manifests across 8 domains: skills, hooks, rules, KB topics, sessions, MCP tools, Terraform, Product. Three scaffold generators (scaffold.py, scaffold_extended.py, scaffold_product.py) for mechanical extraction, then agent fills judgment fields."
+category: maintenance
+
+requires_tools:
+  - "Bash"
+  - "Read"
+  - "Write"
+  - "Edit"
+  - "Grep"
+  - "Glob"
+  - "AskUserQuestion"
+requires_topics: []
+requires_rules:
+  - skill-standards
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    scope:
+      type: string
+      required: false
+      description: "What to generate: --all, --skills, --hooks, --rules, --sessions, --mcp, --terraform, --product (requires --path <release-dir>), or a component name"
+      examples: ["--all", "--skills", "--sessions", "--product --path /path/to/release", "triage", "--dry-run"]
+  scope_from: argument
+output_contract:
+  produces: [manifest_files, compilation_report, coverage_report]
+  format: markdown_report
+
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "5-30"
+
+preconditions: []
+guardrails:
+  - post-write-edit
+threat_model: writes_local

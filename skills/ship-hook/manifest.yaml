@@ -1,0 +1,36 @@
+id: ship-hook
+type: skill
+description: "Install staged hook specifications -- reads .spec.md, writes hook script, registers in settings.json, and tests atomically."
+category: shipping
+requires_tools:
+  - AskUserQuestion
+  - Bash
+  - Grep
+  - Read
+  - Write
+requires_topics: []
+requires_rules:
+  - check-before-change
+requires_skills: []
+requires_auth: []
+input_contract:
+  parameters:
+    spec_name:
+      type: string
+      required: false
+      description: "Name of the staged spec to install (omit to list all staged specs)"
+  scope_from: argument
+output_contract:
+  produces: [hook_script, settings_registration, test_results]
+  format: markdown_report
+side_effects: [writes_hook_script, modifies_settings_json]
+execution_context: main_thread
+auth_constraint: main_thread_only
+estimated_turns: "5-12"
+preconditions:
+  - staged_specs_exist
+guardrails:
+  - config-guard
+threat_model: writes_local
+prose_only_tools:  # mentioned in SKILL.md prose, deliberately not used (B9/F4; reconcile-skill-tools honors this)
+  - Edit  # matcher-pattern examples + 'races with ~/.claude.json' warning; Edit was deliberately removed (B8f)

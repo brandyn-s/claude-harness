@@ -1,0 +1,52 @@
+id: gather-research
+type: skill
+description: "Search the research frontier (arXiv, conference papers, institutional blogs, frameworks) for AI agent architecture findings, then map discoveries to this Claude Code architecture for research-backed improvements."
+category: knowledge
+
+requires_tools:
+  - AskUserQuestion
+  - Bash
+  - Edit
+  - Glob
+  - Grep
+  - Read
+  - ToolSearch
+  - Write
+  - mcp__4c2bb016-a49e-4043-8a0f-35135dea63a2__web_fetch_exa
+  - mcp__4c2bb016-a49e-4043-8a0f-35135dea63a2__web_search_exa
+  - mcp__exa__get_code_context_exa
+  - mcp__exa__web_search_advanced_exa
+  - mcp__exa__web_search_exa
+  - mcp__firecrawl__firecrawl_search
+  - mcp__memory-search__memory_search
+  - mcp__tavily__tavily_crawl
+  - mcp__tavily__tavily_extract
+  - mcp__tavily__tavily_map
+  - mcp__tavily__tavily_research
+  - mcp__tavily__tavily_search
+requires_topics: []
+requires_rules:
+  - web-search-preference
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    focus_area:
+      type: string
+      required: false
+      description: "Optional focus area, e.g. 'agent memory', 'tool use', 'MCP patterns'"
+  scope_from: argument
+output_contract:
+  produces: [research_baseline_health, new_findings, research_threads, transfer_analysis]
+  format: markdown_report
+
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "30-60"
+
+preconditions:
+  - "Tavily or Exa MCP available for web searches"
+guardrails: []
+threat_model: writes_local

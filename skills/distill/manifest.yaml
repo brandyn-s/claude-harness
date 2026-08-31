@@ -1,0 +1,35 @@
+id: distill
+type: skill
+description: "Extract errors, failed approaches, and operational fixes from a session. Classifies severity T0-T5 and persists to rules, memory, or topic files."
+category: knowledge
+requires_tools:
+  - AskUserQuestion
+  - "Read"
+  - "Write"
+  - "Edit"
+  - "Bash"
+  - "Grep"
+  - "Glob"
+  - "mcp__memory-search__memory_search"
+  - "mcp__memory-search__memory_search_batch"
+requires_topics: []
+requires_rules:
+  - check-before-change
+requires_skills:
+  - ship-hook
+requires_auth: []
+input_contract:
+  parameters: {}
+  scope_from: none
+output_contract:
+  produces: [distilled_entries, rule_updates, topic_updates, distill_marker]
+  format: markdown_report
+side_effects: [modifies_memory, writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "10-20"
+preconditions:
+  - session_complete_or_explicit_distill_request
+guardrails:
+  - memory-write-guard
+threat_model: writes_local

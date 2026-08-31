@@ -1,0 +1,45 @@
+id: run-status
+type: skill
+description: "Show the live state of long-running background work (oracle runs, terraform applies, measurement harnesses, deploy monitors) from their durable status files. Reports status by reading durable markers and output growth rather than pid-liveness."
+category: operations
+
+requires_tools:
+  - "Bash"
+  - "Read"
+  - "Glob"
+requires_topics: []
+requires_rules:
+  - worktree-by-default
+  - platform-constraints
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    run_id:
+      type: string
+      required: false
+      description: "Specific run to report on. Blank reports all active runs."
+
+output_contract:
+  produces:
+    - "per-run state: running / complete / failed / stalled, from durable status files and markers"
+    - "output-growth evidence rather than pid-liveness (a hung run keeps its pid; a finished run loses it)"
+  side_effects: []
+
+invocation:
+  user_invocable: true
+  model_invocable: true
+  effort: low
+
+enforces:
+  - worktree-by-default
+
+incidents:
+  - date: "2026-07-24"
+    summary: "Manifest absent since authoring — surfaced by the session-start manifest-coverage check (195/203)"
+    turns_wasted: 0
+    category: drift
+
+created_date: "2026-07-24"
+last_validated: "2026-07-24"

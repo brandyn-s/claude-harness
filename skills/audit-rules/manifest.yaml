@@ -1,0 +1,47 @@
+id: audit-rules
+type: skill
+description: "Measures rule compliance from session transcripts, classifies rules by defense layer, and recommends promotions for most-violated rules."
+category: maintenance
+
+requires_tools:
+  - Bash
+  - Glob
+  - Grep
+  - Read
+  - WebFetch
+  - WebSearch
+  - Write
+  - AskUserQuestion
+requires_topics: []
+requires_rules:
+  - verify-effectiveness
+requires_skills:
+  - validate-changes
+requires_auth: []
+
+input_contract:
+  parameters:
+    mode:
+      type: enum
+      required: false
+      description: "Audit mode: measure, promote, or full (default)"
+    rule_name:
+      type: string
+      required: false
+      description: "Rule name for promote mode"
+  scope_from: argument
+output_contract:
+  produces: [violation_rates, defense_layer_classification, promotion_recommendations]
+  format: markdown_report
+
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "8-15"
+
+preconditions:
+  - Session transcripts exist under ~/.claude/projects/*/ or ~/.claude/session-transcripts/
+  - rules/*.md files exist under the resolved config root
+  - hooks/*.py files exist under the resolved config root
+guardrails: []
+threat_model: writes_local

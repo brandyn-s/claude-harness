@@ -1,0 +1,32 @@
+id: scout
+type: skill
+description: "Full pipeline: discover community repos, inventory, evaluate with advocate/skeptic pairs, and present adoption proposals."
+category: knowledge
+requires_tools:
+  - Bash
+  - Skill
+  - AskUserQuestion
+requires_topics: []
+requires_rules:
+  - compare-by-need
+requires_skills:
+  - gather-repos
+  - evaluate-repos
+requires_auth: []
+input_contract:
+  parameters:
+    repo_url:
+      type: string
+      required: false
+      description: "Optional specific repo URL for ad-hoc scouting"
+  scope_from: argument
+output_contract:
+  produces: [discovery_summary, evaluation_results, adoption_proposals]
+  format: markdown_report
+side_effects: [writes_assessed_repos]
+execution_context: main_thread
+auth_constraint: main_thread_only
+estimated_turns: "20-50"
+preconditions: []
+guardrails: []
+threat_model: writes_local

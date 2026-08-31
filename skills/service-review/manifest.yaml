@@ -1,0 +1,42 @@
+id: service-review
+type: skill
+description: "Review a backend service / API / CLI tool for production readiness — boots and drives the running tool live, adversarial-hammers every input path for fail-closed behavior, and checks the durability/observability/security/config-at-boot pillars. Produces a prioritized worklist; read-only, makes no changes."
+category: review
+
+requires_tools:
+  - "Bash"
+  - "Read"
+  - "Grep"
+  - "Glob"
+  - "AskUserQuestion"
+requires_topics: []
+requires_rules:
+  - scope-discipline
+  - check-before-change
+  - diagnose-before-fix
+  - verify-effectiveness
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    repo:
+      type: string
+      required: true
+      description: "Repo name or path to the backend service / API / CLI tool to review"
+  scope_from: argument
+output_contract:
+  produces:
+    - review_report
+    - prioritized_worklist
+  format: markdown_report
+
+side_effects: []
+execution_context: main_thread
+estimated_turns: "6-15"
+
+preconditions:
+  - "the service can be booted locally (or the boot blocker is documented)"
+guardrails:
+  - bash-security-guard
+threat_model: read_only

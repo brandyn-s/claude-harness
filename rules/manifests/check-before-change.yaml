@@ -1,0 +1,43 @@
+id: check-before-change
+type: rule
+description: "Search memory and git history before modifying defaults, removing features, or altering behavior."
+applies_to:
+  - "settings.json"
+  - "rules/*"
+  - "skills/*/SKILL.md"
+  - "agents/*"
+  - "any default value change"
+  - "any feature removal"
+trigger_conditions:
+  - "modifying existing behavior"
+  - "removing code or features"
+  - "changing defaults"
+required_actions:
+  - "search memory for feature/setting name"
+  - "search git history for prior changes"
+  - "present conflict if rationale contradicts change"
+prohibited_actions:
+  - "modify defaults without checking why they're set"
+  - "re-add removed features without checking removal reason"
+  - "bulk-copy files between repos without reading target"
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - date: "2026-03-20"
+    summary: "Re-added auto-learn feature that was deliberately removed (40% productive rate)"
+    turns_wasted: 3
+    category: regression
+  - date: "2026-03-20"
+    summary: "Added context:fork to skill that uses Agent tool (incompatible)"
+    turns_wasted: 2
+    category: regression
+  - date: "2026-03-22"
+    summary: "Bulk-copied 11 files from upstream, overwrote 7 fork-specific commits"
+    turns_wasted: 6
+    category: regression
+  - date: "2026-07-26"
+    summary: "Deleted 4 shared .github/scripts on a clean same-repo grep; 5 skills in a sibling repo invoked them by absolute path (broken ~1 day)"
+    turns_wasted: 12
+    category: regression
+created_date: "2026-03-20"
+last_validated: "2026-04-12"

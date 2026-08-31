@@ -1,0 +1,148 @@
+# Machine-First Architecture Schema
+# Defines structured, queryable metadata for skills, hooks, and rules.
+# Designed for graph representation: every component is a node,
+# every relationship is a typed edge.
+#
+# Design principles (from research):
+# - Flat structure, max 2-3 nesting levels (JSONSchemaBench)
+# - Graph-representable: depends_on/enforced_by are typed edges (PADME, G2CP)
+# - Progressive disclosure: id+type+description at discovery, full manifest on load
+# - Explicit > implicit: no field left to inference (SOPBench, Gustafson)
+
+# ============================================================
+# SKILL MANIFEST
+# ============================================================
+skill:
+  # Identity (always loaded - discovery tier)
+  id: string           # kebab-case, matches directory name
+  type: "skill"
+  description: string  # 1-2 sentences, when-to-use focused
+  category: enum       # operations, planning, knowledge, code-intel, security, shipping, maintenance
+
+  # Dependencies (graph edges)
+  requires_tools: list[string]       # MCP tool prefixes needed (e.g. "mcp__remote-crowdstrike__*")
+  prose_only_tools: list[string]     # Tool tokens named only as retired/negated examples; never grants execution
+  requires_topics: list[string]      # Topic files loaded (e.g. "security.md", "crowdstrike.md")
+  requires_rules: list[string]       # Rules this skill depends on (e.g. "security-confirmations")
+  requires_skills: list[string]      # Other skills this chains to (e.g. "distill", "capture")
+  requires_auth: list[auth_ref]      # Authentication requirements
+
+  # Contracts (what this skill guarantees)
+  input_contract:
+    parameters: map[string, param]   # Named parameters with types
+    scope_from: string               # Where scope comes from ("argument", "user_prompt", "none")
+  output_contract:
+    produces: list[string]           # What it generates ("findings", "report", "commits", "pr_url")
+    format: string                   # Output format ("markdown_report", "json", "git_commits", "task_list")
+
+  # Behavioral properties
+  side_effects: list[string]         # "none", "writes_files", "creates_pr", "sends_message", "modifies_memory"
+  execution_context: enum            # "main_thread", "worker", "parallel_workers", "agent_team"
+  auth_constraint: enum              # "main_thread_only", "any", "subagent_safe"
+  estimated_turns: range             # e.g. "5-15", "20-50"
+
+  # Safety
+  preconditions: list[string]        # What must be true before invocation
+  guardrails: list[string]           # Hook IDs that enforce safety for this skill
+  threat_model: string               # "read_only", "writes_local", "writes_remote", "destructive"
+
+# ============================================================
+# auth_ref sub-schema
+# ============================================================
+auth_ref:
+  provider: string       # "crowdstrike_falcon", "tenable_io", "msgraph_gcc_high", etc.
+  scope: string          # "read", "write", "admin"
+  constraint: string     # "main_thread_only", "any"
+
+# ============================================================
+# param sub-schema
+# ============================================================
+param:
+  type: string           # "string", "integer", "boolean", "enum"
+  required: boolean
+  description: string
+  examples: list[string]
+
+# ============================================================
+# HOOK MANIFEST
+# ============================================================
+hook:
+  # Identity
+  id: string             # Script filename without .py
+  type: "hook"
+  event: string          # "PreToolUse", "PostToolUse", "SessionStart", etc.
+  matcher: string        # Tool pattern matched (e.g. "Bash", "Write|Edit", "mcp__remote-.*")
+  if_condition: string   # Optional pre-filter (e.g. "Read(*.pdf)")
+
+  # Behavior
+  action_type: enum      # "guard" (blocks), "fixer" (modifies), "injector" (adds context), "logger" (records)
+  description: string    # What it does in one sentence
+
+  # What it enforces/modifies
+  enforces: list[string]          # Rule IDs this hook mechanically enforces
+  blocks_patterns: list[string]   # What patterns it blocks (for guards)
+  injects: string                 # What context it adds (for injectors)
+  modifies: string                # What it changes in tool output (for fixers)
+
+  # Dependencies
+  depends_on_files: list[string]  # Config files it reads (e.g. "protected-repos.json")
+  depends_on_env: list[string]    # Environment variables needed
+
+  # Contract
+  exit_codes:
+    "0": string          # What exit 0 means ("allow", "no-op", "success")
+    "2": string          # What exit 2 means ("block")
+  output_format: string  # "json", "plaintext", "none"
+
+  # Incident history
+  incidents: list[incident_ref]
+
+# ============================================================
+# incident_ref sub-schema
+# ============================================================
+incident_ref:
+  date: string           # ISO date
+  summary: string        # One-line description
+  turns_wasted: integer  # Cost of the incident
+  category: string       # "regression", "drift", "misconfiguration", "security"
+
+# ============================================================
+# RULE MANIFEST
+# ============================================================
+rule:
+  # Identity
+  id: string             # Filename without .md
+  type: "rule"
+  description: string    # What constraint this rule expresses
+
+  # Scope
+  applies_to: list[string]         # File patterns, tool patterns, action types
+  trigger_conditions: list[string]  # When this rule is relevant
+
+  # Requirements
+  required_actions: list[string]    # What the agent must do when this rule applies
+  prohibited_actions: list[string]  # What the agent must not do
+
+  # Enforcement
+  enforced_by: list[string]         # Hook IDs that mechanically enforce this rule
+  enforcement_coverage: enum        # "full" (hook covers all cases), "partial", "none" (prose only)
+
+  # Evidence
+  incidents: list[incident_ref]     # Incidents that motivated this rule
+  created_date: string
+  last_validated: string            # When someone confirmed the rule still applies
+
+# ============================================================
+# CROSS-REFERENCE QUERIES (what the graph enables)
+# ============================================================
+# These are the queries that become trivial with manifests
+# but require full-text reading of all files without them:
+#
+# depends_on(skill_id) -> all tools, topics, rules, skills, hooks
+# depended_on_by(component_id) -> reverse lookup
+# enforcement_chain(action) -> ordered list of hooks that fire
+# auth_requirements(skill_id) -> what auth, can subagent provide it?
+# impact_of_removal(component_id) -> what breaks
+# unenforced_rules() -> rules with enforcement_coverage == "none"
+# constraint_check(proposed_action) -> which rules/hooks flag this
+# skill_for_task(keywords) -> skills matching input contract

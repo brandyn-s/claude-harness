@@ -1,0 +1,26 @@
+name: insecure-defaults deterministic invariants
+skill: insecure-defaults
+trigger: "/insecure-defaults <repo>"
+
+must_happen:
+  - Framework-first discovery runs before generic pattern greps
+  - 12-category grep library invoked via references/grep-patterns.md
+  - Each finding traced to production-reachable code (not test fixtures)
+  - Severity classified per documented rubric
+
+deterministic:
+  - frontmatter_equals:
+      name: insecure-defaults
+  - frontmatter_contains:
+      description: "insecure default"
+  - body_contains:
+      - "## When to Use"
+      - "## When NOT to Use"
+      - "Framework-first"
+      - "production-reachable"
+      - "grep-patterns.md"
+  - ref_resolves:
+      - grep-patterns.md
+      - examples.md
+  - references_resolve: true
+  - examples_count: ">=2"

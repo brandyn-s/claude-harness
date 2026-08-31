@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.example.red-main-sweep</string>
+	<!-- zsh -lc = login shell, so PATH (gh, brew python3) resolves exactly
+	     as in a terminal. Uses the operator's existing gh auth — zero new
+	     secrets by design (the enforce-mirror lesson). caffeinate -i holds
+	     off idle sleep for the run (~1 min). -->
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/zsh</string>
+		<string>-lc</string>
+		<string>mkdir -p "$HOME/.claude/audit/launchd" &amp;&amp; caffeinate -i python3 "$HOME/.claude/bin/red-main-sweep.py" >> "$HOME/.claude/audit/launchd/red-main-sweep.log" 2>&amp;1</string>
+	</array>
+	<!-- Daily 08:15 local. Missed runs (laptop asleep) coalesce into one
+	     run at next wake. The session-start banner flags state older than
+	     48h, so a dead job surfaces within two days. -->
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Hour</key>
+		<integer>8</integer>
+		<key>Minute</key>
+		<integer>15</integer>
+	</dict>
+	<key>RunAtLoad</key>
+	<false/>
+	<key>ProcessType</key>
+	<string>Background</string>
+</dict>
+</plist>

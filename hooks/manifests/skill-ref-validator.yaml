@@ -1,0 +1,18 @@
+id: skill-ref-validator
+type: hook
+event: PostToolUse
+matcher: "Write|Edit"
+if_condition: "file_path contains /skills/ and ends with /SKILL.md"
+action_type: advisory
+description: "Warns when a SKILL.md body references hooks/*.py or scripts/*.py files that do not exist on disk. Catches dead refs at edit-time instead of via manual /healthcheck."
+enforces: []
+blocks_patterns: []
+injects: null
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "Always (advisory warning if stale refs found)"
+output_format: plaintext
+incidents:
+  - "#548 deleted sync-repo.py and sync-knowledge.py; dead refs in 7 skills sat undetected for 6 days"

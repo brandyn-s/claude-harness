@@ -1,0 +1,20 @@
+id: tavily-search-cap
+type: hook
+event: PreToolUse
+matcher: "tavily_search"
+if_condition: null
+action_type: guard
+description: "Caps Tavily search max_results to 5 to save tokens -- empirically verified 2.4M tokens/month savings."
+enforces:
+  - web-search-preference
+blocks_patterns:
+  - max_results_over_5
+injects: null
+modifies: tool_input
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "Parameters within cap or adjusted"
+  "2": "Blocked: max_results exceeds cap"
+output_format: json
+incidents: []

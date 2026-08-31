@@ -1,0 +1,27 @@
+id: compare-by-need
+type: rule
+description: "Compare systems by actual needs, not feature lists -- requires evidence that a gap causes real friction before recommending adoption."
+applies_to:
+  - system_comparison
+  - pattern_evaluation
+  - tool_adoption
+trigger_conditions:
+  - comparing_two_systems
+  - recommending_pattern_adoption
+  - gap_analysis
+required_actions:
+  - read_existing_tools_first
+  - identify_actual_workflow
+  - confirm_problem_exists
+  - assess_adoption_cost
+prohibited_actions:
+  - feature_list_comparison_without_need_analysis
+  - recommending_adoption_without_verifying_gap
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - tob_config_comparison_2026_03_26
+  - ironbee_evaluation_2026_03_26
+  - absorb_batch_2026_04_05
+created_date: "2026-03-26"
+last_validated: "2026-04-15"

@@ -1,0 +1,18 @@
+id: auto-topic-loader
+type: hook
+event: PreToolUse
+matcher: "mcp__remote-.*|mcp__linear-server__.*|mcp__ramp__.*|mcp__slack-user__.*"
+if_condition: null
+action_type: injector
+description: "Auto-loads topic context on first call to each MCP server in a session. Maps server prefixes to topic files."
+enforces: []
+blocks_patterns: []
+injects: "additionalContext with topic file content"
+modifies: null
+depends_on_files: []
+depends_on_env:
+  - CLAUDE_SESSION_ID
+exit_codes:
+  "0": "continue with injected context"
+output_format: json
+incidents: []

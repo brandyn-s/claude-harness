@@ -1,0 +1,29 @@
+id: diagnose-before-fix
+type: rule
+description: "Read actual error logs before proposing fixes. No guessing."
+applies_to:
+  - "any debugging or troubleshooting task"
+  - "ECS failures"
+  - "Terraform failures"
+  - "CI failures"
+  - "API/service errors"
+trigger_conditions:
+  - "deployment or service failure reported"
+  - "error or bug needs investigation"
+required_actions:
+  - "read actual error output first"
+  - "for ECS: check describe-services events"
+  - "for Terraform: read apply log"
+  - "for API errors: pull CloudWatch logs immediately"
+prohibited_actions:
+  - "guess the cause without reading logs"
+  - "ship a fix without confirming what's broken"
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - date: "2026-03-01"
+    summary: "Guessed Prisma migration was cause of 503, wasted 20 minutes"
+    turns_wasted: 10
+    category: drift
+created_date: "2026-02-28"
+last_validated: "2026-04-12"

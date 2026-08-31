@@ -1,0 +1,51 @@
+id: gather-claude-endpoints
+type: skill
+description: "Detect drift in Anthropic's data-collection surface (OTel signals, Compliance API, Admin API, Analytics APIs, webhooks, rate limits, documented exclusions) by diffing live vendor docs against committed baselines in a dedicated knowledge base."
+category: knowledge
+
+requires_tools:
+  - "Bash"
+  - "Read"
+  - "Write"
+  - "Edit"
+  - "Glob"
+  - "Grep"
+  - "mcp__memory-search__memory_search"
+  - "AskUserQuestion"
+requires_topics: []
+requires_rules:
+  - verify-effectiveness
+  - verify-before-assuming
+  - uncharted-vs-refuted
+  - api-doc-lookup
+  - grading-discipline
+  - web-search-preference
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    scope:
+      type: string
+      required: false
+      description: "'full', a channel key (see --list), or 'baseline' to establish/refresh baselines"
+  scope_from: argument
+output_contract:
+  produces: [channel_drift_report, finding_list, updated_baselines]
+  format: markdown_report
+
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "6-15"
+
+preconditions:
+  - "python3 available (stdlib only — no third-party deps)"
+  - "Network egress to code.claude.com and platform.claude.com (public docs, no auth)"
+  - "~/Documents/knowledge-base checked out (dedicated KB at reference/claude-data-channels/)"
+# `guardrails:` names enforcing HOOK ids, not prose. This skill's operating
+# rules (never hand-edit a baseline; refresh only after grading; INSTRUMENT_BLIND
+# invalidates the diff; never auto-write) live in SKILL.md Step 6, where they are
+# in front of the model at execution time.
+guardrails: []
+threat_model: writes_local

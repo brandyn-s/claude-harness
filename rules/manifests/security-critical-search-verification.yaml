@@ -1,0 +1,42 @@
+id: security-critical-search-verification
+type: rule
+description: "Every CALLS-edge claim, semantic-search top-1, or code-localize verdict informing an auth/crypto/sanitization/taint/privilege/secrets/access-control decision MUST produce a file:line + source excerpt verification artifact (CONFIRMED / FALSE-POSITIVE / AMBIGUOUS)."
+applies_to:
+  - "every code-graph CALLS-edge with resolver_rule in {suffix_match, unique_name, fuzzy, self_method, null}"
+  - "every semantic-search top-K result informing a security claim"
+  - "code_localize / code_localize_agent verdicts in security audits"
+  - "queries about auth flow, crypto path, sanitization boundary, taint flow, privilege check, secret handling, access control"
+trigger_conditions:
+  - "tool result informs a security-critical decision"
+  - "negative finding ('no exposure') being declared from semantic search"
+  - "claiming a fuzzy/suffix-match CALLS edge as established fact"
+required_actions:
+  - "inspect r.resolution_strategy; type_static_dispatch >= 0.95 precision is reliable; sub-95% requires verification"
+  - "for semantic search: read top-K (K>=3) — never top-1 alone"
+  - "for code_localize: read top-K (K>=5) — top-1 is a candidate not a verdict"
+  - "produce CONFIRMED/FALSE-POSITIVE/AMBIGUOUS verdict with file:line + 3-5 line source excerpt"
+  - "if 0 of K confirmed for negative findings: re-query with multi-phrasing (framework-idiom + hypothetical-code) before publishing 'no exposure'"
+  - "use /verify-search-result skill to produce the verification artifact"
+prohibited_actions:
+  - "ship security finding based on edge plausibility alone"
+  - "use top-1 semantic result for security-critical query"
+  - "publish 'no exposure' negative finding from single-phrasing zero-hit"
+  - "trust null-strategy or suffix_match edges as established"
+  - "act on localize candidate ranks as verdicts"
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - date: "2026-05-04"
+    summary: "PSM baseline: type_static_dispatch >= 0.95 precision; suffix_match 0.55-0.95 (Python adversarial 0.00-0.35); unique_name 0.88 Go / 0.10-0.40 Python"
+    turns_wasted: 0
+    category: precision
+  - date: "2026-05-04"
+    summary: "PSM median MRR ~0.5 means ~50% of correct results NOT at rank 1 for semantic search"
+    turns_wasted: 0
+    category: precision
+  - date: "2026-05-10"
+    summary: "Roundtable convergent finding: top-1 semantic for security-critical queries below safe-action bar"
+    turns_wasted: 0
+    category: precision
+created_date: "2026-05-10"
+last_validated: "2026-05-12"

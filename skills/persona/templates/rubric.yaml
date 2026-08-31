@@ -1,0 +1,159 @@
+# Rubric template — machine-readable companion to pre-registration.md
+#
+# Copy this to fixture.yaml in the run dir. The dispatch harness reads
+# this file to drive keyword scoring and LLM-judge prompt construction.
+#
+# Pre-registration discipline: this file's git-commit timestamp must
+# predate the first dispatch's STARTED.lock timestamp. Editing after
+# dispatch starts triggers a warn-loudly path.
+#
+# CLI override discipline (Fix K, 2026-04-30): fixture wins over CLI
+# flags. Passing --n / --sampling / --model / --effort / --judge-model /
+# --judge-effort values that
+# contradict the fixture causes a hard fail with a logged override
+# attempt; pass --override-fixture to opt out (run is then post-hoc).
+
+schema_version: 1
+slug: <run-slug>
+date_authored: YYYY-MM-DD
+author: <name>
+
+# === Provenance (required, Fix J 2026-04-30) ===
+# Surfaces self-validation risk. If the fixture and the inventory share
+# authorship — or if the fixture was authored while consulting the
+# inventory's prose — the rubric run validates reproducibility within
+# ONE frame, not methodology generality. Declare it honestly. The skill
+# fails dispatch when fixture_author is missing, and prints a NOTE when
+# `independent: false`.
+
+provenance:
+  fixture_author: <name of person who wrote this fixture>
+  inventory_authored_by: <name of person who wrote/curated the inventory>
+  independent: <true|false>   # different authors AND fixture author did
+                               # NOT consult inventory text while writing
+  notes: |
+    <how was the fixture constructed?
+     was the inventory consulted?
+     if same person authored both, what's the use case for this run —
+     reproducibility-within-frame, or attempted methodology validation
+     (which this run cannot deliver)?>
+
+# === Problem statement ===
+# What every persona sees. The harness substitutes this verbatim into
+# the dispatch-prompt template's {problem} placeholder.
+
+problem: |
+  <full structured problem statement, symptoms + constraints + question>
+
+# === Ground truth ===
+# Used by scorer; never shown to personas.
+
+root_causes:
+  RC1:
+    short_name: "<one phrase>"
+    description: |
+      <full description of what RC1 is>
+    endorsement_criteria: |
+      Endorsed iff persona proposes:
+      (a) <criterion 1>, AND
+      (b) <criterion 2>
+    rejection_criteria: |
+      Rejected iff persona explicitly argues against
+      <RC1's intervention>.
+    keywords:
+      - "phrase 1"
+      - "phrase 2"
+      - "phrase 3"
+
+  RC2:
+    short_name: "<one phrase>"
+    description: |
+      ...
+    endorsement_criteria: |
+      ...
+    rejection_criteria: |
+      ...
+    keywords:
+      - "..."
+
+  RC3:
+    short_name: "<one phrase>"
+    description: |
+      ...
+    endorsement_criteria: |
+      ...
+    rejection_criteria: |
+      ...
+    keywords:
+      - "..."
+
+# === False leads ===
+# Things that look plausible but are NOT root causes. Mentioning these
+# as fixes counts as a false-lead endorsement.
+
+false_leads:
+  FL1:
+    short_name: "<one phrase>"
+    why_wrong: "<one sentence>"
+    keywords: ["..."]
+  FL2:
+    short_name: "..."
+    why_wrong: "..."
+    keywords: ["..."]
+  FL3:
+    short_name: "..."
+    why_wrong: "..."
+    keywords: ["..."]
+
+# === Stance check ===
+# Negation patterns that flip "endorse" to "reject" when found within
+# 30 chars before a keyword.
+
+negation_patterns:
+  - "should not"
+  - "avoid"
+  - "not the issue"
+  - "ignore"
+  - "rule out"
+  - "is not the cause"
+  - "isn't the cause"
+  - "don't bother"
+
+# === Cohort selection ===
+
+cohort:
+  n: 15
+  sampling: bucket  # bucket | random | curated
+  curated_framework_ids: []  # only used if sampling=curated
+  inventory: canonical-2026-04-29
+  seed: auto  # int or "auto" for deterministic-from-slug
+
+# === Models ===
+
+models:
+  persona: claude-haiku-4-5-20251001
+  persona_effort: null  # Haiku 4.5 has no effort control; set for newer models
+  judge: claude-opus-5
+  judge_effort: high
+
+# === Stopping rule ===
+
+stopping:
+  no_early_stop: true
+  retry_failed_dispatches: 1  # how many retries on API error
+  exclude_after_retries: true  # if still fails, exclude that persona
+
+# === Pre-dispatch prediction ===
+# Optional. Lock pre-dispatch expectations so post-hoc rationalization
+# is detectable. The analysis script compares actuals against this.
+
+prediction: |
+  <one paragraph on what the run is expected to show>
+  e.g., "I expect 80% of personas to endorse RC1, ~50% RC2, ~30% RC3
+  given the problem statement's symptom emphasis. Mean RC endorsed
+  should be 1.6/3."
+
+# === Notes ===
+
+notes: |
+  <any context not captured above>

@@ -1,0 +1,36 @@
+id: threat-model
+type: skill
+description: "Produce a structured threat model: assets, trust boundaries, attacker stories, calibrated severity -- grounded in actual code."
+category: security
+requires_tools:
+  - Glob
+  - Grep
+  - Read
+  - Write
+  - Bash
+  - mcp__codebase-memory-mcp__get_architecture
+  - mcp__codebase-memory-mcp__search_graph
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+input_contract:
+  parameters:
+    scope:
+      type: string
+      required: false
+      description: "Optional scope: directory, module, or focus area"
+  scope_from: argument
+output_contract:
+  produces: [threat_model_document, claims_ndjson]
+  format: markdown_report
+side_effects: [writes_threat_model_file, appends_model_history_jsonl]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "15-35"
+preconditions:
+  - codebase_accessible
+guardrails: []
+threat_model: writes_local
+prose_only_tools:  # mentioned in SKILL.md prose, deliberately not used (B9/F4; reconcile-skill-tools honors this)
+  - mcp__codebase-memory-mcp__query_graph  # describes a downstream orchestrator's optional capability, not this skill's usage

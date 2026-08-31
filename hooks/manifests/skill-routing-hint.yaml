@@ -1,0 +1,18 @@
+id: skill-routing-hint
+type: hook
+event: UserPromptSubmit
+matcher: ""
+if_condition: null
+action_type: injector
+description: "Injects routing hints for skill selection based on user prompt analysis."
+enforces: []
+blocks_patterns: []
+injects: routing_hints
+modifies: null
+depends_on_files:
+  - hooks/skill-rules.json
+depends_on_env: []
+exit_codes:
+  "0": "Routing hint provided or not applicable"
+output_format: json
+incidents: []

@@ -1,0 +1,60 @@
+id: build-measurement-harness
+type: skill
+description: "Use at the start of any new measurement project — when you're about to ask 'is this getting better?' of a system where the answer needs to be defensible. Walks 10 phases that produce instrumented harnesses with two-source ground truth, stratified failure analysis, truncation auditing, and freshness gates."
+category: measurement
+
+requires_tools:
+  - "Bash"
+  - "Read"
+  - "Write"
+  - "Edit"
+  - "AskUserQuestion"
+requires_topics:
+  - measurement-discipline.md
+  - retrieval-optimization-methodology.md
+requires_rules:
+  - verify-effectiveness
+  - verify-instrument-before-fix
+  - eval-shipping-discipline
+requires_skills:
+  - persona
+  - plateau-diagnose
+  - recall
+  - validate-changes
+requires_auth: []
+
+input_contract:
+  parameters:
+    system_name:
+      type: string
+      required: true
+      description: "System to instrument"
+    metric_goal:
+      type: string
+      required: true
+      description: "What 'better' means (F1, latency p99, etc.)"
+  scope_from: argument
+output_contract:
+  produces:
+    - harness_scaffolding
+    - ground_truth_oracle
+    - per_query_data_dump
+    - failure_strata_definitions
+    - truncation_audit_results
+    - freshness_gate_implementation
+  format: harness_files_plus_markdown_report
+
+side_effects:
+  - writes_files  # creates harness scripts, oracle data, baseline reports
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "20-50"
+
+preconditions:
+  - "system to measure has clear input/output boundaries"
+  - "ground-truth source available (oracle, manual labels, or known-correct second tool)"
+guardrails:
+  - context-monitor
+  - block-partial-read
+  - bash-security-guard
+threat_model: writes_local

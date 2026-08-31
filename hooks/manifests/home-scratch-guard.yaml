@@ -1,0 +1,18 @@
+id: home-scratch-guard
+type: hook
+event: PreToolUse
+matcher: "Write|Edit"
+if_condition: null
+action_type: guard
+description: "Warns (never blocks) when a non-dotfile with a scratch-like suffix is written directly to the home root (~/), where scratch scripts, run logs, and report files accumulate instead of /tmp/claude (scratch) or a repo/knowledge-base (deliverables). Runs as an 'open'-posture sub-guard of write-edit-dispatcher.py."
+enforces: []
+blocks_patterns: []
+injects: "additionalContext nudge toward /tmp/claude (scratch) or a repo/KB (deliverables) when a file lands directly in $HOME"
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "allow — warn-only via additionalContext; never blocks"
+output_format: json
+incidents:
+  - "2026-06-14 home-directory hygiene audit: AWS security reports, a paycom doc, sandbox helper scripts, and install logs had accumulated in the home root across several prior sessions; the hook layer guarded deletion + security but nothing enforced scratch/deliverable LOCATION."

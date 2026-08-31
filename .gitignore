@@ -1,0 +1,53 @@
+# This repository is a DISTRIBUTABLE copy of a Claude Code configuration.
+#
+# It is deliberately NOT a live `~/.claude` working directory. In the private
+# original, the checkout and the runtime directory were the same path, so every
+# new class of runtime artifact (session spools, caches, ledgers, receipts,
+# transcripts) was one missing ignore rule away from being committed. Keeping
+# this copy separate from the runtime is the structural fix; the rules below are
+# the backstop.
+
+# --- never commit: local runtime state ---
+settings.local.json
+.env
+.credentials.json
+*.bak
+*.bak-*
+
+# --- runtime / regenerable ---
+__pycache__/
+*.pyc
+*.pyo
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# --- session + telemetry (present only if you run this AS your ~/.claude) ---
+projects/
+history.jsonl
+sessions/
+session-state/
+session-ledgers/
+session-end-receipts/
+session-runtime-seeds/
+session-transcripts/
+shell-snapshots/
+todos/
+debug/
+logs/
+audit/*.jsonl
+*-log.jsonl
+skill-usage.jsonl
+compaction-log.jsonl
+
+# --- caches / databases ---
+cache/
+memory-search.db*
+statsig/
+telemetry/
+plugins/
+worktrees/
+
+# --- OS cruft ---
+.DS_Store
+Thumbs.db

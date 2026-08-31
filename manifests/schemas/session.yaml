@@ -1,0 +1,17 @@
+# Session Transcript Manifest Schema
+# Manual draft schema for explicit transcript analysis; no lifecycle hook writes it.
+
+session:
+  id: string              # session date-time-hash (e.g., 2026-04-15-12-00-abc123)
+  type: "session"
+  date: string            # ISO date
+  duration_minutes: integer
+  skills_invoked: list[string]    # skill IDs used
+  tools_used: list[string]        # tool names (Bash, Read, mcp__*)
+  hooks_fired: map[string, int]   # hook_id -> fire count
+  repos_touched: list[string]     # repo names with changes
+  prs_created: list[string]       # PR numbers
+  errors_encountered: integer
+  tokens_consumed: integer        # approximate from /stats
+  distill_lessons: integer        # lessons extracted by /distill
+  character: enum                 # clean, mixed, rough

@@ -1,0 +1,17 @@
+# MCP Server Tool Manifest Schema
+# Per-tool metadata for each MCP server's exposed tools
+
+mcp_tool:
+  id: string              # server__tool_name (e.g., crowdstrike__list_alerts)
+  type: "mcp_tool"
+  server: string          # MCP server name (e.g., crowdstrike, airlock)
+  tool_name: string       # tool name as exposed via MCP
+  description: string     # what the tool does
+  operation_type: enum    # read, write, delete, admin
+  auth_provider: string   # which auth provider (crowdstrike_falcon, tenable_io, etc.)
+  opa_policy: string      # OPA policy name that gates this tool (if any)
+  rate_limit: string      # e.g., "10/sec", "100/min", "none"
+  parameters: list[string]  # key parameter names
+  response_size: enum     # small (<1KB), medium (1-50KB), large (50KB+), variable
+  side_effects: list[string]  # none, mutates_state, creates_resource, deletes_resource, sends_notification
+  gov_cloud: boolean      # true if uses government cloud endpoints (.us, laggar.gcw, etc.)

@@ -1,0 +1,23 @@
+name: Error pattern requiring T0-hook enforcement stages a spec
+skill: distill
+trigger: "/distill (in a session where a pattern MUST be enforced every time and a rule would not reliably prevent it)"
+
+must_happen:
+  - Classify as T0-hook (not T1 rule)
+  - Design the spec (hook event, matcher, behavior, enforcement logic, timeout, test case)
+  - Write the specification to $CONFIG_ROOT/hooks/staged/{name}.spec.md
+  - Report staged spec path, event, matcher, proposed behavior
+  - Point the user to /ship-hook for installation
+
+must_not_happen:
+  - Write the hook script inline to hooks/
+  - Modify settings.json during /distill
+  - Test the hook inline (defer to /ship-hook)
+  - Classify as T1 when the pattern requires enforcement (not just guidance)
+
+output_contains:
+  - "hooks/staged/ spec path"
+  - "/ship-hook pointer"
+
+guards: []
+skip_ab: false

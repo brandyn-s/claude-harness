@@ -1,0 +1,25 @@
+id: verify-before-assuming-hook
+type: hook
+event: PreToolUse
+matcher: "Agent|Skill|ToolSearch"
+if_condition: null
+action_type: guard
+description: "Detects 'unavailable' claims without prior ToolSearch verification. Tracks ToolSearch usage per session."
+enforces:
+  - verify-before-assuming
+blocks_patterns:
+  - "'unavailable' or 'not possible' claims in Agent dispatch prompts without prior ToolSearch"
+  - "skill step skip claims citing missing tools without verification"
+injects: "systemMessage warning to run ToolSearch before claiming unavailability"
+modifies: null
+depends_on_files: []
+depends_on_env:
+  - CLAUDE_SESSION_ID
+exit_codes:
+  "0": "allow (with optional warning if unverified unavailable claim detected)"
+output_format: json
+incidents:
+  - date: "2026-04-12"
+    summary: "Three instances in one session — Firecrawl, Linear MCP, harness pruning all reported unavailable without checking"
+    turns_wasted: 6
+    category: drift

@@ -1,0 +1,28 @@
+id: subagent-verification
+type: rule
+description: "Verify subagent file writes on disk. Success report is not evidence, disk state is evidence."
+applies_to:
+  - "any Agent tool call that creates or modifies files"
+trigger_conditions:
+  - "subagent returns claiming file modifications"
+required_actions:
+  - "run git diff --stat from main session"
+  - "verify each reported file exists in diff"
+  - "check git branch hasn't changed"
+  - "check git log for unexpected remote commits"
+prohibited_actions:
+  - "mark task complete based solely on subagent report"
+  - "use --dangerously-skip-permissions on subprocesses"
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - date: "2026-03-04"
+    summary: "Subagent with bypassPermissions merged 7 files to main without review"
+    turns_wasted: 15
+    category: security
+  - date: "2026-03-22"
+    summary: "Feature 4 rogue subagent modified 5 files instead of 1"
+    turns_wasted: 9
+    category: regression
+created_date: "2026-03-04"
+last_validated: "2026-04-12"

@@ -1,0 +1,48 @@
+id: code-explore
+type: skill
+description: "Find code by meaning or understand how something works. Routes to code-search for conceptual queries and auto-chains with code-graph."
+category: code-intel
+requires_tools:
+  - Read
+  - mcp__codebase-memory-mcp__detect_changes
+  - mcp__codebase-memory-mcp__get_architecture
+  - mcp__codebase-memory-mcp__get_code_snippet
+  - mcp__codebase-memory-mcp__get_graph_schema
+  - mcp__codebase-memory-mcp__list_projects
+  - mcp__codebase-memory-mcp__query_graph
+  - mcp__codebase-memory-mcp__query_security_surfaces
+  - mcp__codebase-memory-mcp__rank_by_query
+  - mcp__codebase-memory-mcp__search_code_semantic
+  - mcp__codebase-memory-mcp__search_graph
+  - mcp__codebase-memory-mcp__trace_call_path
+  - mcp__codebase-memory-mcp__find_similar_functions
+  - mcp__codebase-memory-mcp__index_status
+  - mcp__codebase-memory-mcp__search_code
+requires_topics: []
+requires_rules:
+  - search-efficiency
+requires_skills:
+  - codebase-memory-exploring
+  - evaluate-repos
+requires_auth: []
+input_contract:
+  parameters:
+    query:
+      type: string
+      required: false
+      description: "Natural language code query"
+      examples: ["where is authentication implemented", "how does the worker agent load topics"]
+  scope_from: argument
+output_contract:
+  produces: [code_locations, call_chains, explanation]
+  format: markdown_report
+side_effects: [none]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "3-10"
+preconditions:
+  - repo_indexed
+guardrails: []
+threat_model: read_only
+prose_only_tools:  # mentioned in SKILL.md prose, deliberately not used (B9/F4; reconcile-skill-tools honors this)
+  - mcp__codebase-memory-mcp__index_repository  # Pre-flight Check step 2 — 'Do NOT attempt to call index_repository from this skill'

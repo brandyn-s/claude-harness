@@ -1,0 +1,28 @@
+name: Ship in non-sensitive repo skips the security gate
+skill: ship
+trigger: "/ship (with changes outside mcp-servers and mcp-infra, e.g. documentation, claude-config skills)"
+
+must_happen:
+  - Detect repo from git remote
+  - Recognise that the repo is not mcp-servers or mcp-infra
+  - Skip Step 4 (Security Gate) entirely
+  - Proceed directly to push, PR, and auto-merge
+
+must_not_happen:
+  - Run /differential-review for non-sensitive repos
+  - Block shipping on diff content that is not service code, workflows, Dockerfiles, or Rego
+
+output_contains:
+  - PR URL and verified remote state
+
+guards: []
+skip_ab: true
+
+deterministic:
+- body_contains:
+  - If the repo is outside `mcp-servers`, `mcp-infra`, and
+  - skip this step entirely
+  - $CONFIG_ROOT/bin/pr-merge-verified.py
+- body_not_contains:
+  - direct-push
+  - push confirmation for unprotected

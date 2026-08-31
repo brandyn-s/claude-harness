@@ -1,0 +1,61 @@
+{
+  "schema_version": "provider-monitor-skill-bindings/v1",
+  "truth_scope": "source_identity_and_routing_only",
+  "catalog": {
+    "repository": "example-org/mcp-servers",
+    "reviewed_revision": "39f63ad3efa34dda3c6a8b9930d44aea9a44bc12",
+    "path": "scripts/enterprise_ai_monitor/provider_source_catalog.v1.json",
+    "schema_version": "provider-source-catalog/v1",
+    "source_generation": "repository-census/2026-08-15/v1",
+    "document_sha256": "0c69f8e54e790a848b1b7078f5b0a73d8b3562a21a6cce77d78684c0198c9075",
+    "source_count": 61,
+    "provider_source_counts": {
+      "anthropic": 42,
+      "openai": 19
+    },
+    "provider_source_set_sha256": {
+      "anthropic": "cd8582ca47fc90a004e281b9453a2eeb0f474dc6babfb13e8f73cd81f497aa9a",
+      "openai": "4398eb6d63c7b6ea539f725346ea1b413e86138122fe899a6b37ab132b160e1e"
+    }
+  },
+  "emitter_registry": {
+    "path": "scripts/enterprise_ai_monitor/expected_emitter_registry.v1.json",
+    "schema_version": "expected-emitter-registry/v1",
+    "source_generation": "repository-census/2026-08-15/v1",
+    "document_sha256": "73c1b3d28d47283cda1b6d5fd8e12d6c05be14d8d462bcdbc1863ad7d0c252b5",
+    "emitter_count": 63,
+    "provider_emitter_counts": {
+      "anthropic": 38,
+      "openai": 24,
+      "unknown": 1
+    }
+  },
+  "skill_bindings": {
+    "cc-monitor": {
+      "role": "provider_router",
+      "providers": [
+        "anthropic"
+      ],
+      "source_selector": "all_provider_sources"
+    },
+    "openai-monitor": {
+      "role": "provider_router",
+      "providers": [
+        "openai"
+      ],
+      "source_selector": "all_provider_sources"
+    },
+    "enterprise-ai-monitor": {
+      "role": "cross_provider_composer",
+      "providers": [
+        "anthropic",
+        "openai"
+      ],
+      "source_selector": "union_of_provider_bindings",
+      "requires_skills": [
+        "cc-monitor",
+        "openai-monitor"
+      ]
+    }
+  }
+}

@@ -1,0 +1,44 @@
+name: Session with errors requiring multi-tier classification
+skill: distill
+trigger: "/distill (in a session with 3+ distinct error types: a platform issue, an API surprise, and a repeated mistake)"
+
+must_happen:
+  - Extract pain points with root cause analysis (not just symptoms)
+  - Collect session metrics (total turns, tool calls, retries, abandoned approaches, efficiency ratio)
+  - Classify each lesson to exactly one tier (T0-T5) with rationale
+  - Deduplicate across all 6 logical sources before writing (rules, runtime project memory and pending extensions, agent-memory topics, skills, staged hooks, semantic search)
+  - Present retrospective table with metrics header
+  - Write distill coordination marker
+
+must_not_happen:
+  - Classify to wrong tier (e.g., domain-specific API gotcha as T1 rule instead of T4 topic)
+  - Write duplicate entries (lesson already exists at same or higher tier)
+  - Persist workarounds as lessons when root cause is fixable
+  - Skip dedup check for any tier
+
+output_contains:
+  - Session metrics table (total turns, tool calls, efficiency)
+  - Lessons table with columns (lesson, friction, tier, target, action)
+  - '"Worst offender" identification'
+
+guards:
+  - memory_search called for dedup check before any write
+skip_ab: false
+
+deterministic:
+- body_contains:
+  - all 6 sources
+  - $STATE_ROOT/memories/extensions/ad_hoc/notes/
+  - $HOME/.claude/projects/$PROJECT_ID/memory/MEMORY.md
+  - Invoking `/distill` authorizes the in-scope, non-destructive local writes
+  - scripts/write_marker.py
+  - "| # | Lesson | Friction | Tier | Target | Action |"
+  - 4. **Skills**
+  - 5. **Staged hooks**
+  - 6. **Semantic**
+- body_not_contains:
+  - all 7 sources
+  - Project `memory/MEMORY.md`
+  - "**Confirm**"
+- script_runs:
+    cmd: "grep -Fq 'T1 candidate, audit pending' references/tier-decision-tree.md"

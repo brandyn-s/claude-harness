@@ -1,0 +1,33 @@
+id: semgrep
+type: skill
+description: "Semgrep static analysis with parallel subagents. Auto-detects Semgrep Pro for cross-file taint analysis."
+category: security
+requires_tools:
+  - Agent
+  - AskUserQuestion
+  - Bash
+  - Glob
+  - Read
+  - Task
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+input_contract:
+  parameters:
+    target:
+      type: string
+      required: false
+      description: "Directory or file to scan"
+  scope_from: argument
+output_contract:
+  produces: [sarif_results, finding_summary, severity_distribution]
+  format: json
+side_effects: [none]
+execution_context: parallel_workers
+auth_constraint: subagent_safe
+estimated_turns: "10-25"
+preconditions:
+  - semgrep_installed
+guardrails: []
+threat_model: read_only

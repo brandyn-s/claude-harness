@@ -1,0 +1,28 @@
+id: verify-effectiveness
+type: rule
+description: "Test that changes work, not just that they do not break -- two-part validation (plumbing + outcome) is mandatory for behavior changes."
+applies_to:
+  - hook_changes
+  - skill_modifications
+  - config_changes
+  - rule_additions
+trigger_conditions:
+  - implementing_any_change
+  - setting_thresholds
+required_actions:
+  - plumbing_verification
+  - outcome_verification
+  - measure_before_setting_thresholds
+  - retroactive_test_for_hooks
+prohibited_actions:
+  - shipping_with_plumbing_only
+  - setting_thresholds_without_data
+  - declaring_batch_edits_complete_without_verification
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - python_script_guard_2026_03_28
+  - skill_yaml_cosmetic_2026_04_11
+  - self_consistent_drift_check_2026_07_26
+created_date: "2026-03-20"
+last_validated: "2026-04-15"

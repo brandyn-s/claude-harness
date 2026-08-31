@@ -1,0 +1,31 @@
+id: transcript-over-summary
+type: rule
+description: "For session-history/retrospective/self-audit claims on a session with a compaction boundary, the on-disk .jsonl transcript is the primary source; the rendered compaction summary is a lossy secondary account that truncates scope to the last boundary's window."
+applies_to:
+  - session_retrospective
+  - session_characterization
+  - self_audit
+  - distill_capture_extraction
+  - postmortem
+trigger_conditions:
+  - answering_what_did_we_build_or_do_this_session
+  - compaction_boundary_present_in_context
+  - multi_compaction_session
+  - claim_about_session_scope_or_history
+required_actions:
+  - detect_and_count_compaction_boundaries
+  - read_local_jsonl_transcript_when_boundary_present
+  - mine_transcript_with_script_not_raw_read
+  - reconstruct_arc_from_user_message_chain_and_pr_link_ledger
+  - treat_summary_as_cross_check_not_source
+prohibited_actions:
+  - characterize_session_from_last_summary_alone
+  - trust_summary_pr_or_decision_list_as_complete
+  - raw_read_28mb_transcript_into_context
+  - skip_transcript_on_multi_compaction_history_claim
+enforced_by: []
+enforcement_coverage: none
+incidents:
+  - characterized_46h_64pr_session_from_last_summary_missed_first_40h_2026_06_19
+created_date: "2026-06-19"
+last_validated: "2026-06-19"

@@ -1,0 +1,45 @@
+id: work
+type: skill
+description: "Create a per-session git worktree with auto-prefixed branch and emit the cd command to enter it. Use to isolate this session from other Claude Code sessions writing in the same repo, eliminating shared-HEAD races and ref clobbers."
+category: git-workflow
+
+requires_tools:
+  - "Bash"
+  - "Read"
+requires_topics: []
+requires_rules:
+  - git-hygiene
+  - platform-constraints
+  - worktree-by-default
+requires_skills:
+  - ship
+requires_auth: []
+
+input_contract:
+  parameters:
+    branch_name:
+      type: string
+      required: false
+      description: "Optional branch name; auto-generated with session prefix if omitted"
+  scope_from: argument
+output_contract:
+  produces:
+    - worktree_path
+    - cd_command
+    - branch_name
+  format: cd_command
+
+side_effects:
+  - writes_files  # creates worktree dir
+  - modifies_git  # creates branch and worktree ref
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "1-2"
+
+preconditions:
+  - "current directory is a git repository"
+  - "no existing worktree at target path"
+guardrails:
+  - bash-security-guard
+  - worktree-enforcement
+threat_model: writes_local

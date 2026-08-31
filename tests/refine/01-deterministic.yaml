@@ -1,0 +1,27 @@
+skill: refine
+name: refine deterministic invariants
+trigger: /refine <prompt>
+must_happen:
+- Rule scan before gap analysis
+- Escape hatch for deceptively-simple prompts
+- Decomposition trigger fires for >3 constraints + 3 clarifications + 7 steps
+deterministic:
+- frontmatter_equals:
+    name: refine
+- body_contains:
+  - escape hatch
+  - decomposition
+- references_resolve: true
+- examples_count: '>=2'
+
+# LLM-driven assertions runnable by scripts/run-skill-llm-evals.py
+llm_eval:
+  invocation:
+    prompt: "refine this prompt before I run it: build a thing that processes data"
+    expected_skill_fires: true
+    timeout_s: 120
+  expected_output_contains:
+    - prompt
+  forbidden_output:
+    - "I cannot help"
+    - "as an AI language model"

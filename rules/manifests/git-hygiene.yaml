@@ -1,0 +1,29 @@
+id: git-hygiene
+type: rule
+description: "Protected repo rules, commit flow, PR merge sequence, post-merge sync, branch naming."
+applies_to:
+  - "all git operations"
+  - "all GitHub PR operations"
+trigger_conditions:
+  - "any commit, push, PR, or merge operation"
+required_actions:
+  - "never commit directly to main"
+  - "always create feature branch and PR"
+  - "push before creating PR (separate steps)"
+  - "use gh pr merge --auto --squash --delete-branch"
+  - "sync local main after merge"
+prohibited_actions:
+  - "git push origin main on protected repos"
+  - "git pull without --rebase"
+  - "gh pr merge --admin"
+  - "push to example-technologies org"
+enforced_by:
+  - bash-security-guard
+enforcement_coverage: partial
+incidents:
+  - date: "2026-02-28"
+    summary: "git checkout -b silently failed, commit landed on main"
+    turns_wasted: 5
+    category: drift
+created_date: "2026-02-15"
+last_validated: "2026-04-12"

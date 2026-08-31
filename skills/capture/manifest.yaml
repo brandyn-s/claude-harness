@@ -1,0 +1,38 @@
+id: capture
+type: skill
+description: "Record strategic decisions, lessons, and patterns to the digital garden knowledge base. Extracts from conversation context, matches to existing topics."
+category: knowledge
+requires_tools:
+  - "mcp__memory-search__memory_search"
+  - "mcp__memory-search__memory_search_batch"
+  - "AskUserQuestion"
+  - "Bash"
+  - "Edit"
+  - "Glob"
+  - "Grep"
+  - "Read"
+  - "Write"
+requires_topics: []
+requires_rules:
+  - check-before-change
+requires_skills: []
+requires_auth: []
+input_contract:
+  parameters:
+    action:
+      type: enum
+      required: false
+      description: "Mode: auto-capture, push to sync, or list to browse"
+      examples: ["push", "list"]
+  scope_from: argument
+output_contract:
+  produces: [knowledge_entries, topic_updates]
+  format: markdown_report
+side_effects: [modifies_memory, writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "8-15"
+preconditions: []
+guardrails:
+  - memory-write-guard
+threat_model: writes_local

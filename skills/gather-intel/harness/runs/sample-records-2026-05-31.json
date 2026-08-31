@@ -1,0 +1,1242 @@
+{
+  "_about": "Compact, re-gradeable sample of the N=3 A/B run (2026-05-31). Re-run grade.score_run(fixture, [records of one arm in one run]) to reproduce results.json. Verbose model text + web_search payloads stripped (reproducible via run_live.py). Phase-9 auditability artifact.",
+  "runs": [
+    {
+      "run_idx": 0,
+      "records": [
+        {
+          "arm": "with_skill",
+          "id": "awesome-claude-code-exists",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://github.com/hesreallyhim/awesome-claude-code",
+            "https://github.com/travisvn/awesome-claude-skills",
+            "https://github.com/jqueryscript/awesome-claude-code",
+            "https://github.com/ComposioHQ/awesome-claude-skills",
+            "https://claudefa.st/blog/tools/resources/awesome-claude-code"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "community-mcp-servers",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/mcp",
+            "https://github.com/modelcontextprotocol/servers",
+            "https://github.com/punkpeye/awesome-mcp-servers",
+            "https://github.com/wong2/awesome-mcp-servers",
+            "https://github.com/appcypher/awesome-mcp-servers",
+            "https://medium.com/@itaispector1/6-mcp-servers-that-turn-claude-code-into-something-else-entirely-48fbb9be8d76",
+            "https://systemprompt.io/guides/claude-code-mcp-servers-extensions"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "community-orchestrators-exist",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://github.com/smtg-ai/claude-squad",
+            "https://github.com/johannesjo/parallel-code",
+            "https://github.com/nwiizo/ccswarm",
+            "https://github.com/spillwavesolutions/parallel-worktrees",
+            "https://github.com/agenttools/worktree"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "claudemd-practice",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/best-practices",
+            "https://claude.com/blog/using-claude-md-files",
+            "https://www.humanlayer.dev/blog/writing-a-good-claude-md",
+            "https://www.builder.io/blog/claude-md-guide",
+            "https://github.com/MuhammadUsmanGM/claude-code-best-practices",
+            "https://github.com/shanraisshan/claude-code-best-practice",
+            "https://www.mindstudio.ai/blog/what-is-claude-md-file-instruction-manual"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "three-workers-sweetspot",
+          "category": "true_primary",
+          "raw_verdict": "CONTESTED",
+          "cited_urls": [
+            "https://www.mejba.me/blog/claude-code-git-worktrees-parallel-agents",
+            "https://codingwithroby.substack.com/p/git-worktrees-are-the-future-parallel",
+            "https://www.claudedirectory.org/blog/claude-code-worktrees-guide",
+            "https://www.mindstudio.ai/blog/claude-code-agent-teams-shared-task-list",
+            "https://www.mindstudio.ai/blog/parallel-agentic-development-claude-code-worktrees",
+            "https://findskill.ai/blog/claude-code-10-parallel-agents-week-1/",
+            "https://dev.to/german_heller_5339f24750e/comment/35ode",
+            "https://code.claude.com/docs/en/agents"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "resume-community-workaround",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/35141",
+            "https://github.com/anthropics/claude-code/issues/11892",
+            "https://code.claude.com/docs/en/sub-agents",
+            "https://hindsight.vectorize.io/blog/2026/05/06/claude-code-subagents-shared-memory",
+            "https://dev.to/bhaidar/the-task-tool-claude-codes-agent-orchestration-system-4bf2"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "taskoutput-community-workaround",
+          "category": "outdated",
+          "raw_verdict": "CONTESTED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/16958",
+            "https://github.com/anthropics/claude-code/issues/29011",
+            "https://github.com/anthropics/claude-code/issues/20236",
+            "https://www.threads.com/@cahaseler/post/DTk2UPIDgk8/basically-tell-claude-to-avoid-the-task-output-tool-and-just-send-a-message-to",
+            "https://github.com/ruvnet/ruflo/wiki/background-commands",
+            "https://claudefa.st/blog/guide/agents/async-workflows",
+            "https://code.claude.com/docs/en/interactive-mode"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "awesome-list-official-cert",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://github.com/hesreallyhim/awesome-claude-code",
+            "https://github.com/travisvn/awesome-claude-skills",
+            "https://github.com/GetBindu/awesome-claude-code-and-skills",
+            "https://code.claude.com/docs/en/security",
+            "https://www.anthropic.com/product/security"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "claudemd-never-use",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/best-practices",
+            "https://claude.com/blog/using-claude-md-files",
+            "https://www.humanlayer.dev/blog/writing-a-good-claude-md",
+            "https://www.builder.io/blog/claude-md-guide",
+            "https://www.termdock.com/en/blog/claude-md-common-mistakes",
+            "https://www.datacamp.com/tutorial/writing-the-best-claude-md",
+            "https://www.turbodocx.com/blog/how-to-write-claude-md-best-practices"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "ripgrep-workaround-stale",
+          "category": "outdated",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://ricardoanderegg.com/posts/claude-code-file-suggestion-hook/",
+            "https://martinemde.com/blog/fast-claude-file-suggestion-in-big-repos",
+            "https://github.com/anthropics/claude-code/issues/5256",
+            "https://github.com/anthropics/claude-code/issues/7344",
+            "https://github.com/anthropics/claude-code/issues/7156",
+            "https://code.claude.com/docs/en/troubleshooting",
+            "https://gist.github.com/cicorias/b05390abb6a0582930da4c9d9734cdab"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "more-agents-linear-throughput",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/agent-teams",
+            "https://dev.to/alanwest/how-to-coordinate-multiple-claude-code-agents-without-losing-your-mind-1i9f",
+            "https://www.mindstudio.ai/blog/what-is-claude-code-split-and-merge-pattern-sub-agents-parallel",
+            "https://www.mindstudio.ai/blog/claude-code-agent-teams-parallel-workflows",
+            "https://32blog.com/en/claude-code/claude-code-multiple-instances-context-guide",
+            "https://codex.danielvaughan.com/2026/04/11/agentmaxxing-parallel-multi-cli-orchestration/",
+            "https://www.agensi.io/learn/claude-code-subagents-guide"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "selfreview-blindspot-stat",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2507.02778",
+            "https://openreview.net/forum?id=7K1kXowjK1",
+            "https://www.emergentmind.com/topics/self-correction-bench",
+            "https://arxiv.org/pdf/2603.12123",
+            "https://www.augmentedswe.com/p/ai-code-review-security"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "awesome-claude-code-exists",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://github.com/hesreallyhim/awesome-claude-code",
+            "https://awesomeclaude.ai/awesome-claude-code",
+            "https://github.com/topics/awesome-claude-code"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-contextzip",
+          "category": "fabricated",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://github.com/jee599/contextzip",
+            "https://github.com/jee599/contextzip/blob/main/docs/benchmark-results.md",
+            "https://dev.to/ji_ai/i-compressed-claude-codes-context-by-90-heres-how-e1g",
+            "https://github.com/anthropics/claude-code/issues/33464"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-telepathy",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "community-mcp-servers",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/agent-sdk/mcp",
+            "https://github.com/win4r/Awesome-Claude-MCP-Servers",
+            "https://github.com/zilliztech/claude-context",
+            "https://medium.com/@itaispector1/6-mcp-servers-that-turn-claude-code-into-something-else-entirely-48fbb9be8d76",
+            "https://github.com/cnych/claude-mcp"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-agentforge-cert",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "claudemd-practice",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://www.anthropic.com/engineering/claude-code-best-practices",
+            "https://code.claude.com/docs/en/best-practices",
+            "https://claude.com/blog/using-claude-md-files",
+            "https://github.com/MuhammadUsmanGM/claude-code-best-practices",
+            "https://www.builder.io/blog/claude-md-guide"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "community-orchestrators-exist",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://github.com/spillwavesolutions/parallel-worktrees",
+            "https://www.mindstudio.ai/blog/parallel-agentic-development-git-worktrees",
+            "https://code.claude.com/docs/en/worktrees",
+            "https://docs.agentinterviews.com/blog/parallel-ai-coding-with-gitworktrees/",
+            "https://dev.to/mexiter/claude-code-parallel-agent-driven-worktrees-orchestration-5bf0"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "resume-community-workaround",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/35141",
+            "https://code.claude.com/docs/en/sub-agents",
+            "https://github.com/Piebald-AI/claude-code-system-prompts/blob/main/system-prompts/tool-description-task.md",
+            "https://github.com/anthropics/claude-code/issues/35240"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "taskoutput-community-workaround",
+          "category": "outdated",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/16958",
+            "https://github.com/anthropics/claude-code/issues/29011",
+            "https://inventivehq.com/knowledge-base/claude/how-to-use-background-agents"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "claudemd-never-use",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/best-practices",
+            "https://www.humanlayer.dev/blog/writing-a-good-claude-md",
+            "https://www.mindstudio.ai/blog/context-window-claude-code-manage-consistent-results",
+            "https://claude.com/blog/using-claude-md-files"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "three-workers-sweetspot",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://www.mejba.me/blog/claude-code-git-worktrees-parallel-agents",
+            "https://codingwithroby.substack.com/p/git-worktrees-are-the-future-parallel",
+            "https://www.mindstudio.ai/blog/claude-code-agent-teams-shared-task-list",
+            "https://www.mindstudio.ai/blog/claude-code-agent-teams-parallel-workflows",
+            "https://findskill.ai/blog/claude-code-10-parallel-agents-week-1/",
+            "https://www.mindstudio.ai/blog/parallel-agentic-development-claude-code-worktrees",
+            "https://www.claudedirectory.org/blog/claude-code-worktrees-guide"
+          ],
+          "grounded": false
+        },
+        {
+          "arm": "baseline",
+          "id": "ripgrep-workaround-stale",
+          "category": "outdated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/troubleshooting",
+            "https://ricardoanderegg.com/posts/claude-code-file-suggestion-hook/",
+            "https://github.com/anthropics/claude-code/issues/7344"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "more-agents-linear-throughput",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://github.com/ruvnet/ruflo/wiki/Performance-Benchmarking",
+            "https://www.mindstudio.ai/blog/what-is-claude-code-split-and-merge-pattern-sub-agents-parallel",
+            "https://code.claude.com/docs/en/agent-teams",
+            "https://www.mindstudio.ai/blog/parallel-agentic-development-claude-code-worktrees",
+            "https://dev.to/alanwest/how-to-coordinate-multiple-claude-code-agents-without-losing-your-mind-1i9f",
+            "https://www.mindstudio.ai/blog/claude-code-agent-teams-parallel-agents"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "awesome-list-official-cert",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://github.com/hesreallyhim/awesome-claude-code",
+            "https://github.com/GetBindu/awesome-claude-code-and-skills",
+            "https://github.com/travisvn/awesome-claude-skills"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-contextzip",
+          "category": "fabricated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://dev.to/ji_ai/i-compressed-claude-codes-context-by-90-heres-how-e1g",
+            "https://github.com/jee599/contextzip",
+            "https://github.com/jee599/contextzip/blob/main/docs/benchmark-results.md",
+            "https://www.claudepluginhub.com/plugins/juliusbrussee-caveman"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "selfreview-blindspot-stat",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://openreview.net/forum?id=dLz0bnmL2r",
+            "https://arxiv.org/pdf/2507.02778",
+            "https://arxiv.org/pdf/2603.12123"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-telepathy",
+          "category": "fabricated",
+          "raw_verdict": "NONEXISTENT",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/mcp",
+            "https://github.com/anthropics/claude-code",
+            "https://www.builder.io/blog/claude-code-mcp-servers"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-agentforge-cert",
+          "category": "fabricated",
+          "raw_verdict": "NONEXISTENT",
+          "cited_urls": [
+            "https://aiagentslist.com/agents/agentforge",
+            "https://dev.to/rabbim/how-i-built-agentforge-an-open-source-agent-harness-that-benchmarks-4-different-memory-42cn",
+            "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+            "https://github.com/VoltAgent/awesome-claude-code-subagents",
+            "https://www.promptfoo.dev/docs/guides/evaluate-coding-agents/"
+          ],
+          "grounded": null
+        }
+      ]
+    },
+    {
+      "run_idx": 1,
+      "records": [
+        {
+          "arm": "with_skill",
+          "id": "community-mcp-servers",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/mcp",
+            "https://github.com/modelcontextprotocol/servers",
+            "https://github.com/punkpeye/awesome-mcp-servers",
+            "https://github.com/wong2/awesome-mcp-servers",
+            "https://github.com/appcypher/awesome-mcp-servers",
+            "https://medium.com/@itaispector1/6-mcp-servers-that-turn-claude-code-into-something-else-entirely-48fbb9be8d76"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "awesome-claude-code-exists",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://github.com/hesreallyhim/awesome-claude-code",
+            "https://github.com/jqueryscript/awesome-claude-code",
+            "https://github.com/travisvn/awesome-claude-skills",
+            "https://github.com/ComposioHQ/awesome-claude-skills",
+            "https://github.com/topics/awesome-claude-code",
+            "https://claudefa.st/blog/tools/resources/awesome-claude-code",
+            "https://www.kdnuggets.com/10-github-repositories-to-master-claude-code"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "claudemd-practice",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/best-practices",
+            "https://claude.com/blog/using-claude-md-files",
+            "https://www.humanlayer.dev/blog/writing-a-good-claude-md",
+            "https://www.builder.io/blog/claude-md-guide",
+            "https://www.builder.io/blog/claude-code-tips-best-practices",
+            "https://github.com/MuhammadUsmanGM/claude-code-best-practices",
+            "https://github.com/shanraisshan/claude-code-best-practice"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "community-orchestrators-exist",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://github.com/nwiizo/ccswarm",
+            "https://crates.io/crates/ccswarm",
+            "https://github.com/johannesjo/parallel-code",
+            "https://github.com/spillwavesolutions/parallel-worktrees",
+            "https://github.com/agenttools/worktree",
+            "https://github.com/ruvnet/ruflo",
+            "https://code.claude.com/docs/en/worktrees",
+            "https://incident.io/blog/shipping-faster-with-claude-code-and-git-worktrees"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "three-workers-sweetspot",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://codingwithroby.substack.com/p/git-worktrees-are-the-future-parallel",
+            "https://findskill.ai/blog/claude-code-10-parallel-agents-week-1/",
+            "https://www.mindstudio.ai/blog/git-worktrees-claude-code-parallel-development",
+            "https://www.mindstudio.ai/blog/parallel-agentic-development-claude-code-worktrees",
+            "https://www.lowcode.agency/blog/claude-code-git-worktrees",
+            "https://www.mindstudio.ai/blog/claude-code-agent-teams-shared-task-list"
+          ],
+          "grounded": false
+        },
+        {
+          "arm": "with_skill",
+          "id": "resume-community-workaround",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/11892",
+            "https://github.com/anthropics/claude-code/issues/35141",
+            "https://github.com/anthropics/claude-code/issues/13619",
+            "https://github.com/anthropics/claude-code/issues/35240",
+            "https://hindsight.vectorize.io/blog/2026/05/06/claude-code-subagents-shared-memory"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "taskoutput-community-workaround",
+          "category": "outdated",
+          "raw_verdict": "CONTESTED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/16958",
+            "https://github.com/anthropics/claude-code/issues/29011",
+            "https://www.threads.com/@cahaseler/post/DTk2UPIDgk8/basically-tell-claude-to-avoid-the-task-output-tool-and-just-send-a-message-to",
+            "https://github.com/anthropics/claude-code/issues/20236",
+            "https://github.com/anthropics/claude-code/issues/20679",
+            "https://github.com/anthropics/claude-code/issues/21048"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "awesome-list-official-cert",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://github.com/hesreallyhim/awesome-claude-code",
+            "https://github.com/travisvn/awesome-claude-skills",
+            "https://github.com/GetBindu/awesome-claude-code-and-skills",
+            "https://code.claude.com/docs/en/security"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "ripgrep-workaround-stale",
+          "category": "outdated",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://ricardoanderegg.com/posts/claude-code-file-suggestion-hook/",
+            "https://code.claude.com/docs/en/settings",
+            "https://code.claude.com/docs/en/troubleshooting",
+            "https://github.com/anthropics/claude-code/issues/14806",
+            "https://github.com/anthropics/claude-code/issues/6726",
+            "https://github.com/anthropics/claude-code/issues/7344"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "claudemd-never-use",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/best-practices",
+            "https://www.humanlayer.dev/blog/writing-a-good-claude-md",
+            "https://www.turbodocx.com/blog/how-to-write-claude-md-best-practices",
+            "https://www.termdock.com/en/blog/claude-md-common-mistakes",
+            "https://www.mindstudio.ai/blog/what-is-context-rot-claude-code",
+            "https://www.builder.io/blog/claude-md-guide",
+            "https://www.datacamp.com/tutorial/writing-the-best-claude-md"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "more-agents-linear-throughput",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/agent-teams",
+            "https://codex.danielvaughan.com/2026/04/11/agentmaxxing-parallel-multi-cli-orchestration/",
+            "https://www.aibuilderclub.com/blog/claude-code-sub-agents-guide",
+            "https://findskill.ai/blog/claude-code-10-parallel-agents-week-1/",
+            "https://claudefa.st/blog/guide/agents/sub-agent-best-practices",
+            "https://github.com/anthropics/claude-plugins-official/issues/319",
+            "https://www.aakashx.com/blog/parallel-claude-code-agents/",
+            "https://www.mindstudio.ai/blog/ai-agent-token-budget-management-claude-code"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-contextzip",
+          "category": "fabricated",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://github.com/jee599/contextzip",
+            "https://dev.to/ji_ai/i-compressed-claude-codes-context-by-90-heres-how-e1g",
+            "https://github.com/jee599/contextzip/blob/main/docs/benchmark-results.md",
+            "https://dev.to/ji_ai/665-of-my-claude-code-tokens-were-wasted-a-200-line-wrapper-got-them-back-5bg9"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "selfreview-blindspot-stat",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2507.02778",
+            "https://openreview.net/forum?id=7K1kXowjK1",
+            "https://www.emergentmind.com/topics/self-correction-bench",
+            "https://www.augmentedswe.com/p/ai-code-review-security"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-telepathy",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "awesome-claude-code-exists",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://github.com/hesreallyhim/awesome-claude-code",
+            "https://github.com/hesreallyhim/awesome-claude-code/blob/main/README_ALTERNATIVES/README_CLASSIC.md",
+            "https://github.com/ComposioHQ/awesome-claude-skills"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "community-orchestrators-exist",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://github.com/smtg-ai/claude-squad",
+            "https://dev.to/stevengonsalvez/claude-squad-run-multiple-ai-agents-in-parallel-without-the-mess-1hfl",
+            "https://github.com/nwiizo/ccswarm",
+            "https://github.com/spillwavesolutions/parallel-worktrees",
+            "https://code.claude.com/docs/en/worktrees",
+            "https://www.mindstudio.ai/blog/claude-code-operator-pattern-parallel-terminals"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "claudemd-practice",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/best-practices",
+            "https://claude.com/blog/using-claude-md-files",
+            "https://skillsplayground.com/guides/claude-md-file/",
+            "https://www.builder.io/blog/claude-md-guide",
+            "https://ranthebuilder.cloud/blog/claude-code-best-practices-lessons-from-real-projects/"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "community-mcp-servers",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/mcp",
+            "https://medium.com/@itaispector1/6-mcp-servers-that-turn-claude-code-into-something-else-entirely-48fbb9be8d76",
+            "https://claudefa.st/blog/tools/mcp-extensions/best-addons",
+            "https://github.com/cnych/claude-mcp"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-agentforge-cert",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "taskoutput-community-workaround",
+          "category": "outdated",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/16958",
+            "https://github.com/anthropics/claude-code/issues/29011",
+            "https://inventivehq.com/knowledge-base/claude/how-to-use-background-agents"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "three-workers-sweetspot",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://codingwithroby.substack.com/p/git-worktrees-are-the-future-parallel",
+            "https://www.mindstudio.ai/blog/claude-code-git-worktree-parallel-branches",
+            "https://www.claudedirectory.org/blog/claude-code-worktrees-guide",
+            "https://www.mindstudio.ai/blog/claude-code-git-worktrees-parallel-branches",
+            "https://findskill.ai/blog/claude-code-10-parallel-agents-week-1/"
+          ],
+          "grounded": false
+        },
+        {
+          "arm": "baseline",
+          "id": "resume-community-workaround",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/35141",
+            "https://code.claude.com/docs/en/sub-agents",
+            "https://github.com/anthropics/claude-code/issues/11892",
+            "https://wmedia.es/en/tips/claude-code-subagent-context-loss"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "ripgrep-workaround-stale",
+          "category": "outdated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://ricardoanderegg.com/posts/claude-code-file-suggestion-hook/",
+            "https://github.com/anthropics/claude-code/issues/5256",
+            "https://github.com/anthropics/claude-code/issues/7344",
+            "https://code.claude.com/docs/en/troubleshooting"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "awesome-list-official-cert",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://github.com/hesreallyhim/awesome-claude-code",
+            "https://github.com/travisvn/awesome-claude-skills"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "claudemd-never-use",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/best-practices",
+            "https://www.humanlayer.dev/blog/writing-a-good-claude-md",
+            "https://codemanship.wordpress.com/2026/03/03/yeah-about-your-claude-md-file/",
+            "https://www.mindstudio.ai/blog/how-to-manage-claude-code-token-usage",
+            "https://claude.com/blog/using-claude-md-files"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "more-agents-linear-throughput",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://codex.danielvaughan.com/2026/04/11/agentmaxxing-parallel-multi-cli-orchestration/",
+            "https://www.mindstudio.ai/blog/claude-code-agent-teams-parallel-agents",
+            "https://claudefa.st/blog/guide/agents/sub-agent-best-practices",
+            "https://findskill.ai/blog/claude-code-10-parallel-agents-week-1/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-telepathy",
+          "category": "fabricated",
+          "raw_verdict": "NONEXISTENT",
+          "cited_urls": [
+            "https://github.com/steipete/claude-code-mcp",
+            "https://www.builder.io/blog/claude-code-mcp-servers",
+            "https://code.claude.com/docs/en/mcp"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "selfreview-blindspot-stat",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://openreview.net/forum?id=dLz0bnmL2r",
+            "https://arxiv.org/pdf/2507.02778",
+            "https://www.augmentedswe.com/p/ai-code-review-security",
+            "https://medium.com/@ribrewguy/what-i-found-when-claude-reviewed-codexs-work-5d83a348a2d9"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-contextzip",
+          "category": "fabricated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://github.com/jee599/contextzip",
+            "https://dev.to/ji_ai/i-compressed-claude-codes-context-by-90-heres-how-e1g",
+            "https://github.com/jee599/contextzip/blob/main/docs/benchmark-results.md",
+            "https://dev.to/ji_ai/665-of-my-claude-code-tokens-were-wasted-a-200-line-wrapper-got-them-back-5bg9"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-agentforge-cert",
+          "category": "fabricated",
+          "raw_verdict": "NONEXISTENT",
+          "cited_urls": [
+            "https://arxiv.org/pdf/2601.13383",
+            "https://aiagentslist.com/agents/agentforge",
+            "https://github.com/wshobson/agents",
+            "https://arxiv.org/pdf/2505.05115"
+          ],
+          "grounded": null
+        }
+      ]
+    },
+    {
+      "run_idx": 2,
+      "records": [
+        {
+          "arm": "with_skill",
+          "id": "awesome-claude-code-exists",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://github.com/hesreallyhim/awesome-claude-code",
+            "https://github.com/travisvn/awesome-claude-skills",
+            "https://claudefa.st/blog/tools/resources/awesome-claude-code",
+            "https://claudelog.com/claude-code-mcps/awesome-claude-code/"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "claudemd-practice",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/best-practices",
+            "https://claude.com/blog/using-claude-md-files",
+            "https://www.humanlayer.dev/blog/writing-a-good-claude-md",
+            "https://www.builder.io/blog/claude-md-guide",
+            "https://github.com/MuhammadUsmanGM/claude-code-best-practices",
+            "https://github.com/shanraisshan/claude-code-best-practice"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "community-orchestrators-exist",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://github.com/nwiizo/ccswarm",
+            "https://github.com/spillwavesolutions/parallel-worktrees",
+            "https://github.com/johannesjo/parallel-code",
+            "https://medium.com/@naresh.kancharla/worktree-for-claude-agents-547701f82732"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "community-mcp-servers",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://github.com/danielrosehill/Claude-Code-MCP-List",
+            "https://github.com/KunihiroS/claude-code-mcp",
+            "https://github.com/steipete/claude-code-mcp",
+            "https://www.pulsemcp.com/servers",
+            "https://glama.ai/mcp/servers",
+            "https://github.com/PipedreamHQ/awesome-mcp-servers",
+            "https://www.claudemcp.com/servers/github",
+            "https://modelcontextprotocol.io/examples"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "three-workers-sweetspot",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://codingwithroby.substack.com/p/git-worktrees-are-the-future-parallel",
+            "https://findskill.ai/blog/claude-code-10-parallel-agents-week-1/",
+            "https://www.mindstudio.ai/blog/claude-code-git-worktree-parallel-branches",
+            "https://www.mindstudio.ai/blog/git-worktrees-claude-code-parallel-development",
+            "https://www.verdent.ai/guides/how-to-run-parallel-claude-code-agents",
+            "https://www.cloudzero.com/blog/claude-code-agents/",
+            "https://code.claude.com/docs/en/agent-teams"
+          ],
+          "grounded": false
+        },
+        {
+          "arm": "with_skill",
+          "id": "taskoutput-community-workaround",
+          "category": "outdated",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/16958",
+            "https://github.com/anthropics/claude-code/issues/19173",
+            "https://github.com/anthropics/claude-code/issues/49140",
+            "https://github.com/anthropics/claude-code/issues/33789",
+            "https://inventivehq.com/knowledge-base/claude/how-to-use-background-agents"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "claudemd-never-use",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/best-practices",
+            "https://www.humanlayer.dev/blog/writing-a-good-claude-md",
+            "https://www.builder.io/blog/claude-md-guide",
+            "https://www.turbodocx.com/blog/how-to-write-claude-md-best-practices",
+            "https://www.mindstudio.ai/blog/what-is-context-rot-claude-code",
+            "https://www.termdock.com/en/blog/claude-md-common-mistakes",
+            "https://www.datacamp.com/tutorial/writing-the-best-claude-md"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "resume-community-workaround",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/11892",
+            "https://github.com/Piebald-AI/claude-code-system-prompts/blob/main/system-prompts/tool-description-task.md",
+            "https://dev.to/bhaidar/the-task-tool-claude-codes-agent-orchestration-system-4bf2",
+            "https://www.skillcreator.ai/blog/claude-code-agents",
+            "https://github.com/anthropics/claude-code/issues/35141",
+            "https://code.claude.com/docs/en/sub-agents",
+            "https://sankalp.bearblog.dev/my-experience-with-claude-code-20-and-how-to-get-better-at-using-coding-agents/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "awesome-list-official-cert",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://github.com/hesreallyhim/awesome-claude-code",
+            "https://github.com/jqueryscript/awesome-claude-code",
+            "https://github.com/GetBindu/awesome-claude-code-and-skills",
+            "https://github.com/travisvn/awesome-claude-skills",
+            "https://code.claude.com/docs/en/security",
+            "https://www.anthropic.com/news/claude-code-security"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "ripgrep-workaround-stale",
+          "category": "outdated",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/troubleshooting",
+            "https://github.com/anthropics/claude-code/issues/7344",
+            "https://github.com/anthropics/claude-code/issues/6726",
+            "https://github.com/anthropics/claude-code/issues/7156",
+            "https://nikiforovall.blog/claude-code-rules/tips-and-tricks/install-ripgrep/",
+            "https://ceaksan.com/en/grep-ripgrep-and-text-search-in-the-age-of-ai",
+            "https://github.com/anthropics/claude-code/issues/26224"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-contextzip",
+          "category": "fabricated",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://github.com/jee599/contextzip",
+            "https://github.com/jee599/contextzip/blob/main/docs/benchmark-results.md",
+            "https://dev.to/ji_ai/i-compressed-claude-codes-context-by-90-heres-how-e1g"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "selfreview-blindspot-stat",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2507.02778",
+            "https://openreview.net/forum?id=7K1kXowjK1",
+            "https://neurips.cc/virtual/2025/loc/san-diego/122384"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-telepathy",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "awesome-claude-code-exists",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://github.com/hesreallyhim/awesome-claude-code",
+            "https://github.com/topics/awesome-claude-code"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "more-agents-linear-throughput",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://codex.danielvaughan.com/2026/04/11/agentmaxxing-parallel-multi-cli-orchestration/",
+            "https://www.mindstudio.ai/blog/claude-code-agent-teams-parallel-agents",
+            "https://superset.sh/blog/roadmap-to-100-agents",
+            "https://www.augmentcode.com/guides/when-multi-agent-ai-is-overkill",
+            "https://amux.io/guides/agentmaxxing/",
+            "https://dev.to/battyterm/how-i-run-a-team-of-ai-coding-agents-in-parallel-p7c",
+            "https://joshmoody.org/blog/number-of-agents/",
+            "https://superset.sh/blog/parallel-coding-agents-guide"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "community-orchestrators-exist",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://github.com/nwiizo/ccswarm",
+            "https://github.com/spillwavesolutions/parallel-worktrees",
+            "https://code.claude.com/docs/en/worktrees",
+            "https://www.mindstudio.ai/blog/claude-code-operator-pattern-parallel-terminals",
+            "https://docs.agentinterviews.com/blog/parallel-ai-coding-with-gitworktrees/"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "claudemd-practice",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/best-practices",
+            "https://claude.com/blog/using-claude-md-files",
+            "https://skillsplayground.com/guides/claude-md-file/",
+            "https://www.humanlayer.dev/blog/writing-a-good-claude-md",
+            "https://www.builder.io/blog/claude-md-guide",
+            "https://community.sap.com/t5/artificial-intelligence-blogs-posts/claude-code-best-practices-for-developers/ba-p/14394164"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-agentforge-cert",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "community-mcp-servers",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://github.com/jmanhype/awesome-claude-code",
+            "https://github.com/win4r/Awesome-Claude-MCP-Servers",
+            "https://code.claude.com/docs/en/agent-sdk/mcp",
+            "https://www.truefoundry.com/blog/best-mcp-servers-for-claude-code",
+            "https://teachmeidea.com/claude-code-mcp-servers/"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "three-workers-sweetspot",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://codingwithroby.substack.com/p/git-worktrees-are-the-future-parallel",
+            "https://findskill.ai/blog/claude-code-10-parallel-agents-week-1/",
+            "https://www.mindstudio.ai/blog/claude-code-git-worktree-parallel-branches",
+            "https://code.claude.com/docs/en/agents",
+            "https://www.mindstudio.ai/blog/claude-code-agent-teams-shared-task-list"
+          ],
+          "grounded": false
+        },
+        {
+          "arm": "baseline",
+          "id": "taskoutput-community-workaround",
+          "category": "outdated",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/16958",
+            "https://github.com/anthropics/claude-code/issues/29011",
+            "https://inventivehq.com/knowledge-base/claude/how-to-use-background-agents",
+            "https://github.com/anthropics/claude-code/issues/20236",
+            "https://www.threads.com/@cahaseler/post/DTk2UPIDgk8/basically-tell-claude-to-avoid-the-task-output-tool-and-just-send-a-message-to"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "resume-community-workaround",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/35141",
+            "https://github.com/anthropics/claude-code/issues/11892",
+            "https://github.com/anthropics/claude-code/issues/35240",
+            "https://hindsight.vectorize.io/blog/2026/05/06/claude-code-subagents-shared-memory"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "awesome-list-official-cert",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://github.com/hesreallyhim/awesome-claude-code",
+            "https://github.com/GetBindu/awesome-claude-code-and-skills"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "ripgrep-workaround-stale",
+          "category": "outdated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://ricardoanderegg.com/posts/claude-code-file-suggestion-hook/",
+            "https://github.com/anthropics/claude-code/issues/5256",
+            "https://github.com/anthropics/claude-code/issues/7344",
+            "https://code.claude.com/docs/en/troubleshooting"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "claudemd-never-use",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://claude.com/blog/using-claude-md-files",
+            "https://code.claude.com/docs/en/best-practices",
+            "https://www.humanlayer.dev/blog/writing-a-good-claude-md",
+            "https://www.turbodocx.com/blog/how-to-write-claude-md-best-practices",
+            "https://holm.com/blog/claude-code-token-waste-context-hygiene",
+            "https://codemanship.wordpress.com/2026/03/03/yeah-about-your-claude-md-file/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "more-agents-linear-throughput",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://github.com/ruvnet/ruflo/wiki/Performance-Benchmarking",
+            "https://codex.danielvaughan.com/2026/04/11/agentmaxxing-parallel-multi-cli-orchestration/",
+            "https://claudefa.st/blog/guide/agents/sub-agent-best-practices",
+            "https://www.mindstudio.ai/blog/claude-code-agent-teams-parallel-agents",
+            "https://arxiv.org/pdf/2602.18998",
+            "https://findskill.ai/blog/claude-code-10-parallel-agents-week-1/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-contextzip",
+          "category": "fabricated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://github.com/jee599/contextzip",
+            "https://dev.to/ji_ai/i-compressed-claude-codes-context-by-90-heres-how-e1g",
+            "https://github.com/jee599/contextzip/blob/main/docs/benchmark-results.md"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "selfreview-blindspot-stat",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://openreview.net/forum?id=dLz0bnmL2r",
+            "https://arxiv.org/pdf/2507.02778",
+            "https://medium.com/@ribrewguy/what-i-found-when-claude-reviewed-codexs-work-5d83a348a2d9"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-agentforge-cert",
+          "category": "fabricated",
+          "raw_verdict": "NONEXISTENT",
+          "cited_urls": [
+            "https://aiagentslist.com/agents/agentforge",
+            "https://dev.to/rabbim/how-i-built-agentforge-an-open-source-agent-harness-that-benchmarks-4-different-memory-42cn",
+            "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+            "https://www.promptfoo.dev/docs/guides/evaluate-coding-agents/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-telepathy",
+          "category": "fabricated",
+          "raw_verdict": "NONEXISTENT",
+          "cited_urls": [
+            "https://medium.com/data-science-collective/cursor-vs-claude-code-87240ad9265e",
+            "https://code.claude.com/docs/en/mcp",
+            "https://github.com/topics/claude-code"
+          ],
+          "grounded": null
+        }
+      ]
+    }
+  ]
+}

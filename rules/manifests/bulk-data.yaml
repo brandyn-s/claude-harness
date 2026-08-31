@@ -1,0 +1,28 @@
+id: bulk-data
+type: rule
+description: "Script operations over 100 results while preserving authorization, preview, bounded execution, per-item evidence, and rollback for bulk writes."
+applies_to:
+  - data_operations
+  - api_queries
+  - exports
+  - bulk_mutations
+trigger_conditions:
+  - result_count_over_100
+  - bulk_export_requested
+  - bulk_write_requested
+required_actions:
+  - use_python_script_for_bulk
+  - invoke_bulk_api_script_skill
+  - preview_target_set_and_action_before_bulk_write
+  - record_per_item_outcomes_and_retry_state
+  - define_batch_bounds_stop_conditions_and_rollback
+prohibited_actions:
+  - mcp_pagination_for_bulk
+  - looping_state_changing_mcp_calls
+  - bypassing_opa_or_user_confirmation_with_script
+  - assuming_unverified_vendor_helper_exists
+enforced_by: []
+enforcement_coverage: none
+incidents: []
+created_date: "2026-03-15"
+last_validated: "2026-08-05"

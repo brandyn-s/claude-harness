@@ -1,0 +1,25 @@
+id: web-search-preference
+type: rule
+description: "Routing rules for Tavily and Exa web search -- competitive strengths, parameter optimization, research wave strategy."
+applies_to:
+  - web_search
+  - url_extraction
+  - research_tasks
+trigger_conditions:
+  - performing_web_search
+  - extracting_url_content
+  - research_skill_execution
+required_actions:
+  - use_tavily_exa_or_firecrawl_not_builtin
+  - route_by_competitive_strength
+  - use_chunked_or_terse_queries_for_token_efficiency
+prohibited_actions:
+  - using_builtin_websearch
+  - using_builtin_webfetch
+  - tavily_max_results_over_5
+enforced_by:
+  - tavily-search-cap
+enforcement_coverage: partial
+incidents: []
+created_date: "2026-03-28"
+last_validated: "2026-06-12"

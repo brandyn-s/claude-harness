@@ -1,0 +1,71 @@
+id: triage
+type: skill
+description: "Triage findings from any tool - security detections, vulnerability scans, compliance gaps, vendor anomalies. Loads topic context, applies severity scoring, correlates across tools."
+category: operations
+
+requires_tools:
+  - "mcp__crowdstrike__*"
+  - "mcp__tenable__*"
+  - "mcp__airlock__*"
+  - "mcp__msgraph__*"
+  - "mcp__linear-server__*"
+  - "mcp__93acadff-cc17-4b6c-b323-1d575dcca6d3__*"
+  - "mcp__ramp__*"
+  - "mcp__codebase-memory-mcp__*"
+  - "mcp__tavily__tavily_search"
+  - "AskUserQuestion"
+  - "Bash"
+  - "Glob"
+  - "Grep"
+  - "Read"
+requires_topics:
+  - security.md
+  - crowdstrike.md
+  - tenable.md
+  - airlock.md
+  - msgraph.md
+  - linear.md
+  - ramp.md
+requires_rules:
+  - security-confirmations
+  - diagnose-before-fix
+requires_skills: []
+requires_auth:
+  - provider: crowdstrike_falcon
+    scope: read
+    constraint: main_thread_only
+  - provider: tenable_io
+    scope: read
+    constraint: main_thread_only
+  - provider: airlock_digital
+    scope: read
+    constraint: main_thread_only
+  - provider: msgraph_gcc_high
+    scope: read
+    constraint: main_thread_only
+
+input_contract:
+  parameters:
+    scope:
+      type: string
+      required: false
+      description: "Tool, severity, time range, or entity filter"
+      examples: ["CrowdStrike critical", "Tenable DCs", "last 24h", "stale Linear issues"]
+  scope_from: argument
+output_contract:
+  produces: [findings, composite_scores, recommendations, severity_distribution]
+  format: markdown_report
+
+side_effects: [none]
+execution_context: main_thread
+auth_constraint: main_thread_only
+estimated_turns: "15-40"
+
+preconditions:
+  - at_least_one_security_tool_reachable
+  - topic_context_loaded
+guardrails:
+  - auto-topic-loader
+  - result-injection-guard
+  - loop-detector
+threat_model: read_only

@@ -1,0 +1,60 @@
+id: red-team-axes
+type: skill
+description: "Break a HARDENED target by rotating ATTACK axes, driven by the harness red-team platform (generator + oracle portfolios). Maps the six search axes onto the harness generators (bare-ctf / triage-rank / multi-agent / variant-seeded) and oracles (reproducer / fp-check / property / tiered), and enforces tested-refuted vs untested before calling a sink hardened."
+category: security
+
+requires_tools:
+  - "Read"
+  - "Grep"
+  - "Glob"
+  - "Bash"
+requires_topics: []
+requires_rules:
+  - uncharted-vs-refuted
+  - verify-effectiveness
+  - verify-instrument-before-fix
+requires_skills:
+  - search-axis-rotate
+requires_auth: []
+
+input_contract:
+  parameters:
+    target:
+      type: string
+      required: true
+      description: "The hardened target under adversarial test"
+    refusing_sinks:
+      type: string
+      required: true
+      description: "The sinks or predicates that refuse — the attempts that are not landing"
+
+output_contract:
+  produces:
+    - "attack-axis inventory mapped onto harness generators and oracles"
+    - "selected untried attack axis plus its concrete generator/oracle pairing"
+    - "per-sink tested-refuted vs untested verdict — required before any 'hardened' claim"
+  side_effects: []
+
+invocation:
+  user_invocable: true
+  model_invocable: true
+  effort: medium
+
+compatibility:
+  optional:
+    - repo: harness
+      path: ~/Documents/GitHub/harness
+      fallback: "Run the axes manually using the generator/oracle concepts if the harness repo is absent."
+
+enforces:
+  - uncharted-vs-refuted
+  - verify-effectiveness
+
+incidents:
+  - date: "2026-07-24"
+    summary: "Manifest absent since authoring — surfaced by the session-start manifest-coverage check (195/203)"
+    turns_wasted: 0
+    category: drift
+
+created_date: "2026-07-24"
+last_validated: "2026-07-24"

@@ -1,0 +1,47 @@
+id: garden
+type: skill
+description: "Weekly knowledge base curation — stage promotion, broken wiki-link cleanup, orphan MoC assignment with no-fit floor, MoC coverage gap fill, bare-link conversion, HIGH-confidence merges, and backlog appends for canonicalization candidates. Supports an audit dry-run mode."
+category: knowledge
+# Note: manifest.yaml is internal-only metadata. The marketplace copy
+# (marketplace/knowledge-ops/skills/garden/) ships SKILL.md, references/,
+# and scripts/ by convention — no marketplace skill carries a manifest.
+# Keep SKILL.md in sync between the two locations; manifest.yaml lives
+# only here.
+
+requires_tools:
+  - Bash
+  - Edit
+  - Glob
+  - Grep
+  - Read
+  - Write
+  - mcp__memory-search__memory_search
+  - mcp__memory-search__memory_search_batch
+requires_topics: []
+requires_rules:
+  - platform-constraints
+requires_skills:
+  - pull-repos
+requires_auth: []
+
+input_contract:
+  parameters:
+    mode:
+      type: enum
+      required: false
+      description: "audit (dry-run preview, no writes or PR), or omit for full run"
+      examples: ["audit"]
+  scope_from: argument
+output_contract:
+  produces: [garden_health_report, stage_fixes, wiki_link_fixes, moc_assignments, canonicalization_candidates]
+  format: markdown_report
+
+side_effects: [writes_files, pushes_to_remote]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "15-30"
+
+preconditions:
+  - "~/Documents/knowledge-base/topics/ directory exists with .md files"
+guardrails: []
+threat_model: writes_remote

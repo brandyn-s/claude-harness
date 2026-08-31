@@ -1,0 +1,18 @@
+id: bash-error-classifier
+type: hook
+event: PostToolUseFailure
+matcher: "Bash"
+if_condition: null
+action_type: fixer
+description: "Classifies Bash errors and suggests fixes based on common failure patterns."
+enforces:
+  - diagnose-before-fix
+blocks_patterns: []
+injects: null
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "Error classified and guidance provided"
+output_format: json
+incidents: []

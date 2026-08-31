@@ -1,0 +1,4 @@
+suppressions:
+  - code: C2
+    path: skills/audit-fix/SKILL.md
+    reason: "Bash-workflow examples showing oracle act-on / worklist plumbing (/tmp/wl.yaml, /tmp/gr.yaml); /tmp/ resolves under Git Bash on Windows. Command demonstrations, not Python file I/O."

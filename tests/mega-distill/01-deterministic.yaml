@@ -1,0 +1,74 @@
+name: "mega-distill deterministic contract"
+skill: mega-distill
+trigger: "/mega-distill (large or auto-compacted session needing whole-transcript recovery)"
+
+# NOTE ON SCHEMA: run-skill-evals.py requires each `deterministic:` list item to be
+# a dict with EXACTLY ONE key (the assertion type). Rationale therefore lives in
+# comments, never as a sibling `pins_what:` key — a second key makes the whole
+# assertion "malformed" and it silently never runs.
+
+must_happen:
+  - Step 0 routes on size/compaction before doing any work
+  - Corpus-mode fork is checked before the single-session size gate
+  - Step 1 condenses the transcript to the diagnostic signal slice
+  - Step 2 hands each slice to /distill with whole-session framing
+  - Step 3 auto-ships without an approval gate
+
+deterministic:
+  # --- Step 0 size gate: load-bearing routing numbers. If these drift, small
+  # sessions get misrouted into an expensive full-transcript recovery.
+  - frontmatter_contains:
+      when_to_use: ">5000 lines"
+  - frontmatter_contains:
+      when_to_use: ">15MB"
+
+  # --- Core design principle. The "What it is NOT" section documents why a
+  # census approach was rejected; losing this phrase loses the design contract.
+  - body_contains: "condense, don't census"
+
+  # --- Corpus-mode fork must be checked FIRST (Step 0 routing order). If this
+  # ordering inverts, a --corpus run wastes the single-session size gate.
+  - body_matches: "Corpus-mode fork \\(check FIRST\\)"
+  - body_contains: "If `--corpus` was passed"
+
+  # --- Auto-ship contract: mega-distill writes AND ships with no approval gate,
+  # matching /distill. A regression here would silently add a confirmation step.
+  - body_contains: "## Step 3 — Auto-ship the fixes (no approval gate — like /distill)"
+
+  # --- Session-ID resolution must use the env var, NOT newest-by-mtime.
+  # transcript-over-summary.md documents mtime picking a DIFFERENT session's
+  # transcript under concurrency (2026-06-25). This pins the safe resolution.
+  - body_contains: "$CLAUDE_CODE_SESSION_ID"
+  # Codex exposes the task id through request metadata and stores rollout files
+  # under a separate lowercase root.
+  - body_contains: "nodeRepl.requestMeta"
+  - body_contains: "~/.codex/sessions"
+  # Delta recovery must locate canonical boundaries for both Claude and Codex
+  # without matching the Codex event_msg/context_compacted mirror.
+  - body_contains: "input_line_number"
+  - body_contains: "$CODEX_THREAD_ID"
+
+  # --- Both supported transcript envelopes must trigger the same recovery path.
+  - body_contains: "\"type\":\"compacted\""
+  - body_contains: "paired counts"
+  - body_contains: "in Claude Code use the Skill tool; in Codex"
+
+  # --- The helper is bundled with the skill and resolved from the loaded
+  # SKILL.md path, independent of cwd or runtime-specific home directories.
+  - body_contains: "scripts/transcript_condense.py"
+  - body_contains: "enumerate only the paths listed in the manifest"
+  - body_not_contains: "$HOME/.claude/bin/transcript_condense.py"
+  - body_contains: "--max-tokens 180000"
+
+  # --- Corpus-mode instrument-validation gate. Mandatory before acting on
+  # extractor output; without it a broken extractor's results look like findings.
+  - body_contains: "gate:read-before-edit"
+
+  # --- Corpus mode keeps its current whole-session extraction prompt; the
+  # retired per-chunk census prompt must not be distributed.
+  - ref_resolves:
+      - corpus-extract-prompt.md
+  - body_not_contains: "extraction-prompt.md"
+
+  # --- distill is the required downstream skill; mega-distill is its preprocessor.
+  - body_contains: "/distill"

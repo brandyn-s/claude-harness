@@ -1,0 +1,14 @@
+rules:
+  - id: deprecated-without-migration-path
+    pattern: |
+      #[deprecated]
+      pub fn $NAME(...) -> $RET { ... }
+    message: >
+      `#[deprecated]` without a `note` specifying the replacement. Use
+      `#[deprecated(note = "use `replacement_fn()` instead")]` so users know
+      what to migrate to. (alexcrichton: deprecation with migration path, not removal)
+    languages: [rust]
+    severity: WARNING
+    metadata:
+      source: absorb-alexcrichton
+      pattern-maturity: stage-2

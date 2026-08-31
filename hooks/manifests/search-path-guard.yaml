@@ -1,0 +1,20 @@
+id: search-path-guard
+type: hook
+event: PreToolUse
+matcher: "Grep|Glob"
+if_condition: null
+action_type: guard
+description: "Validates search paths to prevent searching in overly broad or irrelevant directories."
+enforces:
+  - search-efficiency
+blocks_patterns:
+  - overly_broad_search_paths
+injects: null
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "Search path acceptable"
+  "2": "Blocked: search path too broad"
+output_format: plaintext
+incidents: []

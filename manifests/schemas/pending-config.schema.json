@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "pending-config",
+  "title": "pending-config.json",
+  "description": "Legacy schema for deferred settings mutations. No active lifecycle hook consumes this queue; new producers must not enqueue changes until an explicit serialized apply workflow exists.",
+  "type": "array",
+  "items": {
+    "oneOf": [
+      {
+        "type": "object",
+        "required": ["action", "event", "hook"],
+        "properties": {
+          "action": {"const": "add_hook"},
+          "event": {"type": "string", "enum": ["PreToolUse", "PostToolUse", "UserPromptSubmit", "SessionStart", "SessionStop", "Stop", "SubagentStop", "PreCompact"]},
+          "matcher": {"type": "string"},
+          "hook": {
+            "type": "object",
+            "required": ["type", "command"],
+            "properties": {
+              "type": {"const": "command"},
+              "command": {"type": "string"},
+              "timeout": {"type": "integer", "minimum": 1}
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": ["action", "event", "script_name"],
+        "properties": {
+          "action": {"const": "remove_hook"},
+          "event": {"type": "string"},
+          "script_name": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    ]
+  }
+}

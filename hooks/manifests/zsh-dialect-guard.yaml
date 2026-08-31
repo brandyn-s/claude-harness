@@ -1,0 +1,129 @@
+id: zsh-dialect-guard
+type: hook
+event: PreToolUse
+matcher: "Bash"
+if_condition: null
+action_type: advisory
+description: "Advisory-only zsh dialect guard. Warns on unquoted glob metacharacters that abort a command on an unbraced `$var:<modifier>` whose colon zsh reads as a history modifier, and on three narrow bash-style word-splitting shapes that run with the wrong argv: `set -- $var`, `for X in $var`, and a same-command packed flag assignment expanded unquoted. Always exits 0 and emits only a top-level systemMessage."
+enforces:
+  - search-efficiency
+  - platform-constraints
+blocks_patterns:
+  - "grep -rn x dir/ --include=*.py      (option-value branch)"
+  - "find . -name *.md                   (find-predicate branch)"
+  - "gh api repos/o/r/contents/f?ref=v1  (url-query branch)"
+  - "set -- $spec                       (set-dashdash branch)"
+  - "for r in $repos; do :; done        (for-in-split branch)"
+  - "R='--region us-west-2'; aws $R     (flag-packing branch)"
+  - "docker build -t \"$ECR:latest\"      (colon-modifier branch)"
+injects: null
+modifies: null
+depends_on_files:
+  - hooks/manifest_metrics.py
+depends_on_env: []
+exit_codes:
+  "0": "always — advisory warns via systemMessage, never blocks"
+output_format: json
+notes: |
+  DETECTION SURFACE — six branches, deliberately narrow. `check_unquoted_glob()`
+  returns the BRANCH NAME (option-value / find-predicate / url-query /
+  set-dashdash / for-in-split / flag-packing / colon-modifier / none) rather
+  than a bare bool, so a test can assert WHICH branch fired — per
+  verify-effectiveness's N-branch GUARD, a control that always takes the same path
+  still exits 0, so the untaken branch is the one that rots silently.
+
+  A bare trailing path glob (`ls *.py`, `cat logs/*.txt`) is deliberately NOT
+  matched: that is the CORRECT idiom when a match is expected, and flagging it
+  would be pure noise.
+
+  Quoted-string and heredoc bodies are stripped before scanning (`_strip_noise`) —
+  a glob inside an `echo` is prose and zsh never expands it there; a heredoc body
+  is data.
+
+  The url-query branch gets a DIFFERENT fix suggestion: quoting only the value
+  after the first `=` is right for `--include=*.py` and WRONG for a query string,
+  because in `repos/x?ref='v1'` the `?` sits in the still-unquoted prefix and zsh
+  globs the word anyway. That branch quotes the WHOLE token.
+
+  The word-splitting branches are intentionally narrower than generic unquoted
+  expansion detection. `for item in $ITEMS`, `command -- $FILES`, and ordinary
+  single-token expansions remain out of scope. The advisory never includes the
+  packed assignment value; it reports only the variable name.
+
+  Measured combined fire rate — 0.16% (9 of 5,640 real Bash commands across 40
+  recent session transcripts) against the >10% "too broad" gate; 29/29 fixtures
+  pass. Branch counts: flag-packing=2, option-value=1, set-dashdash=3,
+  url-query=3.
+  Harness: hooks/test-hooks/replay_bash_glob_metachar.py — RE-RUN IT after any
+  pattern change; it gates on the rate and exits non-zero above 10%.
+
+  KNOWN COVERAGE LIMIT: detection is an allowlist of the five shapes above, so it
+  does NOT cover every metachar abort. Its silence is not clearance. It also cannot
+  see a command handed to the USER to run — a PreToolUse hook only observes commands
+  the agent executes, so that path has no enforcement layer at all (recorded in
+  search-efficiency).
+
+  THE COLON-MODIFIER BRANCH USES A DIFFERENT STRIP, and this is load-bearing.
+  `_strip_noise` removes DOUBLE-quoted spans, which is correct for the glob branches
+  (an unmatched glob inside `"..."` is inert) and exactly WRONG here: a parameter
+  expansion inside double quotes DOES expand, and every measured instance of this
+  hazard lives inside them (`docker build -t "$ECR:latest"`). That branch therefore
+  uses `_strip_unexpanded`, which drops only heredoc bodies and SINGLE-quoted spans.
+
+  ITS CHARACTER SET IS MEASURED, NOT COPIED FROM THE STAGED SPECS — both were wrong.
+  Probing every ASCII letter plus `& # % ? - / . _` in zsh 5.9 gives: `a c e h l q r
+  t u A P Q &` corrupt silently, `s` aborts (`bad substitution`), and the other 46
+  are inert. `zsh-colon-modifier-guard.spec.md` listed `p x g` and
+  `zsh-unbraced-colon-modifier.spec.md` listed `x g p f F w W` — all inert, so either
+  list would fire on `"$IMG:prod"`, a safe and very common docker tag. The older list
+  also missed `Q`.
+
+  Measured colon-modifier fire rate — 0.036% (4 of 11,252 real Bash commands across
+  40 recent transcripts), against the staged specs' own >1% falsifier. ALL FOUR ARE
+  GENUINE, 0 false positives, and 3 of the 4 are GIT's `<rev>:<path>` / `<src>:<dst>`
+  syntax rather than docker tags: `git rev-parse $sha:rules/x.md` yields
+  `<sha>ules/x.md`, and `refs/heads/$HEAD_REF:refs/remotes/origin/$HEAD_REF` collapses
+  into one mangled ref. Both were silenced by `2>/dev/null` in the originals.
+  A FIFTH fire was a FALSE POSITIVE the replay caught: `echo "... \$ECR:latest would
+  trigger the zsh :l modifier"` — prose warning about this hazard, with a BACKSLASH-
+  ESCAPED `$` that zsh never expands. Fixed with a `(?<!\\)` left boundary. Shipping
+  on the fire rate alone (already far under gate) would have shipped it.
+
+  ENFORCEMENT: remains advisory. Any future blocking proposal requires its own
+  evidence-backed review and explicit authorization.
+
+  INTERRUPTION: safe — reads stdin, writes stdout, mutates no shared state.
+  Telemetry is wrapped so it can never break the guard.
+incidents:
+  - date: "2026-06-12"
+    summary: "az --query \"[?...]\" aborted unquoted (2 occurrences same day)"
+    turns_wasted: 1
+    category: shell-dialect
+  - date: "2026-07-19"
+    summary: "unquoted --include glob aborted a search; empty output read as a negative finding"
+    turns_wasted: 1
+    category: shell-dialect
+  - date: "2026-07-24"
+    summary: "recurrence after the constraint was documented in three ambient places"
+    turns_wasted: 1
+    category: shell-dialect
+  - date: "2026-08-01"
+    summary: "5th+ recurrence; prose delivery had failed (macOS platform-constraints is injected preview-only, ~2 KB of 30 KB), triggering promotion from rule to hook per pattern-maturity-lifecycle"
+    turns_wasted: 1
+    category: shell-dialect
+  - date: "2026-08-02"
+    summary: "url-query branch added: gh api contents/pyproject.toml?ref=v0.11.0 returned empty, briefly reading as 'the tag has no pyproject.toml' — a claim about the server that was really about the shell"
+    turns_wasted: 1
+    category: shell-dialect
+  - date: "2026-08-06"
+    summary: "packed AWS flags and set -- variable expansion repeatedly produced single-argument argv under zsh"
+    turns_wasted: 3
+    category: shell-dialect
+  - date: "2026-08-12"
+    summary: "unbraced $br:ancestor silently applied :a and rewrote a branch value, which would have classified a branch as deletable with no error; a sibling $br:squashed aborted loudly one line earlier and was the only one noticed"
+    turns_wasted: 1
+    category: shell-dialect
+  - date: "2026-08-27"
+    summary: "colon-modifier branch installed, merging two specs staged 15 days apart for the same hazard; both specs' letter sets measured WRONG (each included inert letters, so both would fire on the common docker tag \"$IMG:prod\") and the replay found a false positive on backslash-escaped prose about the hazard itself"
+    turns_wasted: 0
+    category: shell-dialect

@@ -1,0 +1,80 @@
+name: supergoal deterministic contract
+skill: supergoal
+trigger: "/supergoal <plan-file> (drive a superplan plan to completion with tool-backed verification)"
+
+# NOTE ON SCHEMA (two sharp edges this fixture is calibrated against):
+#  1. Each `deterministic:` item must be a dict with EXACTLY ONE key. A sibling
+#     `pins_what:` key makes the assertion "malformed" and it silently never runs.
+#  2. `body_contains` does NOT see frontmatter — run-skill-evals.py's
+#     parse_frontmatter() splits it off. supergoal declares its whole `type:agent`
+#     Stop-hook prompt IN frontmatter, so hook-internal contracts must be asserted
+#     with `frontmatter_contains`, not `body_contains`.
+
+must_happen:
+  - Steps 1-5 run as agent actions (parse, prior-arc, budget, env-export, confirm)
+  - Step 6 emits the /goal command rather than invoking it programmatically
+  - Step 7 writes a terminal doc on exit
+
+deterministic:
+  # --- The four load-bearing scripts must exist. AUDIT-FINDINGS records two
+  # behavior bugs already FIXED in these (prior_arc_ledger init in parse_plan.py;
+  # write_terminal int turn count) — pinning existence guards the fix surface.
+  - script_exists:
+      - scripts/parse_plan.py
+      - scripts/check_prior_arcs.py
+      - scripts/state_io.py
+      - scripts/write_terminal.py
+
+  # --- parse_plan.py must remain invocable. Catches an import-time break
+  # (the plan-parsing entrypoint failing is a silent whole-skill outage).
+  - script_runs: "python3 scripts/parse_plan.py --help"
+
+  # --- FRONTMATTER-scoped: the Stop hook's STEP 0 gate. anthropics/claude-code#55754
+  # documents a missing stop_hook_active check as the #1 hook-design mistake —
+  # without it supergoal compounds a forced continuation into a block-storm.
+  - frontmatter_contains:
+      hooks: "stop_hook_active gate (CRITICAL):"
+
+  # --- BODY-scoped contracts.
+  - body_contains:
+      # Both block-cap guards are needed (env override does NOT disable the flag).
+      - "anthropics/claude-code#55754"
+      - "type:agent Stop hook"
+      # Plan-tamper detection via mtime-keyed re-hash.
+      - "mtime-keyed"
+      - "plan-tampered"
+      # /goal is a UI/headless command — Step 6 EMITS it, never invokes it.
+      # Exact strings verified against SKILL.md:122 and :178.
+      - "goal is a UI command, not a skill"
+      - "the AGENT cannot invoke it programmatically"
+      # Pseudocode metric_commands scorer-break the loop every turn; the guard
+      # is to NOT enter /goal at all when placeholders are present.
+      - "Non-executable (pseudocode) metric_commands"
+      - "do NOT invoke `/goal`"
+      # Goodhart guard: the exit probe must differ from the metric in SURFACE,
+      # or a green metric can coexist with an artifact that never deploys.
+      - "Goodhart probe must differ from the metric in SURFACE"
+      - "neither verifies the artifact WORKS or DEPLOYS"
+      - "artifact_probe[]"
+
+  # --- The block cap follows the selected turn budget instead of creating a
+  # hidden 1000-turn continuation allowance.
+  - body_matches: 'block_cap=\$\(\(turn_budget \+ 2\)\)'
+  - body_matches: 'CLAUDE_CODE_STOP_HOOK_BLOCK_CAP="\$block_cap"'
+  - body_contains:
+      - "| M | 20 | 3600s (1h) |"
+      - "| L | 40 | 7200s (2h) |"
+      - "| XL | 80 | 14400s (4h) |"
+      - "explicit user opt-in"
+
+  # --- All seven references must resolve (each is loaded by a named Step).
+  - ref_resolves:
+      - budget.md
+      - headless.md
+      - plan-parsing.md
+      - plan-pattern-library.md
+      - prior-arc-check.md
+      - terminal-doc.md
+      - verification-hook.md
+
+  - tests_count: ">=1"

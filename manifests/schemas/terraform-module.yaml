@@ -1,0 +1,14 @@
+# Terraform Module Manifest Schema
+# Per-.tf file operational metadata
+
+terraform_module:
+  id: string              # filename without .tf (e.g., ecs, iam, redis)
+  type: "terraform_module"
+  description: string     # what this module provisions
+  resources: list[string] # AWS resource types (aws_ecs_service, aws_iam_role, etc.)
+  depends_on_modules: list[string]  # other .tf files this depends on
+  consumers: list[string]           # MCP server names that use these resources
+  variables_required: list[string]  # terraform variables this module needs
+  outputs_produced: list[string]    # outputs other modules consume
+  sensitivity: enum       # low (CDN, DNS), medium (ECS, S3), high (IAM, secrets), critical (KMS, root)
+  change_impact: string   # what breaks if this module is modified

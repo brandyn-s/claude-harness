@@ -1,0 +1,7 @@
+suppressions:
+  - code: C4
+    path: skills/audit-skill/scripts/backfill_reproducers.py
+    reason: The script generates bash reproducer commands (test ! -e $HOME/...) that are stored in findings YAML and later executed via bash -c by the oracle reverify path. The $HOME tokens are intended for bash expansion, not Python expansion - they live inside f-string templates for shell commands. Python never resolves them. The C4 lint cannot disambiguate this from the bug it targets (Path string used as a Python path); the suppression is the simplest fix.
+  - code: C2
+    path: skills/audit-skill/SKILL.md
+    reason: Phase 4 bash example uses /tmp/phase1.ndjson and /tmp/worklist.yaml as illustrative scratch paths. The skill documents POSIX-shell workflow; Windows users use a different shell anyway. /tmp/ here is illustrative, not a portability claim about the tool. (Line qualifier removed 2026-07-24 — the block drifts as SKILL.md grows; a stale range orphaned this suppression (S2) and re-fired the C2s. The only /tmp mentions in this SKILL.md are these illustrative ones, so file-scope is safe.)

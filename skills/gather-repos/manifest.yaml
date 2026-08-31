@@ -1,0 +1,46 @@
+id: gather-repos
+type: skill
+description: "Discover community Claude Code config repos via structural GitHub search, batch screening, and parallel subagent inventory. Produces per-bucket inventories that feed into /evaluate-repos."
+category: knowledge
+
+requires_tools:
+  - "AskUserQuestion"
+  - "Bash"
+  - "Read"
+  - "Write"
+  - "Edit"
+  - "Glob"
+  - "Grep"
+  - "mcp__exa__get_code_context_exa"
+  - "mcp__exa__web_search_exa"
+  - "mcp__firecrawl__firecrawl_search"
+  - "mcp__tavily__tavily_search"
+requires_topics: []
+requires_rules:
+  - web-search-preference
+requires_skills:
+  - evaluate-repos
+requires_auth: []
+
+input_contract:
+  parameters:
+    repo_url:
+      type: string
+      required: false
+      description: "Optional: specific repo URL for ad-hoc inventory"
+  scope_from: argument
+output_contract:
+  produces: [repo_inventories, discovery_summary, ledger_update]
+  format: markdown_report
+
+side_effects: [writes_files]
+execution_context: parallel_workers
+auth_constraint: any
+estimated_turns: "20-40"
+
+preconditions:
+  - "gh CLI authenticated"
+  - "Exa MCP available for code search"
+  - "~/.claude/assessed-repos.md ledger exists or will be created"
+guardrails: []
+threat_model: writes_local

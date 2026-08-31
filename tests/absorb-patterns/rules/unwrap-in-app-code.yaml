@@ -1,0 +1,23 @@
+rules:
+  - id: unwrap-in-app-code
+    patterns:
+      - pattern: $X.unwrap()
+      - pattern-not-inside: |
+          #[cfg(test)]
+          mod $MOD {
+            ...
+          }
+      - pattern-not-inside: |
+          #[test]
+          fn $FN(...) {
+            ...
+          }
+    message: >
+      unwrap() in application code is a latent panic. Use `?` with `.context()`
+      for fallible operations, or `expect()` only for provably impossible states.
+      (dtolnay pattern: zero unwrap in app code)
+    languages: [rust]
+    severity: WARNING
+    metadata:
+      source: absorb-dtolnay
+      pattern-maturity: stage-2

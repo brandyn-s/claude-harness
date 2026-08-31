@@ -1,0 +1,35 @@
+id: audit-fix
+type: skill
+description: "Take a verified worklist of STILL-FIRES audit findings and dispatch fix-agents (one per finding) with pre/post oracle verification via Layer D fix_loop. Only commits VERIFIED fixes. Closes the discovery→fix loop for /audit-skill."
+category: meta
+
+requires_tools:
+  - AskUserQuestion
+  - Bash
+  - Edit
+  - Glob
+  - Grep
+  - Read
+  - Write
+  - Agent
+requires_topics: []
+requires_rules:
+  - subagent-verification
+  - subagent-tool-discipline
+  - git-hygiene
+  - verify-effectiveness
+requires_skills:
+  - audit-skill
+requires_auth: []
+
+input_contract:
+  consumes:
+    - source: worklist YAML produced by `audit-skill-oracle.py act-on`
+      schema: oracle/SPEC.md §"Finding"
+      required_fields: [skill, code, reproducer.type, reproducer.command, description]
+
+output_contract:
+  produces:
+    - artifact: git commits with VERIFIED fixes (one per finding, grouped by skill)
+    - artifact: tracker update with triage_status=FIXED on closed findings
+    - artifact: summary table with VERIFIED/FIX-INEFFECTIVE/STALE-PRE counts

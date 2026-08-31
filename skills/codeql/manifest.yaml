@@ -1,0 +1,38 @@
+id: codeql
+type: skill
+description: "Scans codebases for security vulnerabilities using CodeQL interprocedural data flow and taint tracking, with database building, data extension generation, and SARIF result processing."
+category: security
+
+requires_tools:
+  - AskUserQuestion
+  - Bash
+  - Edit
+  - Glob
+  - Grep
+  - Read
+  - Write
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    target:
+      type: string
+      required: false
+      description: "Repo path or language to scan"
+  scope_from: argument
+output_contract:
+  produces: [codeql_database, sarif_results, findings_report]
+  format: sarif  # primary artifact is $OUTPUT_DIR/results/results.sarif; SKILL.md emits a markdown summary as a secondary surface
+
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "10-25"
+
+preconditions:
+  - codeql CLI installed and on PATH
+guardrails: []
+threat_model: writes_local

@@ -1,0 +1,18 @@
+id: manifest_metrics
+type: hook
+event: none
+matcher: "none"
+if_condition: null
+action_type: logger
+description: "Shared logging utility for manifest layer metrics. Not a registered hook — imported by other hooks as a library."
+enforces: []
+blocks_patterns: []
+injects: null
+modifies: null
+depends_on_files: []
+depends_on_env:
+  - CLAUDE_SESSION_ID
+exit_codes:
+  "0": "n/a (library, not executed directly)"
+output_format: json
+incidents: []

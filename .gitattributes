@@ -1,0 +1,14 @@
+# Normalize all text files to LF in the index AND the working tree on every
+# platform. A CRLF checkout on Windows would break the bash launchers
+# (hooks/run-hook, bin/statusline-launcher, install.sh) the next time the
+# repo is cloned as ~/.claude on macOS/Linux — `\r` after the shebang is a
+# hard failure. LF works everywhere (Git Bash, pwsh, and every editor here).
+* text=auto eol=lf
+
+# Windows batch files are the one format that REQUIRES CRLF (none tracked
+# today; this protects future additions).
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Efficacy-harness fixtures are byte-hashed (run_live.py); pin LF for stable cross-platform hashes.
+**/harness/*.json text eol=lf

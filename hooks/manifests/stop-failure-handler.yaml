@@ -1,0 +1,17 @@
+id: stop-failure-handler
+type: hook
+event: StopFailure
+matcher: ""
+if_condition: null
+action_type: fixer
+description: "Handles failures during session stop -- logs errors and attempts recovery."
+enforces: []
+blocks_patterns: []
+injects: null
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "Failure handled"
+output_format: plaintext
+incidents: []

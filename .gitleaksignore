@@ -1,0 +1,8 @@
+# Reviewed-and-cleared gitleaks fingerprints.
+#
+# Add ONE LINE PER FINDING (commit:path:rule:line), never a path glob — a glob
+# silently drops future files in that path from the gate.
+#
+# The test fixtures under hooks/test-hooks/ contain intentionally fake,
+# key-shaped strings so the redaction and prompt-scanning hooks can be tested.
+# If the gate flags one, verify it is still a fixture, then add its fingerprint.

@@ -1,0 +1,22 @@
+name: Fix phase searches for related patterns before fixing
+skill: pr-fix
+trigger: "/pr-fix (fixing a code error, repo is indexed)"
+
+must_happen:
+  - Call index_status before codebase-memory search
+  - If indexed, call search_code for variants of the diagnosed pattern
+  - Use trace_call_path to understand affected callers
+  - Inspect each result and fix every confirmed instance of the same root cause
+
+must_not_happen:
+  - Ignore confirmed variants returned by code search
+  - Modify lookalikes without reading and confirming the same root cause
+  - Call search_code without checking index status
+  - Skip pattern search when index is available
+
+output_contains:
+  - Pattern search results or "not indexed" skip note
+
+guards:
+  - index_status called before search_code
+skip_ab: false

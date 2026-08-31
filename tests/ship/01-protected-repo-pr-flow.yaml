@@ -1,0 +1,44 @@
+name: Ship changes in protected repo through full PR lifecycle
+skill: ship
+trigger: "/ship (with uncommitted changes in a protected repo like mcp-servers or claude-config)"
+
+must_happen:
+  - Detect repo and fork target from git remote URL
+  - Classify current branch (main, feature branch continuing pending work, or stale/unrelated)
+  - If on main or on an unrelated branch, create a fresh feature branch off origin/main
+  - Verify branch with git branch --show-current (Git Bash silent-failure check)
+  - Stage files explicitly (never git add -A or git add .)
+  - Generate or use provided commit message in conventional <type>: <description> form
+  - Commit with heredoc
+  - Push with -u origin <branch>
+  - Create PR via gh pr create with --head <branch> in a standalone Bash call
+  - Inspect effective required-status check contexts on main
+  - If required checks are absent or ambiguous, wait for applicable PR checks to be terminal-green
+  - Run pr-merge-verified.py in default mode so queue-versus-standard behavior is discovered and recovered centrally
+  - Report PR URL and terminal MERGED state
+
+must_not_happen:
+  - Commit directly to main on a protected repo
+  - Use git add -A or git add .
+  - Chain gh pr create and gh pr merge in one Bash call
+  - Use --admin on merge
+  - Arm auto-merge before terminal-green when effective required checks are absent or ambiguous
+  - Hand-roll gh pr merge commands outside pr-merge-verified.py
+
+output_contains:
+  - PR URL
+  - "MERGED"
+
+guards: []
+skip_ab: true
+
+deterministic:
+- body_contains:
+  - All repos require feature branches
+  - $CONFIG_ROOT/bin/pr-merge-verified.py
+  - .parameters.required_status_checks[]?.context
+  - terminal `MERGED`
+  - bounded registration window
+- body_not_contains:
+  - direct-push
+  - push confirmation for unprotected

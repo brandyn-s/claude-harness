@@ -1,0 +1,11 @@
+fixture: shell-only-skill
+required_codes:
+  - C3   # scripts/ contains .sh-only — must rewrite in Python
+forbidden_codes:
+  - C1   # no Python scripts, so no POSIX-import problem
+  - C4   # no Python source, so no $HOME-literal problem
+  - B1   # has tests/ (built into the fixture)
+notes: |
+  Tests C3 (sh-only scripts). Forbids C1 and C4 to confirm those
+  Python-specific checks don't false-fire on a skill with no .py
+  scripts.

@@ -1,0 +1,18 @@
+id: post-failure-guide
+type: hook
+event: PostToolUseFailure
+matcher: ""
+if_condition: null
+action_type: injector
+description: "Injects diagnostic guidance after tool failures to prevent guess-and-fix cycles."
+enforces:
+  - diagnose-before-fix
+blocks_patterns: []
+injects: failure_guidance
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "Guidance injected"
+output_format: plaintext
+incidents: []

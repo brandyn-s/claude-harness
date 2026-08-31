@@ -1,0 +1,34 @@
+id: variant-analysis
+type: skill
+description: "Find similar vulnerabilities and bugs across codebases using iterative pattern generalization with CodeQL/Semgrep."
+category: security
+requires_tools:
+  - Bash
+  - Read
+  - Grep
+  - Glob
+  - AskUserQuestion
+requires_topics: []
+requires_rules: []
+requires_skills:
+  - semgrep
+  - codeql
+requires_auth: []
+input_contract:
+  parameters:
+    pattern:
+      type: string
+      required: false
+      description: "Vulnerability pattern or CVE to find variants of"
+  scope_from: argument
+output_contract:
+  produces: [variant_report, match_table, confidence_classification, hunt_ndjson]
+  format: markdown_report
+side_effects: [appends_hunt_history_jsonl]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "10-30"
+preconditions:
+  - codebase_accessible
+guardrails: []
+threat_model: read_only

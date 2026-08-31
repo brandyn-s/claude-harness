@@ -1,0 +1,32 @@
+id: sarif-parsing
+type: skill
+description: "Parse and process SARIF files from static analysis tools -- filtering, deduplication, format conversion, and CI/CD integration."
+category: security
+requires_tools:
+  - Bash
+  - Read
+  - Glob
+  - Grep
+  - AskUserQuestion
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+input_contract:
+  parameters:
+    sarif_path:
+      type: string
+      required: true
+      description: "Path to the SARIF file to parse"
+  scope_from: argument
+output_contract:
+  produces: [findings_table, dedup_results, severity_breakdown]
+  format: markdown_report
+side_effects: []
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "3-10"
+preconditions:
+  - sarif_file_exists
+guardrails: []
+threat_model: read_only

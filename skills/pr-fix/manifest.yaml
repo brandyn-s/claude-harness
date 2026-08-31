@@ -1,0 +1,51 @@
+id: pr-fix
+type: skill
+description: "Discover and repair multi-repository PR/CI failures, merge-queue drops, conflicts, stale branches, dirty trees, and orphaned worktrees. Uses isolated repair worktrees, evidence-gated classification, and explicit destructive-action scopes."
+category: shipping
+
+requires_tools:
+  - AskUserQuestion
+  - Bash
+  - Edit
+  - Glob
+  - Grep
+  - Read
+  - Write
+  - mcp__codebase-memory-mcp__trace_call_path
+  - mcp__codebase-memory-mcp__index_status
+  - mcp__codebase-memory-mcp__search_code
+requires_topics: []
+requires_rules:
+  - git-hygiene
+  - diagnose-before-fix
+  - platform-constraints
+  - worktree-by-default
+  - security-confirmations
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    target:
+      type: string
+      required: false
+      description: "Optional: org/repo#number for direct fix, --iterate to loop, --axis <name> for single-axis fast-path (e.g. --axis failing scans only axis 1), or omit for discovery"
+  scope_from: argument
+output_contract:
+  produces: [discovery_report, fix_commits, ci_report]
+  format: markdown_report
+
+side_effects: [writes_files, creates_commits, pushes_to_remote, creates_pr, merges_pr, deletes_branches, removes_worktrees, modifies_repo_settings]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "10-30"
+
+preconditions:
+  - "gh CLI authenticated with repo access"
+  - "Writable remote resolution available; selected repositories may be cloned on demand"
+# guardrails: operational constraints (read-before-fix, never-auto-merge-others,
+# never-rebase-others, branch-cleanup-confirmation, dirty-tree-bucket-match, etc.)
+# are documented inline in SKILL.md § Guardrails as procedure constraints rather
+# than externalized as hook integrations.
+guardrails: []
+threat_model: destructive

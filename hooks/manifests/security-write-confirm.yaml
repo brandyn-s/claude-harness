@@ -1,0 +1,21 @@
+id: security-write-confirm
+type: hook
+event: PreToolUse
+# Broad registration is intentional: hosted connector IDs can change. The hook
+# classifies known families/operations after receiving the call.
+matcher: "mcp__.*"
+if_condition: null
+action_type: injector
+description: "Partially detects known security/external MCP writes and emits an advisory systemMessage. It neither prompts nor blocks and is not evidence of human consent."
+enforces:
+  - security-confirmations
+blocks_patterns: []
+injects: "advisory systemMessage naming the classified operation and a bounded parameter preview"
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "allow (recognized writes may receive an advisory; no permissionDecision is emitted)"
+output_format: json
+incidents:
+  - "2026-07-31 operator decision removed permissionDecision: ask because of prompt friction; all same-shape advisories in the prior sample still executed."

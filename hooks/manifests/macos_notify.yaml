@@ -1,0 +1,20 @@
+id: macos_notify
+type: hook
+event: none
+matcher: null
+if_condition: null
+action_type: advisory
+description: "Library module (no standalone execution): macOS Notification Center banners via osascript argv (quote/newline-injection safe). Strict no-op off darwin. Imported by task-completed.py (BLOCK path always, pass path behind CLAUDE_NOTIFY_TASKS) and teammate-idle.py (on idle)."
+enforces: []
+blocks_patterns: []
+injects: null
+modifies: null
+depends_on_files: []
+depends_on_env:
+  - CLAUDE_NOTIFY
+  - CLAUDE_NOTIFY_TASKS
+  - CLAUDE_NOTIFY_STOP
+exit_codes:
+  "0": "n/a — imported module; notify() returns bool, never raises, never writes stdout/stderr"
+output_format: none
+incidents: []

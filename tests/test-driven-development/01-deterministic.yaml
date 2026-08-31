@@ -1,0 +1,18 @@
+skill: test-driven-development
+name: test-driven-development deterministic invariants
+trigger: /test-driven-development (when writing features)
+must_happen:
+- 'Iron law: NO PRODUCTION CODE WITHOUT FAILING TEST FIRST'
+- RED-GREEN-REFACTOR cycle enforced
+- Legacy code uses characterization-test escape hatch
+deterministic:
+- frontmatter_equals:
+    name: test-driven-development
+- body_contains:
+  - RED
+  - GREEN
+  - REFACTOR
+  - reachable through production preconditions
+- body_matches:
+  - NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
+- examples_count: '>=2'

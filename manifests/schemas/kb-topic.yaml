@@ -1,0 +1,17 @@
+# Knowledge Base Topic Manifest Schema
+# Extracted from frontmatter + structural analysis of topic pages
+
+kb_topic:
+  id: string              # filename without .md
+  type: "kb_topic"
+  title: string
+  stage: enum             # seedling, budding, evergreen
+  tags: list[string]
+  category: enum          # moc, absorb-profile, research, architecture, operations, patterns
+  created: string         # ISO date
+  updated: string         # ISO date
+  entry_count: integer    # number of H2 entries
+  links_to: list[string]  # outbound wiki-links (other topic IDs)
+  linked_from: list[string]  # inbound (computed at compile time)
+  word_count: integer     # approximate size
+  staleness_days: integer # days since last update (computed)

@@ -1,0 +1,88 @@
+name: "garden deterministic contract"
+skill: garden
+trigger: "/garden (weekly knowledge-base curation; 'audit' for dry-run)"
+
+# SCHEMA REMINDERS (see tests/README.md):
+#  - each `deterministic:` item needs EXACTLY ONE key; rationale goes in comments
+#  - `body_contains` does NOT see frontmatter — use frontmatter_* for that
+
+must_happen:
+  - Step 1 branches from origin/main before inventorying
+  - Step 3 auto-resolves every check with no human-review bucket
+  - Step 5 pushes a single PR
+
+deterministic:
+  # --- The DEFINING contract, and a standing user directive
+  # (feedback_garden-full-automation.md): /garden must auto-resolve every check.
+  # If a future edit reintroduces a "human review needed" bucket, that violates an
+  # explicit instruction — this is the single most important thing to pin here.
+  #
+  # NOTE the two surfaces: the phrase 'No "human review needed" bucket' lives in
+  # frontmatter when_to_use (line 6) and is therefore INVISIBLE to body_contains —
+  # this fixture's first draft failed on exactly that. Pin BOTH surfaces.
+  - frontmatter_contains:
+      when_to_use: 'No "human review needed" bucket'
+  # Body-side statements of the same contract: the report has no such section, and
+  # the Success Criteria assert the bucket does not exist in the output.
+  - body_contains:
+      - 'No "human review" section'
+      - 'no "human review" bucket exists in the output'
+  # And the anti-pattern rationale — flag-for-human-review accumulates noise.
+  - body_contains: '"flag for human review" buckets'
+
+  # --- The one deliberate exception to full automation. Hub-splits are surfaced
+  # (and since #1674, appended to a dedup backlog), never auto-fixed — splitting
+  # a mega-topic is a judgment call. Pin the INVARIANT, not the heading text:
+  # #1674 renamed the heading ("surface loudly (no auto-fix)" ->
+  # "append to hub-split-candidates.md (dedup) + surface") while keeping the
+  # no-auto-fix rule, so the old heading-literal is stale but the rule is live.
+  - body_contains: "NOT a garden auto-fix"
+  - body_contains: "Do not attempt the split in-run"
+
+  # --- Orphan adoption must keep its no-fit floor, or every orphan gets forced
+  # into a poorly-matched MoC instead of _moc-uncategorized.
+  - body_contains: "no-fit floor"
+
+  # --- Two scope boundaries that were deliberately moved OUT of garden.
+  # Harness pruning went to /harness-prune (2026-06-11, B8c/F2); the staleness
+  # check was DROPPED rather than kept as an unresolvable finding.
+  # 2026-07-29: both dispositions' RATIONALE moved to references/procedures.md
+  # ("Dropped and relocated checks") — their checks do not run, so the history
+  # was reference-grade while SKILL.md was over the C1 length cap. These
+  # assertions now pin the SCOPE BOUNDARY (which must stay visible in SKILL.md,
+  # or a future run silently re-adds the check) rather than the prose that
+  # explained it. Same fixture intent, wording decoupled from the narrative.
+  - body_contains: "/harness-prune"
+  - body_contains: "Stale Topics"
+
+  # --- Step skeleton. Step 4 = report, Step 5 = push; the audit mode short-circuits
+  # before the writes. A dropped Step header means a phase silently stops running.
+  # (Step 1 renamed 2026-08-22: garden ships from a feature branch, so it cuts
+  # garden/<date> from origin/main and never syncs local main.)
+  - body_contains:
+      - "## Step 1: Branch from origin/main"
+      - "## Step 2: Inventory"
+      - "## Step 3: Auto-resolve every check"
+      - "## Step 4: Output the report"
+      - "## Step 5: Push"
+
+  # --- Both analyzer scripts must exist. analyze.py is the detection engine whose
+  # unit tests CI already runs (pytest skills/garden/tests/); flip_status.py performs
+  # the STATUS-marker resolution flips.
+  - script_exists:
+      - scripts/analyze.py
+      - scripts/flip_status.py
+
+  # --- analyze.py must stay invocable — an import-time break is a silent whole-skill
+  # outage that the pytest suite would catch but only if collection succeeds.
+  - script_runs: "python3 scripts/analyze.py --help"
+
+  # --- model override: garden is mechanical curation, deliberately on sonnet.
+  - frontmatter_equals:
+      model: sonnet
+
+  # --- Both references must resolve (procedures.md carries the per-check
+  # auto-resolution procedures; examples.md the worked runs).
+  - ref_resolves:
+      - procedures.md
+      - examples.md

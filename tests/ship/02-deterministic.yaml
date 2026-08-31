@@ -1,0 +1,43 @@
+name: ship deterministic invariants
+skill: ship
+trigger: "/ship <commit-message>"
+
+must_happen:
+  - Feature-branch and PR flow with fork-target detection
+  - Branch verification immediately before commit (Git Bash race)
+  - Marketplace sync for claude-config + touched skills/hooks/rules
+  - Explicit file staging (no `git add -A`)
+  - Security gate for mcp-servers / mcp-infra / compliance-access-framework
+  - PR creation followed by verified merge-helper execution
+
+deterministic:
+  - frontmatter_equals:
+      name: ship
+  - frontmatter_matches:
+      description: "commit"
+  - body_contains:
+      - "Step 1"
+      - "Step 2"
+      - "Step 5"
+      - "git branch --show-current"
+      - "Failure Paths"
+      - "actual required check contexts"
+      - "rules/branches/main"
+      - "terminal-green"
+      - ".parameters.required_status_checks[]?.context"
+      - "$CONFIG_ROOT/bin/pr-merge-verified.py"
+      - "--queue-only"
+      - "terminal `MERGED`"
+  # The skill *forbids* these — so we expect the directive substrings
+  # ("Never `git add -A`", "no `git add -A`") to be present but not used unconditionally.
+  - body_matches:
+      - "(Never|no|do not) `?git add -A`?"
+      - "(Never|no) `?--no-verify`?|don't use `?--no-verify`?"
+  - body_not_contains:
+      - "Do NOT wait for checks."
+      - "direct-push"
+      - "push confirmation for unprotected"
+  - ref_resolves:
+      - failure-paths.md
+  - references_resolve: true
+  - examples_count: ">=3"

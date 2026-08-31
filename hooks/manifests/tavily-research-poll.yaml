@@ -1,0 +1,18 @@
+id: tavily-research-poll
+type: hook
+event: PostToolUse
+matcher: "tavily_research"
+if_condition: null
+action_type: fixer
+description: "Polls Tavily research status until completion and injects results."
+enforces:
+  - web-search-preference
+blocks_patterns: []
+injects: null
+modifies: tool_output
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "Research complete or polling scheduled"
+output_format: json
+incidents: []
