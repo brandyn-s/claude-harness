@@ -160,7 +160,7 @@ full tier is the pre-PR check.
    a repo/clone that CI does not have, pytest will run it during collection and
    fail the entire job. Name it `verify_*.py` or `check_*.py`, and have it print a
    SKIPPED message and `exit 0` when its prerequisites are absent.
-   (2026-08-12: a separate skill (not included in this export)
+   (2026-08-12: `skills/software-security-review/scripts/test_preflight_checks.py`
    did exactly this — module-level execution plus a required knowledge-base clone
    — and reddened the lane with `FileNotFoundError` during collection while the
    full local tier was green.)
@@ -190,7 +190,7 @@ change, so a `bin/`/`scripts/` edit is the least-gated thing you can push.
 **Why an aggregator instead of a list:** selecting a subset from memory is the
 documented failure mode, and it has now recurred three times.
 
-- 2026-06-14 a separate skill (not included in this export) #1276 — **3 CI cycles**. Only `validate-skills` +
+- 2026-06-14 `/lab-review` #1276 — **3 CI cycles**. Only `validate-skills` +
   `audit-skill` ran locally; the drift gate and cross-chain validator are separate
   Matrix-validate steps.
 - 2026-07-26 — **1 cycle**. `validate-skill-chains.py` was run WITHOUT `--strict`,
@@ -276,7 +276,7 @@ Full writeup: `knowledge-base/topics/skill-format-effectiveness.md`.
 - **Judgment-heavy skills** — classification, narrative generation,
   sequential orchestration with mandatory steps, multi-phase planning.
   Examples: `/distill`, `/capture`, `/retro`, `/triage`, `/superplan`,
-  a separate skill (not included in this export), `/fp-check`. **Consider constitutional format** —
+  `/investigate`, `/fp-check`. **Consider constitutional format** —
   especially if the skill may run on Haiku.
 
 **High-leverage skill interventions (in all cases):**

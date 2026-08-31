@@ -285,7 +285,7 @@ The platform-specific gotchas that recur here stay ambient below.
 
     ```
     ImportError: cannot import name 'PYTHON' from 'conftest'
-      (/repo/a separate skill (not included in this export))   # ← wrong conftest entirely
+      (/repo/skills/docgen/tests/conftest.py)   # ← wrong conftest entirely
     ```
 
     **The tell is the timing, not the message: 42 "errors" in 2.15 seconds.** No

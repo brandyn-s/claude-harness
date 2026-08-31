@@ -46,7 +46,7 @@ Three phases: **Audit existing** (backward-looking) -> **Gather new** (forward-l
 ## Scope guard
 
 Before proceeding, verify the request is in-scope. If the user is asking about:
-- **Internal team messages** (Slack threads, Linear issues, Confluence pages) → redirect to a separate skill (not included in this export)
+- **Internal team messages** (Slack threads, Linear issues, Confluence pages) → redirect to `/gather-internal-intel`
 - **Patterns from the current session** → redirect to `/distill` or `/capture`
 - **Specific repo evaluation** (not discovery of patterns) → redirect to `/evaluate-repos`
 - **Community repo discovery** (find repos, not patterns/tips) → redirect to `/gather-repos`

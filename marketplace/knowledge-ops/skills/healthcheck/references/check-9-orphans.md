@@ -24,7 +24,7 @@ and not referenced by any skill — delete or re-register."
 
 **Why the cross-reference matters**: #548 deleted `sync-repo.py` and
 `sync-knowledge.py` as "orphan hook scripts" because they were unregistered,
-but both were skill-invoked CLI utilities actively consumed by a separate skill (not included in this export),
+but both were skill-invoked CLI utilities actively consumed by `/pull-repos`,
 `/capture`, `/recall`, `/retro`. Skill-body cross-reference would have
 caught the misdiagnosis.
 

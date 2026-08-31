@@ -115,7 +115,7 @@ EXCEPT read_operations_against_security_tools
 
 EXCEPT operations_already_authorized_by_a_skill_workflow
   # Skills that have their own confirmation step (e.g., /triage Phase
-  # 5 actioning, a separate skill (not included in this export) IMMEDIATE actions) keep those steps —
+  # 5 actioning, /investigate IMMEDIATE actions) keep those steps —
   # they are skill-local and were NOT part of the 2026-07-31 revert.
   # Do not strip them to "match" this rule's new posture.
 
@@ -182,7 +182,7 @@ a manual AskUserQuestion — see PROHIBITED silently_re_tightening_this_rule_bac
 
 Referenced by:
 - CLAUDE.md ("Write operations require confirmation")
-- a separate skill (not included in this export) (requires_rules)
+- skills/investigate/manifest.yaml (requires_rules)
 - skills/triage/manifest.yaml (requires_rules)
 - skills/bulk-api-script/SKILL.md (bulk pattern)
 

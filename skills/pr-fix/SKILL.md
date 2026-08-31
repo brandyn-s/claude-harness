@@ -60,7 +60,7 @@ If any reference is stale, read the `origin/main` copy
 and say in the report which files were stale. A stale `SKILL.md` cannot be
 repaired mid-run — its body is already in context — so re-invoke after
 deploying. Ported from the equivalent gates in `/healthcheck` (Check 0),
-`/audit-architecture` (Phase 0), and a separate skill (not included in this export)
+`/audit-architecture` (Phase 0), and `/software-security-review`
 (`preflight.py` check 0).
 
 Measured 2026-08-25: 8 of 20 `skills/pr-fix/` files were stale on this host

@@ -9,7 +9,7 @@ can decline them** — that second axis is the one that matters.
 |---|---|---|
 | **Hooks** (73) | on every matching tool call | **No** — enforced by the runtime |
 | **Rules** (38) | always, in context | Yes (they are text) |
-| **Skills** (83) | on invocation | Yes |
+| **Skills** (82) | on invocation | Yes |
 | **Agents** | on dispatch | Yes |
 | **Reference docs** | on demand | Yes |
 
@@ -103,7 +103,7 @@ that transfers.
 ```
 rules/            always-loaded contracts (+ incidents/, manifests/)
 hooks/            enforcement (+ test-hooks/, session_start_modules/, staged/)
-skills/           invocable procedures (83)
+skills/           invocable procedures (82)
 agents/           subagent definitions
 docs/rule-reference/   long-form rationale, on demand
 platform-rules/   host overlays (macOS / Windows)

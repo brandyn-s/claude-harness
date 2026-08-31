@@ -186,8 +186,8 @@ GUARD pattern="a DISCOVERY step whose target set is a LITERAL LIST you typed" �
   # repo absent from the list). Same run, a repo-map-driven worktree scan found 15 of
   # 41 real directories. The skill states "never hardcode discovery lists" for PR
   # discovery ONLY — which is precisely why PR discovery was correct and the other two
-  # axes were not. Prior precedents, same mechanism: a separate skill (not included in this export) #1082, /pr-fix #1085
-  # (a 15-repo loop missed 31 of 43 authored PRs), a separate skill (not included in this export) Stream 1 — all
+  # axes were not. Prior precedents, same mechanism: /pull-repos #1082, /pr-fix #1085
+  # (a 15-repo loop missed 31 of 43 authored PRs), /weekly-update Stream 1 — all
   # recorded in `skills/_shared/repo-map.md` and the KB, NEITHER of which loads
   # ambiently. That non-delivery is why this GUARD is here and not only there.
 

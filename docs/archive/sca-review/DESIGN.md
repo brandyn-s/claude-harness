@@ -43,12 +43,12 @@ codebase for truth. Output is a diff file of proposed changes.
 ## Pipeline Position
 
 ```
-a separate skill (not included in this export) --> a separate skill (not included in this export) --> a separate skill (not included in this export) --> submission
+/stig-assess --> /stig-verify --> /sca-review --> submission
   (create)        (ground truth)    (SCA simulation)
 ```
 
-Key distinction: a separate skill (not included in this export) asks "is this finding truthful?" (grounding).
-a separate skill (not included in this export) asks "would an SCA reviewer accept this finding?" (quality).
+Key distinction: `/stig-verify` asks "is this finding truthful?" (grounding).
+`/sca-review` asks "would an SCA reviewer accept this finding?" (quality).
 
 > **Required context:** Read `~/.claude/skills/_shared/stig-common.md` for target loading and CKLB handling rules.
 
@@ -121,7 +121,7 @@ a separate skill (not included in this export) asks "would an SCA reviewer accep
 > the scripts ship.
 
 ```bash
-SCRIPTS="$HOME/.claude/a separate skill (not included in this export)"
+SCRIPTS="$HOME/.claude/skills/sca-review/scripts"
 CKLB="{cklb_full_path}"
 STEM="$(basename "$CKLB" .cklb)"
 
@@ -141,7 +141,7 @@ The extract script produces clusters sorted by priority:
    NixOS host controls for switch/camera/radio SRG requirements
 3. **CAT I Open** (CRITICAL)
 4. **Copy-Paste NaF Divergent** (HIGH) — SCA rejection risk
-5. **Prior SUSPICIOUS** (HIGH) — from a separate skill (not included in this export)
+5. **Prior SUSPICIOUS** (HIGH) — from /stig-verify
 6. **Copy-Paste Open** (MEDIUM) — shared root cause, acceptable
 7. **Remaining Open** (MEDIUM)
 8. **NaF spot check** (LOW)
@@ -408,9 +408,9 @@ Offer the user:
 ## Examples
 
 ```
-a separate skill (not included in this export) STIG_Assessment_Mission_Computer.cklb
-a separate skill (not included in this export) SRG_Assessment_Silvus_Radio.cklb --repo ~/path/to/psm
-a separate skill (not included in this export) SRG_Assessment_Cradlepoint_R1900_NDM.cklb
+/sca-review STIG_Assessment_Mission_Computer.cklb
+/sca-review SRG_Assessment_Silvus_Radio.cklb --repo ~/path/to/psm
+/sca-review SRG_Assessment_Cradlepoint_R1900_NDM.cklb
 ```
 
 ## Success Criteria

@@ -8,7 +8,7 @@ set -e
 #
 # Usage:
 #   git clone https://github.com/brandyn-s/claude-harness.git
-#   cd claude-config
+#   cd claude-harness
 #   bash install.sh
 
 BLUE='\033[0;34m'

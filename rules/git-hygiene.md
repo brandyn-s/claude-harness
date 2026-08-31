@@ -150,5 +150,5 @@ GUARD pattern="local is behind origin/main, so copy the edited files onto main":
 # `worktree-enforcement`, `post-merge-sync`) cover deterministic subsets only;
 # behavioral checks remain required where a hook cannot prove intent, remote or
 # deployment state, or process freshness.
-# Skills: `/work`, `/ship`, `/pr-fix`, a separate skill (not included in this export), a separate skill (not included in this export).
+# Skills: `/work`, `/ship`, `/pr-fix`, `/cross-repo`, `/pull-repos`.
 # Detail and recovery procedures: docs/rule-reference/git-hygiene.md

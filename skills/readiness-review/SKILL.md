@@ -74,7 +74,7 @@ Shape decides which specialist runs and which pillars carry weight. Read
 | **Full-stack** | both a UI AND an `api/`/server dir | **BOTH** — run each, merge worklists, never fold one into the other |
 
 Dispatch the specialist(s) and collect their pillar findings + worklists. Do NOT
-re-review what a specialist owns (no duplication; a separate skill (not included in this export) owns the
+re-review what a specialist owns (no duplication; `/lab-review` owns the
 design-system/a11y pillars, `/service-review` owns durability/observability).
 
 ## Step 3 — Capability-first: validate the core output against an independent oracle
@@ -98,7 +98,7 @@ grade capability **AMBIGUOUS**, not A.
 
 ## Step 4 — The SME-trust gate: boot it and drive it LIVE
 
-`/service-review` and a separate skill (not included in this export) each run their live sweep; this step is the
+`/service-review` and `/lab-review` each run their live sweep; this step is the
 *capability* live-drive the specialists don't own: **drive the real end-to-end
 SME workflow against the running tool with real domain data.** (PP: login →
 upload the real ShipMo3D file → evaluate operability → export — 11/11 live steps,
@@ -158,5 +158,5 @@ A (0 crashes, fail-closed), … → **go/no-go: ready for supervised pilot; one 
 - Make code changes — it produces the worklist + verdict; the fix pass is separate and confirmed
 - Rebuild a tool — Step 1's "rebuild" verdict early-exits to /superplan
 - Deploy / productionize infrastructure — that is the mcp-productionization pipeline / lab-deploy
-- Re-review what a specialist owns — a separate skill (not included in this export) owns frontend design/a11y; /service-review owns backend durability/observability
+- Re-review what a specialist owns — /lab-review owns frontend design/a11y; /service-review owns backend durability/observability
 - Generic security code review — use /differential-review

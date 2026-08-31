@@ -119,7 +119,7 @@ Step-1 baseline read. Standard routes:
   the three vendor reports' `## Handoffs` sections** so this lands instead of
   evaporating.
 - `[SECURITY-ADVISORY]` — a new nonzero GHSA on a vendor SDK/repo → route to the
-  org's security-alert intake (a separate skill (not included in this export)), do not dead-end in the report.
+  org's security-alert intake (`/security-alerts`), do not dead-end in the report.
 
 ## 6. Adversarial check (before recommending a removal)
 

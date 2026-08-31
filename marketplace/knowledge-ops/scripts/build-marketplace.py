@@ -25,10 +25,10 @@ from pathlib import Path
 
 CLAUDE_DIR = Path(__file__).resolve().parent.parent
 MARKETPLACE_DIR = CLAUDE_DIR / "marketplace"
-MARKETPLACE_NAME = "claude-config"
+MARKETPLACE_NAME = "claude-harness"
 PLUGIN_AUTHOR = {
-    "name": "the maintainers",
-    "url": "https://github.com/example-org",
+    "name": "Brandyn Schult",
+    "url": "https://github.com/brandyn-s",
 }
 MARKETPLACE_OWNER = PLUGIN_AUTHOR
 

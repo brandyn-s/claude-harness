@@ -252,7 +252,7 @@ the same run. Then:
 ##                  where it was codified. Makes OUR-side drift diffable run-over-run
 ##                  instead of living only in git diffs of references/)
 ## Handoffs        (target-skill | finding | source — e.g. [cross-vendor] Vertex
-##                  EOL dates -> gather-claude; [SECURITY-ADVISORY] -> a separate skill (not included in this export))
+##                  EOL dates -> gather-claude; [SECURITY-ADVISORY] -> /security-alerts)
 ## Archived        (acted-on findings)
 ## Sources Log     (per-channel last-successful-fetch date + marker check; skips logged;
 ##                  probe identity evidence — version/fingerprint/created per pin)

@@ -66,10 +66,10 @@ known_phantom:
   # the same PR that repairs its consumers:
   #
   # - name: mcp__confluence-fedramp__          # replaced_by: mcp__confluence__
-  #     consumers: a separate skill (not included in this export){SKILL.md:17,203, manifest.yaml:29}
+  #     consumers: skills/gather-internal-intel/{SKILL.md:17,203, manifest.yaml:29}
   # - name: mcp__036e0c74-1e0e-4bce-ad71-2a678d79b204__   # replaced_by: mcp__slack-user__
   #     Windows-era claude.ai Slack connector GUID; retired, absent on macOS.
-  #     consumers: a separate skill (not included in this export) (frontmatter + body)
+  #     consumers: skills/gather-internal-intel/SKILL.md (frontmatter + body)
   # - name: mcp__exa__web_search_advanced_exa
   #     replaced_by: mcp__exa__web_search_exa (in-query `category:`) OR
   #     mcp__firecrawl__firecrawl_search (domain filters / operators). NOT a

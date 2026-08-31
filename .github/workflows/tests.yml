@@ -41,5 +41,35 @@ jobs:
       - name: Self-test the known-failing gate
         run: python3 scripts/run-tests.py --selftest
 
+      # Restores the gate the source repo had and this export lost. Its step name
+      # there was literally "Validate manifests (dangling refs, dangling routes,
+      # missing sources)" -- and dropping it is why 17 dangling routes were live in
+      # hooks/skill-rules.json with nothing complaining.
+      - name: Validate the manifest graph
+        run: python3 manifests/compile.py --root . --check --strict-semantic --no-reindex
+
+      # Prove that gate can fail. A validator nobody has watched reject anything is
+      # a hypothesis; this one is only reachable by running it deliberately.
+      - name: Prove the manifest gate fires
+        run: |
+          set -euo pipefail
+          cp hooks/skill-rules.json /tmp/sr.bak
+          python3 - <<'EOF'
+          import json
+          p = "hooks/skill-rules.json"
+          d = json.load(open(p, encoding="utf-8"))
+          d["rules"].append({"pattern": "zzz-control", "skill": "no-such-skill-control",
+                             "agent": None, "desc": "drift control", "priority": "low"})
+          json.dump(d, open(p, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
+          EOF
+          if python3 manifests/compile.py --root . --check --no-reindex >/dev/null 2>&1; then
+            cp /tmp/sr.bak hooks/skill-rules.json
+            echo "::error::manifest gate did NOT reject a dangling route - it is vacuous"
+            exit 1
+          fi
+          cp /tmp/sr.bak hooks/skill-rules.json
+          python3 manifests/compile.py --root . --check --no-reindex >/dev/null
+          echo "manifest gate fires on a dangling route, and is clean after restore"
+
       - name: Run the suite
         run: python3 scripts/run-tests.py --timeout 600

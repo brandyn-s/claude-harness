@@ -7,7 +7,7 @@ How the five gather skills interrelate, when to run each, and what context they 
 | Skill | Domain | Sources | Execution Mode | Approval |
 |-------|--------|---------|---------------|----------|
 | `/gather-intel` | External community patterns | Reddit, HN, GitHub, blogs | Main thread | User approval required |
-| a separate skill (not included in this export) | Internal team learnings | Slack, Linear, Confluence | Main thread | User approval required |
+| `/gather-internal-intel` | Internal team learnings | Slack, Linear, Confluence | Main thread | User approval required |
 | `/gather-repos` | Community config repos | GitHub structural search | Main thread + Explore subagents | User approval for eval |
 | `/gather-claude` | Anthropic upstream changes | GitHub issues, CHANGELOG, docs | Main thread | User approval required |
 | `/gather-research` | Academic research frontier | arXiv, conferences, research blogs | Main thread | User approval required |
@@ -19,7 +19,7 @@ For a comprehensive intelligence refresh, run in this order:
 1. **`/gather-claude`** — first, because upstream changes may obsolete community workarounds
 2. **`/gather-research`** — second, because research findings inform what to look for in community
 3. **`/gather-intel`** — third, consumes reports from 1 and 2 for cross-reference
-4. **a separate skill (not included in this export)** — any time, independent of the others
+4. **`/gather-internal-intel`** — any time, independent of the others
 5. **`/gather-repos`** — any time, independent of the others
 
 Skills 1-3 form a pipeline where each skill's output enriches the next. Skills 4-5 are independent and can run in any order.
@@ -40,7 +40,7 @@ Skills 1-3 form a pipeline where each skill's output enriches the next. Skills 4
 - If gather-intel ran first, gather-research notes "community-first run" in metadata
 
 ### No cross-dependency
-- a separate skill (not included in this export) and `/gather-repos` are fully independent
+- `/gather-internal-intel` and `/gather-repos` are fully independent
 - They don't consume reports from other gather skills
 - They can run in any session without prerequisites
 

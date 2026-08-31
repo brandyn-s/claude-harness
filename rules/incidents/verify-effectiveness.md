@@ -461,7 +461,7 @@ byte-identical HTML and PNG hashes.
 
 ### 2026-07-26 API-fact checker: 29% precision, then it flagged its own corrections
 
-Built a separate skill (not included in this export) to stop a real drift class: the
+Built `skills/cc-monitor/scripts/check_api_facts.py` to stop a real drift class: the
 same API parameter contract was asserted in ~15 files across 4 surfaces in 2 repos,
 nothing compared them, and two surfaces ended up asserting OPPOSITE things about the
 `usage_report/claude_code` date format. Two design failures, both found only by
@@ -606,7 +606,7 @@ Six `mcp__*` tool-name prefixes in `~/.claude` pointed at servers that no longer
 exist (`mcp__remote-airlock__*`, `mcp__remote-crowdstrike__*`,
 `mcp__remote-msgraph__*`, `mcp__remote-tenable__*`, `mcp__slack__*`,
 `mcp__confluence-fedramp__*`). Confirmed dead by empty `ToolSearch` on each. The
-blast radius was real: `/triage` and a separate skill (not included in this export) — the two primary
+blast radius was real: `/triage` and `/investigate` — the two primary
 security-ops skills — declared `allowed-tools` against a dead namespace, and
 three `settings.json` hook matchers keyed on `mcp__remote-.*` had been inert
 since the macOS migration.
@@ -975,7 +975,7 @@ Two properties made it worse than a normal coverage gap:
    itself unexercised that session.
 
 **Why this needed transcript recovery to find:** my own compaction summary recorded the
-provenance fix as clean and listed the follow-up as a a separate skill (not included in this export) handoff. The
+provenance fix as clean and listed the follow-up as a `/cc-monitor` handoff. The
 correction — that the fix created a second gap — survived only in the raw transcript
 (`slice_000:1127`). A summary compresses at the granularity of WORK DONE, not of
 CORRECTIONS RECEIVED.
@@ -1301,7 +1301,7 @@ pytest exit 2/3/4 being suppressed, so a check asserted a result no test produce
 any exception, so a transport error read as PASS. Same defect, different surface — the
 recurrence is what promoted the ambient GUARD.
 
-**Evidence:** claude-config #2190 (the a separate skill (not included in this export) skill encoding the gate; three
+**Evidence:** claude-config #2190 (the `/mail-purge` skill encoding the gate; three
 mutation tests assert the verdict flips to COMPLETE when each guard is disabled).
 Writing those mutation tests found a real defect in the gate itself: a definitive
 retry cleared `seen` but not the indeterminate record, so last-verdict-wins was

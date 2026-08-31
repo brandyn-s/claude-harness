@@ -1,7 +1,7 @@
 ---
 name: differential-review
 description: "Security-focused review of PRs, commits, or diffs, with blast-radius and test-coverage checks."
-when_to_use: 'Use when reviewing PRs, commits, or diffs for security issues. Trigger phrases: "diff review", "review this PR", "what changed", "security review of changes". Do NOT use for SCA compliance (the a separate skill (not included in this export) prototype is intentionally unavailable), STIG assessment, or general scanning (use /semgrep). Performs security-focused differential review with blast radius calculation, test coverage checks, and markdown reports.'
+when_to_use: 'Use when reviewing PRs, commits, or diffs for security issues. Trigger phrases: "diff review", "review this PR", "what changed", "security review of changes". Do NOT use for SCA compliance (the /sca-review prototype is intentionally unavailable), STIG assessment, or general scanning (use /semgrep). Performs security-focused differential review with blast radius calculation, test coverage checks, and markdown reports.'
 effort: high
 allowed-tools: Read Write Grep Glob Bash AskUserQuestion
 argument-hint: "[PR-number, commit-range, or branch]"

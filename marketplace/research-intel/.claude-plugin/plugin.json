@@ -1,9 +1,9 @@
 {
   "name": "research-intel",
   "description": "Intelligence gathering skills \u2014 community patterns, repo discovery, Claude Code changelog tracking, research papers, developer profile analysis, deep research with multi-source discrepancy flagging, and internal Slack/Linear/Confluence intel.",
-  "version": "1.1.17",
+  "version": "1.1.18",
   "author": {
-    "name": "the maintainers",
-    "url": "https://github.com/example-org"
+    "name": "Brandyn Schult",
+    "url": "https://github.com/brandyn-s"
   }
 }

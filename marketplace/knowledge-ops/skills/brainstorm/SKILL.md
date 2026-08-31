@@ -243,7 +243,7 @@ Result: Design doc with chosen approach, implementation steps, and risk factors 
 
 **Example 2: Ambiguous request clarification**
 User says: "make the weekly updates better"
-Actions: Search recent a separate skill (not included in this export) outputs and session transcripts for quality issues, ask targeted clarifying questions about what "better" means (more detail? different format? different sources?), propose concrete improvements.
+Actions: Search recent `/weekly-update` outputs and session transcripts for quality issues, ask targeted clarifying questions about what "better" means (more detail? different format? different sources?), propose concrete improvements.
 Result: Refined requirements document that both user and Claude agree captures the actual intent.
 ## Success Criteria
 

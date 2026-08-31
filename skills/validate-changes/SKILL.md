@@ -59,7 +59,7 @@ Present the detected changes:
 
 ```
 Detected changes:
-  [skill]  a separate skill (not included in this export)
+  [skill]  skills/investigate/SKILL.md
   [skill]  skills/triage/SKILL.md
   [hook]   hooks/bash-security-guard.py
   [rule]   rules/context7-docs.md

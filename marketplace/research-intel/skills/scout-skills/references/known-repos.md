@@ -46,7 +46,7 @@ SKILL.md addition — the counter should not bias routing.
 | `lee-to/ai-factory` | 1 (leftover artifact scan gates for verification) | Quality, verification |
 | `rshankras/claude-code-apple-skills` | 1 (behavior classification table for characterization tests) | Testing, legacy code |
 | `jeffallan/claude-skills` | 1 (steady-state-gated blast-radius-controlled chaos experiment methodology → KB topic) | SRE, resilience, chaos engineering |
-| `davila7/claude-code-templates` | 1 (IOC-database multi-ecosystem supply-chain audit pattern → a separate skill (not included in this export) references) + capa-officer dropped as domain mismatch | Supply chain, security, regulated industry |
+| `davila7/claude-code-templates` | 1 (IOC-database multi-ecosystem supply-chain audit pattern → /vendor-breach references) + capa-officer dropped as domain mismatch | Supply chain, security, regulated industry |
 | `phylaxsystems/agent-skills` | 0 (PCL protocol-invariant mapping technique substantive but dropped — domain mismatch, Example doesn't write smart contracts) | Smart contracts, blockchain |
 
 (Last updated: 2026-05-17 v1.4 — added Hook bucket and Domain Insight (Harness) sub-classification.)

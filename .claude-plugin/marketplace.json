@@ -1,46 +1,161 @@
 {
-  "name": "claude-config",
+  "name": "claude-harness",
   "owner": {
-    "name": "the maintainers",
-    "url": "https://github.com/example-org"
+    "name": "Brandyn Schult",
+    "url": "https://github.com/brandyn-s"
   },
   "description": "Example-internal Claude Code plugin marketplace. Several plugins reference internal MCP servers and org infrastructure; see PORTABLE.md before sharing outside the org.",
   "plugins": [
     {
       "name": "safety-net",
       "source": "./marketplace/safety-net",
-      "description": "Production-grade safety hooks and config tooling \u2014 loop detection, injection guards, context monitoring, security audit, promise checking, hook staging, and proxy guardrail management. The enforcement layer.",
-      "version": "1.1.26"
+      "description": "Production-grade safety hooks and config tooling — loop detection, injection guards, context monitoring, security audit, promise checking, hook staging, and proxy guardrail management. The enforcement layer.",
+      "version": "1.1.26",
+      "license": "MIT",
+      "repository": "https://github.com/brandyn-s/claude-harness",
+      "keywords": [
+        "hooks",
+        "security",
+        "guardrails",
+        "enforcement"
+      ],
+      "relevance": {
+        "topic": "Claude Code agent safety and hooks",
+        "signals": {
+          "cwd": [
+            "**/.claude/**"
+          ],
+          "filesRead": [
+            "**/.claude/settings.json",
+            "**/.claude/hooks/**",
+            "**/hooks/*.py"
+          ]
+        }
+      }
     },
     {
       "name": "planning-toolkit",
       "source": "./marketplace/planning-toolkit",
-      "description": "Design-before-code and ship-safely workflow skills \u2014 brainstorming, architecture planning, adversarial review, prompt refinement, TDD, systematic debugging, ship/PR lifecycle, PR cleanup, Claude API guardrails, and bulk scripting.",
-      "version": "1.1.26"
+      "description": "Design-before-code and ship-safely workflow skills — brainstorming, architecture planning, adversarial review, prompt refinement, TDD, systematic debugging, ship/PR lifecycle, PR cleanup, Claude API guardrails, and bulk scripting.",
+      "version": "1.1.27",
+      "license": "MIT",
+      "repository": "https://github.com/brandyn-s/claude-harness",
+      "keywords": [
+        "planning",
+        "tdd",
+        "debugging",
+        "workflow"
+      ],
+      "relevance": {
+        "topic": "Plan-before-code and test-driven workflow",
+        "signals": {
+          "filesRead": [
+            "**/docs/plans/**"
+          ],
+          "cli": [
+            "pytest"
+          ]
+        }
+      }
     },
     {
       "name": "security-scanner",
       "source": "./marketplace/security-scanner",
-      "description": "Static analysis, threat modeling, compliance, and breach response \u2014 Semgrep, CodeQL, false positive verification, differential review, threat modeling, STIG/SRG assessment and verification, dependabot triage, and vendor breach response.",
-      "version": "1.1.6"
+      "description": "Static analysis, threat modeling, compliance, and breach response — Semgrep, CodeQL, false positive verification, differential review, threat modeling, STIG/SRG assessment and verification, dependabot triage, and vendor breach response.",
+      "version": "1.1.7",
+      "license": "MIT",
+      "repository": "https://github.com/brandyn-s/claude-harness",
+      "keywords": [
+        "security",
+        "sast",
+        "semgrep",
+        "codeql",
+        "threat-model"
+      ],
+      "relevance": {
+        "topic": "Code security scanning and threat modelling",
+        "signals": {
+          "cli": [
+            "semgrep",
+            "codeql",
+            "gitleaks",
+            "trivy",
+            "bandit"
+          ],
+          "filesRead": [
+            "**/*.rego",
+            "**/Dockerfile*"
+          ]
+        }
+      }
     },
     {
       "name": "knowledge-ops",
       "source": "./marketplace/knowledge-ops",
-      "description": "Session knowledge, admin, and record-keeping \u2014 extract learnings, capture decisions, curate a knowledge base, retrospectives, review learnings, validate changes, healthchecks, claim verification, Claude and OpenAI monitoring/admin/cost, cross-provider AI monitoring, Linear status posting, Obsidian sync, workspace provisioning, weekly engineering updates, manifest generation, cross-tool investigation, and GitHub repo sync.",
-      "version": "1.1.39"
+      "description": "Session knowledge, admin, and record-keeping — extract learnings, capture decisions, curate a knowledge base, retrospectives, review learnings, validate changes, healthchecks, claim verification, Claude and OpenAI monitoring/admin/cost, cross-provider AI monitoring, Linear status posting, Obsidian sync, workspace provisioning, weekly engineering updates, manifest generation, cross-tool investigation, and GitHub repo sync.",
+      "version": "1.1.40",
+      "license": "MIT",
+      "repository": "https://github.com/brandyn-s/claude-harness",
+      "keywords": [
+        "memory",
+        "knowledge-base",
+        "retrospective",
+        "documentation"
+      ],
+      "relevance": {
+        "topic": "Session knowledge capture and recall",
+        "signals": {
+          "filesRead": [
+            "**/agent-memory/**",
+            "**/knowledge-base/**",
+            "**/AGENTS.md",
+            "**/CLAUDE.md"
+          ]
+        }
+      }
     },
     {
       "name": "code-intelligence",
       "source": "./marketplace/code-intelligence",
-      "description": "Codebase exploration, analysis, API docs, and debugging \u2014 semantic search, structural graph queries, call chain tracing, dead code detection, Rust hierarchical documentation, MCP server diagnostics, API doc ingestion, and MCP forge (build/audit/deploy).",
-      "version": "1.1.12"
+      "description": "Codebase exploration, analysis, API docs, and debugging — semantic search, structural graph queries, call chain tracing, dead code detection, Rust hierarchical documentation, MCP server diagnostics, API doc ingestion, and MCP forge (build/audit/deploy).",
+      "version": "1.1.12",
+      "license": "MIT",
+      "repository": "https://github.com/brandyn-s/claude-harness",
+      "keywords": [
+        "code-search",
+        "call-graph",
+        "refactoring",
+        "api-docs"
+      ]
     },
     {
       "name": "research-intel",
       "source": "./marketplace/research-intel",
-      "description": "Intelligence gathering skills \u2014 community patterns, repo discovery, Claude Code changelog tracking, research papers, developer profile analysis, deep research with multi-source discrepancy flagging, and internal Slack/Linear/Confluence intel.",
-      "version": "1.1.17"
+      "description": "Intelligence gathering skills — community patterns, repo discovery, Claude Code changelog tracking, research papers, developer profile analysis, deep research with multi-source discrepancy flagging, and internal Slack/Linear/Confluence intel.",
+      "version": "1.1.18",
+      "license": "MIT",
+      "repository": "https://github.com/brandyn-s/claude-harness",
+      "keywords": [
+        "research",
+        "web-search",
+        "multi-model",
+        "evaluation"
+      ],
+      "relevance": {
+        "topic": "Multi-source technical research",
+        "signals": {
+          "hosts": [
+            "arxiv.org",
+            "api.tavily.com",
+            "api.exa.ai",
+            "api.firecrawl.dev"
+          ]
+        }
+      }
     }
-  ]
+  ],
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "metadata": {
+    "pluginRoot": "./marketplace"
+  }
 }

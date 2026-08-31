@@ -133,7 +133,6 @@ to `verify_skip.py`, and as routing-decision starting points.
 - `skills/threat-model/SKILL.md` + `skills/threat-model/references/`
 - `skills/differential-review/SKILL.md`
 - `skills/agentic-actions-auditor/SKILL.md`
-- a separate skill (not included in this export)
 - `rules/security-critical-search-verification.md`
 - `knowledge-base/topics/mcp-server-security-audit.md`
 - `knowledge-base/topics/threat-intel-source-architecture.md`
@@ -154,7 +153,6 @@ to `verify_skip.py`, and as routing-decision starting points.
 ### Debugging / root cause analysis
 
 - `skills/systematic-debugging/SKILL.md` + `references/`
-- a separate skill (not included in this export)
 - `rules/diagnose-before-fix.md`
 - `rules/verify-before-assuming.md`
 - `rules/verify-instrument-before-fix.md`
@@ -196,7 +194,6 @@ to `verify_skip.py`, and as routing-decision starting points.
 
 ### Documentation / technical writing
 
-- a separate skill (not included in this export)
 - `rules/skill-standards.md`
 - `knowledge-base/topics/digital-garden-content-model.md`
 
@@ -245,7 +242,7 @@ How the 6 GPT-card-validated candidates were routed:
 | trailofbits cargo-fuzz workflow | Rust fuzz testing | same destination as above |
 | trailofbits fuzzing-dictionary construction | Coverage-guided fuzzing | same destination as above |
 | jeffallan chaos-engineer methodology | SRE resilience | `knowledge-base/topics/chaos-engineering-methodology.md` (new file) |
-| davila7 supply-chain-guard (IOC database) | Software supply-chain | a separate skill (not included in this export) (extends existing skill) |
+| davila7 supply-chain-guard (IOC database) | Software supply-chain | `skills/vendor-breach/references/ioc-multi-ecosystem-audit.md` (extends existing skill) |
 | phylax mapping-invariants (smart-contract) | Blockchain security | **drop — domain mismatch** (Example doesn't write smart contracts) |
 
 Substantive technique recognition rate: 6 of 6. Non-SKILL.md routing

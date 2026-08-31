@@ -1,7 +1,7 @@
 ---
 name: service-review
 description: "Review a backend service / API / CLI tool for production readiness — boots and drives the running tool live, adversarial-hammers every input path for fail-closed behavior, and checks durability / observability / security / config-at-boot. Produces a prioritized worklist; read-only, makes no changes."
-when_to_use: "Use to assess a backend service (FastAPI/Flask/Express), API, or CLI tool's production readiness — the backend analog of a separate skill (not included in this export) (which is frontend-only and defers backend). Emits a findings report + worklist; makes NO changes. Trigger phrases: 'service-review', 'review the backend', 'is this API durable', 'boot and drive it', 'adversarial input test', 'does it fail closed'. Usually dispatched by /readiness-review for backend/CLI shapes, but runs standalone too. Do NOT use for: frontend/SPA UI, deployment/infra (use lab-deploy / mcp pipeline), or generic security code review (use /differential-review)."
+when_to_use: "Use to assess a backend service (FastAPI/Flask/Express), API, or CLI tool's production readiness — the backend analog of /lab-review (which is frontend-only and defers backend). Emits a findings report + worklist; makes NO changes. Trigger phrases: 'service-review', 'review the backend', 'is this API durable', 'boot and drive it', 'adversarial input test', 'does it fail closed'. Usually dispatched by /readiness-review for backend/CLI shapes, but runs standalone too. Do NOT use for: frontend/SPA UI, deployment/infra (use lab-deploy / mcp pipeline), or generic security code review (use /differential-review)."
 metadata:
   author: example-security-engineering
   version: "1.0"
@@ -12,7 +12,7 @@ effort: high
 
 # /service-review
 
-The **backend / API / CLI analog of a separate skill (not included in this export)** — for the shape a separate skill (not included in this export)
+The **backend / API / CLI analog of `/lab-review`** — for the shape `/lab-review`
 explicitly defers ("backend reliability is its own track"). Produces a
 **prioritized readiness worklist**; makes **NO code changes** (the fix pass is
 separate). Distilled from the Proteus Polar FastAPI maturation (2026-06-19).
@@ -82,7 +82,7 @@ a finding.
 
 ## Step 4 — Pillar sweep (what the live drive doesn't directly surface)
 
-Check the backend pillars a separate skill (not included in this export) doesn't own, citing source + runtime:
+Check the backend pillars `/lab-review` doesn't own, citing source + runtime:
 
 - **Reliability:** fail-closed on bad/NaN data (never silently passes as zero/OK); shared-state/concurrency model honored (`workers=1` documented vs unbounded in-memory growth); a regression test exists for each prior fix (real calls, not mocks).
 - **Observability:** structured + configured logging (not bare `logger.x()` with no handler); request/correlation IDs at trust boundaries; a real `/health` (+ readiness) probe, not a stub.
@@ -128,7 +128,7 @@ worklist — High: reject junk at ingest; verdict feeds `/readiness-review`.
 ## What this skill does NOT do
 
 - Make code changes — produces the worklist; the fix pass is separate and confirmed
-- Review frontend/UI — that is a separate skill (not included in this export) (this is its backend analog)
+- Review frontend/UI — that is `/lab-review` (this is its backend analog)
 - Review deployment/infra — `lab-deploy` / the mcp-productionization pipeline
 - Validate core-output correctness against an oracle — that spine is `/readiness-review` Step 3 (this skill assumes it, or runs standalone for pure durability review)
 - Generic security code review — use `/differential-review`
