@@ -1,0 +1,90 @@
+{
+  "fixture_name": "code-intel-paradigms",
+  "version": "1.0",
+  "created": "2026-04-26",
+  "purpose": "Validate paradigm-distance rubric and scout-frontier criteria for code-intelligence domain. 6 expected paradigm-distinct findings + 6 negative controls.",
+  "test_query": "code intelligence engines paradigm-distinct from example-org/code-graph",
+  "incumbent": {
+    "name": "code-graph",
+    "data_structure": "graph",
+    "computation_model": "traversal",
+    "abstraction_level": "symbol",
+    "time_dynamics": "static-with-incremental"
+  },
+  "expected_paradigm_distinct": [
+    {
+      "name": "Stack Graphs",
+      "url": "https://github.com/github/stack-graphs",
+      "data_structure": "graph",
+      "computation_model": "stitching",
+      "abstraction_level": "scope",
+      "time_dynamics": "incremental-per-file",
+      "differs_on": ["computation_model", "abstraction_level", "time_dynamics"],
+      "distance": 3
+    },
+    {
+      "name": "SCIP/LSIF",
+      "url": "https://github.com/sourcegraph/scip",
+      "data_structure": "structured-index",
+      "computation_model": "lookup",
+      "abstraction_level": "symbol",
+      "time_dynamics": "static-with-incremental",
+      "differs_on": ["data_structure", "computation_model"],
+      "distance": 2
+    },
+    {
+      "name": "Glean",
+      "url": "https://github.com/facebook/glean",
+      "data_structure": "fact-database",
+      "computation_model": "datalog-inference",
+      "abstraction_level": "symbol",
+      "time_dynamics": "static",
+      "differs_on": ["data_structure", "computation_model", "time_dynamics"],
+      "distance": 3
+    },
+    {
+      "name": "GNN call resolution",
+      "url": "https://arxiv.org/abs/2506.18191",
+      "data_structure": "graph",
+      "computation_model": "learning",
+      "abstraction_level": "symbol",
+      "time_dynamics": "static",
+      "differs_on": ["computation_model", "time_dynamics"],
+      "distance": 2
+    },
+    {
+      "name": "LLM-as-oracle",
+      "url": "https://arxiv.org/abs/2410.00603",
+      "data_structure": "graph",
+      "computation_model": "lm-inference",
+      "abstraction_level": "symbol",
+      "time_dynamics": "static-with-incremental",
+      "differs_on": ["computation_model"],
+      "distance": 1
+    },
+    {
+      "name": "Symbolic execution (KLEE)",
+      "url": "https://github.com/klee/klee",
+      "data_structure": "execution-tree",
+      "computation_model": "simulation",
+      "abstraction_level": "behavior",
+      "time_dynamics": "path-sensitive",
+      "differs_on": ["data_structure", "computation_model", "abstraction_level", "time_dynamics"],
+      "distance": 4
+    }
+  ],
+  "negative_controls": [
+    {"name": "tirth8205/code-review-graph", "data_structure": "graph", "computation_model": "traversal", "abstraction_level": "symbol", "time_dynamics": "static-with-incremental", "distance": 0, "_notes": "Graph of symbols + traversal queries + static-with-incremental indexing — same paradigm as code-graph, different implementation."},
+    {"name": "DeusData/codebase-memory-mcp", "data_structure": "graph", "computation_model": "traversal", "abstraction_level": "symbol", "time_dynamics": "static-with-incremental", "distance": 0, "_notes": "Symbol graph traversed at query time; same four axes as the incumbent."},
+    {"name": "aovestdipaperino/tokensave", "data_structure": "graph", "computation_model": "traversal", "abstraction_level": "symbol", "time_dynamics": "static-with-incremental", "distance": 0, "_notes": "Same-paradigm peer; better-implemented graph + traversal, no axis shift."},
+    {"name": "srclight/srclight", "data_structure": "graph", "computation_model": "traversal", "abstraction_level": "symbol", "time_dynamics": "static-with-incremental", "distance": 0, "_notes": "Same-paradigm peer; route to /scout, not /scout-frontier."},
+    {"name": "harshkedia177/axon", "data_structure": "graph", "computation_model": "traversal", "abstraction_level": "symbol", "time_dynamics": "static-with-incremental", "distance": 0, "_notes": "Symbol graph + traversal; distance 0."},
+    {"name": "optave/ops-codegraph-tool", "data_structure": "graph", "computation_model": "traversal", "abstraction_level": "symbol", "time_dynamics": "static-with-incremental", "distance": 0, "_notes": "Same four axes as code-graph; feature differences are /scout territory, not paradigm distance."}
+  ],
+  "instrument_validation": {
+    "tpr": "All 6 expected recompute to distance >= 1 from their per-axis values (TPR = 1.0).",
+    "fpr": "All 6 negative controls carry per-axis values identical to the incumbent and recompute to distance 0 (FPR = 0).",
+    "result": "Instrument valid — verified by scripts/score_rubric.py, which recomputes distance from axes for BOTH the expected set and the controls.",
+    "validated": "2026-04-26; control axes added 2026-05-31 so the scorer measures FPR instead of trusting the declared 0."
+  }
+}

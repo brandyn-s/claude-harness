@@ -1,0 +1,18 @@
+Phase 2c (PDF) fixture placeholder.
+
+Real PDFs are binary; this stub documents what a minimal Phase 2c input
+looks like once converted via pymupdf4llm. The skill's Phase 2c reads a
+real .pdf file via the pymupdf4llm library and emits markdown to
+reference.md.
+
+To exercise Phase 2c manually with a real fixture, save any one-page
+public API PDF (e.g., a webhook spec PDF) as fixtures/2c-sample.pdf and
+run:
+
+    /api-ingest /home/user/claude-config/skills/api-ingest/fixtures/2c-sample.pdf --name fixture-2c
+
+Expected outcome: reference.md created in ~/Documents/api-docs/fixture-2c/
+with the PDF content rendered as markdown.
+
+A binary stub is intentionally NOT committed — repo hygiene policy and
+the fact that any real-world PDF satisfies the verification need.

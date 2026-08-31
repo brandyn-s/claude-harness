@@ -1,0 +1,12 @@
+# Audit suppressions for gather-research.
+# See skills/audit-skill/SKILL.md for the schema.
+suppressions:
+  - code: M2
+    target: "mcp__exa__*"
+    reason: invoked via references/search-waves.md as part of Wave 1+2 search routing; the M2 reference-scan covers most but the bare names appear ambiguously enough to occasionally false-positive
+  - code: M2
+    target: "mcp__4c2bb016-a49e-4043-8a0f-35135dea63a2__*"
+    reason: UUID-namespaced Exa variant; same delegation chain as the named variant above
+  - code: D4
+    target: "/home/user/Documents/knowledge-base/topics/voice-mode-vs-text-mode-behavior.md"
+    reason: stale file_missing reproducer — prior version of references/citation-domain-freshness.md cited this path in file form. Current references/citation-domain-freshness.md (line 27) cites the knowledge-base path as a REFERENCE in table prose: 'Voice-mode behavior delta is documented (~/Documents/knowledge-base/topics/voice-mode-vs-text-mode-behavior.md)'. This is an external-path citation (registered in known-external-paths.yaml) that resolves on machines with the sibling claude-knowledge-base repo cloned. The reproducer is environment-dependent (checks filesystem) rather than content-dependent. The suppression remains valid: no breaking skill code references the path directly (only a documentation citation).

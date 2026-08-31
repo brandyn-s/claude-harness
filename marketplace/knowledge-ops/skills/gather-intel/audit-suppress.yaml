@@ -1,0 +1,20 @@
+# Audit suppressions for gather-intel.
+# See skills/audit-skill/SKILL.md for the schema.
+suppressions:
+  - code: G1
+    target: "/root/.claude/ARCHITECTURE.md"
+    reason: "deployment-time file_missing — SKILL.md Step 1 item 1 already documents the canonical source path at <claude-config-repo>/ARCHITECTURE.md with the deployed path as fallback only; agent has explicit fallback instructions"
+  - code: G1
+    target: "/root/.claude/rules/web-search-preference.md"
+    reason: "deployment-time file_missing — actual source path is agent-memory/rules/web-search-preference.md (SKILL.md Step 5 and gather-coordination.md now document both source and deployed paths)"
+  - code: G1
+    target: "/root/.claude/agent-memory/topics/infrastructure.md"
+    reason: "deployment-time file_missing — SKILL.md Step 1 item 7 has explicit Precondition note instructing fallback to source path at <claude-config-repo>/agent-memory/topics/infrastructure.md when symlink absent"
+  - code: D2
+    target: "claude-code-community-intelligence-*.md"
+    reason: "false positive — SKILL.md uses the no-dash glob claude-code-community-intelligence*.md which correctly matches the canonical first-run file (no suffix); the reproducer tests the wrong glob pattern that is not present in this skill"
+  - code: D4
+    reason: "false positive — SKILL.md dual-skill coordination block now references the gather-research metadata signal as the bullet-list block starting with **Date** YYYY-MM-DD followed by **Focus area** and **Waves completed**, matching the actual format in skills/gather-research/references/report-format.md; the legacy Run date / research-validated signal mentioned in the finding is no longer present in gather-intel"
+  - code: F3
+    target: MAX_AGENT_RESULT_LENGTH
+    reason: "unverified upstream constant softened in SKILL.md Step 6 — language now explicitly notes that the 8,000-char ceiling is observational, not a documented constant, treating it as a conservative working budget rather than a verified claim"

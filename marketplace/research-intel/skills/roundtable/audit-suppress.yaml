@@ -1,0 +1,4 @@
+suppressions:
+  - code: H2
+    path: skills/roundtable/references/_improvements-runbook.md
+    reason: "Internal improvements backlog (items from the 2026-05-02 frontier survey), not a progressive-disclosure reference for the skill flow. Leading underscore marks it a dev working doc; intentionally uncited."

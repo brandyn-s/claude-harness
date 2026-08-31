@@ -363,14 +363,14 @@ references; 12 were FALSE**:
 - `verify_server.py`, `state_io.py`, `parse_plan.py` — live in sibling skills
 - `team-spawn.py` — an illustrative example inside sample output, never a real path
 
-The 13th (`/obsidian` → `obsidian-infra`) was real but **misdiagnosed** as "broken
+The 13th (a separate skill (not included in this export) → `obsidian-infra`) was real but **misdiagnosed** as "broken
 skill, add a Step 0 gate" — the skill ALREADY had that gate at line 76 with the exact
 clone command. The true fault was a **host provisioning gap**: the repo was never
 cloned after the Windows→macOS migration.
 
 The registry that would have prevented all of this already existed:
 `skills/audit-skill/known-external-paths.yaml` listed `~/Documents/obsidian-infra/`
-annotated *"Cited by /obsidian, /weekly-update"*. It had been created for the
+annotated *"Cited by a separate skill (not included in this export), a separate skill (not included in this export)"*. It had been created for the
 2026-05-25 KB-citation incident — the SAME failure mode — but was reachable only from
 inside `/audit-skill`, with no ambient rule pointing at it until the parent guard was
 written.
@@ -392,11 +392,11 @@ D3a/D3b checks consult the registry by construction.
  broken script refs; 12 were FALSE (finalize_topics.py + rebuild_backlinks.py in
  knowledge-base/.github/scripts/, verify_server.py + state_io.py + parse_plan.py in
  sibling skills, team-spawn.py an illustrative example in sample output). The 13th
- (/obsidian → obsidian-infra) was real but MISDIAGNOSED as "broken skill, add a
+ (a separate skill (not included in this export) → obsidian-infra) was real but MISDIAGNOSED as "broken skill, add a
  Step 0 gate" — the skill ALREADY had that gate at line 76 with the exact clone
  command; the true fault was a host provisioning gap (repo never cloned after the
  Windows→macOS migration). `known-external-paths.yaml` ALREADY listed
- ~/Documents/obsidian-infra/ annotated "Cited by /obsidian, /weekly-update" — it
+ ~/Documents/obsidian-infra/ annotated "Cited by a separate skill (not included in this export), a separate skill (not included in this export)" — it
  was created for the 2026-05-25 KB-citation incident, the SAME failure mode, and
  is reachable ONLY from inside /audit-skill (no ambient rule pointed at it until
  this guard). Reporting the unverified list would have sent the user chasing 12

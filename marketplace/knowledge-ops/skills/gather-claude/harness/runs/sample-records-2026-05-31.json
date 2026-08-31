@@ -1,0 +1,1046 @@
+{
+  "_about": "Compact, re-gradeable sample of the N=3 A/B run (2026-05-31). Re-run grade.score_run(fixture, [records of one arm in one run]) to reproduce results.json. Verbose model text + web_search payloads stripped (reproducible via run_live.py). Phase-9 auditability artifact.",
+  "runs": [
+    {
+      "run_idx": 0,
+      "records": [
+        {
+          "arm": "with_skill",
+          "id": "hooks-pre-post",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/hooks"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "mcp-servers",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/mcp"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "skills-skillmd",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/skills",
+            "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview",
+            "https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills",
+            "https://github.com/anthropics/skills",
+            "https://platform.claude.com/docs/en/agent-sdk/skills"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "agent-resume-param",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/35141",
+            "https://github.com/anthropics/claude-code/issues/37051",
+            "https://github.com/anthropics/claude-code/issues/38183",
+            "https://code.claude.com/docs/en/sub-agents"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "rewind-command",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/commands",
+            "https://code.claude.com/docs/en/checkpointing"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "posttooluse-blocks-before",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/hooks",
+            "https://code.claude.com/docs/en/hooks-guide"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "windows-programdata-settings",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/settings"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "effort-frontmatter",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+            "https://code.claude.com/docs/en/changelog",
+            "https://code.claude.com/docs/en/sub-agents"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "opus46-fast-mode-override",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+            "https://code.claude.com/docs/en/fast-mode"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "taskoutput-tool",
+          "category": "outdated",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/16958",
+            "https://github.com/anthropics/claude-code/issues/29011",
+            "https://github.com/anthropics/claude-code/issues/20236",
+            "https://github.com/anthropics/claude-code/issues/33789"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "skills-always-forked",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/sub-agents",
+            "https://code.claude.com/docs/en/skills"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "hooks-pre-post",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/hooks",
+            "https://claudelog.com/mechanics/hooks/"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-parallelism-frontmatter",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "skills-skillmd",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/skills",
+            "https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills",
+            "https://platform.claude.com/docs/en/agent-sdk/skills"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "mcp-servers",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/mcp",
+            "https://www.anthropic.com/news/model-context-protocol"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-bisect-command",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-maxparallelsubagents",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/15487",
+            "https://code.claude.com/docs/en/sub-agents",
+            "https://code.claude.com/docs/en/settings"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-costbudget-setting",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "windows-programdata-settings",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/settings",
+            "https://systemprompt.io/guides/enterprise-claude-code-managed-settings"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "taskoutput-tool",
+          "category": "outdated",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/16958",
+            "https://github.com/anthropics/claude-code/issues/29011",
+            "https://github.com/jedarden/CLASP/blob/main/docs/api-reference/claude-code-tools.md"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "effort-frontmatter",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/sub-agents",
+            "https://www.agensi.io/learn/skill-md-format-reference",
+            "https://allahabadi.dev/blogs/ai/claude-code-skills-frontmatter-complete-guide/",
+            "https://psantanna.com/claude-code-my-workflow/workflow-guide.html"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "agent-resume-param",
+          "category": "outdated",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://github.com/Piebald-AI/claude-code-system-prompts/blob/main/system-prompts/tool-description-task.md",
+            "https://github.com/anthropics/claude-code/issues/11892",
+            "https://code.claude.com/docs/en/sub-agents"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "rewind-command",
+          "category": "true_primary",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/checkpointing",
+            "https://blog.vincentqiao.com/en/posts/claude-code-rewind/",
+            "https://claudelog.com/faqs/how-to-use-checkpoints-in-claude-code/",
+            "https://www.getmrq.com/blog/undo-claude-code"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "posttooluse-blocks-before",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/hooks",
+            "https://code.claude.com/docs/en/hooks-guide",
+            "https://claudefa.st/blog/tools/hooks/hooks-guide"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-parallelism-frontmatter",
+          "category": "fabricated",
+          "raw_verdict": "NONEXISTENT",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/skills",
+            "https://allahabadi.dev/blogs/ai/claude-code-skills-frontmatter-complete-guide/",
+            "https://www.agensi.io/learn/skill-md-format-reference",
+            "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "opus46-fast-mode-override",
+          "category": "outdated",
+          "raw_verdict": "DEPRECATED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+            "https://code.claude.com/docs/en/fast-mode",
+            "https://dev.classmethod.jp/en/articles/20260529-claude-code-updates-v2-1-154/",
+            "https://releasebot.io/updates/anthropic/claude-code"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-maxparallelsubagents",
+          "category": "fabricated",
+          "raw_verdict": "NONEXISTENT",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/settings",
+            "https://claudefa.st/blog/guide/settings-reference",
+            "https://blakecrosley.com/guides/claude-code-cheatsheet",
+            "https://support.claude.com/en/articles/12386420-claude-code-faq"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-bisect-command",
+          "category": "fabricated",
+          "raw_verdict": "NONEXISTENT",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/commands",
+            "https://github.com/ykdojo/claude-code-tips"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "skills-always-forked",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/skills",
+            "https://github.com/anthropics/claude-code/issues/17283",
+            "https://www.agensi.io/learn/skill-md-format-reference",
+            "https://leehanchung.github.io/blogs/2025/10/26/claude-skills-deep-dive/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-costbudget-setting",
+          "category": "fabricated",
+          "raw_verdict": "NONEXISTENT",
+          "cited_urls": [
+            "https://linuxjedi.co.uk/when-the-docs-fall-short-investigating-claude-codes-budget-cap/",
+            "https://docs.bswen.com/blog/2026-03-22-claude-code-cicd-budget/",
+            "https://dev.to/aavisangle/claude-code-cost-tracking-monitor-and-cut-your-spending-4cge",
+            "https://computingforgeeks.com/claude-code-cheat-sheet/",
+            "https://code.claude.com/docs/en/settings"
+          ],
+          "grounded": null
+        }
+      ]
+    },
+    {
+      "run_idx": 1,
+      "records": [
+        {
+          "arm": "with_skill",
+          "id": "skills-skillmd",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/skills",
+            "https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills",
+            "https://platform.claude.com/docs/en/agent-sdk/skills",
+            "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "hooks-pre-post",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/hooks",
+            "https://code.claude.com/docs/en/hooks.md",
+            "https://code.claude.com/docs/en/hooks-guide",
+            "https://platform.claude.com/docs/en/agent-sdk/hooks"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "mcp-servers",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/mcp"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "effort-frontmatter",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/sub-agents"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "agent-resume-param",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/35141",
+            "https://github.com/anthropics/claude-code/issues/11892"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "rewind-command",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/commands",
+            "https://code.claude.com/docs/en/checkpointing"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "skills-always-forked",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/skills"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "posttooluse-blocks-before",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/hooks",
+            "https://code.claude.com/docs/en/hooks-guide"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "windows-programdata-settings",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/settings",
+            "https://code.claude.com/docs/en/admin-setup"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "opus46-fast-mode-override",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+            "https://code.claude.com/docs/en/fast-mode"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "taskoutput-tool",
+          "category": "outdated",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/16958",
+            "https://github.com/anthropics/claude-code/issues/29011",
+            "https://github.com/anthropics/claude-code/issues/20236",
+            "https://github.com/anthropics/claude-code/issues/33789"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-parallelism-frontmatter",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "hooks-pre-post",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/hooks",
+            "https://claudelog.com/mechanics/hooks/"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "skills-skillmd",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/skills",
+            "https://platform.claude.com/docs/en/agent-sdk/skills",
+            "https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "mcp-servers",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/mcp"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-maxparallelsubagents",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/15487",
+            "https://code.claude.com/docs/en/settings"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "rewind-command",
+          "category": "true_primary",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/checkpointing",
+            "https://claudelog.com/mechanics/rewind/",
+            "https://blog.vincentqiao.com/en/posts/claude-code-rewind/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-costbudget-setting",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-bisect-command",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "effort-frontmatter",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/sub-agents",
+            "https://kisdigital.com/posts/2026/04/writing-effective-claude-skills",
+            "https://www.agensi.io/learn/skill-md-format-reference",
+            "https://github.com/shanraisshan/claude-code-best-practice/blob/main/best-practice/claude-subagents.md"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "agent-resume-param",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/35141",
+            "https://www.skillcreator.ai/blog/claude-code-agents"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "windows-programdata-settings",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/settings",
+            "https://systemprompt.io/guides/enterprise-claude-code-managed-settings"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "taskoutput-tool",
+          "category": "outdated",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/16958",
+            "https://github.com/jedarden/CLASP/blob/main/docs/api-reference/claude-code-tools.md"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "opus46-fast-mode-override",
+          "category": "outdated",
+          "raw_verdict": "DEPRECATED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+            "https://code.claude.com/docs/en/fast-mode",
+            "https://releasebot.io/updates/anthropic/claude-code"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "posttooluse-blocks-before",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/hooks",
+            "https://code.claude.com/docs/en/hooks-guide",
+            "https://stevekinney.com/courses/ai-development/claude-code-hooks",
+            "https://claudefa.st/blog/tools/hooks/hooks-guide"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "skills-always-forked",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/skills",
+            "https://code.claude.com/docs/en/sub-agents",
+            "https://linlisa0601.medium.com/how-claude-code-actually-uses-skills-e97e687471b7"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-parallelism-frontmatter",
+          "category": "fabricated",
+          "raw_verdict": "NONEXISTENT",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/skills",
+            "https://allahabadi.dev/blogs/ai/claude-code-skills-frontmatter-complete-guide/",
+            "https://www.agensi.io/learn/skill-md-format-reference",
+            "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-bisect-command",
+          "category": "fabricated",
+          "raw_verdict": "NONEXISTENT",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/commands",
+            "https://github.com/ykdojo/claude-code-tips"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-maxparallelsubagents",
+          "category": "fabricated",
+          "raw_verdict": "NONEXISTENT",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/sub-agents",
+            "https://code.claude.com/docs/en/settings",
+            "https://claudefa.st/blog/guide/settings-reference",
+            "https://www.aibuilderclub.com/blog/claude-code-sub-agents-guide",
+            "https://claudefa.st/blog/guide/agents/sub-agent-best-practices"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-costbudget-setting",
+          "category": "fabricated",
+          "raw_verdict": "NONEXISTENT",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/costs",
+            "https://dev.to/aavisangle/claude-code-cost-tracking-monitor-and-cut-your-spending-4cge",
+            "https://www.finout.io/blog/claude-code-pricing-2026",
+            "https://code.claude.com/docs/en/settings",
+            "https://promptshelf.vercel.app/claude-code-settings-json-guide"
+          ],
+          "grounded": null
+        }
+      ]
+    },
+    {
+      "run_idx": 2,
+      "records": [
+        {
+          "arm": "with_skill",
+          "id": "hooks-pre-post",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/hooks"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "mcp-servers",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/mcp",
+            "https://www.anthropic.com/news/model-context-protocol"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "skills-skillmd",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/skills",
+            "https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills",
+            "https://github.com/anthropics/claude-code/blob/main/plugins/plugin-dev/skills/skill-development/SKILL.md",
+            "https://platform.claude.com/docs/en/agent-sdk/skills"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "agent-resume-param",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/35141",
+            "https://github.com/anthropics/claude-code/issues/37051",
+            "https://github.com/anthropics/claude-code/issues/38183"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "effort-frontmatter",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/sub-agents"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "rewind-command",
+          "category": "true_primary",
+          "raw_verdict": "CONTESTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/checkpointing"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "posttooluse-blocks-before",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/hooks",
+            "https://code.claude.com/docs/en/hooks-guide"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "windows-programdata-settings",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/settings"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "opus46-fast-mode-override",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+            "https://code.claude.com/docs/en/fast-mode"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "taskoutput-tool",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/44703",
+            "https://code.claude.com/docs/en/interactive-mode",
+            "https://github.com/anthropics/claude-code/issues/16958"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "skills-always-forked",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/sub-agents",
+            "https://code.claude.com/docs/en/skills"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-parallelism-frontmatter",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "skills-skillmd",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/skills",
+            "https://platform.claude.com/docs/en/agent-sdk/skills",
+            "https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "hooks-pre-post",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/hooks",
+            "https://claudelog.com/mechanics/hooks/"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-maxparallelsubagents",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-bisect-command",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "mcp-servers",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/mcp"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "windows-programdata-settings",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/settings",
+            "https://systemprompt.io/guides/enterprise-claude-code-managed-settings"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "agent-resume-param",
+          "category": "outdated",
+          "raw_verdict": "DEPRECATED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/35141",
+            "https://github.com/anthropics/claude-code/issues/38183",
+            "https://github.com/anthropics/claude-code/issues/37051",
+            "https://github.com/anthropics/claude-code/issues/11892"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "effort-frontmatter",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/sub-agents",
+            "https://claude.nagdy.me/learn/subagents/",
+            "https://www.agensi.io/learn/skill-md-format-reference",
+            "https://allahabadi.dev/blogs/ai/claude-code-skills-frontmatter-complete-guide/"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "rewind-command",
+          "category": "true_primary",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/commands",
+            "https://code.claude.com/docs/en/checkpointing",
+            "https://timdietrich.me/blog/claude-code-commands-guide/",
+            "https://blog.vincentqiao.com/en/posts/claude-code-rewind/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "fab-costbudget-setting",
+          "category": "fabricated",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/cli-reference",
+            "https://code.claude.com/docs/en/costs",
+            "https://code.claude.com/docs/en/settings"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "taskoutput-tool",
+          "category": "outdated",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/issues/16958",
+            "https://github.com/anthropics/claude-code/issues/29011",
+            "https://github.com/anthropics/claude-code/issues/20236",
+            "https://inventivehq.com/knowledge-base/claude/how-to-use-background-agents"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "opus46-fast-mode-override",
+          "category": "outdated",
+          "raw_verdict": "DEPRECATED",
+          "cited_urls": [
+            "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+            "https://code.claude.com/docs/en/fast-mode",
+            "https://dev.classmethod.jp/en/articles/20260529-claude-code-updates-v2-1-154/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-parallelism-frontmatter",
+          "category": "fabricated",
+          "raw_verdict": "NONEXISTENT",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/skills",
+            "https://allahabadi.dev/blogs/ai/claude-code-skills-frontmatter-complete-guide/",
+            "https://www.agensi.io/learn/skill-md-format-reference"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "skills-always-forked",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://leehanchung.github.io/blogs/2025/10/26/claude-skills-deep-dive/",
+            "https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills",
+            "https://code.claude.com/docs/en/skills",
+            "https://www.ranketai.com/en/blog/explainer-claude-code-skills-fork-subagents-2026-03-31"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-bisect-command",
+          "category": "fabricated",
+          "raw_verdict": "NONEXISTENT",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/commands",
+            "https://github.com/ykdojo/claude-code-tips"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "posttooluse-blocks-before",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/hooks",
+            "https://code.claude.com/docs/en/hooks-guide",
+            "https://stevekinney.com/courses/ai-development/claude-code-hooks"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-maxparallelsubagents",
+          "category": "fabricated",
+          "raw_verdict": "NONEXISTENT",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/sub-agents",
+            "https://claudefa.st/blog/guide/settings-reference",
+            "https://code.claude.com/docs/en/settings",
+            "https://www.aibuilderclub.com/blog/claude-code-sub-agents-guide",
+            "https://gist.github.com/mculp/c082bd1e5a439410158974de90c89db7"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "fab-costbudget-setting",
+          "category": "fabricated",
+          "raw_verdict": "NONEXISTENT",
+          "cited_urls": [
+            "https://dev.to/aavisangle/claude-code-cost-tracking-monitor-and-cut-your-spending-4cge",
+            "https://code.claude.com/docs/en/costs",
+            "https://www.finout.io/blog/claude-code-pricing-2026",
+            "https://code.claude.com/docs/en/settings",
+            "https://gist.github.com/mculp/c082bd1e5a439410158974de90c89db7"
+          ],
+          "grounded": null
+        }
+      ]
+    }
+  ]
+}

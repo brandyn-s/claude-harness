@@ -1,0 +1,80 @@
+{
+  "what_this_measures": "Extraction recall of parse_plan.extract_metric_names: fraction of the metric names a careful human reads in each plan snippet that the regex actually returns. The prior-arc guard (check_prior_arcs.py) keys ONLY on these names and SILENTLY NO-OPS when the list is empty ('PRIOR-ARC: skipped (no metric_names extracted)'). So missed metrics == an unenforced 'refuses re-litigation of prior arcs' value-prop.",
+  "oracle_provenance": "oracle_metric_names is INDEPENDENT hand-derived ground truth. For each snippet a human read the plan prose and labeled the token(s) that name the plan's success metric(s) — the identifiers a prior-arc ledger would need to match against a previous terminal doc. These labels were written BEFORE/WITHOUT consulting extract_metric_names' output and are NOT derived from it. Non-metric ALLCAPS noise (HTTP, JSON, PR, CI, SHA, env-var names, etc.) is deliberately EXCLUDED from the oracle because a human would not register those as the plan's metrics; including them would reward the regex for matching noise.",
+  "target_recall": 0.9,
+  "notes_on_extractor_quirk": "extract_metric_names ALSO hardcodes 5 lowercase/short literals via a second regex: (Acc@\\d+|MRR|F1|precision|recall). Those specific words are therefore caught even when lowercase. The all-non-ALLCAPS silent-no-op snippet (s4_snake_case_silent_noop) deliberately avoids all 5 magic words so its metrics are genuinely invisible to the extractor (returns []), exercising the true guard-inactive path.",
+  "snippets": [
+    {
+      "id": "s1_allcaps_works",
+      "style": "ALLCAPS tokens",
+      "all_non_allcaps": false,
+      "plan_md": "## Goal\nLift RECALL on the retrieval corpus and reduce HTTP_CALLS per query.\n\n### Phase 3.5 Baseline\nRECALL currently 0.62, expected 0.80.\n\n### Metric Commands\n```bash\npython3 eval.py --report RECALL HTTP_CALLS\n```",
+      "oracle_metric_names": ["RECALL", "HTTP_CALLS"],
+      "oracle_rationale": "Two named metrics, both 3+ char ALLCAPS. This is the case the regex was built for; the guard should and does see them."
+    },
+    {
+      "id": "s2_allcaps_only_works",
+      "style": "ALLCAPS-only (pure positive control)",
+      "all_non_allcaps": false,
+      "plan_md": "## Goal\nDrive PRECISION_AT_5 and MRR_SCORE up on the eval set; keep INDEX_SIZE flat.\n\n### Metric Commands\n```bash\npython3 score.py --metrics PRECISION_AT_5 MRR_SCORE INDEX_SIZE\n```",
+      "oracle_metric_names": ["PRECISION_AT_5", "MRR_SCORE", "INDEX_SIZE"],
+      "oracle_rationale": "Three ALLCAPS metric identifiers. All-ALLCAPS control — the currently-working path; expected full recall."
+    },
+    {
+      "id": "s3_metric_eq_upper_works",
+      "style": "METRIC <NAME>=... lines, uppercase names",
+      "all_non_allcaps": false,
+      "plan_md": "## Metrics\nMETRIC RECALL=0.80\nMETRIC NDCG_AT_10=0.65\n\n### Metric Commands\n```bash\npython3 eval.py --emit RECALL --emit NDCG_AT_10\n```",
+      "oracle_metric_names": ["RECALL", "NDCG_AT_10"],
+      "oracle_rationale": "The metric names are RECALL and NDCG_AT_10 (the literal token 'METRIC' is the line keyword, not a metric, and is correctly blacklisted). Names are ALLCAPS so they are caught."
+    },
+    {
+      "id": "s4_snake_case_silent_noop",
+      "style": "lowercase / snake_case metrics (all non-ALLCAPS)",
+      "all_non_allcaps": true,
+      "plan_md": "## Goal\nRaise first_fix_rate from 0.40 to 0.55 and cut p95_latency_ms below 150 on the triage bot.\n\n### Phase 3.5 Baseline\nfirst_fix_rate currently 0.40, expected 0.55.\n\n### Metric Commands\n```bash\npython3 bench.py --report first_fix_rate p95_latency_ms\n```",
+      "oracle_metric_names": ["first_fix_rate", "p95_latency_ms"],
+      "oracle_rationale": "A human reads two clear plan metrics: first_fix_rate and p95_latency_ms. Both snake_case lowercase; neither is one of the 5 hardcoded literals, so the extractor returns [] and the prior-arc guard silently no-ops. THIS is the headline silent-no-op case."
+    },
+    {
+      "id": "s5_metric_eq_lower_silent_noop",
+      "style": "METRIC <name>=... lines, lowercase names (all non-ALLCAPS)",
+      "all_non_allcaps": true,
+      "plan_md": "## Metrics\nMETRIC first_fix_rate=0.55\nMETRIC dedupe_ratio=0.90\n\n### Metric Commands\n```bash\npython3 eval.py --emit first_fix_rate --emit dedupe_ratio\n```",
+      "oracle_metric_names": ["first_fix_rate", "dedupe_ratio"],
+      "oracle_rationale": "Metric names on METRIC= lines are first_fix_rate and dedupe_ratio. 'METRIC' is the keyword (blacklisted). The names are lowercase, so they are missed and the guard no-ops."
+    },
+    {
+      "id": "s6_mixed_case_metrics",
+      "style": "mixed-case / camelCase metrics",
+      "all_non_allcaps": true,
+      "plan_md": "## Goal\nImprove firstFixRate and cacheHitRatio across the run; keep buildTimeSeconds bounded.\n\n### Metric Commands\n```bash\nnode bench.js --metrics firstFixRate cacheHitRatio buildTimeSeconds\n```",
+      "oracle_metric_names": ["firstFixRate", "cacheHitRatio", "buildTimeSeconds"],
+      "oracle_rationale": "Three camelCase metric names a human reads directly. The regex requires a leading capital THEN 2+ ALLCAPS/digit/_ chars; camelCase has interior lowercase so none match. All missed."
+    },
+    {
+      "id": "s7_metrics_in_prose",
+      "style": "metrics embedded in prose, snake_case",
+      "all_non_allcaps": true,
+      "plan_md": "## Goal\nThe agent currently resolves only 40% of tickets without escalation. We want to lift the auto_resolution_rate to 60% while holding the mean_handle_time roughly flat so we do not trade accuracy for speed.",
+      "oracle_metric_names": ["auto_resolution_rate", "mean_handle_time"],
+      "oracle_rationale": "Prose names two metrics: auto_resolution_rate and mean_handle_time. Both snake_case lowercase; neither hardcoded; both missed."
+    },
+    {
+      "id": "s8_prose_hardcoded_literals",
+      "style": "lowercase metrics that happen to be hardcoded literals",
+      "all_non_allcaps": true,
+      "plan_md": "## Goal\nWe want to improve precision and recall and the F1 on the classifier without regressing latency.\n\n### Metric Commands\n```bash\npython3 eval.py --report precision recall f1\n```",
+      "oracle_metric_names": ["precision", "recall", "F1"],
+      "oracle_rationale": "Three named metrics: precision, recall, F1. These are exactly the lowercase/short literals the SECOND regex hardcodes, so they ARE caught despite being non-ALLCAPS. Included to keep the oracle honest: not every non-ALLCAPS snippet is a miss, and the metric must not over-credit the bug. ('latency' is prose, not a named metric, so it is excluded from the oracle.)"
+    },
+    {
+      "id": "s9_mixed_caught_and_missed",
+      "style": "mixed: one ALLCAPS metric + one snake_case metric",
+      "all_non_allcaps": false,
+      "plan_md": "## Goal\nReduce FLAKE_RATE on CI and improve the median review_turnaround_hours for PRs.\n\n### Metric Commands\n```bash\npython3 ci_stats.py --report FLAKE_RATE review_turnaround_hours\n```",
+      "oracle_metric_names": ["FLAKE_RATE", "review_turnaround_hours"],
+      "oracle_rationale": "Two metrics: FLAKE_RATE (ALLCAPS, caught) and review_turnaround_hours (snake_case, missed). CI and PRs are infra nouns, not the plan's metrics, so excluded. Partial-recall case: the guard sees ONE metric, so it runs but checks only half the lineage surface."
+    }
+  ]
+}

@@ -43,7 +43,7 @@ General-purpose research skill. Takes any topic, dynamically generates research 
 Before proceeding, verify the topic is in-scope for this skill. If the user is asking about:
 - **Claude Code community patterns** (Reddit tips, HN threads, GitHub config repos) → redirect to `/gather-intel`
 - **AI research frontier** (arXiv papers, NeurIPS/ICML proceedings, lab research blogs) → redirect to `/gather-research`
-- **Internal team comms** (Slack threads, Linear issues, Confluence pages) → redirect to `/gather-internal-intel`
+- **Internal team comms** (Slack threads, Linear issues, Confluence pages) → redirect to a separate skill (not included in this export)
 
 If out-of-scope, tell the user which skill to use instead, then stop. Do not proceed to Phase 1.
 
@@ -134,7 +134,7 @@ Generate search queries tailored to this specific topic. **No hardcoded queries*
 
 > For Tavily tool selection, wave execution, and graceful degradation patterns shared across all research skills, see `~/.claude/skills/deep-dive/references/research-methodology.md`.
 
-**MULTI-SOURCE DEFAULT (v2.0):** Every research question MUST be queried across **Tavily + Exa + Firecrawl** in parallel, not one provider alone. Single-source research under-samples the web — Tavily's keyword-weighted index, Exa's semantic/embedding index, and Firecrawl's structured site crawl surface different hits. This is the `/vendor-breach` multi-source-with-discrepancy-flagging pattern, generalized to all research. Follow `rules/web-search-preference.md` for per-query tool shape (source: `<claude-config-repo>/rules/web-search-preference.md`; deployed at `~/.claude/rules/web-search-preference.md`).
+**MULTI-SOURCE DEFAULT (v2.0):** Every research question MUST be queried across **Tavily + Exa + Firecrawl** in parallel, not one provider alone. Single-source research under-samples the web — Tavily's keyword-weighted index, Exa's semantic/embedding index, and Firecrawl's structured site crawl surface different hits. This is the a separate skill (not included in this export) multi-source-with-discrepancy-flagging pattern, generalized to all research. Follow `rules/web-search-preference.md` for per-query tool shape (source: `<claude-config-repo>/rules/web-search-preference.md`; deployed at `~/.claude/rules/web-search-preference.md`).
 
 **REQUIRED ERROR DIAGNOSIS:** If any provider returns an error (402, 429, 5xx, timeout), capture the exact error text and surface it in the report header. Do NOT interpret an unexplained error as "credits exhausted" or any other specific cause without the raw error payload — misdiagnosis has caused false claims about provider availability.
 

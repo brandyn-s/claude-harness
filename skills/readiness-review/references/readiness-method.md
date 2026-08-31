@@ -37,7 +37,7 @@ that sub-axis, NOT faked.
 
 ## Step 3-4 — Boot, drive, adversarial-hammer
 
-Specialists own the shape sweep (`/lab-review` frontend, `/service-review`
+Specialists own the shape sweep (a separate skill (not included in this export) frontend, `/service-review`
 backend). This skill adds the capability live-drive: the real end-to-end SME
 workflow against the running tool with real data. PP: login → upload real MRV0
 → operability evaluate → export PNG/SVG/CSV → health = 11/11 live steps.

@@ -1,0 +1,35 @@
+name: canonical-2026-04-29
+source: |
+  Curated by user (you) across two voice-mode chats with
+  Claude + a /deep-dive synthesis report. ~144 frameworks across
+  Western, Eastern, Indigenous, African, and LLM-native traditions.
+  Audited by M3 inventory audit (165/170 entries quality-passing,
+  mean word count 135).
+date: 2026-04-29
+file: ~/Documents/knowledge-base/research/2026-04-29-frameworks-master-inventory.md
+framework_count: 170  # 165 substantive + 5 cross-reference pointer stubs (filtered)
+bucket_structure: |
+  11 functional buckets:
+  1. Standpoint Enumerators (18)
+  2. Constraint Imposers (24)
+  3. Frame Collisioners (13)
+  4. Subtractors (11)
+  5. Provocators / Disruptors (20)
+  6. Meta-Routers / Diagnosticians (31)
+  7. LLM Design Patterns (5)
+  8. AI/LLM Multi-Agent (15)
+  9. Creativity Research Canon (6)
+  10. Engineering / Lean / Strategic (20)
+  11. Apophatic / Via Negativa (7)
+confidence_distribution:
+  HIGH: 71
+  MEDIUM: 11
+  INFERRED: 82
+  unmarked: 6
+notes: |
+  Curator-biased — see F6 red-team residual #1. Future runs should
+  cross-compare against source-B (LLM-generated) and source-C
+  (public-aggregation) inventories for inventory-bias detection.
+
+  Pointer-stub filter: 5 entries with "see X.Y" pointer body and
+  <200 char total. Filtered automatically by parse_inventory.py.

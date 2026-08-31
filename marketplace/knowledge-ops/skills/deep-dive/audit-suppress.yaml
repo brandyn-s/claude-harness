@@ -1,0 +1,35 @@
+# Audit suppressions for deep-dive.
+# See skills/audit-skill/SKILL.md for the schema.
+suppressions:
+  - code: D4
+    target: "~/.claude/agent-memory/rules/web-search-preference.md"
+    reason: |
+      Same deployment-install convention as the G1 entries below. The source
+      lives at /home/user/claude-config/agent-memory/rules/web-search-preference.md
+      and is referenced by gather-intel, gather-research, gather-claude, gather-repos,
+      and deep-dive via the same `~/.claude/agent-memory/rules/...` path. Whether
+      the deployed path resolves depends on whether the install symlinks
+      `agent-memory/`. The SKILL.md now cites both the source-repo path and the
+      deployed-copy path with an explicit "if absent, read source-repo copy"
+      fallback (Phase 2 Step 4), so the skill behaves correctly when the deploy
+      path is missing. Fix at the install layer, not in deep-dive.
+  - code: G1
+    target: "skills/_shared/output-grounding.md"
+    reason: |
+      The path follows the architecture-wide deployed-path convention used by
+      many skills (brainstorm, build-measurement-harness, garden, healthcheck,
+      etc.). The file exists at skills/_shared/output-grounding.md (relocated 2026-08-26)
+      in source. Whether ~/.claude/rules/ is populated depends on the install
+      symlink — this is a deployment-install gap, not a deep-dive-specific bug.
+      Per the audit-context note in the original finding: "the discrepancy may
+      be a per-host install gap rather than a deep-dive bug."
+  - code: G1
+    target: "~/.claude/ARCHITECTURE.md"
+    reason: |
+      Same deployed-path convention as ~/.claude/rules/. The file exists at
+      /home/user/claude-config/ARCHITECTURE.md in source. Several other skills
+      cite this path (audit-architecture, pull-repos, gather-intel, gather-claude).
+      If a host's install does not symlink ARCHITECTURE.md, Step 2.3 ("Only if
+      the topic is about this system's own design") simply skips the file — the
+      conditional makes this fail-soft. Not a deep-dive bug; fix at the install
+      layer.

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="fixture-2e HTML doc-site stub for Phase 2e (Firecrawl fallback) manual verification">
+  <title>fixture-2e API — Reference</title>
+</head>
+<body>
+  <main>
+    <h1>fixture-2e API</h1>
+    <p>Minimal HTML doc-site stub for Phase 2e (Firecrawl fallback) manual verification.</p>
+
+    <h2>Authentication</h2>
+    <p>All endpoints require a bearer token in the
+    <code>Authorization: Bearer {token}</code> header. Generate tokens at
+    <a href="https://api.example.test/settings">api.example.test/settings</a>.</p>
+
+    <h2>Endpoints</h2>
+    <h3>GET /widgets</h3>
+    <p>List widgets. Cursor-paginated. Max page size: 100. Default: 25.</p>
+
+    <h3>POST /widgets</h3>
+    <p>Create a widget. Body: <code>{ "name": "&lt;string&gt;" }</code>.</p>
+
+    <h2>Rate Limits</h2>
+    <p>100 requests/minute default. 1000 requests/minute for enterprise.</p>
+
+    <h2>Errors</h2>
+    <p>Errors return JSON: <code>{ "error": { "code": "...", "message": "..." } }</code>.</p>
+  </main>
+</body>
+</html>

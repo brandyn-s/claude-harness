@@ -197,7 +197,7 @@ accept will revert.
 ## 2026-04-19 example-technologies-absolute-block
 **Key:** `absolute_block_prevented_legitimate_security_fix`
 
-`/vendor-breach` smoke test found real exposure (tag-pinned
+a separate skill (not included in this export) smoke test found real exposure (tag-pinned
 trivy-action) in `example-technologies/trident` during CVE-2026-33634
 response.
 

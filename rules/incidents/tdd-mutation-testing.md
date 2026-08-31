@@ -199,7 +199,7 @@ not surface it, because the pattern LOOKS right.
 ## 2026-08-15-an-assert-raises-predicate-that-accepts-any-exception
 
 ```text
-INCIDENT 2026-08-15 (claude-config #2007, /snow verify_guards.py): a guard-verification
+INCIDENT 2026-08-15 (claude-config #2007, a separate skill (not included in this export) verify_guards.py): a guard-verification
 harness whose `refuses(fn)` helper returned True on ANY SnowError. Ten guard cases; eight
 make live reads. On a transient live failure the three cases expecting a REFUSAL (another
 approver's row, an out-of-scope record, a 401 table) each CAUGHT the transport error and

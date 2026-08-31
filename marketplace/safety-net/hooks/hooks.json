@@ -1,0 +1,209 @@
+{
+  "description": "safety-net plugin hooks",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/run-hook",
+              "bash-security-guard.py"
+            ],
+            "timeout": 30
+          }
+        ],
+        "matcher": "Bash"
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/run-hook",
+              "config-guard.py"
+            ],
+            "timeout": 30
+          }
+        ],
+        "matcher": "Write|Edit"
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/run-hook",
+              "memory-write-guard.py"
+            ],
+            "timeout": 30
+          }
+        ],
+        "matcher": "Write|Edit"
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/run-hook",
+              "search-path-guard.py"
+            ],
+            "timeout": 30
+          }
+        ],
+        "matcher": "Glob|Grep"
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/run-hook",
+              "block-partial-read.py"
+            ],
+            "timeout": 30
+          }
+        ],
+        "matcher": "Read"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/run-hook",
+              "post-write-edit.py"
+            ],
+            "timeout": 30
+          }
+        ],
+        "matcher": "Write|Edit"
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/run-hook",
+              "result-injection-guard.py"
+            ],
+            "timeout": 30
+          }
+        ],
+        "matcher": "mcp__.*"
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/run-hook",
+              "loop-detector.py"
+            ],
+            "timeout": 20
+          }
+        ],
+        "matcher": "mcp__.*|Bash|Read|Glob|Grep"
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/run-hook",
+              "bash-security-audit.py"
+            ],
+            "timeout": 30
+          }
+        ],
+        "matcher": "Bash"
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/run-hook",
+              "context-monitor.py"
+            ],
+            "timeout": 20
+          }
+        ],
+        "matcher": "mcp__.*|Bash|Read|Write|Edit|Glob|Grep"
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/run-hook",
+              "post-failure-guide.py"
+            ],
+            "timeout": 20
+          }
+        ],
+        "matcher": "mcp__.*|Bash|Read|Edit|Write"
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/run-hook",
+              "bash-error-classifier.py"
+            ],
+            "timeout": 30
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/run-hook",
+              "precompact-checkpoint.py"
+            ],
+            "timeout": 20
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/run-hook",
+              "promise-checker.py"
+            ],
+            "timeout": 20
+          }
+        ]
+      }
+    ]
+  }
+}

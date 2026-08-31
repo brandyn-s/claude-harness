@@ -1,0 +1,4 @@
+# Per-run A/B transcripts (arm, ranking, groups records) are reproducible
+# via run_live.py and not committed. The compact, re-gradeable sample-records-*.json
+# IS committed for Phase-9 auditability.
+transcripts-*.json

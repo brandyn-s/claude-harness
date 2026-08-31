@@ -1,0 +1,440 @@
+{
+  "_about": "Compact, re-gradeable sample of the N=3 A/B run (2026-05-31). Re-run grade.score_run(fixture, [records of one arm in one run]) to reproduce results.json. Verbose model text + web_search payloads stripped (reproducible via run_live.py). Phase-9 auditability artifact.",
+  "runs": [
+    {
+      "run_idx": 0,
+      "records": [
+        {
+          "arm": "with_skill",
+          "id": "listwise-rerank",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "per-finding-counterfactual",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "behavioral-labels",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "blinded-judge-pool",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "with_skill",
+          "id": "noise-aware-significance",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "with_skill",
+          "id": "held-out-grader",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "ship-binary-not-optin",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "with_skill",
+          "id": "xml-rule-format",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "context-fork-dispatch",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "downgrade-orchestration-model",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "auto-learn-loop",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "with_skill",
+          "id": "checklist-imperatives",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "baseline",
+          "id": "listwise-rerank",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "baseline",
+          "id": "behavioral-labels",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "baseline",
+          "id": "blinded-judge-pool",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "baseline",
+          "id": "noise-aware-significance",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "baseline",
+          "id": "ship-binary-not-optin",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "baseline",
+          "id": "per-finding-counterfactual",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "baseline",
+          "id": "held-out-grader",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "baseline",
+          "id": "xml-rule-format",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "baseline",
+          "id": "context-fork-dispatch",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "baseline",
+          "id": "checklist-imperatives",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "baseline",
+          "id": "auto-learn-loop",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "baseline",
+          "id": "downgrade-orchestration-model",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "baseline",
+          "id": "parallel-worktree-cleanup",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "baseline",
+          "id": "toon-format",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "with_skill",
+          "id": "parallel-worktree-cleanup",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "toon-format",
+          "decision": "DEFER"
+        }
+      ]
+    },
+    {
+      "run_idx": 1,
+      "records": [
+        {
+          "arm": "with_skill",
+          "id": "noise-aware-significance",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "with_skill",
+          "id": "behavioral-labels",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "listwise-rerank",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "with_skill",
+          "id": "blinded-judge-pool",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "with_skill",
+          "id": "per-finding-counterfactual",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "held-out-grader",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "with_skill",
+          "id": "auto-learn-loop",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "with_skill",
+          "id": "context-fork-dispatch",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "checklist-imperatives",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "with_skill",
+          "id": "downgrade-orchestration-model",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "ship-binary-not-optin",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "xml-rule-format",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "baseline",
+          "id": "listwise-rerank",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "baseline",
+          "id": "behavioral-labels",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "baseline",
+          "id": "blinded-judge-pool",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "baseline",
+          "id": "noise-aware-significance",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "baseline",
+          "id": "held-out-grader",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "baseline",
+          "id": "per-finding-counterfactual",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "baseline",
+          "id": "ship-binary-not-optin",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "baseline",
+          "id": "xml-rule-format",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "baseline",
+          "id": "auto-learn-loop",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "baseline",
+          "id": "context-fork-dispatch",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "baseline",
+          "id": "checklist-imperatives",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "baseline",
+          "id": "downgrade-orchestration-model",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "baseline",
+          "id": "parallel-worktree-cleanup",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "baseline",
+          "id": "toon-format",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "with_skill",
+          "id": "parallel-worktree-cleanup",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "toon-format",
+          "decision": "REJECT"
+        }
+      ]
+    },
+    {
+      "run_idx": 2,
+      "records": [
+        {
+          "arm": "with_skill",
+          "id": "per-finding-counterfactual",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "with_skill",
+          "id": "listwise-rerank",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "behavioral-labels",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "held-out-grader",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "with_skill",
+          "id": "blinded-judge-pool",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "with_skill",
+          "id": "noise-aware-significance",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "xml-rule-format",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "ship-binary-not-optin",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "auto-learn-loop",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "context-fork-dispatch",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "checklist-imperatives",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "downgrade-orchestration-model",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "baseline",
+          "id": "listwise-rerank",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "baseline",
+          "id": "behavioral-labels",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "baseline",
+          "id": "noise-aware-significance",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "baseline",
+          "id": "blinded-judge-pool",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "baseline",
+          "id": "per-finding-counterfactual",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "baseline",
+          "id": "held-out-grader",
+          "decision": "ADOPT"
+        },
+        {
+          "arm": "baseline",
+          "id": "ship-binary-not-optin",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "baseline",
+          "id": "xml-rule-format",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "baseline",
+          "id": "auto-learn-loop",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "baseline",
+          "id": "checklist-imperatives",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "baseline",
+          "id": "context-fork-dispatch",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "baseline",
+          "id": "downgrade-orchestration-model",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "baseline",
+          "id": "toon-format",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "baseline",
+          "id": "parallel-worktree-cleanup",
+          "decision": "REJECT"
+        },
+        {
+          "arm": "with_skill",
+          "id": "parallel-worktree-cleanup",
+          "decision": "DEFER"
+        },
+        {
+          "arm": "with_skill",
+          "id": "toon-format",
+          "decision": "DEFER"
+        }
+      ]
+    }
+  ]
+}

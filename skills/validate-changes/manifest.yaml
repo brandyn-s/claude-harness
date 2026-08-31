@@ -1,6 +1,6 @@
 id: validate-changes
 type: skill
-description: "Validate architecture changes (skills, hooks, rules, memory, MCP servers) with regression, effectiveness, and A/B testing adapted to change type. Trigger phrases: 'validate changes', 'test this', 'A/B test', 'regression test', 'did the change work'. Do NOT use for code testing (use pytest/TDD), deployment verification (use /mcp-diagnose), or STIG verification (use /stig-verify)."
+description: "Validate architecture changes (skills, hooks, rules, memory, MCP servers) with regression, effectiveness, and A/B testing adapted to change type. Trigger phrases: 'validate changes', 'test this', 'A/B test', 'regression test', 'did the change work'. Do NOT use for code testing (use pytest/TDD), deployment verification, or STIG verification."
 category: maintenance
 requires_tools:
   - AskUserQuestion

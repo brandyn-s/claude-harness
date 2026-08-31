@@ -1,0 +1,203 @@
+{
+  "helpers": [
+    "bin/audit-skill-oracle.py",
+    "bin/audit-skill.py",
+    "bin/kb-dedup.py",
+    "bin/kb-entry-budget.py",
+    "bin/pr-merge-verified.py",
+    "bin/reconcile-skill-tools.py",
+    "bin/staged-spec-staleness.py",
+    "bin/transcript_friction.py",
+    "bin/transcript_friction_corpus.py",
+    "bin/transcript_friction_gate.py",
+    "bin/transcript_ground_check.py",
+    "bin/transcript_recurrence.py",
+    "bin/transcript_reduce.py",
+    "bin/x-monitor.config.json",
+    "bin/x-monitor.py",
+    "scripts/_gather_repos_archive.py",
+    "scripts/_gather_screen.py",
+    "scripts/build-marketplace.py",
+    "scripts/cleanup-indexes.py",
+    "scripts/hook_exec_form.py",
+    "scripts/retro-extract.py",
+    "scripts/verify-indexes.py",
+    "scripts/wire_hooks.py"
+  ],
+  "packaged_skills": [
+    "distill",
+    "recall",
+    "garden",
+    "harness-prune",
+    "retrospective",
+    "review-learnings",
+    "validate-changes",
+    "healthcheck",
+    "capture",
+    "retro",
+    "mega-distill",
+    "mega-capture",
+    "verification-before-completion",
+    "plateau-diagnose",
+    "build-measurement-harness",
+    "manifest-gen",
+    "audit-architecture",
+    "audit-rules",
+    "ship-hook",
+    "gather-claude",
+    "ship",
+    "persona",
+    "brainstorm",
+    "fp-check",
+    "scout-frontier",
+    "triage",
+    "deep-dive",
+    "gather-intel",
+    "gather-research",
+    "scout",
+    "scout-skills",
+    "gather-repos",
+    "evaluate-repos"
+  ],
+  "requires_skills": {
+    "audit-architecture": [],
+    "audit-rules": [
+      "validate-changes"
+    ],
+    "brainstorm": [],
+    "build-measurement-harness": [
+      "persona",
+      "plateau-diagnose",
+      "recall",
+      "validate-changes"
+    ],
+    "capture": [],
+    "deep-dive": [],
+    "distill": [
+      "ship-hook"
+    ],
+    "evaluate-repos": [
+      "gather-repos"
+    ],
+    "fp-check": [],
+    "garden": [],
+    "gather-claude": [],
+    "gather-intel": [
+      "capture"
+    ],
+    "gather-repos": [
+      "evaluate-repos"
+    ],
+    "gather-research": [],
+    "harness-prune": [],
+    "healthcheck": [],
+    "manifest-gen": [],
+    "mega-capture": [
+      "capture",
+      "mega-distill",
+      "ship"
+    ],
+    "mega-distill": [
+      "distill",
+      "ship"
+    ],
+    "persona": [
+      "brainstorm",
+      "fp-check",
+      "scout-frontier",
+      "triage"
+    ],
+    "plateau-diagnose": [
+      "persona",
+      "recall"
+    ],
+    "recall": [],
+    "retro": [
+      "distill",
+      "capture",
+      "ship",
+      "mega-distill",
+      "mega-capture"
+    ],
+    "retrospective": [],
+    "review-learnings": [],
+    "scout": [
+      "gather-repos",
+      "evaluate-repos"
+    ],
+    "scout-frontier": [
+      "deep-dive",
+      "gather-intel",
+      "gather-research",
+      "scout",
+      "scout-skills"
+    ],
+    "scout-skills": [
+      "ship"
+    ],
+    "ship": [],
+    "ship-hook": [],
+    "triage": [],
+    "validate-changes": [
+      "gather-claude"
+    ],
+    "verification-before-completion": []
+  },
+  "root_skills": [
+    "distill",
+    "recall",
+    "garden",
+    "harness-prune",
+    "retrospective",
+    "review-learnings",
+    "validate-changes",
+    "healthcheck",
+    "capture",
+    "retro",
+    "mega-distill",
+    "mega-capture",
+    "verification-before-completion",
+    "plateau-diagnose",
+    "build-measurement-harness",
+    "manifest-gen",
+    "audit-architecture",
+    "audit-rules"
+  ],
+  "schema_version": 1,
+  "shared_assets": [
+    "adversarial-validation.md",
+    "change-validation.md",
+    "gather-conventions.md",
+    "linear-routing.md",
+    "model-overlays/fable-5.md",
+    "model-overlays/mythos-5.md",
+    "model-overlays/opus-5.md",
+    "model-overlays/sonnet-5.md",
+    "model-runtime-policy.md",
+    "oracle/ROOT-CAUSE-ANALYSIS.md",
+    "oracle/SPEC.md",
+    "oracle/__init__.py",
+    "oracle/act_on.py",
+    "oracle/claim.py",
+    "oracle/corpus.py",
+    "oracle/discover.py",
+    "oracle/ensemble.py",
+    "oracle/ensemble_dispatch.py",
+    "oracle/finding.py",
+    "oracle/fix_loop.py",
+    "oracle/kappa.py",
+    "oracle/profile.py",
+    "oracle/report.py",
+    "oracle/reverify.py",
+    "oracle/specificity.py",
+    "oracle/templates/phase2-prompt.md",
+    "oracle/trace.py",
+    "oracle/tracker.py",
+    "oracle/validate.py",
+    "output-grounding.md",
+    "project-dir.md",
+    "repo-map.md",
+    "stats.py",
+    "tuning-notes.md"
+  ]
+}

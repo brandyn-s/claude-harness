@@ -1,0 +1,7 @@
+{
+  "rules": [
+    { "pattern": "real-server", "skill": "investigate", "agent": "general-ops" },
+    { "pattern": "crowdstrike", "skill": "investigate", "agent": "security-ops" }
+  ],
+  "skipPatterns": []
+}

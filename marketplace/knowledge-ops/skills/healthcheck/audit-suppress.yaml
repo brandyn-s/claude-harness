@@ -1,0 +1,9 @@
+# Audit suppressions for healthcheck.
+# See skills/audit-skill/SKILL.md for the schema.
+suppressions:
+  - code: G1
+    target: "scripts/verify-indexes.py"
+    reason: "Check 11 invokes ${CLAUDE_PLUGIN_ROOT}/scripts/verify-indexes.py at runtime; the source file lives at $REPO/scripts/verify-indexes.py and is symlinked into ${CLAUDE_PLUGIN_ROOT}/scripts/ at deployment. The audit env may run before deployment (no symlink yet); the documented command is correct for end-user deployments. See audit-skill/audit-context.md on ${CLAUDE_PLUGIN_ROOT}/scripts/ expectation."
+  - code: G1
+    target: "scripts/cleanup-indexes.py"
+    reason: "Same deployment chain as verify-indexes.py — source at $REPO/scripts/cleanup-indexes.py, symlinked to ${CLAUDE_PLUGIN_ROOT}/scripts/cleanup-indexes.py at deployment time. Healthcheck remediation references the deployed path."

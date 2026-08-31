@@ -1,7 +1,7 @@
 ---
 name: validate-changes
 description: "Validate architecture changes (skills, hooks, rules, MCP) with regression and A/B testing."
-when_to_use: 'Use when architecture changes (skills, hooks, rules, memory, MCP servers) need validation before shipping. Runs regression, effectiveness, and A/B testing adapted to the change type. Trigger phrases: "validate changes", "test this", "A/B test", "regression test", "did the change work". Do NOT use for code testing (use pytest/TDD), deployment verification (use /mcp-diagnose), or STIG verification (use /stig-verify).'
+when_to_use: 'Use when architecture changes (skills, hooks, rules, memory, MCP servers) need validation before shipping. Runs regression, effectiveness, and A/B testing adapted to the change type. Trigger phrases: "validate changes", "test this", "A/B test", "regression test", "did the change work". Do NOT use for code testing (use pytest/TDD), deployment verification, or STIG verification.'
 argument-hint: "[omit for full git-state auto-detection, or specify file paths]"
 effort: high
 metadata:
@@ -59,7 +59,7 @@ Present the detected changes:
 
 ```
 Detected changes:
-  [skill]  skills/investigate/SKILL.md
+  [skill]  a separate skill (not included in this export)
   [skill]  skills/triage/SKILL.md
   [hook]   hooks/bash-security-guard.py
   [rule]   rules/context7-docs.md

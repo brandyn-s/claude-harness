@@ -1,0 +1,93 @@
+name: plugins
+
+# Validates the plugin marketplace and proves the generated bundles are in sync
+# with their sources.
+#
+# The sync check is the load-bearing half. `claude plugin validate` proves the
+# manifests are well-formed; it cannot tell you the bundles were rebuilt. Without
+# the sync check a stale bundle ships OLD behaviour under a NEW version number,
+# which is worse than a build failure because nothing looks wrong.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # build-marketplace.py reads the prior version ledger from origin/main
+          # and treats its absence as fatal, so a shallow clone breaks the build.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Validate the marketplace manifest
+        run: claude plugin validate . --strict
+
+      - name: Validate every plugin manifest
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          count=0
+          for dir in marketplace/*/; do
+            echo "--- $dir"
+            claude plugin validate "$dir" --strict
+            count=$((count + 1))
+          done
+          # Vacuity floor: an empty loop would pass silently and prove nothing.
+          if [ "$count" -eq 0 ]; then
+            echo "::error::validated 0 plugins - the marketplace tree is missing"
+            exit 1
+          fi
+          echo "validated $count plugin(s)"
+
+      - name: Prove the generated bundles match their sources
+        run: |
+          set -euo pipefail
+          git fetch origin main --quiet
+          python3 scripts/build-marketplace.py
+          # Use `git status --porcelain`, NOT `git diff`. `git diff` reports only
+          # TRACKED files, so a newly generated plugin file is invisible to it and
+          # the check passes forever. Measured 2026-08-31: with marketplace/
+          # untracked, `git diff --quiet -- marketplace/` returned 0 even after a
+          # bundled file was deliberately mutated.
+          drift="$(git status --porcelain -- marketplace/ .claude-plugin/)"
+          if [ -n "$drift" ]; then
+            echo "::error::marketplace/ is stale - run scripts/build-marketplace.py and commit"
+            echo "$drift"
+            exit 1
+          fi
+          echo "generated bundles are in sync"
+
+      - name: Prove the sync check can actually fail
+        run: |
+          set -euo pipefail
+          # A drift check that cannot fail is not a check. Plant drift, require
+          # detection, then restore and require clean.
+          target="$(find marketplace -name '*.py' -print -quit)"
+          [ -n "$target" ] || { echo "::error::no bundled .py to test with"; exit 1; }
+          cp "$target" /tmp/sync-control.bak
+          printf '
+# drift control
+' >> "$target"
+          if [ -z "$(git status --porcelain -- marketplace/)" ]; then
+            echo "::error::drift check did NOT fire on a mutated bundle - it is vacuous"
+            exit 1
+          fi
+          cp /tmp/sync-control.bak "$target"
+          [ -z "$(git status --porcelain -- marketplace/)" ] || {
+            echo "::error::restore failed; tree left dirty"; exit 1; }
+          echo "drift check fires correctly"

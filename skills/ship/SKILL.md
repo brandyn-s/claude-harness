@@ -207,7 +207,7 @@ Fix any failure HERE, not after CI. Each failure that reaches CI costs a
 ~4-minute round-trip to learn something this answers in under a second.
 
 Do NOT hand-pick a subset of the gates. That is precisely the failure mode:
-- 2026-06-14 `/lab-review` #1276 — **3 CI cycles**; only `validate-skills` +
+- 2026-06-14 a separate skill (not included in this export) #1276 — **3 CI cycles**; only `validate-skills` +
   `audit-skill` were run locally, and the drift gate + cross-chain validator are
   separate Matrix-validate steps.
 - 2026-07-28 `/gather-claude-endpoints` #1740 — **2 CI cycles**; prose in a

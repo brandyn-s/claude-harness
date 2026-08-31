@@ -1,0 +1,160 @@
+{
+  "fixture_name": "observability-paradigms",
+  "version": "1.0",
+  "created": "2026-04-27",
+  "purpose": "Validate paradigm-distance rubric and scout-frontier criteria for observability/telemetry-storage domain. Proves /scout-frontier rubric generalizes beyond code intelligence. 6 expected paradigm-distinct findings + 6 negative controls.",
+  "test_query": "observability storage engines paradigm-distinct from example OTel + Athena pipeline",
+  "incumbent": {
+    "name": "OTel + Athena pipeline",
+    "data_structure": "table",
+    "computation_model": "lookup",
+    "abstraction_level": "behavior",
+    "time_dynamics": "streaming",
+    "_notes": "OpenTelemetry collectors export traces/logs/metrics to Parquet on S3; Athena queries via Presto SQL over partitioned columnar tables. Behavior abstraction = spans/events; lookup = SQL scan-and-filter; streaming = continuous ingest with eventual consistency."
+  },
+  "expected_paradigm_distinct": [
+    {
+      "name": "Grafana Tempo (trace-as-graph with exemplar links)",
+      "url": "https://github.com/grafana/tempo",
+      "data_structure": "graph",
+      "computation_model": "traversal",
+      "abstraction_level": "behavior",
+      "time_dynamics": "streaming",
+      "differs_on": ["data_structure", "computation_model"],
+      "distance": 2,
+      "_notes": "Tempo's TraceQL treats traces as graphs of spans with parent/child + exemplar edges. Queries traverse the span graph rather than scanning tables. Same behavior abstraction (spans), same streaming, but graph + traversal vs table + lookup."
+    },
+    {
+      "name": "eBPF runtime tracing (Pixie / Parca / Inspektor Gadget)",
+      "url": "https://github.com/pixie-io/pixie",
+      "data_structure": "stream",
+      "computation_model": "abstract-interpretation",
+      "abstraction_level": "behavior",
+      "time_dynamics": "runtime-traced",
+      "differs_on": ["data_structure", "computation_model", "time_dynamics"],
+      "distance": 3,
+      "_notes": "eBPF programs attached to kernel hooks emit live event streams; queries run as continuous filters over the stream rather than batched lookups over stored data. Runtime-traced = no pre-defined instrumentation; observability emerges from kernel-level interception. Abstract interpretation describes how eBPF programs symbolically execute kernel events under verifier-imposed safety bounds."
+    },
+    {
+      "name": "Honeycomb / wide-column sampled tracing",
+      "url": "https://docs.honeycomb.io/concepts/data-model/",
+      "data_structure": "table",
+      "computation_model": "lookup",
+      "abstraction_level": "intent",
+      "time_dynamics": "streaming",
+      "differs_on": ["abstraction_level"],
+      "distance": 1,
+      "_notes": "Honeycomb's BubbleUp surfaces high-cardinality 'why is this slow' answers from sampled wide events. The atomic unit is the user-intent (request as understood by the application), not raw spans — wide events embed business-semantic fields. Same backing structure (columnar table) and lookup, but the abstraction shifts from system-behavior to application-intent."
+    },
+    {
+      "name": "Anomaly detection on logs (learned baselines, e.g., LogReducer / Loglizer)",
+      "url": "https://arxiv.org/abs/2008.06448",
+      "data_structure": "table",
+      "computation_model": "learning",
+      "abstraction_level": "behavior",
+      "time_dynamics": "streaming",
+      "differs_on": ["computation_model"],
+      "distance": 1,
+      "_notes": "Learned models consume log streams and emit anomaly scores; queries become 'show me unusual events' rather than 'show me events matching this filter'. Same table backing + behavior abstraction + streaming, but computation is learning-based rather than lookup-based."
+    },
+    {
+      "name": "Datalog over telemetry facts (Logica / Differential Datalog)",
+      "url": "https://github.com/google/logica",
+      "data_structure": "fact-database",
+      "computation_model": "datalog-inference",
+      "abstraction_level": "behavior",
+      "time_dynamics": "streaming",
+      "differs_on": ["data_structure", "computation_model"],
+      "distance": 2,
+      "_notes": "Telemetry events are facts; queries are recursive Datalog rules deriving new facts (e.g., 'service A is upstream of service B if A calls B or A calls something that's upstream of B'). Same behavior abstraction + streaming, but fact-database + Datalog inference vs table + lookup. Differential Datalog adds incremental fact updates as new events stream in."
+    },
+    {
+      "name": "Distributed continuous profiling (Pyroscope flamegraph storage)",
+      "url": "https://github.com/grafana/pyroscope",
+      "data_structure": "tree",
+      "computation_model": "traversal",
+      "abstraction_level": "behavior",
+      "time_dynamics": "streaming",
+      "differs_on": ["data_structure", "computation_model"],
+      "distance": 2,
+      "_notes": "Profiles stored as merged flamegraph trees indexed by time + tag set; queries traverse the tree (zoom, diff, focus on subtree) rather than scanning rows. Same behavior abstraction + streaming, but tree + traversal vs table + lookup."
+    }
+  ],
+  "negative_controls": [
+    {
+      "name": "ClickHouse (column-store telemetry)",
+      "url": "https://github.com/ClickHouse/ClickHouse",
+      "data_structure": "table",
+      "computation_model": "lookup",
+      "abstraction_level": "behavior",
+      "time_dynamics": "streaming",
+      "distance": 0,
+      "_notes": "The feature-parity trap: column-store + SQL + spans + streaming = the incumbent's four axes, just better-implemented. Carries full axes so the scorer confirms it recomputes to distance 0 (rubric must not reward feature parity). For /scout, not /scout-frontier."
+    },
+    {
+      "name": "AWS Timestream",
+      "data_structure": "table",
+      "computation_model": "lookup",
+      "abstraction_level": "behavior",
+      "time_dynamics": "streaming",
+      "distance": 0,
+      "_notes": "Time-series table + SQL lookup + behavior + streaming. Same paradigm as Athena pipeline, different vendor."
+    },
+    {
+      "name": "Datadog APM",
+      "data_structure": "table",
+      "computation_model": "lookup",
+      "abstraction_level": "behavior",
+      "time_dynamics": "streaming",
+      "distance": 0,
+      "_notes": "Hosted SaaS over column-store + SQL-like; behavior abstraction; streaming. Same paradigm, different SLA."
+    },
+    {
+      "name": "Splunk Observability Cloud",
+      "data_structure": "table",
+      "computation_model": "lookup",
+      "abstraction_level": "behavior",
+      "time_dynamics": "streaming",
+      "distance": 0,
+      "_notes": "Indexed log table + search-language lookup + behavior + streaming. Same paradigm, different query DSL."
+    },
+    {
+      "name": "Elastic Observability (ELK)",
+      "data_structure": "table",
+      "computation_model": "lookup",
+      "abstraction_level": "behavior",
+      "time_dynamics": "streaming",
+      "distance": 0,
+      "_notes": "Inverted index is a structured-index implementation detail, but the user-facing primitive is still lookup over rows (KQL/SQL) — so the dominant-primitive rule (paradigm-distance-rubric.md) scores it table + lookup + behavior + streaming, distance 0."
+    },
+    {
+      "name": "Grafana Loki (log aggregation)",
+      "data_structure": "table",
+      "computation_model": "lookup",
+      "abstraction_level": "behavior",
+      "time_dynamics": "streaming",
+      "distance": 0,
+      "_notes": "Compressed-chunk table + LogQL lookup + behavior + streaming. Promtail + Loki is OTel-Collector + Athena with different chunking strategy."
+    }
+  ],
+  "instrument_validation": {
+    "tpr_methodology": "Every expected_paradigm_distinct finding must recompute to distance >= 1 from its per-axis values (TPR = 1.0). Every negative control carries full per-axis values and must recompute to distance 0 (FPR = 0). The feature-parity trap (ClickHouse) lives in negative_controls, NOT in the expected set, so the TPR contract ('all expected >= 1') holds literally — score_rubric.py confirms ClickHouse recomputes to 0.",
+    "expected_distance_distribution": {
+      "tier_3": 1,
+      "tier_2": 3,
+      "tier_1": 2,
+      "tier_0_negative_controls": 6
+    },
+    "validation_status": "Hand-scored 2026-04-27; restructured 2026-05-31 so score_rubric.py recomputes distance from axes for both the expected set (TPR) and the controls (FPR). The earlier layout put ClickHouse (distance 0) inside the expected set and left controls without axes, so the scorer never actually measured FPR."
+  },
+  "domain_generalization_notes": {
+    "purpose": "Proves the 4-axis rubric is domain-agnostic — same axes apply outside code intelligence.",
+    "axis_mappings_for_observability": {
+      "data_structure": "table (Athena/columnar) | graph (Tempo) | tree (flamegraphs) | stream (eBPF) | fact-database (Datalog over telemetry)",
+      "computation_model": "lookup (SQL scan) | traversal (TraceQL) | learning (anomaly detection) | datalog-inference (Logica) | abstract-interpretation (eBPF verifier-bounded execution)",
+      "abstraction_level": "behavior (spans, events, log lines) | intent (Honeycomb wide events) | scope (kernel-namespace boundaries) — most observability work sits at behavior; intent is the high-leverage shift",
+      "time_dynamics": "streaming (continuous ingest) | runtime-traced (eBPF, no pre-instrumentation) | static (snapshot dumps for forensics)"
+    },
+    "cross_domain_validation": "Building this fixture revealed the same rubric values map cleanly to a non-code-intel domain. The axes are abstract enough to cover any structured-data backing system. This is evidence the rubric is not over-fit to code intelligence."
+  }
+}

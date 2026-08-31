@@ -20,8 +20,7 @@ requires_tools:
 requires_topics: []
 requires_rules:
   - platform-constraints
-requires_skills:
-  - pull-repos
+requires_skills: []
 requires_auth: []
 
 input_contract:

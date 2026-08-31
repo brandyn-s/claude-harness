@@ -1,0 +1,103 @@
+{
+  "helpers": [
+    "scripts/_gather_repos_archive.py",
+    "scripts/_gather_screen.py"
+  ],
+  "packaged_skills": [
+    "semgrep",
+    "codeql",
+    "fp-check",
+    "differential-review",
+    "insecure-defaults",
+    "sharp-edges",
+    "variant-analysis",
+    "sarif-parsing",
+    "agentic-actions-auditor",
+    "triage",
+    "semgrep-rule-creator",
+    "verify-search-result",
+    "threat-model",
+    "code-explore",
+    "codebase-memory-exploring",
+    "evaluate-repos",
+    "gather-repos"
+  ],
+  "requires_skills": {
+    "agentic-actions-auditor": [],
+    "code-explore": [
+      "codebase-memory-exploring",
+      "evaluate-repos"
+    ],
+    "codebase-memory-exploring": [],
+    "codeql": [],
+    "differential-review": [],
+    "evaluate-repos": [
+      "gather-repos"
+    ],
+    "fp-check": [],
+    "gather-repos": [
+      "evaluate-repos"
+    ],
+    "insecure-defaults": [],
+    "sarif-parsing": [],
+    "semgrep": [],
+    "semgrep-rule-creator": [],
+    "sharp-edges": [],
+    "threat-model": [],
+    "triage": [],
+    "variant-analysis": [
+      "semgrep",
+      "codeql"
+    ],
+    "verify-search-result": [
+      "code-explore"
+    ]
+  },
+  "root_skills": [
+    "semgrep",
+    "codeql",
+    "fp-check",
+    "differential-review",
+    "insecure-defaults",
+    "sharp-edges",
+    "variant-analysis",
+    "sarif-parsing",
+    "agentic-actions-auditor",
+    "triage",
+    "semgrep-rule-creator",
+    "verify-search-result",
+    "threat-model"
+  ],
+  "schema_version": 1,
+  "shared_assets": [
+    "adversarial-validation.md",
+    "model-overlays/fable-5.md",
+    "model-overlays/mythos-5.md",
+    "model-overlays/opus-5.md",
+    "model-overlays/sonnet-5.md",
+    "model-runtime-policy.md",
+    "oracle/ROOT-CAUSE-ANALYSIS.md",
+    "oracle/SPEC.md",
+    "oracle/__init__.py",
+    "oracle/act_on.py",
+    "oracle/claim.py",
+    "oracle/corpus.py",
+    "oracle/discover.py",
+    "oracle/ensemble.py",
+    "oracle/ensemble_dispatch.py",
+    "oracle/finding.py",
+    "oracle/fix_loop.py",
+    "oracle/kappa.py",
+    "oracle/profile.py",
+    "oracle/report.py",
+    "oracle/reverify.py",
+    "oracle/specificity.py",
+    "oracle/templates/phase2-prompt.md",
+    "oracle/trace.py",
+    "oracle/tracker.py",
+    "oracle/validate.py",
+    "repo-map.md",
+    "stats.py",
+    "subagent-tool-discipline.md"
+  ]
+}

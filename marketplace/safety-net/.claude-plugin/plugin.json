@@ -1,0 +1,9 @@
+{
+  "name": "safety-net",
+  "description": "Production-grade safety hooks and config tooling \u2014 loop detection, injection guards, context monitoring, security audit, promise checking, hook staging, and proxy guardrail management. The enforcement layer.",
+  "version": "1.1.25",
+  "author": {
+    "name": "the maintainers",
+    "url": "https://github.com/example-org"
+  }
+}

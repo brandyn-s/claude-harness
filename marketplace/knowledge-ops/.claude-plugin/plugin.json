@@ -1,0 +1,9 @@
+{
+  "name": "knowledge-ops",
+  "description": "Session knowledge, admin, and record-keeping \u2014 extract learnings, capture decisions, curate a knowledge base, retrospectives, review learnings, validate changes, healthchecks, claim verification, Claude and OpenAI monitoring/admin/cost, cross-provider AI monitoring, Linear status posting, Obsidian sync, workspace provisioning, weekly engineering updates, manifest generation, cross-tool investigation, and GitHub repo sync.",
+  "version": "1.1.39",
+  "author": {
+    "name": "the maintainers",
+    "url": "https://github.com/example-org"
+  }
+}

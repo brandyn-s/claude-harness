@@ -1,0 +1,4 @@
+# Heavy full A/B transcripts (verbose model text + web_search payloads) are
+# reproducible via run_live.py and not committed. The compact, re-gradeable
+# sample-records-*.json IS committed for Phase-9 auditability.
+transcripts-*.json

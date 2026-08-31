@@ -1,0 +1,116 @@
+{
+  "helpers": [
+    "bin/kb-dedup.py",
+    "bin/kb-entry-budget.py",
+    "bin/pr-merge-verified.py",
+    "bin/x-monitor.config.json",
+    "bin/x-monitor.py",
+    "scripts/_gather_repos_archive.py",
+    "scripts/_gather_screen.py",
+    "scripts/hook_exec_form.py",
+    "scripts/wire_hooks.py"
+  ],
+  "packaged_skills": [
+    "gather-intel",
+    "gather-repos",
+    "evaluate-repos",
+    "scout",
+    "scout-frontier",
+    "scout-skills",
+    "gather-claude",
+    "gather-vendor",
+    "gather-research",
+    "deep-dive",
+    "roundtable",
+    "absorb",
+    "persona",
+    "capture",
+    "ship",
+    "brainstorm",
+    "distill",
+    "fp-check",
+    "triage",
+    "ship-hook"
+  ],
+  "requires_skills": {
+    "absorb": [],
+    "brainstorm": [],
+    "capture": [],
+    "deep-dive": [],
+    "distill": [
+      "ship-hook"
+    ],
+    "evaluate-repos": [
+      "gather-repos"
+    ],
+    "fp-check": [],
+    "gather-claude": [],
+    "gather-intel": [
+      "capture"
+    ],
+    "gather-repos": [
+      "evaluate-repos"
+    ],
+    "gather-research": [],
+    "gather-vendor": [],
+    "persona": [
+      "brainstorm",
+      "fp-check",
+      "scout-frontier",
+      "triage"
+    ],
+    "roundtable": [
+      "brainstorm",
+      "distill",
+      "fp-check",
+      "triage"
+    ],
+    "scout": [
+      "gather-repos",
+      "evaluate-repos"
+    ],
+    "scout-frontier": [
+      "deep-dive",
+      "gather-intel",
+      "gather-research",
+      "scout",
+      "scout-skills"
+    ],
+    "scout-skills": [
+      "ship"
+    ],
+    "ship": [],
+    "ship-hook": [],
+    "triage": []
+  },
+  "root_skills": [
+    "gather-intel",
+    "gather-repos",
+    "evaluate-repos",
+    "scout",
+    "scout-frontier",
+    "scout-skills",
+    "gather-claude",
+    "gather-vendor",
+    "gather-research",
+    "deep-dive",
+    "roundtable",
+    "absorb",
+    "persona"
+  ],
+  "schema_version": 1,
+  "shared_assets": [
+    "adversarial-validation.md",
+    "gather-conventions.md",
+    "linear-routing.md",
+    "model-overlays/fable-5.md",
+    "model-overlays/mythos-5.md",
+    "model-overlays/opus-5.md",
+    "model-overlays/sonnet-5.md",
+    "model-runtime-policy.md",
+    "output-grounding.md",
+    "project-dir.md",
+    "stats.py",
+    "tuning-notes.md"
+  ]
+}

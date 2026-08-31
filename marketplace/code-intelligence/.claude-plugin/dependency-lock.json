@@ -1,0 +1,51 @@
+{
+  "helpers": [
+    "scripts/_gather_repos_archive.py",
+    "scripts/_gather_screen.py",
+    "scripts/cleanup-indexes.py",
+    "scripts/verify-indexes.py"
+  ],
+  "packaged_skills": [
+    "code-explore",
+    "codebase-memory-exploring",
+    "codebase-memory-quality",
+    "codebase-memory-tracing",
+    "index-repo",
+    "api-ingest",
+    "api-preflight",
+    "evaluate-repos",
+    "gather-repos"
+  ],
+  "requires_skills": {
+    "api-ingest": [],
+    "api-preflight": [],
+    "code-explore": [
+      "codebase-memory-exploring",
+      "evaluate-repos"
+    ],
+    "codebase-memory-exploring": [],
+    "codebase-memory-quality": [],
+    "codebase-memory-tracing": [],
+    "evaluate-repos": [
+      "gather-repos"
+    ],
+    "gather-repos": [
+      "evaluate-repos"
+    ],
+    "index-repo": []
+  },
+  "root_skills": [
+    "code-explore",
+    "codebase-memory-exploring",
+    "codebase-memory-quality",
+    "codebase-memory-tracing",
+    "index-repo",
+    "api-ingest",
+    "api-preflight"
+  ],
+  "schema_version": 1,
+  "shared_assets": [
+    "stats.py",
+    "tuning-notes.md"
+  ]
+}

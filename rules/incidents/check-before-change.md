@@ -780,7 +780,7 @@ WHY: CI workflows, hook configs, import statements, settings.json hook
 
 ```
 WHY (recently-merged twin): 2026-06-14 — a second session began building the
-/lab-review skill ~14 min after another session MERGED it (#1276). Invisible to
+a separate skill (not included in this export) skill ~14 min after another session MERGED it (#1276). Invisible to
 `--state open`; caught only because a just-updated sibling doc (skill-standards.md)
 cited "#1276". Pivoted to a fix-forward refinement (#1278) instead of a duplicate.
 ```

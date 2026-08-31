@@ -1,0 +1,46 @@
+{
+  "name": "claude-config",
+  "owner": {
+    "name": "the maintainers",
+    "url": "https://github.com/example-org"
+  },
+  "description": "Example-internal Claude Code plugin marketplace. Several plugins reference internal MCP servers and org infrastructure; see PORTABLE.md before sharing outside the org.",
+  "plugins": [
+    {
+      "name": "safety-net",
+      "source": "./marketplace/safety-net",
+      "description": "Production-grade safety hooks and config tooling \u2014 loop detection, injection guards, context monitoring, security audit, promise checking, hook staging, and proxy guardrail management. The enforcement layer.",
+      "version": "1.1.25"
+    },
+    {
+      "name": "planning-toolkit",
+      "source": "./marketplace/planning-toolkit",
+      "description": "Design-before-code and ship-safely workflow skills \u2014 brainstorming, architecture planning, adversarial review, prompt refinement, TDD, systematic debugging, ship/PR lifecycle, PR cleanup, Claude API guardrails, and bulk scripting.",
+      "version": "1.1.26"
+    },
+    {
+      "name": "security-scanner",
+      "source": "./marketplace/security-scanner",
+      "description": "Static analysis, threat modeling, compliance, and breach response \u2014 Semgrep, CodeQL, false positive verification, differential review, threat modeling, STIG/SRG assessment and verification, dependabot triage, and vendor breach response.",
+      "version": "1.1.6"
+    },
+    {
+      "name": "knowledge-ops",
+      "source": "./marketplace/knowledge-ops",
+      "description": "Session knowledge, admin, and record-keeping \u2014 extract learnings, capture decisions, curate a knowledge base, retrospectives, review learnings, validate changes, healthchecks, claim verification, Claude and OpenAI monitoring/admin/cost, cross-provider AI monitoring, Linear status posting, Obsidian sync, workspace provisioning, weekly engineering updates, manifest generation, cross-tool investigation, and GitHub repo sync.",
+      "version": "1.1.39"
+    },
+    {
+      "name": "code-intelligence",
+      "source": "./marketplace/code-intelligence",
+      "description": "Codebase exploration, analysis, API docs, and debugging \u2014 semantic search, structural graph queries, call chain tracing, dead code detection, Rust hierarchical documentation, MCP server diagnostics, API doc ingestion, and MCP forge (build/audit/deploy).",
+      "version": "1.1.12"
+    },
+    {
+      "name": "research-intel",
+      "source": "./marketplace/research-intel",
+      "description": "Intelligence gathering skills \u2014 community patterns, repo discovery, Claude Code changelog tracking, research papers, developer profile analysis, deep research with multi-source discrepancy flagging, and internal Slack/Linear/Confluence intel.",
+      "version": "1.1.17"
+    }
+  ]
+}

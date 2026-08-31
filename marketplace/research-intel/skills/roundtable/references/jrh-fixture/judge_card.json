@@ -1,0 +1,41 @@
+{
+  "evidence_status": "historical-frozen",
+  "measured_on": "2026-06-14",
+  "cost_usd": 1.4282,
+  "budget_usd": 20.0,
+  "models": [
+    "claude-opus-4-8",
+    "grok-4.20-0309-reasoning",
+    "gpt-5.5-pro"
+  ],
+  "fixture": {
+    "claims": 3,
+    "pairs": 3
+  },
+  "judge_card": {
+    "opus": {
+      "model": "claude-opus-4-8",
+      "stochastic_consistent": "3/3 (100%)",
+      "position_flip": "0/3 (0%)",
+      "position_correct_both_orders": "3/3",
+      "paraphrase_stable": "3/3 (100%)",
+      "verbosity_stay_correct": "3/3 (100%)"
+    },
+    "grok": {
+      "model": "grok-4.20-0309-reasoning",
+      "stochastic_consistent": "3/3 (100%)",
+      "position_flip": "0/3 (0%)",
+      "position_correct_both_orders": "3/3",
+      "paraphrase_stable": "3/3 (100%)",
+      "verbosity_stay_correct": "3/3 (100%)"
+    },
+    "gpt": {
+      "model": "gpt-5.5-pro",
+      "stochastic_consistent": "3/3 (100%)",
+      "position_flip": "0/3 (0%)",
+      "position_correct_both_orders": "3/3",
+      "paraphrase_stable": "3/3 (100%)",
+      "verbosity_stay_correct": "3/3 (100%)"
+    }
+  }
+}

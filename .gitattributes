@@ -1,14 +1,8 @@
-# Normalize all text files to LF in the index AND the working tree on every
-# platform. A CRLF checkout on Windows would break the bash launchers
-# (hooks/run-hook, bin/statusline-launcher, install.sh) the next time the
-# repo is cloned as ~/.claude on macOS/Linux — `\r` after the shebang is a
-# hard failure. LF works everywhere (Git Bash, pwsh, and every editor here).
+# Collapse the generated plugin tree in GitHub diffs and exclude it from
+# language stats. It is assembled by scripts/build-marketplace.py from the
+# sources in skills/, hooks/, agents/ and bin/ -- reviewers should read those.
+marketplace/** linguist-generated=true
+
+# Normalise line endings so the generated bundles are byte-stable across hosts;
+# CI compares the rebuilt tree against the committed one.
 * text=auto eol=lf
-
-# Windows batch files are the one format that REQUIRES CRLF (none tracked
-# today; this protects future additions).
-*.bat text eol=crlf
-*.cmd text eol=crlf
-
-# Efficacy-harness fixtures are byte-hashed (run_live.py); pin LF for stable cross-platform hashes.
-**/harness/*.json text eol=lf

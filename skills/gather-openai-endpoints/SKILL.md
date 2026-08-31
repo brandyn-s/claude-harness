@@ -37,9 +37,7 @@ Runs in the main thread. **Never auto-writes** anything except baseline files.
 | Request is about | Use instead |
 |---|---|
 | OpenAI model releases, API changelog, deprecations | `/gather-vendor openai` |
-| Answering a usage/spend/finding question from data we hold | `/openai-monitor` |
 | The Anthropic surface | `/gather-claude-endpoints` |
-| Cross-provider comparison | `/enterprise-ai-monitor` |
 
 Argument: none = all channels · a channel key = just that one (`--list`) ·
 `baseline` = establish/refresh baselines after review.
@@ -228,10 +226,8 @@ refresh is a detector bug.
 
 | Finding shape | Route to |
 |---|---|
-| ingest/routing change for an OpenAI data source | `/openai-monitor` |
 | model/product surface change discovered incidentally | `/gather-vendor openai` |
 | a change with a cross-provider mirror worth checking on Anthropic | `/gather-claude-endpoints` |
-| a security advisory on a collection path | `/security-alerts` |
 
 ---
 

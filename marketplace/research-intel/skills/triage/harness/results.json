@@ -1,0 +1,80 @@
+{
+  "_about": "MEASURED live A/B for triage efficacy (ranking + correlation). Refresh: python3 skills/triage/harness/run_live.py. CI asserts on this file.",
+  "model": "claude-opus-4-8",
+  "arms": "with_skill (severity+correlation framework) vs baseline (unstructured rank)",
+  "run_date": "2026-05-31",
+  "n_runs": 3,
+  "n_findings": 12,
+  "fixture_sha": "212b22247e15",
+  "cost_ratio": 5.0,
+  "metrics": {
+    "with_skill": {
+      "n_runs": 3,
+      "spearman": {
+        "mean": 0.958,
+        "min": 0.9371,
+        "max": 0.972,
+        "stdev": 0.0151,
+        "n": 3
+      },
+      "group_precision": {
+        "mean": 0.6,
+        "min": 0.6,
+        "max": 0.6,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "group_recall": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "group_f1": {
+        "mean": 0.75,
+        "min": 0.75,
+        "max": 0.75,
+        "stdev": 0.0,
+        "n": 3
+      }
+    },
+    "baseline": {
+      "n_runs": 3,
+      "spearman": {
+        "mean": 0.9394,
+        "min": 0.9371,
+        "max": 0.9441,
+        "stdev": 0.0033,
+        "n": 3
+      },
+      "group_precision": {
+        "mean": 0.6,
+        "min": 0.6,
+        "max": 0.6,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "group_recall": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "group_f1": {
+        "mean": 0.75,
+        "min": 0.75,
+        "max": 0.75,
+        "stdev": 0.0,
+        "n": 3
+      }
+    }
+  },
+  "verdict": {
+    "verdict": "trim",
+    "reason": "spearman delta 0.0186 + group_f1 delta 0.0 within noise \u2014 14-article framework not buying materially better ranking/correlation",
+    "spearman_delta": 0.0186,
+    "group_f1_delta": 0.0
+  }
+}

@@ -664,7 +664,7 @@ instances in one merge, each surfaced by a more expensive symptom than the last:
 | # | surfaced by | files |
 |---|---|---|
 | 1 | marketplace generator crash | `hooks/context-monitor.py`, `hooks/precompact-checkpoint.py` |
-| 2 | `manifest-refs` gate | `skills/sca-review/` (9 files) |
+| 2 | `manifest-refs` gate | a separate skill (not included in this export) (9 files) |
 | 3 | `hook-paths` gate | `hooks/skill-routing-hint.py` |
 | 4 | `pytest skills/` (15 min) | 5 hooks named by `classify_rules.py` HOOK_RULE_MAP |
 | 5 | **the sweep below** (seconds) | 8 remaining dangling references |

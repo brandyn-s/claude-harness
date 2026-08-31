@@ -16,7 +16,6 @@ requires_rules:
   - grading-discipline
   - verify-effectiveness
 requires_skills:
-  - lab-review
   - service-review
 requires_auth: []
 

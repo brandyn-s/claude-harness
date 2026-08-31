@@ -1,0 +1,1194 @@
+{
+  "_about": "Compact, re-gradeable sample of the N=3 A/B run (2026-05-31). Re-run grade.score_run(fixture, [records of one arm in one run]) to reproduce results.json. Verbose model text + web_search payloads stripped (reproducible via run_live.py). Phase-9 auditability artifact.",
+  "runs": [
+    {
+      "run_idx": 0,
+      "records": [
+        {
+          "arm": "with_skill",
+          "id": "transformer-2017",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/1706.03762",
+            "https://papers.neurips.cc/paper/7181-attention-is-all-you-need.pdf",
+            "https://www.semanticscholar.org/paper/Attention-is-All-you-Need-Vaswani-Shazeer/204e3073870fae3d05bcbc2f6a8e263d9b72e776",
+            "https://arxiv.org/html/1706.03762v7"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "react-2022",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2210.03629",
+            "https://research.google/blog/react-synergizing-reasoning-and-acting-in-language-models/",
+            "https://www.semanticscholar.org/paper/ReAct:-Synergizing-Reasoning-and-Acting-in-Language-Yao-Zhao/99832586d55f540f603637e458a292406a0ed75d",
+            "https://portkey.ai/blog/react-synergizing-reasoning-and-acting-in-language-models-summary/"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "mast-14-modes",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2503.13657",
+            "https://arxiv.org/pdf/2503.13657",
+            "https://proceedings.neurips.cc/paper_files/paper/2025/hash/b1041e52d3be19f0a9bc491657488e4a-Abstract-Datasets_and_Benchmarks_Track.html",
+            "https://sky.cs.berkeley.edu/project/mast/",
+            "https://openreview.net/forum?id=fAjbYBmonr"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "cot-2022",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2201.11903",
+            "https://arxiv.org/abs/2201.11903v1",
+            "https://dl.acm.org/doi/10.5555/3600270.3602070",
+            "https://arxiv.org/pdf/2403.14312"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "mcp-nov-2024",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://www.anthropic.com/news/model-context-protocol",
+            "https://en.wikipedia.org/wiki/Model_Context_Protocol",
+            "https://venturebeat.com/data-infrastructure/anthropic-releases-model-context-protocol-to-standardize-ai-data-integration",
+            "https://www.anthropic.com/news/donating-the-model-context-protocol-and-establishing-of-the-agentic-ai-foundation"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "claude-context-100k",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://platform.claude.com/docs/en/build-with-claude/context-windows",
+            "https://support.claude.com/en/articles/8606395-how-large-is-the-claude-api-s-context-window",
+            "https://support.claude.com/en/articles/8606394-how-large-is-the-context-window-on-paid-claude-plans"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "scaling-truthfulness",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2109.07958",
+            "https://arxiv.org/pdf/2109.07958",
+            "https://aclanthology.org/2022.acl-long.229/",
+            "https://arxiv.org/pdf/2306.09479",
+            "https://arxiv.org/pdf/2305.14681",
+            "https://arxiv.org/html/2504.02181v1"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "cot-faithfulness",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2305.04388",
+            "https://arxiv.org/abs/2307.13702",
+            "https://arxiv.org/abs/2505.05410",
+            "https://arxiv.org/pdf/2503.08679",
+            "https://arxiv.org/pdf/2603.22582",
+            "https://www.anthropic.com/research/reasoning-models-dont-say-think"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "rag-eliminates-hallucination",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2410.11414",
+            "https://arxiv.org/pdf/2509.21875",
+            "https://arxiv.org/pdf/2408.15533",
+            "https://arxiv.org/pdf/2505.07528",
+            "https://www.uintent.com/case-studies-und-blog/rag-hallucinations-llm-reliability",
+            "https://arxiv.org/pdf/2411.12759"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "more-agents-monotonic",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2602.03794",
+            "https://research.google/blog/towards-a-science-of-scaling-agent-systems-when-and-why-agent-systems-work/",
+            "https://arxiv.org/pdf/2604.03295",
+            "https://arxiv.org/pdf/2511.00751",
+            "https://arxiv.org/pdf/2402.05120"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "gpt4-most-capable",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://openai.com/index/introducing-gpt-5/",
+            "https://openai.com/index/introducing-gpt-5-5/",
+            "https://www.mindstudio.ai/blog/what-is-gpt-5-5-openai-flagship-model-explained",
+            "https://www.remoteopenclaw.com/blog/best-openai-models-2026",
+            "https://en.wikipedia.org/wiki/GPT-5.5",
+            "https://developers.openai.com/api/docs/models/gpt-5.5"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "claude-code-no-hooks",
+          "category": "outdated",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/hooks-guide",
+            "https://code.claude.com/docs/en/hooks",
+            "https://platform.claude.com/docs/en/agent-sdk/hooks",
+            "https://claudelog.com/mechanics/hooks/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "transformer-2017",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://arxiv.org/abs/1706.03762"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "holographic-memory-iclr-2025",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "recursive-context-distillation",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "constitutional-scaling-laws",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "mcp-nov-2024",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://en.wikipedia.org/wiki/Model_Context_Protocol",
+            "https://dev.to/ajeetraina/one-year-of-model-context-protocol-from-experiment-to-industry-standard-5hj8",
+            "https://blog.modelcontextprotocol.io/posts/2025-11-25-first-mcp-anniversary/"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "cot-2022",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://arxiv.org/abs/2201.11903",
+            "https://www.semanticscholar.org/paper/Chain-of-Thought-Prompting-Elicits-Reasoning-in-Wei-Wang/1b6e810ce0afd0dd093f789d2b2742d047e316d5",
+            "https://answers.businesslibrary.uflib.ufl.edu/genai/faq/411515"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "react-2022",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://arxiv.org/abs/2210.03629"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "mast-14-modes",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://arxiv.org/html/2503.13657v2",
+            "https://arxiv.org/abs/2503.13657",
+            "https://neurips.cc/virtual/2025/poster/121528",
+            "https://openreview.net/forum?id=fAjbYBmonr"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "scaling-truthfulness",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://arxiv.org/pdf/2109.07958",
+            "https://ar5iv.labs.arxiv.org/html/2109.07958",
+            "https://truthful.ai/papers/truthfulqa/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "cot-faithfulness",
+          "category": "refuted",
+          "raw_verdict": "FALSE (as an absolute/universal claim; CoT is only sometimes faithful and frequently unfaithful)",
+          "cited_urls": [
+            "https://arxiv.org/pdf/2503.08679",
+            "https://arxiv.org/html/2503.08679v4",
+            "https://www.anthropic.com/research/measuring-faithfulness-in-chain-of-thought-reasoning",
+            "https://arxiv.org/pdf/2505.23945",
+            "https://medium.com/@mefoutse/chain-of-thought-reasoning-in-the-wild-is-not-always-faithful-6c64aa83f9f0"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "claude-context-100k",
+          "category": "outdated",
+          "raw_verdict": "FALSE (OUTDATED)",
+          "cited_urls": [
+            "https://support.claude.com/en/articles/8606395-how-large-is-the-claude-api-s-context-window",
+            "https://tygartmedia.com/claude-ai-context-window/",
+            "https://support.claude.com/en/articles/8606394-how-large-is-the-context-window-on-paid-claude-plans"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "more-agents-monotonic",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://arxiv.org/pdf/2602.03794",
+            "https://arxiv.org/html/2403.02419v1",
+            "https://arxiv.org/pdf/2604.03295",
+            "https://arxiv.org/pdf/2601.23219",
+            "https://arxiv.org/pdf/2402.05120"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "claude-code-no-hooks",
+          "category": "outdated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/hooks",
+            "https://claude.com/blog/how-to-configure-hooks",
+            "https://www.morphllm.com/claude-code-hooks",
+            "https://claudelog.com/mechanics/hooks/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "rag-eliminates-hallucination",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://www.uintent.com/case-studies-und-blog/rag-hallucinations-llm-reliability",
+            "https://medium.com/autonomous-agents/rag-does-not-reduce-hallucinations-in-llms-math-deep-dive-900107671e10",
+            "https://www.researchgate.net/publication/392448842_Retrieval-Augmented_Generation_and_Hallucination_in_Large_Language_Models_A_Scholarly_Overview",
+            "https://www.mdpi.com/2227-7390/13/5/856",
+            "https://arxiv.org/pdf/2411.12759",
+            "https://arxiv.org/pdf/2404.08189",
+            "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12223273/",
+            "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12540348/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "gpt4-most-capable",
+          "category": "outdated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://overchat.ai/ai-hub/the-best-ai-model",
+            "https://www.mindstudio.ai/blog/what-is-gpt-5-5-openai-flagship-model-explained",
+            "https://www.remoteopenclaw.com/blog/best-openai-models-2026"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "recursive-context-distillation",
+          "category": "fabricated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://arxiv.org/pdf/2602.08234",
+            "https://arxiv.org/pdf/2510.00615",
+            "https://arxiv.org/pdf/2601.07190",
+            "https://arxiv.org/pdf/2409.01930"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "constitutional-scaling-laws",
+          "category": "fabricated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://www.lawfaremedia.org/article/scaling-laws--claude's-constitution--with-amanda-askell",
+            "https://www.anthropic.com/engineering/writing-tools-for-agents",
+            "https://medium.com/genaius/your-ai-agent-wastes-95-of-its-brain-on-tools-anthropic-just-showed-the-fix-96fbe597136b",
+            "https://www.anthropic.com/engineering/multi-agent-research-system",
+            "https://arxiv.org/html/2512.08296v1",
+            "https://www.jenova.ai/en/resources/the-tooling-bottleneck-how-reliability-and-scalability-challenges-are-stalling-the-future-of-mcp-and-agentic-ai"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "holographic-memory-iclr-2025",
+          "category": "fabricated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://arxiv.org/pdf/2305.19534",
+            "https://arxiv.org/pdf/2509.19331",
+            "https://iclr.cc/virtual/2025/poster/28152",
+            "https://deepseekocr.space/",
+            "https://venturebeat.com/data/observational-memory-cuts-ai-agent-costs-10x-and-outscores-rag-on-long"
+          ],
+          "grounded": null
+        }
+      ]
+    },
+    {
+      "run_idx": 1,
+      "records": [
+        {
+          "arm": "with_skill",
+          "id": "transformer-2017",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/1706.03762",
+            "https://papers.neurips.cc/paper/7181-attention-is-all-you-need.pdf",
+            "https://arxiv.org/html/1706.03762v7",
+            "https://www.semanticscholar.org/paper/Attention-is-All-you-Need-Vaswani-Shazeer/204e3073870fae3d05bcbc2f6a8e263d9b72e776"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "react-2022",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2210.03629",
+            "https://arxiv.org/pdf/2210.03629",
+            "https://research.google/blog/react-synergizing-reasoning-and-acting-in-language-models/",
+            "https://openreview.net/pdf?id=WE_vluYUL-X",
+            "https://par.nsf.gov/biblio/10451467-react-synergizing-reasoning-acting-language-models"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "mcp-nov-2024",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://www.anthropic.com/news/model-context-protocol",
+            "https://github.com/modelcontextprotocol",
+            "https://en.wikipedia.org/wiki/Model_Context_Protocol",
+            "https://www.anthropic.com/news/donating-the-model-context-protocol-and-establishing-of-the-agentic-ai-foundation",
+            "https://venturebeat.com/data-infrastructure/anthropic-releases-model-context-protocol-to-standardize-ai-data-integration"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "mast-14-modes",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2503.13657",
+            "https://arxiv.org/pdf/2503.13657",
+            "https://openreview.net/forum?id=fAjbYBmonr",
+            "https://sky.cs.berkeley.edu/project/mast/"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "cot-2022",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2201.11903",
+            "https://dl.acm.org/doi/10.5555/3600270.3602070",
+            "https://openreview.net/pdf?id=_VjQlMeSB_J",
+            "https://www.ibm.com/think/topics/chain-of-thoughts",
+            "https://www.promptingguide.ai/techniques/cot",
+            "https://arxiv.org/pdf/2604.00130"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "scaling-truthfulness",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://arxiv.org/pdf/2109.07958",
+            "https://aclanthology.org/2022.acl-long.229.pdf",
+            "https://owainevans.github.io/pdfs/truthfulQA_lin_evans.pdf",
+            "https://arxiv.org/html/2306.09479v2",
+            "https://arxiv.org/pdf/2305.14681",
+            "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11446866/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "more-agents-monotonic",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://research.google/blog/towards-a-science-of-scaling-agent-systems-when-and-why-agent-systems-work/",
+            "https://www.infoq.com/news/2026/03/google-multi-agent/",
+            "https://arxiv.org/abs/2602.03794",
+            "https://arxiv.org/pdf/2602.03794",
+            "https://arxiv.org/pdf/2604.03295",
+            "https://arxiv.org/pdf/2402.05120"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "rag-eliminates-hallucination",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://onlinelibrary.wiley.com/doi/full/10.1111/jels.12413",
+            "https://arxiv.org/pdf/2405.20362",
+            "https://law.stanford.edu/publications/hallucination-free-assessing-the-reliability-of-leading-ai-legal-research-tools/",
+            "https://arxiv.org/abs/2410.11414",
+            "https://arxiv.org/pdf/2410.11414",
+            "https://arxiv.org/pdf/2408.15533",
+            "https://arxiv.org/pdf/2601.03052",
+            "https://arxiv.org/pdf/2401.00396",
+            "https://www.uintent.com/case-studies-und-blog/rag-hallucinations-llm-reliability"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "claude-context-100k",
+          "category": "outdated",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://platform.claude.com/docs/en/build-with-claude/context-windows",
+            "https://support.claude.com/en/articles/8606395-how-large-is-the-claude-api-s-context-window",
+            "https://support.claude.com/en/articles/8606394-how-large-is-the-context-window-on-paid-claude-plans",
+            "https://karozieminski.substack.com/p/claude-1-million-context-window-guide-2026"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "cot-faithfulness",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2305.04388",
+            "https://arxiv.org/abs/2307.13702",
+            "https://arxiv.org/html/2505.05410v1",
+            "https://www.anthropic.com/research/reasoning-models-dont-say-think",
+            "https://arxiv.org/abs/2603.22582",
+            "https://arxiv.org/abs/2505.23945"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "gpt4-most-capable",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://developers.openai.com/api/docs/models",
+            "https://help.openai.com/en/articles/9624314-model-release-notes",
+            "https://zapier.com/blog/openai-models/",
+            "https://www.mindstudio.ai/blog/what-is-gpt-5-4-openai-flagship-model",
+            "https://overchat.ai/ai-hub/the-best-ai-model",
+            "https://www.remoteopenclaw.com/blog/best-openai-models-2026",
+            "https://openai.com/index/introducing-gpt-5/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "claude-code-no-hooks",
+          "category": "outdated",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/hooks-guide",
+            "https://platform.claude.com/docs/en/agent-sdk/hooks",
+            "https://claudelog.com/mechanics/hooks/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "mcp-nov-2024",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://www.anthropic.com/news/model-context-protocol",
+            "https://en.wikipedia.org/wiki/Model_Context_Protocol",
+            "https://venturebeat.com/data-infrastructure/anthropic-releases-model-context-protocol-to-standardize-ai-data-integration"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "constitutional-scaling-laws",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "recursive-context-distillation",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "transformer-2017",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://arxiv.org/abs/1706.03762",
+            "https://en.wikipedia.org/wiki/Attention_Is_All_You_Need",
+            "https://papers.neurips.cc/paper/7181-attention-is-all-you-need.pdf"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "react-2022",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://arxiv.org/abs/2210.03629",
+            "https://react-lm.github.io/",
+            "https://arxiv.org/pdf/2412.01262"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "mast-14-modes",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://arxiv.org/abs/2503.13657",
+            "https://arxiv.org/pdf/2503.13657",
+            "https://openreview.net/forum?id=fAjbYBmonr",
+            "https://sky.cs.berkeley.edu/project/mast/"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "cot-2022",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://proceedings.neurips.cc/paper/2022/hash/9d5609613524ecf4f15af0f7b31abca4-Abstract-Conference.html",
+            "https://arxiv.org/abs/2201.11903",
+            "https://arxiv.org/pdf/2201.11903"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "holographic-memory-iclr-2025",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "claude-context-100k",
+          "category": "outdated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://support.claude.com/en/articles/8606395-how-large-is-the-claude-api-s-context-window",
+            "https://support.claude.com/en/articles/8606394-how-large-is-the-context-window-on-paid-claude-plans",
+            "https://platform.claude.com/docs/en/build-with-claude/context-windows"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "cot-faithfulness",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://openreview.net/forum?id=bzs4uPLXvi",
+            "https://arxiv.org/abs/2307.13702",
+            "https://arxiv.org/html/2503.08679v4",
+            "https://arxiv.org/pdf/2603.22582",
+            "https://arxiv.org/html/2305.04388v2"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "scaling-truthfulness",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://truthful.ai/papers/truthfulqa/",
+            "https://arxiv.org/pdf/2109.07958",
+            "https://arxiv.org/abs/2109.07958",
+            "https://deepgram.com/learn/truthfulqa-llm-benchmark-guide",
+            "https://arxiv.org/html/2502.09387v1"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "rag-eliminates-hallucination",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://arxiv.org/html/2404.08189v1",
+            "https://www.researchgate.net/publication/392448842_Retrieval-Augmented_Generation_and_Hallucination_in_Large_Language_Models_A_Scholarly_Overview",
+            "https://arxiv.org/pdf/2505.18581",
+            "https://www.itconvergence.com/blog/how-to-overcome-ai-hallucinations-using-retrieval-augmented-generation/",
+            "https://towardsdatascience.com/detecting-hallucination-in-rag-ecaf251a6633/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "claude-code-no-hooks",
+          "category": "outdated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/hooks-guide",
+            "https://www.morphllm.com/claude-code-hooks",
+            "https://claudelog.com/mechanics/hooks/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "more-agents-monotonic",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://arxiv.org/pdf/2602.03794",
+            "https://arxiv.org/html/2602.03794",
+            "https://research.google/blog/towards-a-science-of-scaling-agent-systems-when-and-why-agent-systems-work/",
+            "https://medium.com/agentic-builders/i-thought-more-ai-agents-always-meant-better-results-i-was-wrong-09ff40301a12",
+            "https://arxiv.org/pdf/2601.23219",
+            "https://arxiv.org/pdf/2604.03295",
+            "https://www.hakunamatatatech.com/our-resources/blog/why-do-multi-agent-llm-systems-fail",
+            "https://www.thecloudgirl.dev/blog/boosting-llm-performance-with-the-more-agents-method"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "gpt4-most-capable",
+          "category": "outdated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://openai.com/index/introducing-gpt-5-5/",
+            "https://www.mindstudio.ai/blog/what-is-gpt-5-5-openai-flagship-model-explained",
+            "https://techcrunch.com/2026/05/05/openai-releases-gpt-5-5-instant-a-new-default-model-for-chatgpt/",
+            "https://www.remoteopenclaw.com/blog/best-openai-models-2026",
+            "https://www.cnbc.com/2026/04/23/openai-announces-latest-artificial-intelligence-model.html",
+            "https://en.wikipedia.org/wiki/GPT-5.5"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "recursive-context-distillation",
+          "category": "fabricated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://arxiv.org/pdf/2209.15189",
+            "https://arxiv.org/pdf/2507.23361",
+            "https://arxiv.org/pdf/2601.16746",
+            "https://arxiv.org/html/2603.28119"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "holographic-memory-iclr-2025",
+          "category": "fabricated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://iclr.cc/virtual/2025/poster/28152",
+            "https://arxiv.org/abs/2305.19534",
+            "https://arxiv.org/pdf/2509.19331",
+            "https://arxiv.org/pdf/2312.03414"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "constitutional-scaling-laws",
+          "category": "fabricated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://aigovernancelead.substack.com/p/5-littleknown-facts-about-anthropics",
+            "https://www.jenova.ai/en/resources/the-tooling-bottleneck-how-reliability-and-scalability-challenges-are-stalling-the-future-of-mcp-and-agentic-ai",
+            "https://arxiv.org/pdf/2602.19008",
+            "https://www.lawfaremedia.org/article/scaling-laws--claude's-constitution--with-amanda-askell"
+          ],
+          "grounded": null
+        }
+      ]
+    },
+    {
+      "run_idx": 2,
+      "records": [
+        {
+          "arm": "with_skill",
+          "id": "cot-2022",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2201.11903",
+            "https://proceedings.neurips.cc/paper/2022/hash/9d5609613524ecf4f15af0f7b31abca4-Abstract-Conference.html",
+            "https://arxiv.org/abs/2201.11903v1",
+            "https://ar5iv.labs.arxiv.org/html/2210.03493"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "mast-14-modes",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2503.13657",
+            "https://arxiv.org/pdf/2503.13657",
+            "https://arxiv.org/html/2503.13657v2",
+            "https://neurips.cc/virtual/2025/poster/121528",
+            "https://openreview.net/forum?id=fAjbYBmonr"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "transformer-2017",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/1706.03762",
+            "https://papers.neurips.cc/paper/7181-attention-is-all-you-need.pdf",
+            "https://www.semanticscholar.org/paper/Attention-is-All-you-Need-Vaswani-Shazeer/204e3073870fae3d05bcbc2f6a8e263d9b72e776",
+            "https://en.wikipedia.org/wiki/Attention_Is_All_You_Need"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "react-2022",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2210.03629",
+            "https://www.semanticscholar.org/paper/ReAct:-Synergizing-Reasoning-and-Acting-in-Language-Yao-Zhao/99832586d55f540f603637e458a292406a0ed75d",
+            "https://research.google/blog/react-synergizing-reasoning-and-acting-in-language-models/",
+            "https://react-lm.github.io/",
+            "https://github.com/ysymyth/ReAct"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "mcp-nov-2024",
+          "category": "true_primary",
+          "raw_verdict": "SUPPORTED",
+          "cited_urls": [
+            "https://www.anthropic.com/news/model-context-protocol",
+            "https://blog.modelcontextprotocol.io/posts/2025-11-25-first-mcp-anniversary/",
+            "https://en.wikipedia.org/wiki/Model_Context_Protocol",
+            "https://venturebeat.com/data-infrastructure/anthropic-releases-model-context-protocol-to-standardize-ai-data-integration"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "claude-context-100k",
+          "category": "outdated",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://platform.claude.com/docs/en/build-with-claude/context-windows",
+            "https://support.claude.com/en/articles/8606395-how-large-is-the-claude-api-s-context-window",
+            "https://support.claude.com/en/articles/8606394-how-large-is-the-context-window-on-paid-claude-plans",
+            "https://www.anthropic.com/news/1m-context",
+            "https://aws.amazon.com/bedrock/anthropic/",
+            "https://thenewstack.io/claude-million-token-pricing/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "rag-eliminates-hallucination",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2410.11414",
+            "https://arxiv.org/pdf/2509.21875",
+            "https://www.mdpi.com/2227-7390/13/5/856",
+            "https://arxiv.org/pdf/2408.15533",
+            "https://arxiv.org/pdf/2601.03052",
+            "https://www.mindee.com/blog/rag-hallucinations-explained",
+            "https://www.uintent.com/case-studies-und-blog/rag-hallucinations-llm-reliability"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "scaling-truthfulness",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2109.07958",
+            "https://aclanthology.org/2022.acl-long.229/",
+            "https://arxiv.org/pdf/2109.07958",
+            "https://truthful.ai/papers/truthfulqa/",
+            "https://www.alignmentforum.org/posts/PF58wEdztZFX2dSue/how-truthful-is-gpt-3-a-benchmark-for-language-models",
+            "https://www.alignmentforum.org/posts/Bunfwz6JsNd44kgLT/new-improved-multiple-choice-truthfulqa"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "more-agents-monotonic",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2512.08296",
+            "https://arxiv.org/html/2512.08296v1",
+            "https://research.google/blog/towards-a-science-of-scaling-agent-systems-when-and-why-agent-systems-work/",
+            "https://arxiv.org/pdf/2602.03794",
+            "https://arxiv.org/pdf/2511.00751",
+            "https://arxiv.org/html/2511.07112v1",
+            "https://arxiv.org/pdf/2604.03295"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "cot-faithfulness",
+          "category": "refuted",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://arxiv.org/abs/2305.04388",
+            "https://arxiv.org/abs/2307.13702",
+            "https://www.anthropic.com/research/measuring-faithfulness-in-chain-of-thought-reasoning",
+            "https://arxiv.org/pdf/2505.05410",
+            "https://www.anthropic.com/research/reasoning-models-dont-say-think",
+            "https://www.marktechpost.com/2025/05/19/chain-of-thought-may-not-be-a-window-into-ais-reasoning-anthropics-new-study-reveals-hidden-gaps/",
+            "https://venturebeat.com/ai/dont-believe-reasoning-models-chains-of-thought-says-anthropic",
+            "https://arxiv.org/pdf/2508.19827"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "gpt4-most-capable",
+          "category": "outdated",
+          "raw_verdict": "OUTDATED",
+          "cited_urls": [
+            "https://www.mindstudio.ai/blog/what-is-gpt-5-5-openai-flagship-model-explained",
+            "https://openai.com/research/index/release/",
+            "https://overchat.ai/ai-hub/the-best-ai-model",
+            "https://www.remoteopenclaw.com/blog/best-openai-models-2026",
+            "https://help.openai.com/en/articles/9624314-model-release-notes",
+            "https://openai.com/index/introducing-gpt-5/",
+            "https://openai.com/index/introducing-gpt-5-2/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "claude-code-no-hooks",
+          "category": "outdated",
+          "raw_verdict": "REFUTED",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/hooks",
+            "https://platform.claude.com/docs/en/agent-sdk/hooks",
+            "https://claudelog.com/mechanics/hooks/",
+            "https://www.getaiperks.com/en/articles/claude-code-hooks",
+            "https://blog.promptlayer.com/understanding-claude-code-hooks-documentation/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "with_skill",
+          "id": "recursive-context-distillation",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "mcp-nov-2024",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://www.anthropic.com/news/model-context-protocol",
+            "https://en.wikipedia.org/wiki/Model_Context_Protocol"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "transformer-2017",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://arxiv.org/abs/1706.03762",
+            "https://www.semanticscholar.org/paper/Attention-is-All-you-Need-Vaswani-Shazeer/204e3073870fae3d05bcbc2f6a8e263d9b72e776",
+            "https://en.wikipedia.org/wiki/Attention_Is_All_You_Need"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "constitutional-scaling-laws",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "cot-2022",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://arxiv.org/abs/2201.11903",
+            "https://gail.wharton.upenn.edu/research-and-insights/tech-report-chain-of-thought/"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "with_skill",
+          "id": "holographic-memory-iclr-2025",
+          "category": "fabricated",
+          "raw_verdict": "UNCHARTED",
+          "cited_urls": [],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "mast-14-modes",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://arxiv.org/abs/2503.13657",
+            "https://arxiv.org/pdf/2503.13657",
+            "https://openreview.net/forum?id=fAjbYBmonr",
+            "https://sky.cs.berkeley.edu/project/mast/"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "react-2022",
+          "category": "true_primary",
+          "raw_verdict": "TRUE",
+          "cited_urls": [
+            "https://arxiv.org/abs/2210.03629",
+            "https://research.google/blog/react-synergizing-reasoning-and-acting-in-language-models/",
+            "https://apxml.com/courses/agentic-llm-memory-architectures/chapter-2-advanced-agent-architectures-reasoning/react-framework-reasoning-acting"
+          ],
+          "grounded": true
+        },
+        {
+          "arm": "baseline",
+          "id": "cot-faithfulness",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://arxiv.org/pdf/2503.08679",
+            "https://arxiv.org/html/2603.22582v1",
+            "https://www.lesswrong.com/posts/BKvJNzALpxS3LafEs/measuring-and-improving-the-faithfulness-of-model-generated",
+            "https://arxiv.org/pdf/2603.22582",
+            "https://www.anthropic.com/research/measuring-faithfulness-in-chain-of-thought-reasoning",
+            "https://arxiv.org/pdf/2307.13702"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "claude-context-100k",
+          "category": "outdated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://support.claude.com/en/articles/8606395-how-large-is-the-claude-api-s-context-window",
+            "https://tygartmedia.com/claude-ai-context-window/",
+            "https://support.claude.com/en/articles/8606394-how-large-is-the-context-window-on-paid-claude-plans"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "scaling-truthfulness",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://arxiv.org/abs/2109.07958",
+            "https://truthful.ai/papers/truthfulqa/",
+            "https://www.emergentmind.com/topics/truthfulqa-benchmark",
+            "https://deepgram.com/learn/truthfulqa-llm-benchmark-guide",
+            "https://arxiv.org/html/2502.09387v1"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "rag-eliminates-hallucination",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://www.uintent.com/case-studies-und-blog/rag-hallucinations-llm-reliability",
+            "https://www.mdpi.com/2227-7390/13/5/856",
+            "https://arxiv.org/pdf/2411.12759",
+            "https://arxiv.org/pdf/2404.08189",
+            "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12223273/",
+            "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12540348/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "gpt4-most-capable",
+          "category": "outdated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://www.mindstudio.ai/blog/what-is-gpt-5-5-openai-flagship-model-explained",
+            "https://overchat.ai/ai-hub/the-best-ai-model",
+            "https://www.remoteopenclaw.com/blog/best-openai-models-2026"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "claude-code-no-hooks",
+          "category": "outdated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://code.claude.com/docs/en/hooks-guide",
+            "https://claudelog.com/mechanics/hooks/",
+            "https://github.com/karanb192/claude-code-hooks"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "more-agents-monotonic",
+          "category": "refuted",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://arxiv.org/pdf/2602.03794",
+            "https://research.google/blog/towards-a-science-of-scaling-agent-systems-when-and-why-agent-systems-work/",
+            "https://arxiv.org/abs/2512.08296",
+            "https://arxiv.org/pdf/2604.03295",
+            "https://redis.io/blog/why-multi-agent-llm-systems-fail/",
+            "https://evoailabs.medium.com/stop-blindly-scaling-agents-a-reality-check-from-google-mit-0cebc5127b1e",
+            "https://arxiv.org/pdf/2402.05120"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "recursive-context-distillation",
+          "category": "fabricated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://arxiv.org/pdf/2209.15189",
+            "https://arxiv.org/html/2601.13100v1",
+            "https://arxiv.org/pdf/2603.28119",
+            "https://arxiv.org/pdf/2601.16746",
+            "https://arxiv.org/pdf/2601.07190"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "holographic-memory-iclr-2025",
+          "category": "fabricated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://iclr.cc/virtual/2025/poster/28152",
+            "https://arxiv.org/abs/2305.19534",
+            "https://arxiv.org/pdf/2509.19331",
+            "https://arxiv.org/abs/2312.03414",
+            "https://deepseekocr.space/"
+          ],
+          "grounded": null
+        },
+        {
+          "arm": "baseline",
+          "id": "constitutional-scaling-laws",
+          "category": "fabricated",
+          "raw_verdict": "FALSE",
+          "cited_urls": [
+            "https://www.lawfaremedia.org/article/scaling-laws--claude's-constitution--with-amanda-askell",
+            "https://research.google/blog/towards-a-science-of-scaling-agent-systems-when-and-why-agent-systems-work/",
+            "https://atlan.com/know/multi-agent-scaling/",
+            "https://www.getmaxim.ai/articles/multi-agent-system-reliability-failure-patterns-root-causes-and-production-validation-strategies/",
+            "https://www.anthropic.com/research/trustworthy-agents"
+          ],
+          "grounded": null
+        }
+      ]
+    }
+  ]
+}

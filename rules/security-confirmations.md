@@ -116,6 +116,6 @@ GUARD pattern="approve it" when this agent authored_or_pushed_the_change:
 # ─── ENFORCEMENT AND ON-DEMAND ROUTING ───
 # `security-write-confirm` is advisory detection; server-side OPA is authorization.
 # Neither proves consent. Skill-local confirmation steps remain in force.
-# Relevant skills: `/investigate`, `/triage`, `/security-alerts`,
-# `/bulk-api-script`, `/invite-to-workspace`, `/provision`.
+# Relevant skills: a separate skill (not included in this export), `/triage`, a separate skill (not included in this export),
+# `/bulk-api-script`, a separate skill (not included in this export), a separate skill (not included in this export).
 # Detailed tool mappings and recovery: docs/rule-reference/security-confirmations.md

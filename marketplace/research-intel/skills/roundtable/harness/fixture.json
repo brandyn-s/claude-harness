@@ -1,0 +1,24 @@
+{
+  "min_quorum": 2,
+  "threshold_note": "self-similarity >= threshold means a vendor's output stabilized vs its prior round; consensus requires >= min_quorum DISTINCT vendors, not one vendor agreeing with itself.",
+  "scenarios": [
+    {"id": "three_converged",   "class": "true_consensus",      "round_num": 3, "min_rounds": 3, "threshold": 0.92, "sims": {"opus": 0.95, "grok": 0.94, "gpt": 0.93}, "oracle_stop": true,
+     "note": "genuine 3-vendor agreement -> valid consensus stop"},
+    {"id": "two_converged",     "class": "true_consensus",      "round_num": 3, "min_rounds": 3, "threshold": 0.92, "sims": {"opus": 0.95, "grok": 0.94}, "oracle_stop": true,
+     "note": "2 distinct vendors agree -> quorum met, decorrelated"},
+    {"id": "one_vendor_opus",   "class": "collapse",            "round_num": 3, "min_rounds": 3, "threshold": 0.92, "sims": {"opus": 0.95}, "oracle_stop": false,
+     "note": "grok+gpt errored/keyless and dropped out; one vendor agreeing with itself is NOT consensus"},
+    {"id": "one_vendor_grok",   "class": "collapse",            "round_num": 4, "min_rounds": 3, "threshold": 0.92, "sims": {"grok": 0.99}, "oracle_stop": false,
+     "note": "single surviving vendor at a later round; still no quorum"},
+    {"id": "zero_vendors",      "class": "collapse",            "round_num": 3, "min_rounds": 3, "threshold": 0.92, "sims": {}, "oracle_stop": false,
+     "note": "degenerate: empty sims. should_stop's `below=[]` makes it report 'all agents converged (sims={})'"},
+    {"id": "three_one_below",   "class": "correctly_continues", "round_num": 3, "min_rounds": 3, "threshold": 0.92, "sims": {"opus": 0.95, "grok": 0.80, "gpt": 0.93}, "oracle_stop": false,
+     "note": "grok below threshold -> not converged, keep going"},
+    {"id": "two_one_below",     "class": "correctly_continues", "round_num": 3, "min_rounds": 3, "threshold": 0.92, "sims": {"opus": 0.95, "grok": 0.80}, "oracle_stop": false,
+     "note": "quorum present but one below threshold -> not converged"},
+    {"id": "below_min_rounds",  "class": "correctly_continues", "round_num": 2, "min_rounds": 3, "threshold": 0.92, "sims": {"opus": 0.95, "grok": 0.94, "gpt": 0.93}, "oracle_stop": false,
+     "note": "converged-shaped but too early -> must not stop"},
+    {"id": "no_embeddings",     "class": "correctly_continues", "round_num": 3, "min_rounds": 3, "threshold": 0.92, "sims": null, "oracle_stop": false,
+     "note": "VOYAGE_API_KEY absent -> sims None -> fall back to fixed max_rounds"}
+  ]
+}

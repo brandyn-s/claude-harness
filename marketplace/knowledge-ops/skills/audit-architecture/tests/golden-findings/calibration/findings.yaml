@@ -1,0 +1,743 @@
+# Calibration set for the audit-architecture oracle.
+#
+# Uses the same oracle infrastructure as audit-skill: labeled findings
+# with deterministic reproducers pointing into calibration fixtures
+# (true_fixture/ = has architecture bugs; false_fixture/ = correct).
+#
+# TPR = correct STILL-FIRES on expected_fires: true / total expected_fires: true
+# TNR = correct STALE on expected_fires: false / total expected_fires: false
+#
+# Floor: TPR >= 0.95, TNR >= 0.80 (same as audit-skill SPEC.md).
+# ERROR-pathway TPR >= 1.00 (instruments must not silently produce STALE
+# on a broken reproducer — same contract as audit-skill PR #979/#981).
+#
+# Re-run: pytest skills/audit-architecture/tests/test_audit_architecture_calibration.py -q
+# Fixture roots: skills/audit-architecture/tests/golden-findings/calibration/
+
+findings:
+  # ===== 10 known-true (expected_fires: true) =====
+
+  - skill: true-fixture
+    code: R3
+    severity: drift
+    label: behavior-fix
+    description: bad-settings.json is not valid JSON — config syntax error
+    expected_fires: true
+    reproducer:
+      type: bash
+      command: |
+        python3 -c "import json; json.load(open('skills/audit-architecture/tests/golden-findings/calibration/true_fixture/bad-settings.json'))" 2>/dev/null
+      expected_exit: 1
+
+  - skill: true-fixture
+    code: R2
+    severity: drift
+    label: behavior-fix
+    description: nonexistent-server.py referenced in true_fixture/mcp.json does not exist
+    expected_fires: true
+    reproducer:
+      type: file_missing
+      path: /nonexistent/path/to/server.py
+
+  - skill: true-fixture
+    code: D4
+    severity: info
+    label: doc-fix
+    description: documented-phantom appears in ARCHITECTURE.md but not in mcp.json
+    expected_fires: true
+    reproducer:
+      type: bash
+      command: |
+        grep -q 'documented-phantom' skills/audit-architecture/tests/golden-findings/calibration/true_fixture/ARCHITECTURE.md && \
+          ! grep -q 'documented-phantom' skills/audit-architecture/tests/golden-findings/calibration/true_fixture/mcp.json
+      expected_exit: 0
+
+  - skill: true-fixture
+    code: D5
+    severity: info
+    label: doc-fix
+    description: phantom-server is in mcp.json but absent from ARCHITECTURE.md
+    expected_fires: true
+    reproducer:
+      type: bash
+      command: |
+        grep -q 'phantom-server' skills/audit-architecture/tests/golden-findings/calibration/true_fixture/mcp.json && \
+          ! grep -q 'phantom-server' skills/audit-architecture/tests/golden-findings/calibration/true_fixture/ARCHITECTURE.md
+      expected_exit: 0
+
+  - skill: true-fixture
+    code: C2
+    severity: drift
+    label: behavior-fix
+    description: phantom-server has no routing rule in true_fixture/routing-rules.json
+    expected_fires: true
+    reproducer:
+      type: grep_absent
+      command: |
+        grep -q 'phantom-server' skills/audit-architecture/tests/golden-findings/calibration/true_fixture/routing-rules.json
+
+  - skill: true-fixture
+    code: D3
+    severity: info
+    label: doc-fix
+    description: ARCHITECTURE.md claims 99 MCP servers — far more than actually in mcp.json
+    expected_fires: true
+    reproducer:
+      type: grep
+      command: |
+        grep -q '99 MCP servers' skills/audit-architecture/tests/golden-findings/calibration/true_fixture/ARCHITECTURE.md
+
+  - skill: true-fixture
+    code: S2
+    severity: drift
+    label: behavior-fix
+    description: Probe-targets.md cites a nonexistent file path
+    expected_fires: true
+    reproducer:
+      type: file_missing
+      path: skills/audit-architecture/tests/golden-findings/calibration/true_fixture/probe-targets-nonexistent.md
+
+  - skill: true-fixture
+    code: R3
+    severity: drift
+    label: behavior-fix
+    description: bad-settings.json fails JSON parse (confirmed via file_exists check)
+    expected_fires: true
+    reproducer:
+      type: file_exists
+      path: skills/audit-architecture/tests/golden-findings/calibration/true_fixture/bad-settings.json
+
+  - skill: true-fixture
+    code: D4
+    severity: info
+    label: doc-fix
+    description: ARCHITECTURE.md has documented-phantom (grep confirms presence)
+    expected_fires: true
+    reproducer:
+      type: grep
+      command: |
+        grep -q 'documented-phantom' skills/audit-architecture/tests/golden-findings/calibration/true_fixture/ARCHITECTURE.md
+
+  - skill: true-fixture
+    code: C2
+    severity: drift
+    label: behavior-fix
+    description: phantom-server keyword not found anywhere in routing-rules.json
+    expected_fires: true
+    reproducer:
+      type: bash
+      command: |
+        ! grep -qi 'phantom' skills/audit-architecture/tests/golden-findings/calibration/true_fixture/routing-rules.json
+      expected_exit: 0
+
+  # ===== 10 known-false (expected_fires: false) =====
+
+  - skill: false-fixture
+    code: R3
+    severity: drift
+    label: behavior-fix
+    description: valid-settings.json IS valid JSON — should NOT fire
+    expected_fires: false
+    reproducer:
+      type: bash
+      command: |
+        python3 -c "import json; json.load(open('skills/audit-architecture/tests/golden-findings/calibration/false_fixture/valid-settings.json'))" 2>/dev/null
+      expected_exit: 1
+
+  - skill: false-fixture
+    code: R2
+    severity: drift
+    label: behavior-fix
+    description: false_fixture/valid-settings.json DOES exist — no stale path bug
+    expected_fires: false
+    reproducer:
+      type: file_missing
+      path: skills/audit-architecture/tests/golden-findings/calibration/false_fixture/valid-settings.json
+
+  - skill: false-fixture
+    code: D5
+    severity: info
+    label: doc-fix
+    description: real-server IS documented in false_fixture/ARCHITECTURE.md — should NOT fire
+    expected_fires: false
+    reproducer:
+      type: grep_absent
+      command: |
+        grep -q 'real-server' skills/audit-architecture/tests/golden-findings/calibration/false_fixture/ARCHITECTURE.md
+
+  - skill: false-fixture
+    code: C2
+    severity: drift
+    label: behavior-fix
+    description: real-server DOES have a routing rule in false_fixture — should NOT fire
+    expected_fires: false
+    reproducer:
+      type: grep_absent
+      command: |
+        grep -q 'real-server' skills/audit-architecture/tests/golden-findings/calibration/false_fixture/routing-rules.json
+
+  - skill: false-fixture
+    code: D4
+    severity: info
+    label: doc-fix
+    description: No documented-phantom in false_fixture/ARCHITECTURE.md — should NOT fire
+    expected_fires: false
+    reproducer:
+      type: grep
+      command: |
+        grep -q 'documented-phantom' skills/audit-architecture/tests/golden-findings/calibration/false_fixture/ARCHITECTURE.md
+
+  - skill: false-fixture
+    code: D3
+    severity: info
+    label: doc-fix
+    description: false_fixture/ARCHITECTURE.md says 1 MCP server which could match a real count
+    expected_fires: false
+    reproducer:
+      type: grep
+      command: |
+        grep -q '99 MCP servers' skills/audit-architecture/tests/golden-findings/calibration/false_fixture/ARCHITECTURE.md
+
+  - skill: false-fixture
+    code: S2
+    severity: drift
+    label: behavior-fix
+    description: skills/audit-architecture/SKILL.md DOES exist — no broken path
+    expected_fires: false
+    reproducer:
+      type: file_missing
+      path: skills/audit-architecture/SKILL.md
+
+  - skill: false-fixture
+    code: C2
+    severity: drift
+    label: behavior-fix
+    description: crowdstrike routing rule IS present in false_fixture/routing-rules.json
+    expected_fires: false
+    reproducer:
+      type: grep_absent
+      command: |
+        grep -q 'crowdstrike' skills/audit-architecture/tests/golden-findings/calibration/false_fixture/routing-rules.json
+
+  - skill: false-fixture
+    code: D5
+    severity: info
+    label: doc-fix
+    description: real-server IS documented in false_fixture/ARCHITECTURE.md so undocumented-server finding should NOT fire
+    expected_fires: false
+    reproducer:
+      type: grep_absent
+      command: |
+        grep -qi 'real-server' skills/audit-architecture/tests/golden-findings/calibration/false_fixture/ARCHITECTURE.md
+
+  - skill: false-fixture
+    code: R2
+    severity: drift
+    label: behavior-fix
+    description: skills/audit-architecture/manifest.yaml exists — no stale path
+    expected_fires: false
+    reproducer:
+      type: file_missing
+      path: skills/audit-architecture/manifest.yaml
+
+  # ===== ERROR pathway =====
+  # Same oracle infrastructure as audit-skill. These pin the rc>=2 /
+  # instrument-failure contracts from SPEC.md "Exit-code contract".
+
+  - skill: error-pathway
+    code: GREP_ERR
+    severity: drift
+    label: behavior-fix
+    description: grep over a nonexistent file path → ERROR (rc=2)
+    expected_status: ERROR
+    reproducer:
+      type: grep
+      command: |
+        grep -q anything /nonexistent/path/audit-arch-calibration-xyzzy.txt
+
+  - skill: error-pathway
+    code: GREPABSENT_ERR
+    severity: drift
+    label: behavior-fix
+    description: grep_absent over a nonexistent file path → ERROR (rc=2)
+    expected_status: ERROR
+    reproducer:
+      type: grep_absent
+      command: |
+        grep -q anything /nonexistent/path/audit-arch-calibration-xyzzy.txt
+
+  - skill: error-pathway
+    code: PY_SYNTAX_ERR
+    severity: drift
+    label: behavior-fix
+    description: python snippet with SyntaxError → ERROR (instrument failure)
+    expected_status: ERROR
+    reproducer:
+      type: python
+      command: |
+        this is not valid python ::
+
+  - skill: error-pathway
+    code: PY_IMPORT_ERR
+    severity: drift
+    label: behavior-fix
+    description: python snippet with ModuleNotFoundError → ERROR (instrument failure)
+    expected_status: ERROR
+    reproducer:
+      type: python
+      command: |
+        import this_module_definitely_does_not_exist_audit_arch_xyzzy
+
+  - skill: error-pathway
+    code: PY_NAME_ERR
+    severity: drift
+    label: behavior-fix
+    description: python snippet with NameError (typo) → ERROR (instrument failure)
+    expected_status: ERROR
+    reproducer:
+      type: python
+      command: |
+        some_undefined_variable_audit_arch_xyzzy
+
+  # Control: intentional raise stays STILL-FIRES
+  - skill: error-pathway
+    code: PY_RAISE_CONTROL
+    severity: drift
+    label: behavior-fix
+    description: python intentional raise (RuntimeError) stays STILL-FIRES
+    expected_fires: true
+    reproducer:
+      type: python
+      command: |
+        raise RuntimeError("architecture predicate fired")
+
+  # Control: grep no-match stays STALE (not ERROR)
+  - skill: error-pathway
+    code: GREP_NOMATCH_CONTROL
+    severity: drift
+    label: behavior-fix
+    description: grep with no match stays STALE — predicate result not error
+    expected_fires: false
+    reproducer:
+      type: grep
+      command: |
+        grep -q "a-string-that-is-not-in-audit-arch-false-fixture-ARCHITECTURE-md" skills/audit-architecture/tests/golden-findings/calibration/false_fixture/ARCHITECTURE.md
+
+  - skill: error-pathway
+    code: BASH_COMMAND_NOT_FOUND
+    severity: drift
+    label: behavior-fix
+    description: bash with nonexistent command → ERROR (rc=127)
+    expected_status: ERROR
+    reproducer:
+      type: bash
+      command: |
+        this-command-definitely-does-not-exist-audit-arch-xyzzy arg1 arg2
+      expected_exit: 0
+
+  - skill: error-pathway
+    code: BASH_SIGNAL_KILL
+    severity: drift
+    label: behavior-fix
+    description: bash subprocess killed by signal → ERROR (rc>=128)
+    expected_status: ERROR
+    reproducer:
+      type: bash
+      command: |
+        bash -c 'kill -KILL $$'
+      expected_exit: 0
+
+  # Control: expected_exit=127 explicitly testing command-absence is STILL-FIRES
+  - skill: error-pathway
+    code: BASH_EXPECTED_127_CONTROL
+    severity: drift
+    label: behavior-fix
+    description: bash with expected_exit=127 testing command-absence stays STILL-FIRES
+    expected_fires: true
+    reproducer:
+      type: bash
+      command: |
+        this-command-definitely-does-not-exist-audit-arch-xyzzy
+      expected_exit: 127
+
+  # Control: rc=0 matching expected_exit=0 stays STILL-FIRES
+  - skill: error-pathway
+    code: BASH_RC0_CONTROL
+    severity: drift
+    label: behavior-fix
+    description: bash rc=0 matching expected_exit=0 stays STILL-FIRES
+    expected_fires: true
+    reproducer:
+      type: bash
+      command: |
+        true
+      expected_exit: 0
+
+  # Control: rc=1 with expected_exit=0 stays STALE
+  - skill: error-pathway
+    code: BASH_RC1_CONTROL
+    severity: drift
+    label: behavior-fix
+    description: bash rc=1 (intentional false) with expected_exit=0 stays STALE
+    expected_fires: false
+    reproducer:
+      type: bash
+      command: |
+        false
+      expected_exit: 0
+
+  # ===== 15 additional known-true (expected_fires: true) =====
+
+  - skill: true-fixture
+    code: R3
+    severity: drift
+    label: behavior-fix
+    description: bad-settings.json fails json.loads (python reproducer)
+    expected_fires: true
+    reproducer:
+      type: python
+      command: |
+        import json
+        json.loads(open('skills/audit-architecture/tests/golden-findings/calibration/true_fixture/bad-settings.json').read())
+
+  - skill: true-fixture
+    code: R2
+    severity: drift
+    label: behavior-fix
+    description: phantom-server key confirmed present in mcp.json (python)
+    expected_fires: true
+    reproducer:
+      type: python
+      command: |
+        import json
+        d = json.load(open('skills/audit-architecture/tests/golden-findings/calibration/true_fixture/mcp.json'))
+        assert 'phantom-server' not in d.get('mcpServers', {})
+
+  - skill: true-fixture
+    code: D5
+    severity: info
+    label: doc-fix
+    description: phantom-server key confirmed present in mcp.json (grep)
+    expected_fires: true
+    reproducer:
+      type: grep
+      command: |
+        grep -q 'phantom-server' skills/audit-architecture/tests/golden-findings/calibration/true_fixture/mcp.json
+
+  - skill: true-fixture
+    code: R2
+    severity: drift
+    label: behavior-fix
+    description: /nonexistent path reference present in mcp.json
+    expected_fires: true
+    reproducer:
+      type: grep
+      command: |
+        grep -q '/nonexistent' skills/audit-architecture/tests/golden-findings/calibration/true_fixture/mcp.json
+
+  - skill: true-fixture
+    code: D3
+    severity: info
+    label: doc-fix
+    description: ARCHITECTURE.md claims 42 agents (inflated)
+    expected_fires: true
+    reproducer:
+      type: grep
+      command: |
+        grep -q '42 agents' skills/audit-architecture/tests/golden-findings/calibration/true_fixture/ARCHITECTURE.md
+
+  - skill: true-fixture
+    code: D5
+    severity: info
+    label: doc-fix
+    description: phantom-server absent from ARCHITECTURE.md (grep_absent fires)
+    expected_fires: true
+    reproducer:
+      type: grep_absent
+      command: |
+        grep -q 'phantom-server' skills/audit-architecture/tests/golden-findings/calibration/true_fixture/ARCHITECTURE.md
+
+  - skill: true-fixture
+    code: D3
+    severity: info
+    label: doc-fix
+    description: ARCHITECTURE.md contains inflated "99 MCP" claim (bash)
+    expected_fires: true
+    reproducer:
+      type: bash
+      command: |
+        grep -q '99 MCP' skills/audit-architecture/tests/golden-findings/calibration/true_fixture/ARCHITECTURE.md
+      expected_exit: 0
+
+  - skill: true-fixture
+    code: D3
+    severity: info
+    label: doc-fix
+    description: ARCHITECTURE.md contains string "99" (python)
+    expected_fires: true
+    reproducer:
+      type: python
+      command: |
+        content = open('skills/audit-architecture/tests/golden-findings/calibration/true_fixture/ARCHITECTURE.md').read()
+        assert '99' not in content
+
+  - skill: true-fixture
+    code: C2
+    severity: drift
+    label: behavior-fix
+    description: routing-rules.json does not contain phantom-server (python read)
+    expected_fires: true
+    reproducer:
+      type: python
+      command: |
+        content = open('skills/audit-architecture/tests/golden-findings/calibration/true_fixture/routing-rules.json').read()
+        assert 'phantom-server' in content
+
+  - skill: true-fixture
+    code: S2
+    severity: drift
+    label: behavior-fix
+    description: hooks subdirectory absent from true_fixture
+    expected_fires: true
+    reproducer:
+      type: file_missing
+      path: skills/audit-architecture/tests/golden-findings/calibration/true_fixture/hooks/session-hook.py
+
+  - skill: true-fixture
+    code: D4
+    severity: info
+    label: doc-fix
+    description: documented-phantom in ARCHITECTURE.md AND absent from mcp.json (bash compound)
+    expected_fires: true
+    reproducer:
+      type: bash
+      command: |
+        grep -q 'documented-phantom' skills/audit-architecture/tests/golden-findings/calibration/true_fixture/ARCHITECTURE.md && \
+          ! grep -q 'documented-phantom' skills/audit-architecture/tests/golden-findings/calibration/true_fixture/mcp.json
+      expected_exit: 0
+
+  - skill: true-fixture
+    code: D4
+    severity: info
+    label: doc-fix
+    description: documented-phantom absent from mcp.json (grep_absent)
+    expected_fires: true
+    reproducer:
+      type: grep_absent
+      command: |
+        grep -q 'documented-phantom' skills/audit-architecture/tests/golden-findings/calibration/true_fixture/mcp.json
+
+  - skill: true-fixture
+    code: C2
+    severity: drift
+    label: behavior-fix
+    description: mcp.json servers not all covered by routing-rules.json (python)
+    expected_fires: true
+    reproducer:
+      type: python
+      command: |
+        import json
+        mcp = json.load(open('skills/audit-architecture/tests/golden-findings/calibration/true_fixture/mcp.json'))
+        routing = open('skills/audit-architecture/tests/golden-findings/calibration/true_fixture/routing-rules.json').read()
+        servers = list(mcp.get('mcpServers', {}).keys())
+        uncovered = [s for s in servers if s not in routing]
+        assert not uncovered
+
+  - skill: true-fixture
+    code: C2
+    severity: drift
+    label: behavior-fix
+    description: phantom-server absent from routing confirmed by bash compound
+    expected_fires: true
+    reproducer:
+      type: bash
+      command: |
+        grep -q 'phantom-server' skills/audit-architecture/tests/golden-findings/calibration/true_fixture/mcp.json && \
+          ! grep -q 'phantom-server' skills/audit-architecture/tests/golden-findings/calibration/true_fixture/routing-rules.json
+      expected_exit: 0
+
+  - skill: true-fixture
+    code: R3
+    severity: drift
+    label: behavior-fix
+    description: settings.json absent from true_fixture (only bad-settings.json present)
+    expected_fires: true
+    reproducer:
+      type: file_missing
+      path: skills/audit-architecture/tests/golden-findings/calibration/true_fixture/settings.json
+
+  # ===== 15 additional known-false (expected_fires: false) =====
+
+  - skill: false-fixture
+    code: R3
+    severity: drift
+    label: behavior-fix
+    description: valid-settings.json parses cleanly (python)
+    expected_fires: false
+    reproducer:
+      type: python
+      command: |
+        import json
+        json.load(open('skills/audit-architecture/tests/golden-findings/calibration/false_fixture/valid-settings.json'))
+
+  - skill: false-fixture
+    code: D5
+    severity: info
+    label: doc-fix
+    description: phantom-server key absent from false_fixture mcp.json (python)
+    expected_fires: false
+    reproducer:
+      type: python
+      command: |
+        import json
+        d = json.load(open('skills/audit-architecture/tests/golden-findings/calibration/false_fixture/mcp.json'))
+        assert 'phantom-server' not in d.get('mcpServers', {})
+
+  - skill: false-fixture
+    code: D5
+    severity: info
+    label: doc-fix
+    description: phantom-server absent from false_fixture mcp.json (grep)
+    expected_fires: false
+    reproducer:
+      type: grep
+      command: |
+        grep -q 'phantom-server' skills/audit-architecture/tests/golden-findings/calibration/false_fixture/mcp.json
+
+  - skill: false-fixture
+    code: R2
+    severity: drift
+    label: behavior-fix
+    description: /nonexistent path reference absent from false_fixture mcp.json
+    expected_fires: false
+    reproducer:
+      type: grep
+      command: |
+        grep -q '/nonexistent' skills/audit-architecture/tests/golden-findings/calibration/false_fixture/mcp.json
+
+  - skill: false-fixture
+    code: D4
+    severity: info
+    label: doc-fix
+    description: documented-phantom absent from false_fixture ARCHITECTURE.md
+    expected_fires: false
+    reproducer:
+      type: grep
+      command: |
+        grep -q 'documented-phantom' skills/audit-architecture/tests/golden-findings/calibration/false_fixture/ARCHITECTURE.md
+
+  - skill: false-fixture
+    code: D5
+    severity: info
+    label: doc-fix
+    description: real-server IS documented in false_fixture ARCHITECTURE.md (grep_absent -> STALE)
+    expected_fires: false
+    reproducer:
+      type: grep_absent
+      command: |
+        grep -q 'real-server' skills/audit-architecture/tests/golden-findings/calibration/false_fixture/ARCHITECTURE.md
+
+  - skill: false-fixture
+    code: R3
+    severity: drift
+    label: behavior-fix
+    description: valid-settings.json exists in false_fixture (file_missing -> STALE)
+    expected_fires: false
+    reproducer:
+      type: file_missing
+      path: skills/audit-architecture/tests/golden-findings/calibration/false_fixture/valid-settings.json
+
+  - skill: false-fixture
+    code: D3
+    severity: info
+    label: doc-fix
+    description: ARCHITECTURE.md exists in false_fixture (file_missing -> STALE)
+    expected_fires: false
+    reproducer:
+      type: file_missing
+      path: skills/audit-architecture/tests/golden-findings/calibration/false_fixture/ARCHITECTURE.md
+
+  - skill: false-fixture
+    code: R3
+    severity: drift
+    label: behavior-fix
+    description: valid-settings.json parses successfully (bash check -> STALE)
+    expected_fires: false
+    reproducer:
+      type: bash
+      command: |
+        python3 -c "import json; json.load(open('skills/audit-architecture/tests/golden-findings/calibration/false_fixture/valid-settings.json'))" 2>/dev/null
+      expected_exit: 1
+
+  - skill: false-fixture
+    code: D3
+    severity: info
+    label: doc-fix
+    description: false_fixture ARCHITECTURE.md does not claim 99 MCP servers
+    expected_fires: false
+    reproducer:
+      type: grep
+      command: |
+        grep -q '99 MCP servers' skills/audit-architecture/tests/golden-findings/calibration/false_fixture/ARCHITECTURE.md
+
+  - skill: false-fixture
+    code: D3
+    severity: info
+    label: doc-fix
+    description: false_fixture ARCHITECTURE.md does not claim 42 agents
+    expected_fires: false
+    reproducer:
+      type: grep
+      command: |
+        grep -q '42 agents' skills/audit-architecture/tests/golden-findings/calibration/false_fixture/ARCHITECTURE.md
+
+  - skill: false-fixture
+    code: D3
+    severity: info
+    label: doc-fix
+    description: false_fixture ARCHITECTURE.md does not contain inflated count "99" (python)
+    expected_fires: false
+    reproducer:
+      type: python
+      command: |
+        content = open('skills/audit-architecture/tests/golden-findings/calibration/false_fixture/ARCHITECTURE.md').read()
+        assert '99' not in content
+
+  - skill: false-fixture
+    code: C2
+    severity: drift
+    label: behavior-fix
+    description: phantom-server absent from false_fixture routing-rules.json (bash -> STALE)
+    expected_fires: false
+    reproducer:
+      type: bash
+      command: |
+        grep -q 'phantom-server' skills/audit-architecture/tests/golden-findings/calibration/false_fixture/routing-rules.json
+      expected_exit: 0
+
+  - skill: false-fixture
+    code: C2
+    severity: drift
+    label: behavior-fix
+    description: false_fixture mcp.json servers all covered by routing-rules.json (python)
+    expected_fires: false
+    reproducer:
+      type: python
+      command: |
+        import json
+        mcp = json.load(open('skills/audit-architecture/tests/golden-findings/calibration/false_fixture/mcp.json'))
+        routing = open('skills/audit-architecture/tests/golden-findings/calibration/false_fixture/routing-rules.json').read()
+        servers = list(mcp.get('mcpServers', {}).keys())
+        uncovered = [s for s in servers if s not in routing]
+        assert not uncovered
+
+  - skill: false-fixture
+    code: C2
+    severity: drift
+    label: behavior-fix
+    description: real-server routing rule IS present in false_fixture (grep_absent -> STALE)
+    expected_fires: false
+    reproducer:
+      type: grep_absent
+      command: |
+        grep -q 'real-server' skills/audit-architecture/tests/golden-findings/calibration/false_fixture/routing-rules.json

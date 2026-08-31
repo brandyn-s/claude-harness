@@ -1,0 +1,102 @@
+{
+  "_about": "MEASURED live A/B numbers for gather-research efficacy. Refresh via `python3 skills/gather-research/harness/run_live.py`. CI asserts on this file.",
+  "model": "claude-opus-4-8",
+  "arms": "with_skill (framework) vs baseline (plain strong pass)",
+  "run_date": "2026-05-31",
+  "n_runs": 3,
+  "n_claims": 15,
+  "fixture_sha": "73a1ab845618",
+  "primary_metric": "grounding_precision",
+  "cost_ratio": 5.0,
+  "metrics": {
+    "with_skill": {
+      "n_runs": 3,
+      "grounding_precision": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "refutation_recall": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "fabrication_resistance": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "true_recall": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "verdict_accuracy": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      }
+    },
+    "baseline": {
+      "n_runs": 3,
+      "grounding_precision": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "refutation_recall": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "fabrication_resistance": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "true_recall": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "verdict_accuracy": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      }
+    }
+  },
+  "verdict": {
+    "verdict": "trim",
+    "primary_metric": "grounding_precision",
+    "delta": 0.0,
+    "cost_ratio": 5.0,
+    "reason": "delta 0.0 < 0.05 bar \u2014 framework not worth its ~5.0x cost"
+  },
+  "per_category_n": {
+    "true_primary": 5,
+    "refuted": 4,
+    "outdated": 3,
+    "fabricated": 3
+  }
+}

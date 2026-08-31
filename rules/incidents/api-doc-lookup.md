@@ -22,7 +22,7 @@ for bucket_width="1d"`), so all 4 cost/usage endpoints wrote ZERO
 partitions on the first production run while the engagement lane looked
 healthy. Both the cap AND the non-obvious "it caps TIME BUCKETS, not
 rows" clarification were ALREADY documented 3 days earlier (2026-07-23)
-in topics/anthropic-platform-api.md:293 AND skills/cc-monitor/SKILL.md:229.
+in topics/anthropic-platform-api.md:293 AND a separate skill (not included in this export):229.
 `ls ~/Documents/api-docs/` has no anthropic entry, so step 1 finds
 nothing and step 3 says "ingest the vendor docs" — neither points at
 where the answer actually lived. Cost: a failed prod run + a live API

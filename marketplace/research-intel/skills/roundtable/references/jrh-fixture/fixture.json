@@ -1,0 +1,31 @@
+{
+  "_meta": {
+    "purpose": "Frozen JRH fixture for /roundtable judge-reliability testing (judge-reliability-protocol.md).",
+    "design": "Deliberately UNAMBIGUOUS gold so a verdict flip under an invariance transform = pure bias, not genuine difficulty. This is the crisp-target first instantiation; it is CEILING-BOUND and does NOT discriminate reliability on methodologically-subtle near-tie targets (the documented follow-on).",
+    "gold_provenance": "Claim golds derive from the user's own rules: security-review-before-pr.md (Rust panic = bug not memory-safety; fail-open env default) and uncharted-vs-refuted.md (absence of evidence != refutation). Pairwise golds are uncontroversial severity orderings.",
+    "run": "skills/roundtable/scripts/jrh_harness.py (fixture is inline there; this file is the human-readable mirror).",
+    "first_run": "2026-06-14 — see JUDGE_CARD.md"
+  },
+  "claims": [
+    {"id": "C1", "gold": "REFUTED",
+     "claim": "A Rust panic triggered by malformed input is a memory-safety vulnerability (use-after-free class) and must be triaged as CVE-worthy.",
+     "rationale_gold": "Panics are bugs, not memory unsafety (security-review-before-pr.md triage table)."},
+    {"id": "C2", "gold": "SUPPORTED",
+     "claim": "Loading a secret with os.environ.get('DB_PASSWORD', 'changeme') is a fail-open default: the service keeps running with a weak credential when the env var is unset.",
+     "rationale_gold": "Fail-open default — security-review-before-pr.md env-var FAIL example."},
+    {"id": "C3", "gold": "REFUTED",
+     "claim": "Absence of any published study measuring technique X proves technique X does not work.",
+     "rationale_gold": "Absence of evidence is not refutation (uncharted-vs-refuted.md)."}
+  ],
+  "pairs": [
+    {"id": "P1", "gold_is": "A",
+     "A": "A hardcoded AWS secret-access-key committed in plaintext to a public git repository.",
+     "B": "A log line that prints the current UTC timestamp at DEBUG level."},
+    {"id": "P2", "gold_is": "B",
+     "A": "A README typo: 'recieve' instead of 'receive'.",
+     "B": "An auth middleware that returns allow=True when the OPA policy server is unreachable (fail-open authz bypass)."},
+    {"id": "P3", "gold_is": "A",
+     "A": "SQL built by string-concatenating an unsanitized HTTP query parameter into the WHERE clause (injection).",
+     "B": "A function with a 4-space vs tab indentation inconsistency."}
+  ]
+}

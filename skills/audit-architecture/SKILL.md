@@ -2,7 +2,7 @@
 
 name: audit-architecture
 description: "Audit the Claude Code architecture for drift and coverage gaps across MCP servers, agents, hooks, skills, and rules."
-when_to_use: "Use when asked to audit the Claude Code architecture, validate system health after changes, or find drift and coverage gaps across MCP servers, agents, hooks, skills, and routing rules. Runs live runtime probes, coverage analysis, consistency checks, and offers ranked batch fixes. Do NOT use for simple status checks (/mcp-diagnose), single-component debugging (/systematic-debugging), or querying a specific MCP tool."
+when_to_use: "Use when asked to audit the Claude Code architecture, validate system health after changes, or find drift and coverage gaps across MCP servers, agents, hooks, skills, and routing rules. Runs live runtime probes, coverage analysis, consistency checks, and offers ranked batch fixes. Do NOT use for simple status checks (a separate skill (not included in this export)), single-component debugging (/systematic-debugging), or querying a specific MCP tool."
 disable-model-invocation: true
 argument-hint: "[optional focus, e.g. 'hooks', 'topics', 'routing', 'skills', 'MCP servers']"
 effort: high
@@ -282,7 +282,7 @@ Start from `discovery.json`'s `loops` section (PostToolUseFailure universality, 
 | **Pre-flight Prevention** | Which MCPs are covered by PreToolUse matchers? Which are NOT? |
 | **Transparency + Human Audit** | SubagentStop matcher is `.*` (wildcard)? Or hardcoded to specific agents? |
 | **Pattern Promotion** | Any agent memory entries with 3+ `[confirmed]` tags? (candidates for promotion to agent .md) |
-| **Intelligence Gathering** | `/gather-intel` and `/gather-internal-intel` skills exist and have routing rules? |
+| **Intelligence Gathering** | `/gather-intel` and a separate skill (not included in this export) skills exist and have routing rules? |
 
 ## Phase 7: Emit Findings, Oracle Gating & Fix
 

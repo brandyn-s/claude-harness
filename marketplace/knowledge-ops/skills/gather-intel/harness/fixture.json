@@ -1,0 +1,149 @@
+{
+  "_about": "Independent, hand-curated oracle for the gather-intel live-arm efficacy measurement. See harness/PROBLEM.md. ORACLE-SCOPE CAVEAT (cardinal rule honesty): gather-intel's headline value — judging community-pattern EFFECTIVENESS / hype / source-authority — has NO clean deterministic oracle. What IS cleanly gradeable is EXISTENCE + CURRENCY of community tools/patterns and FALSE-SPECIFIC claims, so this fixture measures that surface. Also: the community Claude Code ecosystem is so dense that 'plausible fabricated tool' claims are usually REAL (verified 2026-05-31: claude-code-orchestrator, claude-supervisor, orchestrator-kit all exist), so this fixture leans on `refuted` (false claims about real things) over `fabricated`. Verdicts verified against GitHub/web + the anthropics/claude-code CHANGELOG @ v2.1.158.",
+  "grounding": {
+    "method": "deterministic term-overlap on the fetched page text of the arm's OWN cited URL",
+    "threshold": 0.6,
+    "note": "Community sources (GitHub READMEs) are fetchable HTML; grounding works for existence claims. verdict_accuracy / refutation_recall are hand-label-based (robust)."
+  },
+  "expected_disposition_legend": {
+    "supported": "a correct arm SHOULD assert this is a real, current community tool/pattern",
+    "not_supported": "a correct arm should NOT assert it — it is platform-obsoleted (outdated), a false claim (refuted), or nonexistent (fabricated)"
+  },
+  "claims": [
+    {
+      "id": "awesome-claude-code-exists",
+      "category": "true_primary",
+      "claim": "There is a community-curated 'awesome-claude-code' style GitHub list cataloguing Claude Code tools, skills, and resources.",
+      "expected_disposition": "supported",
+      "ground_truth": "TRUE. Multiple exist (e.g. daxaur/awesome-claude-code-mastery; the canonical hesreallyhim/awesome-claude-code). Verified Exa GitHub search 2026-05-31.",
+      "primary_source_url": "https://github.com/hesreallyhim/awesome-claude-code",
+      "grounding_terms": ["awesome", "claude code", "curated"]
+    },
+    {
+      "id": "community-orchestrators-exist",
+      "category": "true_primary",
+      "claim": "The community has built orchestrator tools that run multiple Claude Code agents in parallel across isolated git worktrees.",
+      "expected_disposition": "supported",
+      "ground_truth": "TRUE. Verified real: mohsen1/claude-code-orchestrator, ravid7000/claude-agent-orchestrator, allexcd/claude-supervisor (npm). Parallel-agents-in-worktrees is a real community pattern.",
+      "primary_source_url": "https://github.com/allexcd/claude-supervisor",
+      "grounding_terms": ["parallel", "Claude Code", "worktree"]
+    },
+    {
+      "id": "claudemd-practice",
+      "category": "true_primary",
+      "claim": "Putting project-specific instructions in a CLAUDE.md file is a widely-adopted community practice for Claude Code.",
+      "expected_disposition": "supported",
+      "ground_truth": "TRUE. CLAUDE.md is documented + community-standard; nearly every community toolkit references it.",
+      "primary_source_url": "https://docs.claude.com/en/docs/claude-code/memory",
+      "grounding_terms": ["CLAUDE.md", "instructions"]
+    },
+    {
+      "id": "community-mcp-servers",
+      "category": "true_primary",
+      "claim": "The community builds and shares MCP servers to extend Claude Code with external tools.",
+      "expected_disposition": "supported",
+      "ground_truth": "TRUE. A large community MCP-server ecosystem exists (awesome-mcp-servers lists, many community servers).",
+      "primary_source_url": "https://github.com/modelcontextprotocol/servers",
+      "grounding_terms": ["MCP", "server", "Claude"]
+    },
+    {
+      "id": "three-workers-sweetspot",
+      "category": "true_primary",
+      "claim": "A common community heuristic is that ~3 parallel agents/worktrees is a practical sweet spot before credit-window or coordination limits bite.",
+      "expected_disposition": "supported",
+      "ground_truth": "TRUE as a community-reported heuristic (e.g. p3nchan/cc-orchestrator: 'Three parallel workers is the sweet spot; four collides with the 5-hour credit window'). A community-sourced practitioner claim.",
+      "primary_source_url": "https://github.com/p3nchan/cc-orchestrator",
+      "grounding_terms": ["three parallel workers", "sweet spot"]
+    },
+    {
+      "id": "taskoutput-community-workaround",
+      "category": "outdated",
+      "claim": "The current community recommendation is to use the TaskOutput tool to read a background task's output.",
+      "expected_disposition": "not_supported",
+      "ground_truth": "OUTDATED. TaskOutput was deprecated in favor of Read on the task's output file path (CHANGELOG @ v2.1.158). Current guidance is Read, not TaskOutput.",
+      "primary_source_url": "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+      "grounding_terms": ["TaskOutput", "deprecated"]
+    },
+    {
+      "id": "resume-community-workaround",
+      "category": "outdated",
+      "claim": "Community guidance is to pass a `resume` parameter to the Agent tool to continue a previously spawned subagent.",
+      "expected_disposition": "not_supported",
+      "ground_truth": "OUTDATED. The Agent tool no longer accepts `resume`; current method is SendMessage({to: agentId}) (CHANGELOG, removed v2.1.77).",
+      "primary_source_url": "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md",
+      "grounding_terms": ["resume", "Agent", "SendMessage"]
+    },
+    {
+      "id": "ripgrep-workaround-stale",
+      "category": "outdated",
+      "claim": "A current community workaround is needed because Claude Code's built-in file search is broken and times out by default.",
+      "expected_disposition": "not_supported",
+      "ground_truth": "OUTDATED/FALSE as a CURRENT claim. Early ripgrep/search timeout issues were addressed; built-in search (Grep/Glob) is the standard working path. A current verdict rejects 'is broken by default'.",
+      "primary_source_url": "https://docs.claude.com/en/docs/claude-code/overview",
+      "grounding_terms": ["search", "broken", "times out"]
+    },
+    {
+      "id": "claudemd-never-use",
+      "category": "refuted",
+      "claim": "Community consensus is that you should never use CLAUDE.md files because they waste context.",
+      "expected_disposition": "not_supported",
+      "ground_truth": "FALSE. The opposite is true — CLAUDE.md is a near-universal recommended practice. No such 'never use' consensus exists.",
+      "primary_source_url": "https://docs.claude.com/en/docs/claude-code/memory",
+      "grounding_terms": ["CLAUDE.md", "never use"]
+    },
+    {
+      "id": "awesome-list-official-cert",
+      "category": "refuted",
+      "claim": "The awesome-claude-code list is an official Anthropic certification program that vets tools for security.",
+      "expected_disposition": "not_supported",
+      "ground_truth": "FALSE. awesome-claude-code lists are community-curated, not an official Anthropic certification/security-vetting program.",
+      "primary_source_url": "https://github.com/hesreallyhim/awesome-claude-code",
+      "grounding_terms": ["official", "Anthropic", "certification"]
+    },
+    {
+      "id": "more-agents-linear-throughput",
+      "category": "refuted",
+      "claim": "Community benchmarks show that adding more parallel Claude Code agents always linearly increases task throughput.",
+      "expected_disposition": "not_supported",
+      "ground_truth": "FALSE. Community experience is the opposite (diminishing returns / credit-window collisions past ~3 workers; coordination overhead). No 'always linear' benchmark exists.",
+      "primary_source_url": "https://github.com/p3nchan/cc-orchestrator",
+      "grounding_terms": ["more agents", "linearly", "throughput"]
+    },
+    {
+      "id": "selfreview-blindspot-stat",
+      "category": "refuted",
+      "claim": "The community has established that single-model self-review of code has exactly a 64.5% blind-spot rate across all languages and tasks.",
+      "expected_disposition": "not_supported",
+      "ground_truth": "FALSE as stated. A '64.5% blind spot' figure circulates in one community playbook (p3nchan/cc-orchestrator) as a rationale for cross-family review, but 'exactly, across all languages and tasks' is an over-generalized fabrication of a single anecdotal figure. Tests the framework's source-authority/over-claim discipline.",
+      "primary_source_url": "https://github.com/p3nchan/cc-orchestrator",
+      "grounding_terms": ["64.5%", "blind spot", "all languages and tasks"]
+    },
+    {
+      "id": "fab-contextzip",
+      "category": "fabricated",
+      "claim": "The community 'ContextZip' plugin losslessly compresses any CLAUDE.md by 90% with zero quality loss.",
+      "expected_disposition": "not_supported",
+      "ground_truth": "FABRICATED. No such 'ContextZip' community plugin with a '90% lossless, zero quality loss' guarantee exists; the specific guarantee is the absurd tell. Correct verdict: UNCHARTED/unsupported.",
+      "primary_source_url": null,
+      "grounding_terms": ["ContextZip", "90%", "lossless"]
+    },
+    {
+      "id": "fab-telepathy",
+      "category": "fabricated",
+      "claim": "claude-code-telepathy is a popular community MCP server that reads your IDE cursor position to predict and pre-apply edits before you type.",
+      "expected_disposition": "not_supported",
+      "ground_truth": "FABRICATED. No such 'claude-code-telepathy' MCP server exists; the capability (predict + pre-apply edits before typing) is the absurd tell. Correct verdict: UNCHARTED/unsupported.",
+      "primary_source_url": null,
+      "grounding_terms": ["claude-code-telepathy", "cursor position", "predict"]
+    },
+    {
+      "id": "fab-agentforge-cert",
+      "category": "fabricated",
+      "claim": "The community 'AgentForge' standard certifies subagent prompts with a guaranteed 50% minimum task success rate.",
+      "expected_disposition": "not_supported",
+      "ground_truth": "FABRICATED. No 'AgentForge' community certification standard with a guaranteed success rate exists; a guaranteed success-rate certification is the absurd tell. Correct verdict: UNCHARTED/unsupported.",
+      "primary_source_url": null,
+      "grounding_terms": ["AgentForge", "certifies", "guaranteed", "success rate"]
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "helpers": [
+    "bin/ci-failure-superseded.py",
+    "bin/pr-merge-verified.py"
+  ],
+  "packaged_skills": [
+    "brainstorm",
+    "superplan",
+    "supergoal",
+    "supergoal-pause",
+    "supergoal-resume",
+    "superplan-status",
+    "superplan-loop",
+    "interview",
+    "refine",
+    "subagent-driven-development",
+    "ship",
+    "pr-fix",
+    "systematic-debugging",
+    "test-driven-development",
+    "api-guardrails",
+    "bulk-api-script",
+    "work",
+    "verification-before-completion"
+  ],
+  "requires_skills": {
+    "api-guardrails": [],
+    "brainstorm": [],
+    "bulk-api-script": [],
+    "interview": [],
+    "pr-fix": [],
+    "refine": [],
+    "ship": [],
+    "subagent-driven-development": [
+      "test-driven-development",
+      "ship"
+    ],
+    "supergoal": [
+      "supergoal-resume",
+      "supergoal-pause",
+      "superplan"
+    ],
+    "supergoal-pause": [
+      "supergoal",
+      "supergoal-resume",
+      "superplan"
+    ],
+    "supergoal-resume": [
+      "supergoal",
+      "supergoal-pause",
+      "superplan"
+    ],
+    "superplan": [
+      "brainstorm"
+    ],
+    "superplan-loop": [
+      "supergoal",
+      "supergoal-pause",
+      "superplan-status"
+    ],
+    "superplan-status": [
+      "supergoal",
+      "supergoal-pause",
+      "supergoal-resume",
+      "superplan-loop"
+    ],
+    "systematic-debugging": [
+      "test-driven-development",
+      "verification-before-completion"
+    ],
+    "test-driven-development": [],
+    "verification-before-completion": [],
+    "work": [
+      "ship"
+    ]
+  },
+  "root_skills": [
+    "brainstorm",
+    "superplan",
+    "supergoal",
+    "supergoal-pause",
+    "supergoal-resume",
+    "superplan-status",
+    "superplan-loop",
+    "interview",
+    "refine",
+    "subagent-driven-development",
+    "ship",
+    "pr-fix",
+    "systematic-debugging",
+    "test-driven-development",
+    "api-guardrails",
+    "bulk-api-script",
+    "work"
+  ],
+  "schema_version": 1,
+  "shared_assets": [
+    "linear-routing.md",
+    "model-overlays/fable-5.md",
+    "model-overlays/mythos-5.md",
+    "model-overlays/opus-5.md",
+    "model-overlays/sonnet-5.md",
+    "model-runtime-policy.md",
+    "output-grounding.md",
+    "project-dir.md",
+    "repo-map.md"
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "kappa_floor": 0.6,
+  "in_band": [0.2, 0.8],
+  "tol": 1e-6,
+  "oracle_note": "Every oracle_kappa below is INDEPENDENT, hand-computed ground truth derived from the textbook Cohen's kappa formula by exact rational arithmetic (Python Fraction), NEVER by calling persona's cohens_kappa. Binary kappa: po = fraction of items where the two raters agree; pe = pa*pb + (1-pa)*(1-pb) where pa, pb are each rater's fraction of positives; kappa = (po - pe)/(1 - pe). rater values are 1=endorse, 0=reject. po == raw_agreement; the discriminator case proves kappa != raw_agreement.",
+  "anchor_check": "rater_a=[1,1,0,0,1], rater_b=[1,0,0,0,1] -> po=0.8, pa=0.6, pb=0.4, pe=0.48, kappa=0.615 (case id=anchor_kappa_0p615).",
+  "cases": [
+    {
+      "id": "anchor_kappa_0p615",
+      "class": "intermediate",
+      "rater_a": [1, 1, 0, 0, 1],
+      "rater_b": [1, 0, 0, 0, 1],
+      "raw_agreement": 0.8,
+      "oracle_kappa": 0.615,
+      "derivation": "agree on 4/5 -> po=0.8; pa=3/5=0.6, pb=2/5=0.4; pe=0.6*0.4+0.4*0.6=0.48; kappa=(0.8-0.48)/(1-0.48)=8/13=0.6154 -> 0.615. Spec anchor; kappa(0.615) != raw(0.80)."
+    },
+    {
+      "id": "moderate_kappa_0p348_DISCRIM",
+      "class": "discriminator",
+      "rater_a": [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+      "rater_b": [0, 0, 0, 0, 0, 1, 1, 0, 1, 1],
+      "raw_agreement": 0.7,
+      "oracle_kappa": 0.348,
+      "derivation": "agree on 7/10 -> po=0.70; pa=3/10=0.3, pb=4/10=0.4; pe=0.3*0.4+0.7*0.6=0.54; kappa=(0.70-0.54)/(1-0.54)=8/23=0.3478 -> 0.348. DISCRIMINATOR: both base rates in [0.2,0.8] (in-band), raw_agreement=0.70 >= 0.6 would PASS an agreement-floor gate, but real kappa=0.348 < 0.6 correctly FIRES the gate. Substituting raw-agreement for kappa flips the gate decision."
+    },
+    {
+      "id": "substantial_kappa_0p583",
+      "class": "intermediate",
+      "rater_a": [1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+      "rater_b": [1, 1, 1, 0, 1, 0, 0, 0, 0, 0],
+      "raw_agreement": 0.8,
+      "oracle_kappa": 0.583,
+      "derivation": "agree on 8/10 -> po=0.80; pa=4/10=0.4, pb=4/10=0.4; pe=0.4*0.4+0.6*0.6=0.52; kappa=(0.80-0.52)/(1-0.52)=7/12=0.5833 -> 0.583. kappa(0.583) clearly != raw(0.80)."
+    },
+    {
+      "id": "half_base_kappa_0p600",
+      "class": "intermediate",
+      "rater_a": [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+      "rater_b": [1, 1, 1, 1, 0, 1, 0, 0, 0, 0],
+      "raw_agreement": 0.8,
+      "oracle_kappa": 0.6,
+      "derivation": "agree on 8/10 -> po=0.80; pa=5/10=0.5, pb=5/10=0.5; pe=0.5*0.5+0.5*0.5=0.50; kappa=(0.80-0.50)/(1-0.50)=3/5=0.600. At pa=pb=0.5, pe=0.5 -> kappa = 2*po-1; kappa(0.60) != raw(0.80). Sits exactly on the 0.6 floor (boundary check: gate fires only on kappa < floor)."
+    },
+    {
+      "id": "strong_kappa_0p737",
+      "class": "intermediate",
+      "rater_a": [0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+      "rater_b": [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+      "raw_agreement": 0.9,
+      "oracle_kappa": 0.737,
+      "derivation": "agree on 9/10 -> po=0.90; pa=2/10=0.2, pb=3/10=0.3; pe=0.2*0.3+0.8*0.7=0.62; kappa=(0.90-0.62)/(1-0.62)=14/19=0.7368 -> 0.737. Upper end of the 0.3-0.75 intermediate band; kappa(0.737) != raw(0.90)."
+    },
+    {
+      "id": "perfect_agreement",
+      "class": "edge",
+      "rater_a": [1, 1, 0, 1, 0],
+      "rater_b": [1, 1, 0, 1, 0],
+      "raw_agreement": 1.0,
+      "oracle_kappa": 1.0,
+      "derivation": "identical raters -> po=1.0; pa=pb=3/5=0.6; pe=0.6*0.6+0.4*0.4=0.52; kappa=(1.0-0.52)/(1-0.52)=1.0. Degenerate +1: perfect agreement beyond chance."
+    },
+    {
+      "id": "perfect_disagreement",
+      "class": "edge",
+      "rater_a": [1, 1, 0, 0],
+      "rater_b": [0, 0, 1, 1],
+      "raw_agreement": 0.0,
+      "oracle_kappa": -1.0,
+      "derivation": "raters never agree -> po=0.0; equal base rates pa=pb=2/4=0.5 so pe=0.5; kappa=(0.0-0.5)/(1-0.5)=-1.0. Degenerate -1: maximal disagreement (requires equal base rates for exactly -1)."
+    },
+    {
+      "id": "chance_level_zero",
+      "class": "edge",
+      "rater_a": [1, 1, 0, 0],
+      "rater_b": [1, 0, 1, 0],
+      "raw_agreement": 0.5,
+      "oracle_kappa": 0.0,
+      "derivation": "agree on 2/4 -> po=0.5; pa=pb=2/4=0.5; pe=0.5*0.5+0.5*0.5=0.5; kappa=(0.5-0.5)/(1-0.5)=0.0. Agreement exactly at chance -> kappa=0 even though raw agreement is 0.50. Pins that the (1-pa)(1-pb) term is present: dropping it gives pe=0.25 and kappa=0.333, not 0."
+    },
+    {
+      "id": "degenerate_all_endorse",
+      "class": "edge",
+      "rater_a": [1, 1, 1, 1],
+      "rater_b": [1, 1, 1, 1],
+      "raw_agreement": 1.0,
+      "oracle_kappa": "NaN",
+      "derivation": "both raters endorse everything -> pa=pb=1.0; pe=1.0*1.0+0.0*0.0=1.0; kappa=(po-pe)/(1-pe) is 0/0 -> undefined. persona returns float('nan') when p_e == 1. Out-of-band (rates not in [0.2,0.8]), so this never gates regardless."
+    },
+    {
+      "id": "length_mismatch",
+      "class": "edge",
+      "rater_a": [1, 1, 0],
+      "rater_b": [1, 1, 0, 0],
+      "raw_agreement": null,
+      "oracle_kappa": "NaN",
+      "derivation": "len(a) != len(b) -> kappa undefined by construction. persona returns float('nan') for the n==0 or n!=len(b) guard. Oracle is NaN by definition, not from arithmetic."
+    }
+  ]
+}

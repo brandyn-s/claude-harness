@@ -50,7 +50,6 @@ Route away if the request is really about something else:
 |---|---|
 | Claude Code product features, CLI, model releases | `/gather-claude` |
 | OpenAI / Gemini / Grok | `/gather-vendor` |
-| Answering a spend/usage question from data we already hold | `/cc-monitor` |
 | Community patterns | `/gather-intel` |
 | Academic research | `/gather-research` |
 
@@ -580,10 +579,8 @@ A finding relevant to another skill goes in the `## Handoffs` table
 
 | Finding shape | Route to |
 |---|---|
-| ingest/routing change for a Claude data source | `/cc-monitor` |
 | a platform feature or env var that overlaps Claude Code product surface | `/gather-claude` |
 | a new detection opportunity from a new OTel event or activity type | the detector work queue |
-| a security advisory on a collection path | `/security-alerts` |
 
 ---
 

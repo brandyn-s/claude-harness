@@ -1,0 +1,102 @@
+{
+  "_about": "MEASURED live A/B numbers for gather-intel efficacy. Refresh via `python3 skills/gather-intel/harness/run_live.py`. CI asserts on this file.",
+  "model": "claude-opus-4-8",
+  "arms": "with_skill (framework) vs baseline (plain strong pass)",
+  "run_date": "2026-05-31",
+  "n_runs": 3,
+  "n_claims": 15,
+  "fixture_sha": "6a017f97d139",
+  "primary_metric": "grounding_precision",
+  "cost_ratio": 5.0,
+  "metrics": {
+    "with_skill": {
+      "n_runs": 3,
+      "grounding_precision": {
+        "mean": 0.8778,
+        "min": 0.8,
+        "max": 1.0,
+        "stdev": 0.0875,
+        "n": 3
+      },
+      "refutation_recall": {
+        "mean": 0.9524,
+        "min": 0.8571,
+        "max": 1.0,
+        "stdev": 0.0673,
+        "n": 3
+      },
+      "fabrication_resistance": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "true_recall": {
+        "mean": 0.9333,
+        "min": 0.8,
+        "max": 1.0,
+        "stdev": 0.0943,
+        "n": 3
+      },
+      "verdict_accuracy": {
+        "mean": 0.9556,
+        "min": 0.9333,
+        "max": 1.0,
+        "stdev": 0.0314,
+        "n": 3
+      }
+    },
+    "baseline": {
+      "n_runs": 3,
+      "grounding_precision": {
+        "mean": 0.8333,
+        "min": 0.8333,
+        "max": 0.8333,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "refutation_recall": {
+        "mean": 0.8571,
+        "min": 0.8571,
+        "max": 0.8571,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "fabrication_resistance": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "true_recall": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3
+      },
+      "verdict_accuracy": {
+        "mean": 0.9333,
+        "min": 0.9333,
+        "max": 0.9333,
+        "stdev": 0.0,
+        "n": 3
+      }
+    }
+  },
+  "verdict": {
+    "verdict": "trim",
+    "primary_metric": "grounding_precision",
+    "delta": 0.0445,
+    "cost_ratio": 5.0,
+    "reason": "delta 0.0445 < 0.05 bar \u2014 framework not worth its ~5.0x cost"
+  },
+  "per_category_n": {
+    "true_primary": 5,
+    "outdated": 3,
+    "refuted": 4,
+    "fabricated": 3
+  }
+}

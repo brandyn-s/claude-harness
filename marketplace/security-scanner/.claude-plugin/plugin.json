@@ -1,0 +1,9 @@
+{
+  "name": "security-scanner",
+  "description": "Static analysis, threat modeling, compliance, and breach response \u2014 Semgrep, CodeQL, false positive verification, differential review, threat modeling, STIG/SRG assessment and verification, dependabot triage, and vendor breach response.",
+  "version": "1.1.6",
+  "author": {
+    "name": "the maintainers",
+    "url": "https://github.com/example-org"
+  }
+}

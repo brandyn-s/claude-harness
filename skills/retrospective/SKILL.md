@@ -257,10 +257,10 @@ The previous version of this note asserted that `/ship` is "not auto-chained by 
 | `differential-review` | `/differential-review` invocation | `/ship` sessions with security-sensitive diffs OR explicit diff review | **In `/ship` Step 4** (conditional) |
 | `insecure-defaults` | `/insecure-defaults` invocation (standalone only) | explicit security-review requests | **NOT in `/ship`** — standalone |
 | `agentic-actions-auditor` | `/agentic-actions-auditor` invocation (standalone only) | sessions touching `.github/workflows/` | **NOT in `/ship`** — standalone |
-| `semgrep` | `/security-scanner:semgrep` invocation (bare `/semgrep` also works) | `/security-alerts` sessions (optional) | **NOT in `/ship`** — standalone |
+| `semgrep` | `/security-scanner:semgrep` invocation (bare `/semgrep` also works) | a separate skill (not included in this export) sessions (optional) | **NOT in `/ship`** — standalone |
 | `fp-check` | `/fp-check` invocation | triage sessions with CRITICAL/HIGH findings | standalone |
 | `variant-analysis` | `/variant-analysis` invocation | triage sessions after fp-check TRUE POSITIVE | standalone |
-| `sharp-edges` | `/sharp-edges` invocation | full/red-team `/stig-assess` sessions | standalone |
+| `sharp-edges` | `/sharp-edges` invocation | full/red-team a separate skill (not included in this export) sessions | standalone |
 
 The **Host gate** column exists because the earlier version of this table listed
 `insecure-defaults`, `agentic-actions-auditor` and `semgrep` with `/ship`-scoped
@@ -448,7 +448,7 @@ Full report: ~/.claude/retrospectives/{filename}
 - Every finding references specific sessions, PRs, or error messages
 - Strategic analysis cites specific sessions that demonstrate the need
 - Learning report entries are cross-referenced against current errors
-- Gap recommendations are concrete ("create /mcp-diagnose skill") not vague ("improve debugging")
+- Gap recommendations are concrete ("create a separate skill (not included in this export) skill") not vague ("improve debugging")
 - When a previous retro exists, you show which gaps were resolved and which recur
 
 ## Examples

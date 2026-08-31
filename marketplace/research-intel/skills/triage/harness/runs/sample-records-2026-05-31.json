@@ -1,0 +1,212 @@
+{
+  "_about": "Compact re-gradeable sample of the N=3 triage A/B (2026-05-31). Each record is an arm's full ranking+groups; re-run grade.score_run(fixture, record) per arm/run to reproduce results.json.",
+  "runs": [
+    {
+      "run_idx": 0,
+      "records": [
+        {
+          "arm": "baseline",
+          "ranking": [
+            "f1",
+            "f2",
+            "f3",
+            "f4",
+            "f5",
+            "f6",
+            "f7",
+            "f11",
+            "f9",
+            "f12",
+            "f8",
+            "f10"
+          ],
+          "groups": [
+            [
+              "f1",
+              "f2",
+              "f3"
+            ],
+            [
+              "f4",
+              "f5"
+            ],
+            [
+              "f7",
+              "f11"
+            ]
+          ]
+        },
+        {
+          "arm": "with_skill",
+          "ranking": [
+            "f1",
+            "f2",
+            "f3",
+            "f5",
+            "f4",
+            "f6",
+            "f9",
+            "f7",
+            "f11",
+            "f12",
+            "f10",
+            "f8"
+          ],
+          "groups": [
+            [
+              "f1",
+              "f2",
+              "f3"
+            ],
+            [
+              "f4",
+              "f5"
+            ],
+            [
+              "f7",
+              "f11"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "run_idx": 1,
+      "records": [
+        {
+          "arm": "with_skill",
+          "ranking": [
+            "f1",
+            "f2",
+            "f3",
+            "f5",
+            "f4",
+            "f9",
+            "f6",
+            "f7",
+            "f11",
+            "f12",
+            "f10",
+            "f8"
+          ],
+          "groups": [
+            [
+              "f1",
+              "f2",
+              "f3"
+            ],
+            [
+              "f4",
+              "f5"
+            ],
+            [
+              "f7",
+              "f11"
+            ]
+          ]
+        },
+        {
+          "arm": "baseline",
+          "ranking": [
+            "f1",
+            "f2",
+            "f3",
+            "f5",
+            "f4",
+            "f6",
+            "f7",
+            "f11",
+            "f9",
+            "f12",
+            "f10",
+            "f8"
+          ],
+          "groups": [
+            [
+              "f1",
+              "f2",
+              "f3"
+            ],
+            [
+              "f4",
+              "f5"
+            ],
+            [
+              "f7",
+              "f11"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "run_idx": 2,
+      "records": [
+        {
+          "arm": "baseline",
+          "ranking": [
+            "f1",
+            "f2",
+            "f3",
+            "f4",
+            "f5",
+            "f6",
+            "f7",
+            "f11",
+            "f9",
+            "f12",
+            "f10",
+            "f8"
+          ],
+          "groups": [
+            [
+              "f1",
+              "f2",
+              "f3"
+            ],
+            [
+              "f4",
+              "f5"
+            ],
+            [
+              "f7",
+              "f11"
+            ]
+          ]
+        },
+        {
+          "arm": "with_skill",
+          "ranking": [
+            "f1",
+            "f2",
+            "f3",
+            "f5",
+            "f4",
+            "f6",
+            "f7",
+            "f11",
+            "f9",
+            "f12",
+            "f10",
+            "f8"
+          ],
+          "groups": [
+            [
+              "f1",
+              "f2",
+              "f3"
+            ],
+            [
+              "f4",
+              "f5"
+            ],
+            [
+              "f7",
+              "f11"
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

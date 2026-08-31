@@ -1,0 +1,18 @@
+{
+  "_README": [
+    "TEMPLATE. Replace `searches` with your own. Consumed by bin/x-monitor.py,",
+    "which fans one query across Tavily, Exa and Firecrawl and reports what",
+    "each provider found. The point of three providers is that a zero from",
+    "one is a property of that provider's index, not of the world -- the same",
+    "known-positive-control reasoning the rest of this repo applies to any",
+    "instrument that can return nothing."
+  ],
+  "searches": [
+    {
+      "id": "example-topic",
+      "search_name": "a person, company or topic you want tracked",
+      "web_query": "the plain-text query to run",
+      "topics": "comma-separated narrowing terms, or omit"
+    }
+  ]
+}
