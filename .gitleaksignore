@@ -1,38 +1,8 @@
 # Reviewed-and-cleared gitleaks fingerprints.
 #
-# ONE LINE PER FINDING (never a path glob -- a glob silently drops future
-# files in that path from the gate, which is how a secret gate stops being one).
+# Add ONE LINE PER FINDING (commit:path:rule:line), never a path glob — a glob
+# silently drops future files in that path from the gate.
 #
-# All entries below are the redaction hook's own test fixtures. The matched
-# 'secret' is the literal string the hook is expected to OUTPUT -- e.g.
-# '[REDACTED:AWS Access Key ID]' -- asserted in the test that proves redaction
-# happened. Verified unredacted 2026-08-31; these are not credentials.
-#
-# Two fingerprint shapes are needed because CI runs both scan modes:
-#   gitleaks git -> <commit>:<path>:<rule>:<line>
-#   gitleaks dir ->           <path>:<rule>:<line>
-
-# dir: hooks/test-hooks/test_output_secret_redact.py:35 (generic-api-key)
-hooks/test-hooks/test_output_secret_redact.py:generic-api-key:35
-# dir: hooks/test-hooks/test_output_secret_redact.py:77 (aws-access-token)
-hooks/test-hooks/test_output_secret_redact.py:aws-access-token:77
-# dir: hooks/test-hooks/test_output_secret_redact.py:78 (aws-access-token)
-hooks/test-hooks/test_output_secret_redact.py:aws-access-token:78
-# dir: hooks/test-hooks/test_output_secret_redact.py:83 (aws-access-token)
-hooks/test-hooks/test_output_secret_redact.py:aws-access-token:83
-# dir: hooks/test-hooks/test_post_write_edit.py:327 (generic-api-key)
-hooks/test-hooks/test_post_write_edit.py:generic-api-key:327
-# dir: hooks/test-hooks/test_post_write_edit.py:369 (generic-api-key)
-hooks/test-hooks/test_post_write_edit.py:generic-api-key:369
-# git: hooks/test-hooks/test_output_secret_redact.py:35 (generic-api-key)
-91f08e16145da27e22342c4381099cb9735c1680:hooks/test-hooks/test_output_secret_redact.py:generic-api-key:35
-# git: hooks/test-hooks/test_output_secret_redact.py:77 (aws-access-token)
-91f08e16145da27e22342c4381099cb9735c1680:hooks/test-hooks/test_output_secret_redact.py:aws-access-token:77
-# git: hooks/test-hooks/test_output_secret_redact.py:78 (aws-access-token)
-91f08e16145da27e22342c4381099cb9735c1680:hooks/test-hooks/test_output_secret_redact.py:aws-access-token:78
-# git: hooks/test-hooks/test_output_secret_redact.py:83 (aws-access-token)
-91f08e16145da27e22342c4381099cb9735c1680:hooks/test-hooks/test_output_secret_redact.py:aws-access-token:83
-# git: hooks/test-hooks/test_post_write_edit.py:327 (generic-api-key)
-91f08e16145da27e22342c4381099cb9735c1680:hooks/test-hooks/test_post_write_edit.py:generic-api-key:327
-# git: hooks/test-hooks/test_post_write_edit.py:369 (generic-api-key)
-91f08e16145da27e22342c4381099cb9735c1680:hooks/test-hooks/test_post_write_edit.py:generic-api-key:369
+# The test fixtures under hooks/test-hooks/ contain intentionally fake,
+# key-shaped strings so the redaction and prompt-scanning hooks can be tested.
+# If the gate flags one, verify it is still a fixture, then add its fingerprint.

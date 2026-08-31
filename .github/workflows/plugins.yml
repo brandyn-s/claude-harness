@@ -80,9 +80,7 @@ jobs:
           target="$(find marketplace -name '*.py' -print -quit)"
           [ -n "$target" ] || { echo "::error::no bundled .py to test with"; exit 1; }
           cp "$target" /tmp/sync-control.bak
-          printf '
-# drift control
-' >> "$target"
+          echo "# drift control" >> "$target"
           if [ -z "$(git status --porcelain -- marketplace/)" ]; then
             echo "::error::drift check did NOT fire on a mutated bundle - it is vacuous"
             exit 1
