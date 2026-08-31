@@ -1,4 +1,5 @@
 """Regression tests for skill-routing-hint.py routing patterns."""
+import pytest
 import json
 from conftest import run_hook
 
@@ -63,6 +64,7 @@ def test_no_match_short_prompt():
     assert _get_skill(out) is None
 
 
+@pytest.mark.skip(reason="not shipped in this export: openai-monitor")
 def test_openai_monitor_routes_provider_specific_health():
     _rc, out, _ = run_hook(
         HOOK,
@@ -71,6 +73,7 @@ def test_openai_monitor_routes_provider_specific_health():
     assert _get_skill(out) == "openai-monitor"
 
 
+@pytest.mark.skip(reason="not shipped in this export: openai-monitor")
 def test_openai_monitor_routes_platform_audit_without_fanout():
     _rc, out, _ = run_hook(
         HOOK,
@@ -79,6 +82,7 @@ def test_openai_monitor_routes_platform_audit_without_fanout():
     assert _get_skill(out) == "openai-monitor"
 
 
+@pytest.mark.skip(reason="not shipped in this export: enterprise-ai-monitor")
 def test_enterprise_monitor_wins_for_cross_provider_health():
     _rc, out, _ = run_hook(
         HOOK,
@@ -87,6 +91,7 @@ def test_enterprise_monitor_wins_for_cross_provider_health():
     assert _get_skill(out) == "enterprise-ai-monitor"
 
 
+@pytest.mark.skip(reason="not shipped in this export: cc-monitor")
 def test_claude_only_monitoring_stays_with_cc_monitor():
     _rc, out, _ = run_hook(
         HOOK,
