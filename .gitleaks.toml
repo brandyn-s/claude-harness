@@ -14,3 +14,36 @@ title = "claude-harness"
 
 [extend]
 useDefault = true
+
+# TWO exact filenames are allowlisted. The reasoning matters, because the more
+# precise alternatives were tried and MEASURED to be unavailable.
+#
+# What needs suppressing: both files assert on the string the redaction hook is
+# expected to OUTPUT -- literally `[REDACTED:AWS Access Key ID]`. gitleaks scores
+# that as a secret. Verified unredacted 2026-08-31; they are not credentials.
+#
+#  * PER-FINDING FINGERPRINTS (.gitleaksignore) -- tried first, STRUCTURALLY
+#    UNSTABLE. A `gitleaks git` fingerprint embeds the COMMIT SHA, so regenerating
+#    these files puts identical lines at a new SHA and every suppression silently
+#    stops matching. CI went red for exactly this.
+#  * A CONTENT regex on the matched string -- the right mechanism, and it does
+#    NOT work in gitleaks 8.30.1. Measured: `regexes = ['.*']` suppresses
+#    everything, while `REDACTED`, `\[REDACTED`, and `\[REDACTED:[^\]]*\]`
+#    suppress NOTHING against secrets that are literally
+#    `[REDACTED:AWS Access Key ID]`. The global allowlist regex is evaluated
+#    against something other than the secret or the match in this version, so the
+#    mechanism is unavailable -- not mis-written.
+#
+# So: paths, in the narrowest form -- two anchored filenames, never a directory
+# glob. Deliberately unlike the private original, which globbed 343 files (every
+# topic file, every SKILL.md) and would hide whatever landed there later.
+#
+# The residual risk is real and bounded: if either of these two files ever holds a
+# genuine secret, this hides it. That is why the list is two names long, why CI
+# asserts it stays two, and why CI plants a known-positive on every push.
+[allowlist]
+description = "Only the redaction hook's own two test files -- see the note above"
+paths = [
+  '''^hooks/test-hooks/test_output_secret_redact\.py$''',
+  '''^hooks/test-hooks/test_post_write_edit\.py$''',
+]

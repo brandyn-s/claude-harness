@@ -49,6 +49,24 @@ jobs:
           fi
           echo "control fired as expected"
 
+      # A gate is only as trustworthy as the size of its exemption list. Two files
+      # are reviewed and justified in .gitleaks.toml; a third would not be, and the
+      # failure mode of a quietly growing allowlist is silence.
+      - name: Assert the allowlist has not grown
+        run: |
+          set -euo pipefail
+          n=$(grep -c "hooks/test-hooks/test_" .gitleaks.toml || true)
+          if [ "$n" -ne 2 ]; then
+            echo "::error::.gitleaks.toml allowlist has $n path entries, expected 2."
+            echo "::error::Each exemption needs its own written justification."
+            exit 1
+          fi
+          if grep -q "^paths = \[" .gitleaks.toml && grep -qE "\.\*|\.md|SKILL" .gitleaks.toml; then
+            echo "::error::allowlist looks broadened to a glob; keep it to exact filenames"
+            exit 1
+          fi
+          echo "allowlist is 2 anchored paths, unchanged"
+
       - name: Scan history
         run: gitleaks git . --no-banner --redact --exit-code 1
 

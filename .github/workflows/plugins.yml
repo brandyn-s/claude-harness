@@ -57,7 +57,15 @@ jobs:
       - name: Prove the generated bundles match their sources
         run: |
           set -euo pipefail
-          git fetch origin main --quiet
+          # NO `git fetch` here: the checkout sets persist-credentials:false, so a
+          # fetch fails with "could not read Username" (exit 128) -- which the
+          # drift step then reported as if the bundles were stale. fetch-depth:0
+          # already provides origin/main, so assert it rather than re-fetching.
+          git rev-parse --verify origin/main >/dev/null 2>&1 || {
+            echo "::error::origin/main is missing; the version ledger cannot be read"
+            echo "::error::(actions/checkout needs fetch-depth: 0)"
+            exit 1
+          }
           python3 scripts/build-marketplace.py
           # Use `git status --porcelain`, NOT `git diff`. `git diff` reports only
           # TRACKED files, so a newly generated plugin file is invisible to it and
