@@ -1189,7 +1189,7 @@ def _autofix_msys_python_path(command, _cwd=""):
     if _MSYS_TMP_RE.search(fixed):
         # Use a callable replacement so the regex engine doesn't process
         # backslash escapes in `_SAFE_TEMP`. On Windows `_SAFE_TEMP` resolves
-        # to a path like `C:\Users\BRANDY~1\AppData\Local\Temp\claude/`,
+        # to a path like `C:\Users\USER~1\AppData\Local\Temp\claude/`,
         # whose `\Users` would otherwise raise
         # `re.error: bad escape \U at position 4` because `.sub()` parses
         # `\U` as a (malformed) backreference. Verified 2026-05-19.

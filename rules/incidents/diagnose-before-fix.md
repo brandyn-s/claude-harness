@@ -373,7 +373,7 @@ a sequence diff against the baseline surfaces it.
 
 resolution: reinstall of the SAME version (6.2.8) via Jamf Self Service. Post-
 reinstall the two-key fall-through returned and the tunnel established
-(`tunnel-status = connected`, `utun4`, 172.16.13.24). Root cause was a
+(`tunnel-status = connected`, `utun4`, 192.0.2.24). Root cause was a
 client-side state defect, not configuration — every config variable had been
 eliminated. An IT-facing incident report was delivered
 (`~/Documents/reports/it/2026-07-26-globalprotect-outage-report.md`).

@@ -324,7 +324,7 @@ ON macos_many_open_files (code-search/code-graph indexing, MCP servers):
 ON macos_wifi_or_ssid_state_check (network connectivity diagnosis):
   # `networksetup -getairportnetwork en0` reports "You are not associated
   # with an AirPort network" EVEN WHEN Wi-Fi is connected and working.
-  # Observed 2026-06-15: en0 held inet 10.16.20.169 + status: active and
+  # Observed 2026-06-15: en0 held inet 192.0.2.20 + status: active and
   # `system_profiler SPAirPortDataType` showed "Status: Connected"
   # (Signal/Noise -55/-95 dBm) while getairportnetwork claimed "not
   # associated." Reading getairportnetwork as "Wi-Fi is down" is a phantom.
