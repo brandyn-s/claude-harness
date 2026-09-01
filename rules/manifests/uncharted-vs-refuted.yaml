@@ -21,7 +21,6 @@ prohibited_actions:
   - search_failure_treated_as_world_truth
   - conflate_speculative_proposal_with_refutable_claim
   - default_to_refutation_when_evidence_sparse
-enforced_by: []
 enforcement_coverage: none
 incidents:
   - dada_surrealism_uncharted_misclassified_as_refuted_2026_04_29

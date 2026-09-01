@@ -13,7 +13,7 @@ grepping.
 
 ---
 
-> **Enforcement edges are DERIVED, not declared.** `manifests/compile.py --check` computes each rule's `enforced_by` from `settings.json` wiring intersected with the hook manifests' own `enforces`, and fails when a manifest disagrees. Before that check existed, 20 edges had drifted — rules claiming enforcers that were never wired, and wired hooks the graph said did not exist — so `unenforced_rules` and `enforcement_chain` returned confident wrong answers in both directions. If you are asking what is mechanically enforced, that check is what makes the answer trustworthy.
+> **Enforcement edges are DERIVED, not declared.** `manifests/compile.py` computes each rule's graph-only `enforced_by` from `settings.json` wiring intersected with the hook manifests' own `enforces`; rule source manifests do not store a back-reference. `--check` rejects a coverage label contradicted by those derived edges. Before this existed, 20 edges had drifted — rules claiming enforcers that were never wired, and wired hooks the graph said did not exist — so `unenforced_rules` and `enforcement_chain` returned confident wrong answers in both directions.
 
 ## 1. Orient: five layers, ranked by whether you can ignore them
 

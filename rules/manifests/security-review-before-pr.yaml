@@ -13,7 +13,6 @@ required_actions:
   - check_dependency_audit
 prohibited_actions:
   - tag_references_in_github_actions
-enforced_by: []
 enforcement_coverage: none
 incidents: []
 created_date: "2026-03-10"

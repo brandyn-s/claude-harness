@@ -30,3 +30,16 @@ def test_scaffold_hook_discovers_exec_form_registration(tmp_path, monkeypatch):
     assert result is not None
     assert result["event"] == "PreToolUse"
     assert 'matcher: "Bash"' in result["content"]
+
+
+def test_rule_scaffold_omits_compiler_derived_enforced_by(tmp_path, monkeypatch):
+    rules = tmp_path / "rules"
+    rules.mkdir()
+    (rules / "safety.md").write_text("# Safety\n", encoding="utf-8")
+    monkeypatch.setattr(scaffold, "RULES_DIR", rules)
+
+    result = scaffold.scaffold_rule("safety", dry_run=True)
+
+    assert result is not None
+    assert "enforced_by" not in result["content"]
+    assert "enforcement_coverage: none" in result["content"]

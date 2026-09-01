@@ -7,7 +7,7 @@
 # - Flat structure, max 2-3 nesting levels (JSONSchemaBench)
 # - Graph-representable: depends_on/enforced_by are typed edges (PADME, G2CP)
 # - Progressive disclosure: id+type+description at discovery, full manifest on load
-# - Explicit > implicit: no field left to inference (SOPBench, Gustafson)
+# - Derived > duplicated: mechanically knowable edges have one source of truth
 
 # ============================================================
 # SKILL MANIFEST
@@ -124,7 +124,7 @@ rule:
   prohibited_actions: list[string]  # What the agent must not do
 
   # Enforcement
-  enforced_by: list[string]         # Hook IDs that mechanically enforce this rule
+  enforced_by: list[string]         # DERIVED graph output; omit from rule source manifests
   enforcement_coverage: enum        # "full" (hook covers all cases), "partial", "none" (prose only)
 
   # Evidence

@@ -18,10 +18,7 @@ required_actions:
 prohibited_actions:
   - "guess the cause without reading logs"
   - "ship a fix without confirming what's broken"
-enforced_by:
-  - bash-error-classifier
-  - post-failure-guide
-enforcement_coverage: none
+enforcement_coverage: partial
 incidents:
   - date: "2026-03-01"
     summary: "Guessed Prisma migration was cause of 503, wasted 20 minutes"

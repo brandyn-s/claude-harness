@@ -1,0 +1,9 @@
+demotions:
+  - scanner_rule: encoding-missing-open
+    classifier_rule: "Block Python scripts missing encoding='utf-8' in open()"
+    hook: post-write-edit.py
+    scope: non-win32
+    date: "2026-06-27"
+    rationale: >-
+      Python defaults to UTF-8 on supported non-Windows hosts; retain the
+      stronger block on Windows and record an advisory elsewhere.

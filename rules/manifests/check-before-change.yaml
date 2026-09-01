@@ -20,7 +20,6 @@ prohibited_actions:
   - "modify defaults without checking why they're set"
   - "re-add removed features without checking removal reason"
   - "bulk-copy files between repos without reading target"
-enforced_by: []
 enforcement_coverage: none
 incidents:
   - date: "2026-03-20"

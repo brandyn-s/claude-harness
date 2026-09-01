@@ -22,7 +22,6 @@ prohibited_actions:
   - "grow a harness to prove its own correctness"
   - "add checks that cannot change the current decision"
   - "weaken live or outcome proof in the name of speed"
-enforced_by: []
 enforcement_coverage: none
 incidents:
   - date: "2026-08-22"

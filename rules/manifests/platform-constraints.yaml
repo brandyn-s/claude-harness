@@ -17,12 +17,6 @@ prohibited_actions:
   - "pip install --upgrade all outdated packages at once"
   - "use text=True in subprocess for external API calls"
   - "pgrep -af / ps aux / ps -ef when launcher env has inlined secrets"
-enforced_by:
-  - bash-security-guard
-  - bash-tail-buffering-guard
-  - output-secret-redact
-  - post-write-edit
-  - zsh-dialect-guard
 enforcement_coverage: partial
 incidents: []
 created_date: "2026-02-15"

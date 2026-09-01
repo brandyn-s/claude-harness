@@ -26,6 +26,8 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+import pytest
+
 REPO = Path(__file__).resolve().parent.parent
 WORKFLOWS = REPO / ".github" / "workflows"
 
@@ -129,7 +131,10 @@ def test_mirror_workflow_commands_match_its_stated_contract():
 
     The contract is now "main + tags, no pruning" and the commands say so.
     """
-    text = (WORKFLOWS / "mirror.yml").read_text(encoding="utf-8")
+    mirror = WORKFLOWS / "mirror.yml"
+    if not mirror.is_file():
+        pytest.skip("public export intentionally omits the private mirror workflow")
+    text = mirror.read_text(encoding="utf-8")
 
     # Tags cannot be pushed before they are fetched.
     assert "git fetch origin --tags" in text, (

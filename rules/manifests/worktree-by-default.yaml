@@ -23,9 +23,7 @@ prohibited_actions:
   - "rely on 'I'll commit before any cleanup runs' — hook firing timing unknown"
   - "[WINDOWS-ONLY, inactive on macOS] use /c/path with git worktree add (Git Bash mangles to C:/c/...); on macOS ~/path and $HOME/path are correct"
   - "write a plan/report/output file to repo B's main checkout while continuing work in repo A's worktree (commit in same turn or use temp location)"
-enforced_by:
-  - git-empty-push-guard
-enforcement_coverage: none
+enforcement_coverage: partial
 incidents:
   - date: "2026-05-04"
     summary: "A4 multi-query experiment in code-search: 3 uncommitted files vanished mid-experiment when PR #96 auto-merged with --delete-branch (~$1 API + 30 min compute lost)"

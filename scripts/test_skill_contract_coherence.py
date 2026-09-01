@@ -21,7 +21,13 @@ def test_retro_manifest_declares_documented_full_argument() -> None:
 
 def test_skill_catalog_describes_retro_recovery_and_shipping() -> None:
     catalog = (REPO_ROOT / "skills" / "README.md").read_text(encoding="utf-8")
-    row = next(line for line in catalog.splitlines() if line.startswith("| `retro` |"))
+    if not (REPO_ROOT / "skills" / "retro" / "SKILL.md").is_file():
+        assert "| `retro` |" not in catalog
+        return
+    row = next(
+        line for line in catalog.splitlines()
+        if line.startswith("| [`retro`](./retro/SKILL.md) |")
+    )
     assert "/ship" in row
     assert "/mega-distill" in row
     assert "/mega-capture" in row

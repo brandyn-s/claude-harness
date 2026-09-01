@@ -23,7 +23,6 @@ prohibited_actions:
   - "estimate impact from hand-picked 10-sample inspection (vibes, not engineering)"
   - "promote 'fix +Xpp' claim when baseline used older instrument"
   - "execute plan with cited day-of-execution numbers without re-running baselines"
-enforced_by: []
 enforcement_coverage: none
 incidents:
   - date: "2026-05-02"

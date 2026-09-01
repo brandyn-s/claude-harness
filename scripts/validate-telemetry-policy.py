@@ -79,9 +79,13 @@ def validate() -> list[str]:
             errors.append(f"unsafe telemetry policy: {key} must be 0")
 
     sources = policy.get("managedSources")
-    if not isinstance(sources, list) or not sources:
-        errors.append("telemetry policy must name managed source templates")
+    if not isinstance(sources, list):
+        errors.append("telemetry policy managedSources must be a list")
         sources = []
+    if not sources and source_validation.get("scope") != "not-shipped-in-portable-harness":
+        errors.append(
+            "an empty managedSources list must explicitly identify the public-export scope"
+        )
     for rel in sources:
         path = REPO / rel
         if not path.is_file():
@@ -105,7 +109,7 @@ def main() -> int:
         for error in errors:
             print(f"telemetry-policy validation failed: {error}", file=sys.stderr)
         return 1
-    print("telemetry policy valid: source templates are metadata-only; live state unverified")
+    print("telemetry policy valid: portable harness contains no managed source templates; live state unverified")
     return 0
 
 

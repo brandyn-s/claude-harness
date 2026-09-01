@@ -18,7 +18,6 @@ prohibited_actions:
   - trusting_snapshot_over_live_probe
   - using_tailscale_mcp_as_corp_tailnet_evidence
   - netcloud_write_without_named_target_verb_and_confirmation
-enforced_by: []
 enforcement_coverage: none
 incidents: []
 created_date: "2026-03-20"

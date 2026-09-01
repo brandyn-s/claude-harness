@@ -22,9 +22,6 @@ prohibited_actions:
   - "treat an aborted or truncated search as exhaustive"
   - "claim hook coverage for commands handed to the user"
   - "infer no prior work from a qualified semantic query alone"
-enforced_by:
-  - zsh-dialect-guard
-  - search-path-guard
 enforcement_coverage: partial
 incidents:
   - date: "2026-03-30"

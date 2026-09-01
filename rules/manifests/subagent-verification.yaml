@@ -13,11 +13,7 @@ required_actions:
 prohibited_actions:
   - "mark task complete based solely on subagent report"
   - "use --dangerously-skip-permissions on subprocesses"
-enforced_by:
-  - subagent-stop
-  - task-completed
-  - worktree-enforcement
-enforcement_coverage: none
+enforcement_coverage: partial
 incidents:
   - date: "2026-03-04"
     summary: "Subagent with bypassPermissions merged 7 files to main without review"

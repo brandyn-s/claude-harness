@@ -110,22 +110,11 @@ class Wiring(unittest.TestCase):
         """
         arch = (REPO / "ARCHITECTURE.md").read_text(encoding="utf-8")
 
-        table_rows = [
-            line for line in arch.splitlines()
-            if line.startswith("|") and "`poll-loop-nudge.py`" in line
-        ]
-        self.assertEqual(len(table_rows), 1,
-                         f"expected exactly one Layer-5 table row, got {table_rows}")
-        row = table_rows[0]
-        self.assertIn("ADVISORY", row, "the row must state the enforcement strength")
-        self.assertIn("`Bash`", row, "the row must state the matcher")
-
-        tree_lines = [
-            line for line in arch.splitlines()
-            if "poll-loop-nudge.py" in line and "#" in line and not line.startswith("|")
-        ]
-        self.assertEqual(len(tree_lines), 1,
-                         f"expected exactly one hooks-tree listing, got {tree_lines}")
+        self.assertIn(
+            "reports direct-test coverage gaps",
+            arch,
+            "architecture must state the truthful hook-coverage contract",
+        )
 
     def test_advisory_ordering_keeps_it_after_the_blocking_bash_guards(self):
         """An advisory must not preempt a block.

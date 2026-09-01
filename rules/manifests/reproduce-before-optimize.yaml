@@ -26,7 +26,6 @@ prohibited_actions:
   - "spend submission quota / paid runs / deploys to learn from an unverified premise"
   - "present an unreproduced theory as a diagnosis rather than a hypothesis"
   - "declare a ceiling or reachable frontier while a known-good reference is unreproduced"
-enforced_by: []
 enforcement_coverage: none
 incidents:
   - date: "2026-07-05"

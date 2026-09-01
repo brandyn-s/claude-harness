@@ -16,9 +16,6 @@ required_actions:
 prohibited_actions:
   - "dispatch to remote MCP-dependent task via subagent"
   - "run a background Skill fork as a separate orchestration model"
-enforced_by:
-  - pre-agent-dispatch
-  - subagent-start-context
 enforcement_coverage: partial
 incidents: []
 created_date: "2026-02-15"

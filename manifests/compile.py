@@ -65,8 +65,8 @@ def load_manifests(root: Path):
 # The ratio is the diagnosis. Hook manifests are written when the hook is built,
 # so `enforces` is accurate; the rule-side back-reference is the unmaintained
 # half, and a one-way hand-maintained edge decays toward the unmaintained side.
-# So DERIVE the rule side from the hook side intersected with actual wiring,
-# and make --check fail on divergence rather than hoping for discipline.
+# It is now a graph OUTPUT only: derive it from the hook side intersected with
+# actual wiring. Rule source manifests no longer carry a second editable copy.
 #
 # This is what makes `unenforced_rules` and `enforcement_chain` trustworthy:
 # before, both keyed off self-declared metadata that no gate compared to
@@ -128,62 +128,31 @@ def derive_enforced_by(components, root):
 
 
 def validate_enforcement_edges(components, root):
-    """Classify every rule->hook enforcement claim three ways, not two.
-
-    A two-way check (declared == derived) is tempting and WRONG, because a hook
-    manifest's `enforces: []` is overwhelmingly an UNFILLED field rather than a
-    positive denial. Treating the hook side as authoritative therefore deletes
-    true edges to make the gate green -- reducing coverage rather than fixing
-    it. Measured 2026-08-31 while building this very check: the naive version
-    dropped `agent-delegation -> [pre-agent-dispatch, subagent-start-context]`,
-    two hooks that ARE wired and do inject agent-delegation guidance, purely
-    because their manifests' `enforces` was blank.
-
-    So:
-      CONFIRMED  hook wired AND its manifest declares `enforces: [rule]`
-                 -> the rule MUST list it (omission is a false gap)
-      FALSE      rule claims a hook that is NOT wired
-                 -> must be removed (`enforcement_chain` lies otherwise)
-      AMBIGUOUS  rule claims a WIRED hook whose manifest declares nothing
-                 -> keep the edge, report the blank `enforces` as a work item
-    """
-    wired = wired_hook_ids(root)
-    if wired is None:
-        return []
-    confirmed = {}
-    for cid, c in components.items():
-        if c.get("type") != "hook" or cid not in wired:
-            continue
-        for rid in c.get("enforces") or []:
-            if isinstance(rid, str) and components.get(rid, {}).get("type") == "rule":
-                confirmed.setdefault(rid, set()).add(cid)
-
+    """Reject legacy back-references and coverage labels contradicted by wiring."""
+    derived = derive_enforced_by(components, root)
+    if derived is None:
+        return ["  ENFORCEMENT-UNMEASURABLE: settings.json could not be read"]
     issues = []
     for cid, c in sorted(components.items()):
         if c.get("type") != "rule":
             continue
-        declared = {x for x in (c.get("enforced_by") or []) if isinstance(x, str)}
-        want = confirmed.get(cid, set())
-
-        for h in sorted(want - declared):
+        if "enforced_by" in c:
             issues.append(
-                f"  ENFORCEMENT-DRIFT: {cid}.enforced_by omits '{h}', which is "
-                f"wired and declares it enforces {cid} -- `unenforced_rules` "
-                f"reports a false gap"
+                f"  DERIVED-FIELD: {cid}.enforced_by is declared in source; "
+                "remove it because compile.py derives this graph edge"
             )
-        for h in sorted(declared - want):
-            if h not in wired:
-                issues.append(
-                    f"  ENFORCEMENT-DRIFT: {cid}.enforced_by claims '{h}', "
-                    f"which is not wired in settings.json -- "
-                    f"`enforcement_chain` reports false enforcement"
-                )
-            else:
-                issues.append(
-                    f"  ENFORCEMENT-UNDECLARED: {cid} claims wired hook '{h}', "
-                    f"but hooks/manifests/{h}.yaml has a blank `enforces` -- "
-                    f"fill it in; do NOT resolve this by deleting the edge"
-                )
+        hooks = derived.get(cid, [])
+        coverage = c.get("enforcement_coverage", "none")
+        if hooks and coverage == "none":
+            issues.append(
+                f"  COVERAGE-DRIFT: {cid} has derived hooks {hooks} but "
+                "enforcement_coverage is 'none'; classify it as partial or full"
+            )
+        if not hooks and coverage != "none":
+            issues.append(
+                f"  COVERAGE-DRIFT: {cid} has no derived hooks but "
+                f"enforcement_coverage is {coverage!r}; classify it as none"
+            )
     return issues
 # ── end ENFORCEMENT-EDGE DERIVATION ───────────────────────────────────────
 
@@ -194,7 +163,7 @@ def validate(components, root="."):
     known_ids = set(components.keys())
 
     for cid, c in components.items():
-        for field in ["requires_rules", "requires_skills", "enforced_by", "guardrails"]:
+        for field in ["requires_rules", "requires_skills", "guardrails"]:
             refs = c.get(field, [])
             if isinstance(refs, list):
                 for ref in refs:
@@ -436,9 +405,13 @@ def compile_graph(
         issues += sem_warnings
 
     if not check_only:
+        derived_enforcement = derive_enforced_by(components, root) or {}
         graph = {}
         for cid, c in components.items():
-            graph[cid] = {k: v for k, v in c.items() if not k.startswith("_")}
+            entry = {k: v for k, v in c.items() if not k.startswith("_")}
+            if c.get("type") == "rule":
+                entry["enforced_by"] = derived_enforcement.get(cid, [])
+            graph[cid] = entry
 
         graph_path.parent.mkdir(parents=True, exist_ok=True)
         with open(graph_path, "w", encoding="utf-8") as fh:

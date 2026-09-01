@@ -24,7 +24,6 @@ prohibited_actions:
   - "omit freshness stamps on metric citations"
   - "let adversarial-fixture floor drive aggregate grade (separate axes)"
   - "cite a gap-inventory doc as if it were the state doc"
-enforced_by: []
 enforcement_coverage: none
 incidents:
   - date: "2026-05-10"

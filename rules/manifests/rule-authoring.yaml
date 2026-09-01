@@ -20,7 +20,6 @@ prohibited_actions:
   - "bulk-convert old markdown rules without measuring (rules already at 95%+ have no headroom)"
   - "use XML or TOON for Claude (variance-confirmed loss to markdown/strongwording)"
   - "use numbered-checklist format for imperatives (reads as negotiable)"
-enforced_by: []
 enforcement_coverage: none
 incidents:
   - date: "2026-04-17"

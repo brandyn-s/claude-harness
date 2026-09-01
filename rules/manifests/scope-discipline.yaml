@@ -25,7 +25,6 @@ prohibited_actions:
   - "use sunk cost to justify continuing infrastructure that wasn't asked for"
   - "reset the outcome clock by adding verification"
   - "let a temporary or one-off harness grow uncontrolled"
-enforced_by: []
 enforcement_coverage: none
 incidents:
   - date: "2026-04-24"

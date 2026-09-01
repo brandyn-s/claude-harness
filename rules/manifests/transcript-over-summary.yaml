@@ -23,7 +23,6 @@ prohibited_actions:
   - trust_summary_pr_or_decision_list_as_complete
   - raw_read_28mb_transcript_into_context
   - skip_transcript_on_multi_compaction_history_claim
-enforced_by: []
 enforcement_coverage: none
 incidents:
   - characterized_46h_64pr_session_from_last_summary_missed_first_40h_2026_06_19

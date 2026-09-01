@@ -1,0 +1,29 @@
+id: operator-discipline
+type: rule
+description: "Compact diagnostic, change-history, and negative-finding contract for the personal operator profile."
+applies_to:
+  - debugging
+  - default_changes
+  - exhaustive_search
+trigger_conditions:
+  - diagnosing_a_failure
+  - changing_existing_behavior
+  - reporting_a_negative_finding
+required_actions:
+  - read_actual_failure_and_current_source
+  - inspect_history_before_changing_defaults
+  - verify_zeroes_are_complete_and_successful
+prohibited_actions:
+  - analogy_first_fixing
+  - unexplained_behavior_removal
+  - authoritative_claim_from_failed_or_truncated_search
+enforcement_coverage: none
+incidents:
+  - date: "2026-03-01"
+    summary: "Guessed at a 503 cause before reading the real failure."
+    category: diagnosis
+  - date: "2026-03-22"
+    summary: "Bulk copied files over fork-specific behavior without checking history."
+    category: regression
+created_date: "2026-09-01"
+last_validated: "2026-09-01"

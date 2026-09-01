@@ -20,7 +20,6 @@ prohibited_actions:
   - "terminate silently after 'Prompt is too long' or context overflow"
   - "assume parent knows what was skipped"
   - "continue 'best effort' work after context overflow (next attempt also fails)"
-enforced_by: []
 enforcement_coverage: none
 incidents:
   - date: "2026-04-29"

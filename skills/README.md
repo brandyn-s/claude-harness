@@ -59,7 +59,7 @@ Bigger skills push detail into `references/` and deterministic helpers into
 | [`recall`](./recall/SKILL.md) | Search the knowledge base (digital garden) for prior decisions, lessons, and patterns. | scripts, tests |
 | [`red-team-axes`](./red-team-axes/SKILL.md) | Break a HARDENED target by rotating ATTACK axes, driven by the harness red-team platform (generator + oracle portfolios). | - |
 | [`refine`](./refine/SKILL.md) | Enrich a complex prompt with missing constraints, success criteria, and decomposition. | - |
-| [`retro`](./retro/SKILL.md) | Session wrap-up — runs distill, then capture, then ships uncommitted artifacts. | references, tests |
+| [`retro`](./retro/SKILL.md) | Session wrap-up — runs /distill and /capture (using /mega-distill and /mega-capture for compacted sessions), then lands session artifacts through /ship. | references, tests |
 | [`retrospective`](./retrospective/SKILL.md) | Review what went well, what went wrong, and what's missing across recent sessions. | references |
 | [`review-learnings`](./review-learnings/SKILL.md) | Audit, prune, and correct agent persistent memory across topic files and pattern stores. | references, scripts, tests |
 | [`roundtable`](./roundtable/SKILL.md) | Run a multi-agent adversarial roundtable (Claude, Grok, GPT) for independent critique. | references, scripts, tests |
@@ -99,4 +99,3 @@ This is a curated subset of a larger private configuration. Some skills and
 incident write-ups reference a skill that is not included here (it operated a
 specific internal system). The lesson in those write-ups stands on its own;
 the `/name` cross-reference will not resolve.
-

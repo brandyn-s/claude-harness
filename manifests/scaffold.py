@@ -324,7 +324,6 @@ def scaffold_rule(name, dry_run=False):
         "trigger_conditions: []  # TODO: when is this rule relevant?",
         "required_actions: []  # TODO: what must the agent do?",
         "prohibited_actions: []  # TODO: what must the agent NOT do?",
-        "enforced_by: []  # TODO: which hooks enforce this?",
         "enforcement_coverage: none  # TODO: none, partial, full",
         f"incidents: []  # {incident_count} incident references found in source",
         f'created_date: "TODO"',

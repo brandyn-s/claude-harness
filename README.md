@@ -12,27 +12,63 @@ a subagent claims success, or when a fix "works" but was never committed. Most
 of that method exists because something broke, and the write-ups say so with
 dates and measurements.
 
+The rebuild follows one rule: **simple, fast, correct**. The default is small,
+keeps local work flowing inside Claude Code's native sandbox, and retains only
+the controls that protect a measured failure. The evidence and demotion
+decisions are recorded in
+[`docs/fresh-laptop-control-audit.md`](docs/fresh-laptop-control-audit.md).
 
-## Before you adopt: measured cost and prerequisites
 
-Two ways to use this repository, with very different costs. **Read this before
-cloning the whole thing** — the numbers below are measured with Anthropic's own
-tokenizer (`/v1/messages/count_tokens`), not estimated from byte counts.
+## Fresh-laptop install (recommended)
 
-### Tier 1 — install a plugin bundle (recommended)
+Clone this repository somewhere separate from Claude Code's live configuration,
+then run the installer:
 
+```bash
+git clone https://github.com/brandyn-s/claude-harness
+cd claude-harness
+bash install.sh
+python3 bin/fresh_laptop_doctor.py
 ```
-/plugin marketplace add brandyn-s/claude-harness
-/plugin install safety-net@claude-harness
+
+For a new machine, accept the fresh-laptop profile and the recommended core.
+The installer then offers the owner-focused Brandyn operator layer. The
+portable core installs two ambient rules and three deterministic hooks:
+
+- `outcome-over-verification.md` and `claude-md-quality.md`
+- catastrophic Bash safety, config integrity, and MCP result-injection guards
+- `acceptEdits` plus sandbox-auto-approved Bash; sandbox escapes require review
+- project MCP auto-activation disabled
+
+The operator layer adds one compact discipline rule, the `delivery` Bash policy
+pack, explicit review for high-consequence Terraform/AWS/Git/MCP mutations, a
+non-blocking repeated-failure detector, and prompt/tool-output secret controls.
+It does not restore the phrase-based Stop blocker or the historical ambient
+corpus. The doctor reports the operator layer separately when selected.
+
+The profile is previewable and independently applicable:
+
+```bash
+python3 scripts/install-profile.py
+python3 scripts/install-profile.py --apply
 ```
 
-Each bundle is self-contained and ships **no ambient rules**, so a session costs
-roughly stock Claude Code plus a few hundred tokens of skill descriptions. This
-is the tier to start with.
+Apply creates a timestamped backup when `~/.claude/settings.json` already
+exists, preserves unrelated settings, and writes atomically. The installer also
+backs up collisions before copying runtime files. Re-running it is idempotent.
+See [`profiles/README.md`](profiles/README.md) for the merge contract.
 
-### Tier 2 — clone the whole configuration (the author's mirror)
+On macOS, run `brew bundle` first. On Linux, install Python 3.10+, Git,
+`bubblewrap`, and `socat`. Native Windows is not supported by Claude Code's
+sandbox; use WSL2. After installation, `/sandbox` shows the effective boundary.
 
-This is a real power-user configuration, and it is priced like one:
+## Author-workstation profile (explicit opt-in)
+
+Continue through `install.sh` only when you intentionally want the complete
+author mirror: all hooks, rules, skills, agents, and host integrations. It uses
+the same native sandbox boundary, but has a much larger context and dependency
+surface. Its measured cost, using Anthropic's `count_tokens` endpoint rather
+than byte estimates, is:
 
 | component | measured tokens |
 |---|---|
@@ -40,16 +76,12 @@ This is a real power-user configuration, and it is priced like one:
 | skill listing (82 skills, 8 already suppressed to name-only) | 18,687 |
 | `CLAUDE.md` + `AGENTS.md` | 3,280 |
 | **ambient floor, before your first message** | **97,380** |
-| plus broadly-scoped rules that load in most coding sessions | 24,830 |
-| **effective coding session** | **122,210** |
+| plus broadly-scoped rules that load in most coding sessions | ~12,000 |
+| **effective coding session** | **~109,000** |
 
 On a 200K-token context window that is **roughly half the window consumed at
-rest**. Anthropic's guidance is that context is "a finite resource with
-diminishing marginal returns"; this configuration deliberately spends a lot of
-it on always-loaded engineering discipline. That trade is defensible for the
-author, who wrote every rule in response to a specific measured failure, and it
-may not be the trade you want on day one. `bin/ambient-load-report.py` prints
-the current split so you can decide with numbers rather than vibes.
+rest**. This is why the full mirror is not the fresh-laptop default.
+`bin/ambient-load-report.py` prints the current split.
 
 The skill listing also exceeds its own budget: `skillListingBudgetFraction` is
 set to 3%, which is 6,000 tokens on a 200K context against an 18,687-token
@@ -57,7 +89,7 @@ listing — **3.1x oversubscribed**. It fits on a 1M-context model. If you adopt
 wholesale on a 200K model, expect the listing to be truncated, and prefer
 marking more skills `name-only` in `skillOverrides`.
 
-### Prerequisites that are NOT included
+### Advanced-profile dependencies that are not included
 
 Roughly ten skills require MCP servers that are not part of this repository and
 are not public:
@@ -72,24 +104,19 @@ Those skills will no-op or error without their server. The
 worked example rather than installed. Research skills additionally want
 Tavily / Exa / Firecrawl API keys.
 
-### What has been measured, and what has not
-
-Measured on a clean Linux container with none of the author's tooling: the
-by-hand install completes, all 48 wired hooks resolve, and 511 hook invocations
-across seven realistic payload shapes produced **zero crashes and zero blocks
-on innocuous actions**. `settings.example.json` still carries 49 placeholder
-paths you must edit. Not measured: behavior inside a live authenticated session,
-and any A/B of this harness against stock Claude Code on task outcomes. Adopt
-accordingly.
+The full mirror is a host-materialized reference, not a portable file to copy.
+`settings.example.json` intentionally contains placeholder hook paths;
+`install.sh` materializes paths for the target machine. Do not copy the live
+author settings onto a new laptop.
 
 
 ## Optional: measure whether the verification rules are working
 
 This repository spends more ambient context on "verify before claiming done"
-than on any other single concern, and — unlike git discipline or secret
-redaction — **none of it has mechanical backing**. Every rule in that cluster
-reports `enforced_by: []`, and `manifests/compile.py --check` will now tell you
-so honestly.
+than on any other single concern. A few slices have derived partial enforcement,
+but the specific act of making a completion claim without same-turn evidence has
+no mechanical backing. `manifests/compile.py` derives that topology from live
+wiring instead of trusting rule-side declarations.
 
 The obvious move is a Stop hook that blocks an unverified completion claim. That
 move is not shipped, for a reason worth reading: the argument for it rested on a
@@ -122,11 +149,12 @@ python3 bin/completion-claim-report.py          # distribution
 python3 bin/completion-claim-report.py --json   # machine-readable
 ```
 
-The report **refuses to recommend anything** below 100 observed turns, for the
-same reason the gate is not shipped. A low unverified-claim rate is evidence the
-ambient rules are doing their job and no gate is warranted; a high one is the
-first real basis for building one. Either way the decision comes from a
-distribution rather than from an anecdote.
+The report **refuses to interpret anything** below 100 readable turns or when it
+detects no completion claims. Unreadable transcript tails never satisfy that
+sample floor. A low unverified-claim rate is evidence the ambient rules are doing
+their job and no gate is warranted; a high one is the first real basis for
+building one. Either way the decision comes from a distribution rather than from
+an anecdote.
 
 The detector was qualified against five fixtures before shipping — claim with
 tool evidence, claim with prose evidence only, claim with none, a non-claim, and
@@ -142,6 +170,8 @@ privileged but untrusted actor. Anything that must not happen is blocked by a
 hook that runs regardless of what the model decided — not by a rule asking it to
 remember. `hooks/bash-security-guard.py` is the clearest case: it matches command
 *text*, has no memory to wear down, and returns the same verdict every time.
+Non-catastrophic delivery, portability, and workflow preferences are opt-in
+tables evaluated inside that same hook process.
 
 **Rules are compressed incidents.** `rules/` reads as engineering discipline;
 `rules/incidents/` holds the failures that produced it. Some examples:
@@ -196,34 +226,23 @@ that you almost certainly do not need it. So, in order:
 Taking one hook is a legitimate outcome. Nothing here requires adopting the
 whole thing, and most of it you shouldn't.
 
-## Installing it
+## Optional plugin bundles
 
-**As plugins (recommended)** — versioned, updatable, and *namespaced*, so nothing
-collides with skills you already have:
+Plugins are useful when you want one namespaced capability without installing a
+user-level harness:
 
 ```
 /plugin marketplace add brandyn-s/claude-harness
 /plugin install safety-net@claude-harness
 ```
 
-Six bundles are published: `safety-net` (the enforcement hooks),
+Six bundles are generated: `safety-net` (the three-hook fresh-laptop core),
 `planning-toolkit`, `security-scanner`, `knowledge-ops`, `code-intelligence`,
 `research-intel`. Install only what you want; skills arrive as
 `/plugin-name:skill`. Update with `/plugin marketplace update claude-harness`.
 
-**By hand**, if you would rather read every file before it runs:
-
-```bash
-git clone https://github.com/brandyn-s/claude-harness
-cd claude-harness
-cp settings.example.json ~/.claude/settings.json   # then edit the hook paths
-cp -r hooks rules ~/.claude/                       # or just the ones you want
-```
-
-Copying gives you no versioning, no updates, and no namespacing — a skill you
-copy will shadow one of your own with the same name. `install.sh` automates a
-fuller setup. `platform-rules/` covers what is host-specific. Requires Python
-3.11+; `requirements-dev.txt` covers the tests.
+The remaining hook implementations in the bundle are source-available but are
+not registered automatically. Add them only after a measured need.
 
 > **Do not make your checkout your live `~/.claude`.** The original *was*
 > its own runtime directory, which meant every new kind of runtime artifact
@@ -237,18 +256,11 @@ pip install -r requirements-dev.txt
 python3 scripts/run-tests.py
 ```
 
-~3,900 tests across 44 directories. The runner goes **one directory at a time** on
+~3,900 tests across the repository. The runner goes **one directory at a time** on
 purpose — a single root-level `pytest` cannot work here, and `scripts/run-tests.py`
 explains why in its docstring.
-
-It also carries a **known-failing baseline**, printed on every run and gated in
-both directions. Those failures are tests asserting on inventories that this
-curated subset legitimately changed (which hooks are registered, which skills
-exist). They are not deleted, because deleting them would green the suite by
-reducing coverage and leave no signal that coverage had moved. Going *over* the
-baseline is a regression; going *under* it means an entry is stale and should be
-removed — both fail, so the baseline cannot quietly become a place failures go to
-be forgotten.
+Every discovered test directory must pass; there is no tolerated-failure
+baseline.
 
 ## What this is a subset of
 
@@ -270,13 +282,26 @@ A handful of identifiers in kept files were replaced with neutral placeholders
 (`example.internal`, `ExampleTarget`, `contributor-a`). Where you see one, the
 original named something internal.
 
-## Contributing
-
-Issues and PRs are welcome, particularly bug reports against the hooks. Note
-that much of what looks arbitrary is load-bearing: the odd-looking clauses are
-usually a specific failure encoded so it cannot recur. Check
-`rules/incidents/` before concluding a rule is overcautious.
-
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+## Advanced full-mirror synchronization
+
+These commands are for maintainers of a complete cross-runtime mirror, not for
+plugin users. Check before apply when repairing the session-closure skills:
+
+```bash
+python3 bin/sync-codex-skills.py --check --with-dependencies retro distill ship
+python3 bin/sync-codex-skills.py --apply --with-dependencies retro distill ship
+```
+
+For the complete installed gather-family closure. `gather-vendor` consumes the same authoritative
+direct shared lifecycle dependency as `gather-claude`. Check, apply,
+then check again:
+
+```bash
+python3 bin/sync-codex-skills.py --check --shared-file gather-conventions.md --shared-file project-dir.md gather-claude gather-vendor
+python3 bin/sync-codex-skills.py --apply --shared-file gather-conventions.md --shared-file project-dir.md gather-claude gather-vendor
+python3 bin/sync-codex-skills.py --check --shared-file gather-conventions.md --shared-file project-dir.md gather-claude gather-vendor
+```

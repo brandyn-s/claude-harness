@@ -2,22 +2,54 @@
 
 How this Claude Code harness is put together, and why each layer exists.
 
-There are five layers. They differ in **when they load** and **whether the model
-can decline them** — that second axis is the one that matters.
+There are five extension layers, inside Claude Code's native permission and
+sandbox boundary. They differ in **when they load** and **whether the model can
+decline them** — that second axis is the one that matters.
 
 | Layer | Loads | Model can ignore it? |
 |---|---|---|
-| **Hooks** (73) | on every matching tool call | **No** — enforced by the runtime |
+| **Hooks** (73 available; 3 in the default) | on matching tool calls | **No** — enforced by the runtime |
 | **Rules** (38) | always, in context | Yes (they are text) |
 | **Skills** (82) | on invocation | Yes |
 | **Agents** | on dispatch | Yes |
 | **Reference docs** | on demand | Yes |
 
-## 1. Hooks — the only layer that actually enforces
+## Deployment profiles
+
+The inventory is not the default installation.
+
+See `docs/fresh-laptop-control-audit.md` for the evidence behind the split and
+the first demoted conflict.
+
+| Profile | Ambient rules | Wired hooks | Intended use |
+|---|---:|---:|---|
+| **Fresh laptop** | 2 | 3 | portable kernel; simple, fast, correct |
+| **Brandyn operator** | 3 | 6 | personal delivery, authority, non-progress, and secret controls |
+| **Author workstation** | 36 | 53 | explicit opt-in for the compatible advanced set |
+
+The fresh-laptop profile uses `acceptEdits` and lets sandbox-contained Bash run
+without prompts. Commands that need to escape the sandbox return to the normal
+permission flow. It does not grant blanket `Bash` permission. This preserves
+delivery speed without stacking auto mode, blanket Bash authority, custom
+guards, and a disabled sandbox into one difficult-to-reason-about control plane.
+
+The `brandyn-operator` overlay preserves that kernel while adding only controls
+tied to the owner's recurring work. It is the middle layer between the portable
+core and the full author mirror; it does not load the historical rule corpus or
+reinstate completion-language blocking.
+
+The Bash hook has one always-on catastrophic core. Delivery, portability, and
+workflow preferences are opt-in tables evaluated by that same process. This
+keeps credential exposure, exfiltration, reverse shells, security-control
+disablement, and broad destruction deterministic without turning personal Git,
+AWS, Windows, polling, or prose conventions into universal safety policy.
+
+## 1. Hooks — programmable enforcement
 
 `hooks/` holds Python that the Claude Code runtime executes around tool calls.
-A `PreToolUse` hook can **block** a call outright. This is the only layer with
-that property, and it is where anything load-bearing belongs.
+A `PreToolUse` hook can **block** a call outright. Hooks complement native deny
+rules and OS-level sandboxing; they are reserved for semantic constraints those
+native controls cannot express.
 
 The design premise: **the agent is a privileged but untrusted actor.** It holds
 tools that can destroy data, so "the model was told not to" is not a control. A
@@ -28,7 +60,7 @@ Representative hooks:
 
 | Hook | Event | Blocks |
 |---|---|---|
-| `bash-security-guard.py` | PreToolUse(Bash) | credential reads, destructive shapes, fragile inline code |
+| `bash-security-guard.py` | PreToolUse(Bash) | catastrophic credential, exfiltration, code-execution, security-disablement, and destructive shapes; optional policy tables |
 | `output-secret-redact.py` | PostToolUse | secrets in tool output |
 | `prompt-secret-scan.py` | UserPromptSubmit | pasted credentials |
 | `read-deny-guard.py` | PreToolUse(Read) | reads of denied paths |
@@ -36,11 +68,11 @@ Representative hooks:
 | `memory-write-guard.py` | PreToolUse(Write) | oversized memory entries |
 | `session-start.py` | SessionStart | (composes startup context) |
 
-Hooks are wired in `settings.json` — see `settings.example.json`. Each has tests
-in `hooks/test-hooks/`.
-
-**If you take one thing from this repo, take this layer.** A rule asking the
-model to remember something has a failure rate; a hook does not.
+Hooks are wired in `settings.json` — see `settings.example.json`. Default and
+load-bearing hooks have direct behavior tests in `hooks/test-hooks/`; every
+wired command hook also receives path and crash-safety checks. The auxiliary
+hook audit reports direct-test coverage gaps rather than claiming every source
+file has a dedicated test.
 
 ## 2. Rules — always-loaded engineering discipline
 
@@ -115,6 +147,17 @@ contracts/ manifests/  machine-readable component metadata
 
 ## Recurring principles
 
+**Simple, fast, correct.** In that order as a design test, not as permission to
+trade one away. Prefer a native Claude Code control over a custom equivalent;
+keep the default small; preserve automatic local flow inside a strong boundary;
+retain only the evidence needed to establish the requested outcome.
+
+**Core components must earn promotion.** A rule or hook enters the fresh-laptop
+core only when (1) a measured failure exists, (2) native permissions, sandboxing,
+or an on-demand skill cannot cover it, (3) it has a direct behavior test, and
+(4) its context or runtime cost is bounded. Otherwise it remains on-demand or
+author-profile-only.
+
 **Pair every zero with a known-positive control.** A scanner reporting no
 findings and a scanner that is broken look identical. The CI job here plants a
 secret and fails if gitleaks does *not* find it.
@@ -130,7 +173,7 @@ that coverage moved.
 
 ## Adapting it
 
-Nothing requires adopting the whole thing. Take a hook, take a rule, ignore the
-rest. Start with `hooks/` — it is the layer with teeth and the least coupled to
-anyone's environment. `install.sh` handles a fuller setup;
-`UBIQUITOUS_LANGUAGE.md` defines the vocabulary the rest assumes.
+Start with `bash install.sh`, accept the fresh-laptop profile and core, then
+stop. Promote components only through the gate above. The author-workstation
+profile is a source of candidates and history, not the default architecture.
+`UBIQUITOUS_LANGUAGE.md` defines the vocabulary the full mirror assumes.

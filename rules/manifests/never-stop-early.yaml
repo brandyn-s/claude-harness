@@ -13,7 +13,6 @@ prohibited_actions:
   - presenting_plan_without_executing
   - stopping_due_to_conversation_length
   - claiming_a_fixed_context_capacity_without_runtime_evidence
-enforced_by: []
 enforcement_coverage: none
 incidents: []
 created_date: "2026-03-15"

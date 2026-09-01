@@ -320,7 +320,7 @@ def test_full_hook_install_produces_self_validating_protected_registry(tmp_path)
     env["PYTHONDONTWRITEBYTECODE"] = "1"
     result = subprocess.run(
         [BASH, str(INSTALLER)],
-        input="n\n3\n8\n2\ny\nn\nn\nn\nn\n",
+        input="n\nn\n3\n8\n2\ny\nn\nn\nn\nn\n",
         capture_output=True,
         text=True,
         encoding="utf-8",
@@ -347,7 +347,6 @@ def test_full_hook_install_produces_self_validating_protected_registry(tmp_path)
         ("PostToolUse", "Write|Edit", "post-write-edit.py", 30),
         ("SessionStart", None, "session-start.py", 30),
         ("SessionEnd", ".*", "session-end.py", 5),
-        ("Stop", ".*", "promise-checker.py", 20),
     )
     for event, matcher, script, timeout in protected:
         matching = [
@@ -416,7 +415,9 @@ def test_recommended_starter_installs_runnable_exec_form_hooks(tmp_path):
     env["PYTHONDONTWRITEBYTECODE"] = "1"
     result = subprocess.run(
         [BASH, str(INSTALLER)],
-        input="y\ny\nn\nn\n",
+        # fresh profile, skip operator overlay, starter core, wire hooks,
+        # skip repo githooks, stop before optional components
+        input="y\nn\ny\ny\nn\nn\n",
         capture_output=True,
         text=True,
         encoding="utf-8",
@@ -462,7 +463,7 @@ def test_recommended_starter_installs_runnable_exec_form_hooks(tmp_path):
 def test_declined_partial_starter_collision_does_not_wire_missing_hooks(tmp_path):
     config = tmp_path / ".claude"
     (config / "rules").mkdir(parents=True)
-    (config / "rules" / "check-before-change.md").write_text(
+    (config / "rules" / "outcome-over-verification.md").write_text(
         "local edit\n", encoding="utf-8"
     )
     env = dict(os.environ)
@@ -471,7 +472,7 @@ def test_declined_partial_starter_collision_does_not_wire_missing_hooks(tmp_path
 
     result = subprocess.run(
         [BASH, str(INSTALLER)],
-        input="y\nn\ny\nn\nn\n",
+        input="n\ny\nn\ny\nn\nn\n",
         capture_output=True,
         text=True,
         encoding="utf-8",

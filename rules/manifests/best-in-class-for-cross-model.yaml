@@ -21,7 +21,6 @@ prohibited_actions:
   - treat_vendor_diversity_as_satisfying_validity
   - use_cheaper_model_as_second_opinion_without_measured_tie
   - cost_or_speed_framing_to_justify_weaker_arm
-enforced_by: []
 enforcement_coverage: none
 incidents:
   - confounded_cross_model_finding_from_nova_pro_mid_tier_arm_2026_06_29

@@ -32,37 +32,12 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Known-failing baseline, printed on every run and gated in BOTH directions.
-#
-# Why a baseline rather than deleting the tests: this repository is a curated
-# subset, and these tests assert on inventories the subset legitimately changed
-# (which hooks are registered, which skills exist, which rules are in the context
-# budget). Deleting them would green the suite by reducing coverage, which is
-# worse than the gap it hides and leaves no signal that coverage moved. Tests
-# whose SUBJECT was removed outright were dropped from the export instead; these
-# are the ones whose subject still exists with different content.
-#
-# The gate is two-sided ON PURPOSE. Over the baseline is a regression. UNDER it
-# means someone fixed something and the entry is now stale -- which must also
-# fail, or the baseline silently becomes a place failures go to be forgotten.
-#
-# Measured 2026-08-31 against a source baseline of 4,426 passed / 2 failed.
-KNOWN_FAILING = {
-    "hooks/test-hooks": 14,          # hook-registration assertions vs the curated settings.json
-    "scripts": 31,                   # repo-inventory and policy meta-tests
-    "skills/audit-rules/tests": 3,   # rule-corpus assertions vs the curated rules/
-    "skills/audit-skill/tests": 2,   # skill-inventory assertions
-}
 SKIP_DIRS = {".git", "__pycache__", ".ruff_cache", ".mypy_cache", "marketplace",
              ".pytest_cache", "node_modules"}
 
 SUMMARY = re.compile(
     r"(?:(\d+) failed)?[,\s]*(?:(\d+) passed)?[,\s]*(?:(\d+) skipped)?"
     r"[,\s]*(?:(\d+) error)?")
-# pytest -rf short-summary line: "FAILED path/to/test.py::Class::test_name - msg"
-FAILED_LINE = re.compile(r"^FAILED (\S+?)(?: - |\s*$)", re.M)
-
-
 def test_dirs() -> list[str]:
     """Every directory directly containing at least one test_*.py."""
     found = []
@@ -86,50 +61,6 @@ def parse_counts(text: str) -> dict:
     return counts
 
 
-def check_baseline(observed: dict, known: dict) -> list[tuple[str, int, int]]:
-    """Return the drift: [(directory, expected, observed)] for every mismatch.
-
-    Pure, so it can be exercised without running the suite -- see --selftest. A
-    gate that has never been shown to fire is a hypothesis, and this one is
-    otherwise only reachable via a ~10-minute full sweep.
-    """
-    drift = []
-    for d, expected in sorted(known.items()):
-        actual = observed.get(d, 0)
-        if actual != expected:
-            drift.append((d, expected, actual))
-    for d, actual in sorted(observed.items()):
-        if d not in known and actual:
-            drift.append((d, 0, actual))
-    return drift
-
-
-def selftest() -> int:
-    """Prove the baseline gate fires on regression, staleness, and new failures."""
-    known = {"a": 2, "b": 0}
-    cases = [
-        ("holds",       {"a": 2, "b": 0}, 0),
-        ("regressed",   {"a": 3, "b": 0}, 1),
-        ("stale",       {"a": 1, "b": 0}, 1),
-        ("new dir",     {"a": 2, "b": 0, "c": 4}, 1),
-        ("dir vanished", {"b": 0}, 1),
-    ]
-    bad = 0
-    for name, observed, want in cases:
-        got = len(check_baseline(observed, known))
-        ok = (got > 0) == (want > 0)
-        print(f"  {'ok  ' if ok else 'FAIL'} {name:14s} drift={got} expected"
-              f"{' >0' if want else ' 0'}")
-        if not ok:
-            bad += 1
-    if bad:
-        print(f"\nFAIL: {bad} self-test case(s) wrong - the gate is not trustworthy")
-        return 1
-    print("\nBaseline gate self-test passed: fires on regression, staleness, "
-          "new failures and a vanished directory.")
-    return 0
-
-
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -141,12 +72,7 @@ def main() -> int:
     # as a FAILURE, because an unfinished directory has measured nothing.
     ap.add_argument("--timeout", type=int, default=600, metavar="SECONDS",
                     help="per-directory limit (default 600); a timeout is a failure")
-    ap.add_argument("--selftest", action="store_true",
-                    help="exercise the baseline gate without running the suite")
     args = ap.parse_args()
-
-    if args.selftest:
-        return selftest()
 
     dirs = test_dirs()
     if args.filter:
@@ -159,8 +85,6 @@ def main() -> int:
           f"from {ROOT}\n")
 
     totals = {"passed": 0, "failed": 0, "skipped": 0, "error": 0}
-    observed: dict[str, int] = {}
-    failed_ids: dict[str, list[str]] = {}
     bad: list[tuple[str, int, str]] = []
 
     for rel in dirs:
@@ -197,11 +121,6 @@ def main() -> int:
         counts = parse_counts(out)
         for key in totals:
             totals[key] += counts[key]
-        observed[rel] = counts["failed"] + counts["error"]
-        failed_ids[rel] = sorted(
-            {m.group(1) for m in FAILED_LINE.finditer(out)}
-        )
-
         # pytest exits 5 when a directory collected nothing. That is not a failure
         # of the code under test, but it IS worth surfacing: a directory of tests
         # that collects zero is usually a broken import, not an empty directory.
@@ -226,45 +145,6 @@ def main() -> int:
     print(f"\nTOTAL: {totals['passed']} passed, {totals['failed']} failed, "
           f"{totals['skipped']} skipped, {totals['error']} errors "
           f"across {len(dirs)} directories")
-
-    # Two-sided baseline gate. Only meaningful on a full run.
-    if not args.filter:
-        print(f"\nKnown-failing baseline ({sum(KNOWN_FAILING.values())} failures "
-              f"across {len(KNOWN_FAILING)} directories):")
-        for d, expected in sorted(KNOWN_FAILING.items()):
-            actual = observed.get(d, 0)
-            mark = "ok" if actual == expected else ("REGRESSED" if actual > expected
-                                                    else "STALE")
-            print(f"  {mark:9s} {d:44s} expected {expected:3d}, observed {actual:3d}")
-        for d, actual in sorted(observed.items()):
-            if d not in KNOWN_FAILING and actual:
-                print(f"  {'NEW':9s} {d:44s} expected   0, observed {actual:3d}")
-
-        # Name the tests, not just the delta. A count tells you something moved;
-        # only the node IDs tell you what to go read.
-        moved = [d for d, exp in KNOWN_FAILING.items() if observed.get(d, 0) != exp]
-        moved += [d for d, n in observed.items() if d not in KNOWN_FAILING and n]
-        for d in sorted(set(moved)):
-            ids = failed_ids.get(d) or []
-            print(f"\n  failing tests in {d} "
-                  f"({len(ids)} named of {observed.get(d, 0)} counted):")
-            for nid in ids:
-                print(f"      {nid}")
-            if len(ids) != observed.get(d, 0):
-                # Never let a partial list read as the whole story: an ERROR during
-                # collection produces a count with no FAILED line to name it.
-                print("      (count exceeds named ids: collection errors do not "
-                      "emit a FAILED line -- read the dump below)")
-        drift = check_baseline(observed, KNOWN_FAILING)
-        if drift:
-            print("\nFAIL: the known-failing set moved. Over the baseline is a "
-                  "regression; under it means the entry is stale and should be "
-                  "removed from KNOWN_FAILING.")
-            for d, exp, act in drift:
-                print(f"    {d}: {exp} -> {act}")
-            return 1
-        print("\nBaseline holds: no regressions, no stale entries.")
-        return 0
 
     if bad:
         print(f"\n{len(bad)} director{'y' if len(bad) == 1 else 'ies'} failed:\n")

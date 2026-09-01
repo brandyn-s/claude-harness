@@ -21,7 +21,6 @@ prohibited_actions:
   - "ship at rerank=off when production runs rerank=on (without re-verification)"
   - "skip bootstrap CI as 'overkill' for ship decisions"
   - "ship past the production-stack gate due to API throughput blocking"
-enforced_by: []
 enforcement_coverage: none
 incidents:
   - date: "2026-05-06"

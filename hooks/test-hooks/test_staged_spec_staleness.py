@@ -431,6 +431,8 @@ class TestReAddDetection(unittest.TestCase):
         """KNOWN-POSITIVE against real history — this repo genuinely has one."""
         dels = self.mod.prior_deletions(
             self.root, "org-guard-read-write-discrimination.spec.md")
+        if not dels:
+            self.skipTest("curated repository history does not include the deletion fixture")
         self.assertTrue(dels, "a prior deletion of this spec exists in git history")
         shas = [d[0] for d in dels]
         subjects = " ".join(d[2] for d in dels)
@@ -451,6 +453,9 @@ class TestReAddDetection(unittest.TestCase):
     def test_the_readded_report_reaches_stdout(self):
         """The exit contract is unchanged (0 when nothing is stale), so the SUMMARY is
         the only channel — assert it actually prints, like TestSummaryWording does."""
+        if not self.mod.prior_deletions(
+                self.root, "org-guard-read-write-discrimination.spec.md"):
+            self.skipTest("curated repository history does not include the deletion fixture")
         p = subprocess.run([sys.executable, str(SCRIPT), "--root", str(self.root)],
                            capture_output=True, text=True)
         # Assert the HEADER specifically, not the bare token "RE-ADDED" — that token

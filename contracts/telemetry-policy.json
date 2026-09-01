@@ -10,7 +10,7 @@
     ]
   },
   "sourceValidation": {
-    "scope": "repository-managed-source-templates",
+    "scope": "not-shipped-in-portable-harness",
     "attestsLiveDeployment": false
   },
   "effectiveStartup": {
@@ -28,8 +28,5 @@
     "OTEL_LOG_TOOL_DETAILS": "0",
     "OTEL_LOG_USER_PROMPTS": "0"
   },
-  "managedSources": [
-    "templates/cui-bedrock-govcloud/intune/REM051-detect.ps1",
-    "templates/cui-bedrock-govcloud/intune/REM051-remediate.ps1"
-  ]
+  "managedSources": []
 }

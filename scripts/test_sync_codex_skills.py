@@ -130,9 +130,13 @@ def test_readme_documents_check_before_apply() -> None:
         "python3 bin/sync-codex-skills.py --apply --with-dependencies "
         "retro distill ship"
     )
-    assert check in text
-    assert apply in text
-    assert text.index(check) < text.index(apply)
+    if all((REPO_ROOT / "skills" / name / "SKILL.md").is_file()
+           for name in ("retro", "distill", "ship")):
+        assert check in text
+        assert apply in text
+        assert text.index(check) < text.index(apply)
+    else:
+        assert check not in text and apply not in text
 
 
 def test_readme_documents_full_gather_family_package_repair() -> None:
@@ -143,14 +147,18 @@ def test_readme_documents_full_gather_family_package_repair() -> None:
     )
     check = f"python3 bin/sync-codex-skills.py --check {closure}"
     apply = f"python3 bin/sync-codex-skills.py --apply {closure}"
-    assert text.count(check) == 2
-    assert apply in text
-    assert text.index(check) < text.index(apply)
-    assert text.index(apply) < text.rindex(check)
-    assert "complete installed gather-family closure" in text
-    assert "`gather-vendor` consumes the same authoritative" in text
-    assert "cmp -s skills/_shared" not in text
-    assert "direct shared lifecycle dependency" in text
+    if all((REPO_ROOT / "skills" / name / "SKILL.md").is_file()
+           for name in ("gather-claude", "gather-vendor")):
+        assert text.count(check) == 2
+        assert apply in text
+        assert text.index(check) < text.index(apply)
+        assert text.index(apply) < text.rindex(check)
+        assert "complete installed gather-family closure" in text
+        assert "`gather-vendor` consumes the same authoritative" in text
+        assert "cmp -s skills/_shared" not in text
+        assert "direct shared lifecycle dependency" in text
+    else:
+        assert check not in text and apply not in text
 
 
 def test_gather_runtime_documents_the_actual_codex_shared_path() -> None:

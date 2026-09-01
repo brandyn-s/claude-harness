@@ -17,9 +17,6 @@ prohibited_actions:
   - using_builtin_websearch
   - using_builtin_webfetch
   - tavily_max_results_over_5
-enforced_by:
-  - tavily-research-poll
-  - tavily-search-cap
 enforcement_coverage: partial
 incidents: []
 created_date: "2026-03-28"

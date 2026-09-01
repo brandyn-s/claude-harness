@@ -24,7 +24,6 @@ prohibited_actions:
   - pre_llm_citation_for_llm_behavioral_claim
   - asserted_refutation_without_citation
   - confident_refutation_without_corroboration
-enforced_by: []
 enforcement_coverage: none
 incidents:
   - chat_audit_4_of_7_refutations_reversed_2026_04_29

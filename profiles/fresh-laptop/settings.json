@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep"
+    ],
+    "deny": [
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/credentials.json)",
+      "Read(**/.credentials.json)",
+      "Read(**/secrets.*)",
+      "Edit(~/.ssh/**)",
+      "Edit(~/.aws/**)",
+      "Edit(**/.env)",
+      "Edit(**/.env.*)",
+      "Edit(**/.credentials.json)",
+      "Bash(rm -rf /)",
+      "Bash(rm -rf ~)",
+      "Bash(*chmod 777*)",
+      "Bash(*curl*| bash*)",
+      "Bash(*curl*| sh*)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "allowUnsandboxedCommands": true,
+    "filesystem": {
+      "denyRead": [
+        "~/.aws",
+        "~/.ssh",
+        "~/.config/gcloud",
+        "**/.env",
+        "**/.env.*"
+      ]
+    }
+  },
+  "enableAllProjectMcpServers": false,
+  "enabledMcpjsonServers": []
+}

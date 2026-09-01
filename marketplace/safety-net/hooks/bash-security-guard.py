@@ -1,16 +1,13 @@
-"""Consolidated PreToolUse:Bash security guard.
+"""Single-process PreToolUse:Bash catastrophic guard and optional policies.
 
-Merges 7 formerly separate hooks into one process spawn:
-  - credential-guard: block reading .ssh, .aws, .env via Bash
-  - exfiltration-guard: block outbound data exfiltration
-  - dangerous-command-guard: block rm -rf /, chmod 777, force-push
-  - admin-merge-guard: block gh pr merge --admin (bypasses branch protections)
-  - push-guard: block direct push to main on protected repos
-  - python-interpreter-guard: block python3+boto3 (use python 3.12)
-  - pr-security-check: warn on PR with security-sensitive files
+The fresh-laptop default always blocks credential exposure, exfiltration,
+reverse shells, security-control disablement, and broad or irreversible
+destruction. Non-catastrophic delivery, portability, and workflow preferences
+are selected from ``bash_policy_tables.py`` through
+``CLAUDE_BASH_POLICY_PACKS``. ``all`` preserves the author-workstation profile.
 
 Three response modes (updated 2026-03-31 based on source code analysis):
-  Exit code 2 + stderr message = BLOCK (security-critical checks)
+  Exit code 2 + stderr message = BLOCK
   Exit code 0 + JSON stdout with updated_input = AUTO-FIX (rewrite command)
   Exit code 0 + stderr message = ADVISORY (warn only)
   Exit code 0 (no output) = ALLOW (passthrough)
@@ -30,6 +27,12 @@ import sys
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
+
+_HOOK_DIR = str(Path(__file__).resolve().parent)
+if _HOOK_DIR not in sys.path:
+    sys.path.insert(0, _HOOK_DIR)
+
+from bash_policy_tables import entries, pattern_block_reason, resolve_policy_packs
 
 SEC_REMEDY = (
     "Cheapest fix: write the code to a .py FILE and run it, and split any credential read away from any network call."
@@ -525,20 +528,12 @@ DANGEROUS_PATTERNS = [
         "Hard reset on main/master. This discards all local changes.",
     ),
     (
-        r"pip\s+install\s+.*--pre\b",
-        "pip install --pre installs pre-release packages. Ask the user for approval.",
-    ),
-    (
         r"\bformat\s+[a-zA-Z]:\b|\bmkfs\b|\bdd\s+if=.*of=/dev/",
         "Disk formatting or raw device writing. Extremely destructive.",
     ),
     (
         r"Set-MpPreference\s+.*-DisableRealtimeMonitoring.*\$true|netsh\s+advfirewall\s+set\s+.*state\s+off",
         "Disabling security software. Not allowed.",
-    ),
-    (
-        r"winget\s+(install|upgrade|uninstall)",
-        "winget hangs in non-interactive shells (waits for consent). Run in user terminal instead.",
     ),
 ]
 
@@ -576,8 +571,9 @@ def check_dangerous(command):
 
 
 # ── REVERSE SHELL GUARD ──────────────────────────────────────────────────
-# Selectively cloned from robdtaylor/personal-ai-infrastructure
-# security-validator.ts Tier 2 (2026-03-29, gather-repos run 5 re-screen)
+# Independently maintained signatures for common reverse-shell and staged
+# download-and-execute command shapes. Keep these narrow: string matching is a
+# last-mile safety check, not a substitute for Claude Code's native sandbox.
 
 REVERSE_SHELL_PATTERNS = [
     (r"bash\s+-i\s+>&?\s*/dev/tcp", "Bash reverse shell via /dev/tcp"),
@@ -1875,7 +1871,7 @@ def check_forbidden_org(command):
     return None
 
 
-_ORG_BARE_RE = re.compile(r"\bexample-corp\b", re.IGNORECASE)
+_ORG_BARE_RE = re.compile(r"\bexample-technologies\b", re.IGNORECASE)
 _INTERP_CTX_RE = re.compile(
     r"(?:\bpython3?\b|\bbash\b|\bsh\b)\s*(?:-c\b|<<)|<<\s*'?\w+|\s-c\s+['\"]"
 )
@@ -2176,10 +2172,12 @@ def main():
     if not command:
         sys.exit(0)
 
-    # Phase 1: Security-critical checks — hard BLOCK (exit 2).
-    # These are never auto-fixed. First match wins.
+    enabled_packs = resolve_policy_packs(os.environ.get("CLAUDE_BASH_POLICY_PACKS"))
+
+    # Phase 1: Catastrophic checks — always active, hard BLOCK (exit 2).
+    # These cover secret exposure, code-execution attacks, security-control
+    # disablement, and broad/irreversible destruction. First match wins.
     for check in [
-        lambda: check_forbidden_org(command),
         lambda: check_credentials(command),
         lambda: check_reverse_shell(command),
         lambda: check_shell_wrapper(command),
@@ -2187,15 +2185,7 @@ def main():
         lambda: check_exfiltration(command),
         lambda: check_process_listing_secret_leak(command),
         lambda: check_dangerous(command),
-        lambda: check_commit_on_main(command, cwd),
-        lambda: check_admin_merge(command),
-        lambda: check_push_guard(command, cwd),
-        lambda: check_pr_before_push(command, cwd),
-        lambda: check_heredoc_python_encoding(command),
-        lambda: check_inline_python_encoding(command),
         lambda: check_env_var_diagnostic(command),
-        lambda: check_push_after_auto_merge(command, cwd),
-        lambda: check_long_foreground_sleep(command, tool_input),
     ]:
         reason = check()
         if reason:
@@ -2204,36 +2194,67 @@ def main():
                   file=sys.stderr)
             sys.exit(2)
 
-    # Phase 1.5: inline `python -c` >= 300 chars — auto-rewrite the body to a
-    # temp .py file when it extracts losslessly, else hard-block. Runs AFTER
-    # the Phase-1 encoding checks so encoding-buggy inline python still blocks
-    # and is never silently materialized to a file.
-    ip = handle_inline_python_oversize(command, tool_input)
-    if ip is not None:
-        kind, payload = ip
-        if kind == "block":
-            _audit_log(command, "blocked", payload)
-            print(payload + _repeat_note("bash-security-guard", SEC_REMEDY),
+    block_checks = {
+        "check_forbidden_org": lambda: check_forbidden_org(command),
+        "check_commit_on_main": lambda: check_commit_on_main(command, cwd),
+        "check_admin_merge": lambda: check_admin_merge(command),
+        "check_push_guard": lambda: check_push_guard(command, cwd),
+        "check_pr_before_push": lambda: check_pr_before_push(command, cwd),
+        "check_push_after_auto_merge": lambda: check_push_after_auto_merge(command, cwd),
+        "check_heredoc_python_encoding": lambda: check_heredoc_python_encoding(command),
+        "check_inline_python_encoding": lambda: check_inline_python_encoding(command),
+        "check_long_foreground_sleep": lambda: check_long_foreground_sleep(command, tool_input),
+    }
+    for name in entries(enabled_packs, "block"):
+        reason = block_checks[name]()
+        if reason:
+            _audit_log(command, "blocked", reason)
+            print(reason + _repeat_note("bash-security-guard", SEC_REMEDY),
                   file=sys.stderr)
             sys.exit(2)
-        _audit_log(command, "auto-fixed", payload["reason"])
-        print(json.dumps(payload))
-        sys.exit(0)
+
+    pattern_reason = pattern_block_reason(
+        _strip_string_literals(command), enabled_packs
+    )
+    if pattern_reason:
+        _audit_log(command, "blocked", pattern_reason)
+        print(pattern_reason + _repeat_note("bash-security-guard", SEC_REMEDY),
+              file=sys.stderr)
+        sys.exit(2)
+
+    # Phase 1.5: optional complex handlers. These remain in this process and
+    # are selected by the same directly sourced policy table as other checks.
+    for name in entries(enabled_packs, "handler"):
+        if name != "handle_inline_python_oversize":
+            raise ValueError(f"unknown optional policy handler: {name}")
+        ip = handle_inline_python_oversize(command, tool_input)
+        if ip is not None:
+            kind, payload = ip
+            if kind == "block":
+                _audit_log(command, "blocked", payload)
+                print(payload + _repeat_note("bash-security-guard", SEC_REMEDY),
+                      file=sys.stderr)
+                sys.exit(2)
+            _audit_log(command, "auto-fixed", payload["reason"])
+            print(json.dumps(payload))
+            sys.exit(0)
 
     # Phase 2: Auto-fixable checks — rewrite command via updated_input.
     # These formerly blocked; now they auto-fix and approve.
     fixed_command = command
     fixes_applied = []
-    for autofix in [
-        _autofix_msys_python_path,
-        _autofix_double_prefix_general,
-        _autofix_msys_pathconv,
-        _autofix_fork_pr_routing,
-        _autofix_aws_profile,
-        _autofix_python_interpreter,
-        _autofix_pr_head_flag,
-        _autofix_rebase_dirty,
-    ]:
+    autofixes = {
+        "_autofix_msys_python_path": _autofix_msys_python_path,
+        "_autofix_double_prefix_general": _autofix_double_prefix_general,
+        "_autofix_msys_pathconv": _autofix_msys_pathconv,
+        "_autofix_fork_pr_routing": _autofix_fork_pr_routing,
+        "_autofix_aws_profile": _autofix_aws_profile,
+        "_autofix_python_interpreter": _autofix_python_interpreter,
+        "_autofix_pr_head_flag": _autofix_pr_head_flag,
+        "_autofix_rebase_dirty": _autofix_rebase_dirty,
+    }
+    for name in entries(enabled_packs, "autofix"):
+        autofix = autofixes[name]
         new_cmd, desc = autofix(fixed_command, cwd)
         if new_cmd is not None:
             fixed_command = new_cmd
@@ -2250,19 +2271,21 @@ def main():
         print(json.dumps(result))
         sys.exit(0)
 
-    # Phase 3: Advisory checks (warn only, never block)
-    settings_warning = check_settings_json_staged(command, cwd)
-    if settings_warning:
-        print(settings_warning, file=sys.stderr)
-    org_indirection_warning = warn_forbidden_org_indirection(command)
-    if org_indirection_warning:
-        _audit_log(command, "warned", org_indirection_warning)
-        print(org_indirection_warning, file=sys.stderr)
-    stale_base_warning = warn_stale_branch_base(command)
-    if stale_base_warning:
-        _audit_log(command, "warned", stale_base_warning)
-        print(stale_base_warning, file=sys.stderr)
-    check_pr_security(command, cwd=cwd)
+    # Phase 3: Optional advisories (warn only, never block).
+    advisories = {
+        "check_settings_json_staged": lambda: check_settings_json_staged(command, cwd),
+        "warn_forbidden_org_indirection": lambda: warn_forbidden_org_indirection(command),
+        "warn_stale_branch_base": lambda: warn_stale_branch_base(command),
+    }
+    for name in entries(enabled_packs, "advisory"):
+        warning = advisories[name]()
+        if warning:
+            _audit_log(command, "warned", warning)
+            print(warning, file=sys.stderr)
+    for name in entries(enabled_packs, "observer"):
+        if name != "check_pr_security":
+            raise ValueError(f"unknown optional policy observer: {name}")
+        check_pr_security(command, cwd=cwd)
 
     sys.exit(0)
 
@@ -2271,9 +2294,7 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        # FAIL-CLOSED: if the hook crashes, BLOCK the command.
-        # Selectively cloned from Aedelon/claude-code-blueprint bash-guard.sh
-        # trap pattern. Python exit 1 = Claude Code blocks, but a clean
-        # error message is better than a raw traceback.
+        # FAIL-CLOSED: an unavailable security guard must not silently approve
+        # the command it was asked to inspect.
         print(f"[bash-security-guard] BLOCKED: hook crashed ({e.__class__.__name__}: {e})", file=sys.stderr)
         sys.exit(2)

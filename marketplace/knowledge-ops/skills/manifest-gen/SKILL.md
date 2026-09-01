@@ -194,9 +194,9 @@ and fill in what requires understanding:
 1. **applies_to**: What files, tools, or actions does this rule cover?
 2. **trigger_conditions**: When is the rule relevant?
 3. **required_actions / prohibited_actions**: What must/must not the agent do?
-4. **enforced_by**: Which hooks enforce this? Cross-reference hook manifests.
-5. **enforcement_coverage**: none, partial, or full.
-6. **incidents**: Extract date + summary from incident references.
+4. **enforcement_coverage**: none, partial, or full. `enforced_by` is omitted
+   from rule source manifests; `compile.py` derives it from wired hook manifests.
+5. **incidents**: Extract date + summary from incident references.
 
 ### For MCP tools — read the Python source:
 
@@ -247,7 +247,7 @@ python3 "$MANIFESTS_DIR/scaffold_extended.py" --dry-run --sessions  # should sho
 ```
 
 The compiler checks:
-- **Structural**: no dangling references (every enforced_by, requires_rules,
+- **Structural**: no dangling references (every requires_rules,
   requires_skills points to an existing manifest). Counts toward exit code.
 - **Routing**: hooks/skill-rules.json points at real skills. Counts toward
   exit code.

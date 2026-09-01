@@ -23,7 +23,6 @@ prohibited_actions:
   - inferring_vendor_absence_from_wrapper_search
   - diagnosing_from_guessed_parameter_shapes
   - modifying_shared_deployed_path_before_contract_lookup
-enforced_by: []
 enforcement_coverage: none
 incidents: []
 created_date: "2026-03-30"

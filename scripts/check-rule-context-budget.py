@@ -16,23 +16,9 @@ from rule_context_budget import (  # noqa: E402
     HARD_CAP_BYTES,
     RuleContextBudgetError,
     WARN_BYTES,
+    estimate_tokens,
     scan_unconditional_rules,
 )
-
-# Bytes-per-token: 2.72, MEASURED 2026-08-31 against Anthropic's
-# /v1/messages/count_tokens on this repository's own ambient corpus
-# (206,488 B -> 75,420 tokens, claude-sonnet-5, corpus in the `system`
-# field because that is how ambient rules actually load).
-#
-# It was 4.0 (a bytes/4 estimate), which understated the corpus by 47% --
-# this advisory reported ~51,607 tokens against a 50,000-60,000 target band
-# while the true figure was 75,413, i.e. 25% ABOVE the band's ceiling. A
-# self-measurement that flatters the thing it measures is worse than none.
-#
-# Re-derive rather than trust this constant if the corpus changes character:
-# prose with dense code blocks and DSL markers tokenizes very differently
-# from ordinary English, and 2.72 is specific to THIS corpus.
-BYTES_PER_TOKEN = 2.72
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -57,11 +43,15 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     size = snapshot.total_bytes
-    tokens = int(size / BYTES_PER_TOKEN)
+    tokens = estimate_tokens(size)
+    target_low_tokens = estimate_tokens(AB_TARGET_LOW_BYTES)
+    target_high_tokens = estimate_tokens(AB_TARGET_HIGH_BYTES)
     summary = (
         f"ambient rule context: {len(snapshot.files)} files, {size:,} bytes, "
         f"~{tokens:,} tokens (A/B target {AB_TARGET_LOW_BYTES:,}-"
-        f"{AB_TARGET_HIGH_BYTES:,}; warn {WARN_BYTES:,}; hard cap {HARD_CAP_BYTES:,})"
+        f"{AB_TARGET_HIGH_BYTES:,} bytes, ~{target_low_tokens:,}-"
+        f"{target_high_tokens:,} tokens; warn {WARN_BYTES:,} bytes; "
+        f"hard cap {HARD_CAP_BYTES:,} bytes)"
     )
     if size > HARD_CAP_BYTES:
         print(f"FAIL: {summary}", file=sys.stderr)

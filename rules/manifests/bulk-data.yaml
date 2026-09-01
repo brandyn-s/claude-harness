@@ -21,7 +21,6 @@ prohibited_actions:
   - looping_state_changing_mcp_calls
   - bypassing_opa_or_user_confirmation_with_script
   - assuming_unverified_vendor_helper_exists
-enforced_by: []
 enforcement_coverage: none
 incidents: []
 created_date: "2026-03-15"

@@ -26,7 +26,6 @@ prohibited_actions:
   - "cite volume of activity (N PRs, M tests) as evidence of completeness"
   - "outsource the completeness check to the user"
   - "form the plan from the code's current behavior when design docs exist"
-enforced_by: []
 enforcement_coverage: none
 incidents:
   - date: "2026-06-29"

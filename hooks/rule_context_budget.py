@@ -22,6 +22,18 @@ WARN_BYTES = 225_000
 HARD_CAP_BYTES = 250_000
 BLOCK_BYTES = HARD_CAP_BYTES
 
+# Corpus-specific calibration from Anthropic's count_tokens endpoint. Keep the
+# measured pair, not a rounded chars/token constant, so every reporter produces
+# the same result and reviewers can see exactly what was observed.
+TOKEN_CALIBRATION_BYTES = 206_428
+TOKEN_CALIBRATION_TOKENS = 75_413
+
+
+def estimate_tokens(byte_count: int) -> int:
+    """Estimate tokens using the measured ambient-corpus calibration."""
+
+    return int(byte_count * TOKEN_CALIBRATION_TOKENS / TOKEN_CALIBRATION_BYTES)
+
 
 class RuleContextBudgetError(RuntimeError):
     """The rule corpus could not be measured without undercounting."""

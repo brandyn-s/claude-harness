@@ -17,7 +17,6 @@ required_actions:
 prohibited_actions:
   - feature_list_comparison_without_need_analysis
   - recommending_adoption_without_verifying_gap
-enforced_by: []
 enforcement_coverage: none
 incidents:
   - tob_config_comparison_2026_03_26

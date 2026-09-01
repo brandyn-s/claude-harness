@@ -28,7 +28,6 @@ prohibited_actions:
   - reading_a_timeout_as_inconclusive_rather_than_caught
   - trusting_a_single_verdict_on_a_test_that_reads_live_state
   - mutating_the_reader_instead_of_pinning_the_state
-enforced_by: []
 enforcement_coverage: none
 incidents:
   - "2026-07-26 cc-monitor fact-checker: 2 of 4 mutations passed on wrong-shaped fixtures; trusting them would have deleted two live guards"

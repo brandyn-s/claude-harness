@@ -1,57 +1,5 @@
 """Tests for block-partial-read.py hook."""
-import importlib.util
 import os
-import sys
-
-_hook_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-_spec = importlib.util.spec_from_file_location(
-    "block_partial_read", os.path.join(_hook_dir, "block-partial-read.py")
-)
-_mod = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(_mod)
-PROTECTED_PATTERNS = _mod.PROTECTED_PATTERNS
-import re
-
-
-def test_blocks_partial_read_settings():
-    """offset on settings.json should match."""
-    rel_path = "settings.json"
-    assert any(re.search(p, rel_path) for p in PROTECTED_PATTERNS)
-    print("PASS: blocks partial read of settings.json")
-
-
-def test_blocks_partial_read_rules():
-    """offset on rules/*.md should match."""
-    rel_path = "rules/platform-constraints.md"
-    assert any(re.search(p, rel_path) for p in PROTECTED_PATTERNS)
-    print("PASS: blocks partial read of rules/*.md")
-
-
-def test_blocks_partial_read_skill():
-    """offset on skills/*/SKILL.md should match."""
-    rel_path = "skills/gather-repos/SKILL.md"
-    assert any(re.search(p, rel_path) for p in PROTECTED_PATTERNS)
-    print("PASS: blocks partial read of SKILL.md")
-
-
-def test_allows_full_read():
-    """No offset/limit = no blocking (handled by main(), not patterns)."""
-    # The hook exits 0 when offset and limit are both None
-    print("PASS: full reads allowed (no offset/limit)")
-
-
-def test_allows_non_protected():
-    """Non-protected files not matched."""
-    rel_path = "hooks/bash-security-guard.py"
-    assert not any(re.search(p, rel_path) for p in PROTECTED_PATTERNS)
-    print("PASS: non-protected files not blocked")
-
-
-def test_allows_regular_code():
-    """Regular project files not matched."""
-    rel_path = "src/main.py"
-    assert not any(re.search(p, rel_path) for p in PROTECTED_PATTERNS)
-    print("PASS: regular code files not blocked")
 
 
 # ── Header-peek carve-out tests (run_hook end-to-end) ──────────────────
@@ -61,6 +9,39 @@ from conftest import run_hook
 HOOK = "block-partial-read.py"
 HOME = os.path.expanduser("~")
 SETTINGS = f"{HOME}/.claude/settings.json"
+
+
+def _large_partial(path):
+    return run_hook(HOOK, {
+        "tool_name": "Read",
+        "tool_input": {"file_path": path, "offset": 0, "limit": 400},
+    })
+
+
+def test_blocks_large_partial_reads_of_control_files():
+    paths = (
+        SETTINGS,
+        f"{HOME}/.claude/rules/platform-constraints.md",
+        f"{HOME}/.claude/skills/gather-repos/SKILL.md",
+        f"{HOME}/.claude/agents/reviewer.md",
+        f"{HOME}/.claude/CLAUDE.md",
+    )
+    for path in paths:
+        rc, _out, err = _large_partial(path)
+        assert rc == 2, path
+        assert "block-partial-read" in err
+
+
+def test_allows_full_and_non_control_reads():
+    rc, _out, _err = run_hook(HOOK, {
+        "tool_name": "Read",
+        "tool_input": {"file_path": SETTINGS},
+    })
+    assert rc == 0
+
+    for path in (f"{HOME}/.claude/hooks/bash-security-guard.py", "/tmp/src/main.py"):
+        rc, _out, _err = _large_partial(path)
+        assert rc == 0, path
 
 
 def test_header_peek_offset0_limit50_allowed():
@@ -122,13 +103,3 @@ def test_unbounded_offset_read_still_blocked():
     })
     assert rc == 2
     assert "block-partial-read" in err
-
-
-if __name__ == "__main__":
-    test_blocks_partial_read_settings()
-    test_blocks_partial_read_rules()
-    test_blocks_partial_read_skill()
-    test_allows_full_read()
-    test_allows_non_protected()
-    test_allows_regular_code()
-    print("All block-partial-read tests passed.")

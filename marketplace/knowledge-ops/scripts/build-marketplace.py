@@ -61,39 +61,16 @@ def _hook_group(script: str, timeout: int, matcher: str = "") -> dict:
 PLUGINS = [
     {
         "name": "safety-net",
-        "description": "Production-grade safety hooks and config tooling — loop detection, injection guards, context monitoring, security audit, promise checking, hook staging, and proxy guardrail management. The enforcement layer.",
+        "description": "Minimal deterministic safety hooks for Claude Code — Bash command safety, protected-config integrity, and MCP result-injection detection. Additional policy and observation hooks remain opt-in.",
         "version": "1.1.0",
         "hooks": {
             "PreToolUse": [
                 _hook_group("bash-security-guard.py", 30, "Bash"),
                 _hook_group("config-guard.py", 30, "Write|Edit"),
-                _hook_group("memory-write-guard.py", 30, "Write|Edit"),
-                _hook_group("search-path-guard.py", 30, "Glob|Grep"),
-                _hook_group("block-partial-read.py", 30, "Read"),
             ],
             "PostToolUse": [
-                _hook_group("post-write-edit.py", 30, "Write|Edit"),
                 _hook_group("result-injection-guard.py", 30, "mcp__.*"),
-                _hook_group(
-                    "loop-detector.py", 20, "mcp__.*|Bash|Read|Glob|Grep"
-                ),
-                _hook_group("bash-security-audit.py", 30, "Bash"),
-                _hook_group(
-                    "context-monitor.py",
-                    20,
-                    "mcp__.*|Bash|Read|Write|Edit|Glob|Grep",
-                ),
             ],
-            "PostToolUseFailure": [
-                _hook_group(
-                    "post-failure-guide.py",
-                    20,
-                    "mcp__.*|Bash|Read|Edit|Write",
-                ),
-                _hook_group("bash-error-classifier.py", 30, "Bash"),
-            ],
-            "PreCompact": [_hook_group("precompact-checkpoint.py", 20)],
-            "Stop": [_hook_group("promise-checker.py", 20)],
         },
         "files": [
             # Hooks
@@ -102,6 +79,7 @@ PLUGINS = [
             ("hooks/context-monitor.py", "hooks/context-monitor.py"),
             ("hooks/result-injection-guard.py", "hooks/result-injection-guard.py"),
             ("hooks/bash-security-guard.py", "hooks/bash-security-guard.py"),
+            ("hooks/bash_policy_tables.py", "hooks/bash_policy_tables.py"),
             ("hooks/bash-security-audit.py", "hooks/bash-security-audit.py"),
             ("hooks/bash-error-classifier.py", "hooks/bash-error-classifier.py"),
             ("hooks/config-guard.py", "hooks/config-guard.py"),
@@ -117,7 +95,8 @@ PLUGINS = [
             # plugin is self-contained): result-injection-guard imports
             # hook_input; context-monitor imports atomic_write;
             # bash-security-guard imports manifest_metrics for the
-            # repeat-block escalation.
+            # repeat-block escalation and bash_policy_tables for opt-in
+            # non-catastrophic command policy.
             ("hooks/hook_input.py", "hooks/hook_input.py"),
             ("hooks/atomic_write.py", "hooks/atomic_write.py"),
             ("hooks/manifest_metrics.py", "hooks/manifest_metrics.py"),

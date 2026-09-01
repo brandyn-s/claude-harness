@@ -102,11 +102,27 @@ def last_turn_text(raw):
             rec = json.loads(line)
         except ValueError:
             continue
-        role = (rec.get("message") or {}).get("role") or rec.get("type")
+        message = rec.get("message") or {}
+        role = message.get("role") or rec.get("type")
+        content = message.get("content")
         if role == "user":
-            assistant, tools = [], []      # reset: a new turn began
+            # Claude transcripts encode tool results as user-role messages.
+            # Those are continuations of the current human turn, not new turns.
+            result_blocks = [
+                blk for blk in content
+                if isinstance(content, list)
+                and isinstance(blk, dict)
+                and blk.get("type") == "tool_result"
+            ] if isinstance(content, list) else []
+            if result_blocks:
+                for blk in result_blocks:
+                    value = blk.get("content")
+                    tools.append(
+                        value if isinstance(value, str) else json.dumps(value)[:4000]
+                    )
+            else:
+                assistant, tools = [], []  # a new human turn began
             continue
-        content = (rec.get("message") or {}).get("content")
         if isinstance(content, str):
             assistant.append(content)
         elif isinstance(content, list):
@@ -115,9 +131,6 @@ def last_turn_text(raw):
                     continue
                 if blk.get("type") == "text":
                     assistant.append(blk.get("text") or "")
-                elif blk.get("type") == "tool_result":
-                    c = blk.get("content")
-                    tools.append(c if isinstance(c, str) else json.dumps(c)[:4000])
     return "\n".join(assistant), "\n".join(tools)
 
 

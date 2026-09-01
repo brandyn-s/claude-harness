@@ -127,9 +127,8 @@ to the user.
 
 **`[EXAMPLE]` Validating interpretation before questioning:**
 
-> Selectively cloned from Smart-AI-Memory/attune-ai brainstorm skill
-> (Mirror/Challenge/Advance pattern). Lightweight: one checkpoint, not
-> a full phase framework.
+Use one evidence checkpoint before questions so a mistaken interpretation does
+not propagate into the design.
 
 After gathering evidence but BEFORE asking the user any questions, pause
 and validate your interpretation:

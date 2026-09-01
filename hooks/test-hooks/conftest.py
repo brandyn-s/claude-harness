@@ -40,6 +40,10 @@ os.environ.setdefault(
 # non-Windows CI host; a test that needs the macOS no-op overlays
 # CLAUDE_ENCODING_GUARD_FORCE="0".
 os.environ["CLAUDE_ENCODING_GUARD_FORCE"] = "1"
+# The legacy guard suite characterizes the author-workstation compatibility
+# profile. Fresh-laptop default tests override this with an explicit empty
+# value and prove that only catastrophic checks remain enabled there.
+os.environ.setdefault("CLAUDE_BASH_POLICY_PACKS", "all")
 
 windows_only = pytest.mark.skipif(
     platform.system() != "Windows",

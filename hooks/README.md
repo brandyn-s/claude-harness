@@ -45,7 +45,7 @@ workflows own analysis and repair.
 
 | Hook | Matcher | What it does | Why it exists |
 |------|---------|-------------|---------------|
-| `bash-security-guard.py` | `Bash` | Blocks credential exposure (`cat ~/.aws`), data exfiltration (`curl` with env vars), destructive commands (`rm -rf /`), direct pushes to protected repos, forbidden org writes | The single most important security hook. Prevents credential leaks and destructive commands regardless of agent intent. Audit trail in `bash-security-audit.py`. |
+| `bash-security-guard.py` | `Bash` | Always blocks credential exposure, exfiltration, reverse shells, security-control disablement, and broad destruction; optionally applies delivery, portability, and workflow policy from `bash_policy_tables.py` | One process and one JSON parse. Fresh-laptop loads the catastrophic core; the author profile sets `CLAUDE_BASH_POLICY_PACKS=all`. Audit trail in `bash-security-audit.py`. |
 | `config-guard.py` | `Write\|Edit` | Blocks attempts to disable hooks via settings.json edits | Self-protection. Prevents an agent or subagent from disabling its own safety net. |
 | `memory-write-guard.py` | `Write\|Edit` | Blocks prompt injection patterns and oversized entries in memory file writes | Defends against ASI06 (indirect prompt injection via memory persistence). |
 | `search-path-guard.py` | `Glob\|Grep` | Blocks overly broad search paths (home dir, C:/, ~/.claude/plugins) | Prevents ripgrep from scanning gigabytes of irrelevant files. A single broad Grep can timeout for 2 minutes. |

@@ -33,6 +33,30 @@ def test_hook_invocation_accepts_structured_command_args_registration():
     assert "creative-output-grounding-check.py" in invocation
 
 
+def test_mutation_verdict_guidance_has_cross_language_delivery():
+    rule_text = (REPO / "rules" / "tdd-mutation-testing.md").read_text(
+        encoding="utf-8"
+    )
+    frontmatter = rule_text.split("---", 2)[1]
+    paths = set(yaml.safe_load(frontmatter)["paths"])
+    skill = (REPO / "skills" / "test-driven-development" / "SKILL.md").read_text(
+        encoding="utf-8"
+    )
+
+    for pattern in (
+        "**/*_test.go",
+        "**/*Test.java",
+        "**/*Tests.cs",
+        "**/*_spec.rb",
+        "**/*.tftest.hcl",
+        "**/tests/**",
+        "**/spec/**",
+    ):
+        assert pattern in paths
+    assert "REQUIRED READ" in skill
+    assert "references/mutation-verdict-interpretation.md" in skill
+
+
 def test_agent_delegation_retains_authenticated_remote_mcp_gate():
     rule = (REPO / "rules" / "agent-delegation.md").read_text(
         encoding="utf-8"
@@ -95,7 +119,7 @@ def test_output_grounding_records_advisory_payload_check_not_final_enforcement()
     assert "final answer" in reference_lower
 
     assert "launcher metadata" in rule.lower()
-    assert rule_manifest["enforced_by"] == []
+    assert "enforced_by" not in rule_manifest
     assert rule_manifest["enforcement_coverage"] == "none"
     assert hook_manifest["action_type"] == "injector"
     assert hook_manifest["enforces"] == []

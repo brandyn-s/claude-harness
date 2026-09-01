@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-# ── Claude Code Architecture — Interactive Installer ──────────────────
-# Lets you pick which components to install into your ~/.claude/ directory.
+# ── Claude Code Harness — Fresh-Laptop Installer ──────────────────────
+# Lets you rebuild a portable core or select author-workstation components.
 # Works on macOS, Linux, WSL, and Windows through Git Bash. On native Windows,
 # generated exec-form hooks launch the copied dispatcher through bash.exe.
 #
@@ -18,7 +18,7 @@ RED='\033[0;31m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-CLAUDE_DIR="${HOME}/.claude"
+CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 info()  { echo -e "${BLUE}[info]${NC} $1"; }
@@ -98,7 +98,9 @@ install_rules() {
     local rules=()
     while IFS= read -r f; do
         rules+=("$(basename "$f")")
-    done < <(find "$src_dir" -name "*.md" -type f | sort)
+    done < <(find "$src_dir" -maxdepth 1 -name "*.md" -type f \
+        ! -name "never-stop-early.md" \
+        ! -name "validate-to-improve.md" | sort)
 
     local choice
     choice=$(ask_choice "Install which rules?" "All ${#rules[@]} rules" "Pick individually" "Skip rules")
@@ -143,7 +145,7 @@ install_skills() {
     local security=(semgrep codeql fp-check differential-review insecure-defaults
                     sharp-edges variant-analysis sarif-parsing
                     agentic-actions-auditor triage semgrep-rule-creator
-                    security-alerts)
+                    )
     local knowledge=(distill recall garden retrospective review-learnings
                      validate-changes healthcheck)
     local codeintel=(code-explore codebase-memory-exploring codebase-memory-quality
@@ -218,8 +220,8 @@ install_hooks() {
     echo ""
     local choice
     choice=$(ask_choice "Install which hooks?" \
-        "Safety essentials (loop-detector, injection-guard, promise-checker)" \
-        "Full safety net (all universal hooks)" \
+        "Fresh-laptop core (bash safety, config integrity, injection guard)" \
+        "Author workstation (all universal hooks)" \
         "Pick individually" \
         "Skip hooks")
 
@@ -227,18 +229,18 @@ install_hooks() {
     local hook_dirs=()
     local hook_configs=()
     case "$choice" in
-        1) hooks=(loop-detector.py result-injection-guard.py promise-checker.py)
+        1) hooks=(bash-security-guard.py config-guard.py result-injection-guard.py)
            hook_configs=(
-               'PostToolUse|mcp__.*|Bash|Read|Glob|Grep|loop-detector.py|20'
+               'PreToolUse|Bash|bash-security-guard.py|30'
+               'PreToolUse|Write|Edit|config-guard.py|30'
                'PostToolUse|mcp__.*|result-injection-guard.py|30'
-               'Stop|.*|promise-checker.py|20'
            ) ;;
         2) hooks=(loop-detector.py result-injection-guard.py bash-security-guard.py
                   destructive-ops-guard.py bash-security-audit.py bash-error-classifier.py
                   config-guard.py memory-write-guard.py worktree-enforcement.py
                   rule-size-guard.py rule_context_budget.py home-scratch-guard.py
                   write-edit-dispatcher.py block-partial-read.py search-path-guard.py
-                  post-write-edit.py promise-checker.py post-failure-guide.py
+                  post-write-edit.py post-failure-guide.py
                   config-change-validate.py session-start.py session-end.py
                   protected-repos.json)
            hook_dirs=(session_start_modules)
@@ -264,7 +266,6 @@ install_hooks() {
                'PostToolUseFailure|Bash|bash-error-classifier.py|30'
                'SessionStart||session-start.py|30'
                'SessionEnd|.*|session-end.py|5'
-               'Stop|.*|promise-checker.py|20'
            ) ;;
         3) # Pick individually
            for f in "$src_dir"/*.py; do
@@ -292,7 +293,7 @@ install_hooks() {
     # Always ship shared hook libraries + the run-hook dispatcher (the committed
     # settings.json / settings.example.json invoke hooks through run-hook), and
     # keep it executable.
-    for shared in run-hook atomic_write.py hook_input.py git_lock.py; do
+    for shared in run-hook atomic_write.py hook_input.py git_lock.py bash_policy_tables.py; do
         if [[ -f "$src_dir/$shared" ]]; then
             cp "$src_dir/$shared" "$dest_dir/$shared"
         fi
@@ -379,8 +380,8 @@ install_architecture_doc() {
 # ── Main ──────────────────────────────────────────────────────────────
 
 echo -e "${BOLD}"
-echo "  Claude Code Architecture — Interactive Installer"
-echo "  ================================================"
+echo "  Claude Code Harness — Fresh-Laptop Installer"
+echo "  ============================================="
 echo -e "${NC}"
 echo "  This will install components into: $CLAUDE_DIR"
 echo "  Source: $SCRIPT_DIR"
@@ -394,10 +395,21 @@ if [[ ! -d "$CLAUDE_DIR" ]]; then
     info "Created $CLAUDE_DIR"
 fi
 
+operator_selected=0
+if ask_yn "Apply the fresh-laptop settings profile (fast edits + native sandbox)?" "y"; then
+    profile_args=(--profile fresh-laptop)
+    if ask_yn "Add the Brandyn operator layer (delivery policy + high-consequence review)?" "y"; then
+        operator_selected=1
+        profile_args+=(--profile brandyn-operator)
+    fi
+    "$PYTHON_CMD" "$SCRIPT_DIR/scripts/install-profile.py" \
+        "${profile_args[@]}" --target "$CLAUDE_DIR/settings.json" --apply
+fi
+
 ensure_runtime_floor
 
 # Quick install option
-if ask_yn "Install the recommended starter kit? (5 rules + 4 hooks, zero config needed)" "y"; then
+if ask_yn "Install the recommended fresh-laptop core? (2 rules + 3 deterministic hooks)" "y"; then
     mkdir -p "$CLAUDE_DIR/rules" "$CLAUDE_DIR/hooks"
 
     # The starter-kit manifest. SINGLE SOURCE OF TRUTH for both the collision
@@ -418,20 +430,28 @@ if ask_yn "Install the recommended starter kit? (5 rules + 4 hooks, zero config 
     # empirical install test (2026-06-10) confirmed 2 of 4 starter hooks were
     # dead-on-arrival before this ordering was fixed.
     starter_rules=(
-        check-before-change.md
-        diagnose-before-fix.md
-        never-stop-early.md
-        validate-to-improve.md
-        search-efficiency.md
+        outcome-over-verification.md
+        claude-md-quality.md
     )
     starter_hooks=(
         run-hook
         hook_input.py
-        atomic_write.py
-        loop-detector.py
+        manifest_metrics.py
+        protected-repos.json
+        bash_policy_tables.py
+        bash-security-guard.py
+        config-guard.py
         result-injection-guard.py
-        promise-checker.py
     )
+    if (( operator_selected )); then
+        starter_rules+=(operator-discipline.md)
+        starter_hooks+=(
+            atomic_write.py
+            loop-detector.py
+            prompt-secret-scan.py
+            output-secret-redact.py
+        )
+    fi
 
     starter_files=()
     for rule in "${starter_rules[@]}"; do starter_files+=("rules/$rule"); done
@@ -456,14 +476,25 @@ if ask_yn "Install the recommended starter kit? (5 rules + 4 hooks, zero config 
     done
     chmod +x "$CLAUDE_DIR/hooks/run-hook"
 
-    ok "Starter kit installed (${#starter_rules[@]} rules + 3 hooks + 3 shared files)"
+    if (( operator_selected )); then
+        ok "Fresh-laptop core + operator layer installed (3 rules + 6 hooks)"
+    else
+        ok "Fresh-laptop core installed (2 rules + 3 hooks + 5 support files)"
+    fi
     fi  # idempotency guard
 
     hook_configs=(
-        'PostToolUse|mcp__.*|Bash|Read|Glob|Grep|loop-detector.py|20'
+        'PreToolUse|Bash|bash-security-guard.py|30'
+        'PreToolUse|Write|Edit|config-guard.py|30'
         'PostToolUse|mcp__.*|result-injection-guard.py|30'
-        'Stop|.*|promise-checker.py|20'
     )
+    if (( operator_selected )); then
+        hook_configs+=(
+            'PostToolUse|mcp__.*|Bash|Read|Glob|Grep|loop-detector.py|20'
+            'UserPromptSubmit|.*|prompt-secret-scan.py|30'
+            'PostToolUse|Bash|Read|mcp__.*|output-secret-redact.py|30'
+        )
+    fi
 
     missing_starter_hooks=()
     for hook in "${starter_hooks[@]}"; do

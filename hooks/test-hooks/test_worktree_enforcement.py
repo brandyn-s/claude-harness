@@ -42,8 +42,8 @@ def test_non_write_tool_passes():
 
 
 def test_main_session_write_always_allowed():
-    # No agent_type field → main session → always allow
-    rc, _, _ = run_hook(HOOK, _input(agent_type=None))
+    # Isolate the subagent gate from the independent shared-checkout branch gate.
+    rc, _, _ = run_hook(HOOK, _input(agent_type=None, file_path=UNPROTECTED_FILE))
     assert rc == 0
 
 

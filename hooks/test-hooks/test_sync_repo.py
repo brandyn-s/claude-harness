@@ -24,7 +24,7 @@ _spec.loader.exec_module(_mod)
 def test_parse_org_https_with_git_suffix():
     assert _mod._parse_origin_org(
         "https://github.com/brandyn-s/claude-harness.git"
-    ) == "example-org"
+    ) == "brandyn-s"
 
 
 def test_parse_org_ssh_form_preserves_case():

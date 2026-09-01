@@ -62,7 +62,6 @@ PROTECTED_USER_HOOKS = (
     ProtectedHook("PostToolUse", "Write|Edit", "post-write-edit.py", 30),
     ProtectedHook("SessionStart", None, "session-start.py", 30),
     ProtectedHook("SessionEnd", ".*", "session-end.py", 5),
-    ProtectedHook("Stop", ".*", "promise-checker.py", 20),
 )
 
 

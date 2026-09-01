@@ -21,7 +21,6 @@ prohibited_actions:
   - "apply single rubric to multi-mode artifact silently"
   - "rate findings HIGH because rigor-against-mode-A definition fits, ignoring mode-B trade-off"
   - "blanket-fix-all without pre-mortem verifying primary value survives"
-enforced_by: []
 enforcement_coverage: none
 incidents:
   - date: "2026-04-05"

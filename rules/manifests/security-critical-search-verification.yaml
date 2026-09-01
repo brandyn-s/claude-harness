@@ -23,7 +23,6 @@ prohibited_actions:
   - "publish 'no exposure' negative finding from single-phrasing zero-hit"
   - "trust null-strategy or suffix_match edges as established"
   - "act on localize candidate ranks as verdicts"
-enforced_by: []
 enforcement_coverage: none
 incidents:
   - date: "2026-05-04"

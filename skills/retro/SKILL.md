@@ -1,7 +1,7 @@
 ---
 
 name: retro
-description: "Session wrap-up — runs distill, then capture, then ships uncommitted artifacts."
+description: "Session wrap-up — runs /distill and /capture (using /mega-distill and /mega-capture for compacted sessions), then lands session artifacts through /ship."
 when_to_use: 'Session review that runs /distill then /capture sequentially with shared context, then SHIPS uncommitted artifacts produced by the current session via /ship. Distill extracts errors and operational fixes. Capture records strategic insights, skipping incidents already distilled. Ship commits, opens a PR, and durably queues what the session wrote (rules, skills, docs, reports). Use when a session is wrapping up and its lessons should be persisted in one pass. Trigger phrases: "retro", "session review", "wrap up session", "end of session". Do NOT use for multi-session strategic review (use /retrospective), single-purpose error capture (use /distill), single-purpose knowledge capture (use /capture), or repo cleanup beyond what this session produced — stale branches, stuck PRs, other dirty trees (use /pr-fix).'
 argument-hint: "[omit for auto-review; --full to extract from the COMPLETE transcript on large/compacted sessions]"
 effort: high

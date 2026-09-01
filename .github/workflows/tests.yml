@@ -13,11 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.12'
 
@@ -35,18 +35,15 @@ jobs:
       # The runner exits non-zero on any failing directory AND on a run that
       # collected zero tests, so a suite that silently stops discovering
       # anything cannot report success.
-      # Prove the baseline gate fires before trusting the run it guards. It is
-      # otherwise only reachable through the full ~10-minute sweep, so it would
-      # never be exercised deliberately.
-      - name: Self-test the known-failing gate
-        run: python3 scripts/run-tests.py --selftest
-
       # Restores the gate the source repo had and this export lost. Its step name
       # there was literally "Validate manifests (dangling refs, dangling routes,
       # missing sources)" -- and dropping it is why 17 dangling routes were live in
       # hooks/skill-rules.json with nothing complaining.
       - name: Validate the manifest graph
         run: python3 manifests/compile.py --root . --check --strict-semantic --no-reindex
+
+      - name: Validate hook and test target paths
+        run: python3 scripts/validate-hook-paths.py
 
       # Prove that gate can fail. A validator nobody has watched reject anything is
       # a hypothesis; this one is only reachable by running it deliberately.

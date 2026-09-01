@@ -14,7 +14,6 @@ prohibited_actions:
   - replacing_toBe_with_toBeTruthy
   - deleting_test_cases_to_pass
   - weakening_assertions_for_green
-enforced_by: []
 enforcement_coverage: none
 incidents: []
 created_date: "2026-04-06"

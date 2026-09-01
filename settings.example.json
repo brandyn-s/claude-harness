@@ -27,7 +27,6 @@
   "_comment_permissions": "Customize allow/deny and additionalDirectories for your environment. The org-specific MCP tool allows from the live config are omitted here; add entries for the MCP servers you actually run. Bare Bash/Read/Write/Edit make narrower Bash(...) allows redundant \u2014 don't add both.",
   "permissions": {
     "allow": [
-      "Bash",
       "Read",
       "Write",
       "Edit"
@@ -54,7 +53,7 @@
       "WebFetch",
       "WebSearch"
     ],
-    "defaultMode": "auto",
+    "defaultMode": "acceptEdits",
     "additionalDirectories": [
       "~/Documents",
       "/tmp/claude"
@@ -63,6 +62,20 @@
   "_comment_mcp": "Do NOT auto-trust project .mcp.json files: an MCP server is arbitrary code, so auto-enabling means cloning a repo can execute code from it. Enable trusted servers per-project via enabledMcpjsonServers instead.",
   "enableAllProjectMcpServers": false,
   "enabledMcpjsonServers": [],
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "allowUnsandboxedCommands": true,
+    "filesystem": {
+      "denyRead": [
+        "~/.aws",
+        "~/.ssh",
+        "~/.config/gcloud",
+        "**/.env",
+        "**/.env.*"
+      ]
+    }
+  },
   "hooks": {
     "Notification": [
       {
@@ -259,7 +272,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/run-hook",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
             "args": [
               "mcp-truncation-signal-guard.py"
             ],
@@ -606,21 +619,6 @@
               "session-end.py"
             ],
             "timeout": 5
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": ".*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/absolute/path/to/.claude/hooks/run-hook",
-            "args": [
-              "promise-checker.py"
-            ],
-            "timeout": 20
           }
         ]
       }

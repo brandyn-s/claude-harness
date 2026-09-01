@@ -40,7 +40,8 @@ def main():
 
     n = len(rows)
     unread = sum(1 for r in rows if not r.get("transcript_read"))
-    claims = [r for r in rows if r.get("claimed_done")]
+    readable = [r for r in rows if r.get("transcript_read")]
+    claims = [r for r in readable if r.get("claimed_done")]
     with_ev = [r for r in claims if r.get("evidence_in_tool_output")]
     prose_only = [r for r in claims if r.get("evidence_in_prose_only")]
     bare = [r for r in claims if not r.get("evidence_in_tool_output")
@@ -49,12 +50,13 @@ def main():
     if args.json:
         print(json.dumps({
             "turns": n, "malformed_lines": malformed,
+            "readable_turns": len(readable),
             "turns_with_unreadable_transcript": unread,
             "completion_claims": len(claims),
             "claims_with_tool_evidence": len(with_ev),
             "claims_with_prose_evidence_only": len(prose_only),
             "claims_with_no_evidence": len(bare),
-            "sample_sufficient": n >= MIN_SAMPLE,
+            "sample_sufficient": len(readable) >= MIN_SAMPLE and bool(claims),
         }, indent=2))
         return 0
 
@@ -75,14 +77,19 @@ def main():
               f"({100*len(bare)/len(claims):.0f}%)")
 
     print()
-    if n < MIN_SAMPLE:
-        print(f"SAMPLE TOO SMALL ({n} < {MIN_SAMPLE}). No recommendation.")
+    if len(readable) < MIN_SAMPLE or not claims:
+        reason = (
+            f"{len(readable)} readable < {MIN_SAMPLE}"
+            if len(readable) < MIN_SAMPLE
+            else "no completion claims detected"
+        )
+        print(f"SAMPLE NOT USABLE ({reason}). No recommendation.")
         print("This is the point of the observer: the proposal it exists to test")
         print("was rejected for resting on a count with no denominator. Reporting")
         print("a rate from a handful of turns would repeat that error.")
         return 0
     rate = len(bare) / len(claims) if claims else 0.0
-    print(f"unverified-claim rate: {rate:.1%} over {n:,} turns")
+    print(f"unverified-claim rate: {rate:.1%} over {len(readable):,} readable turns")
     print("Interpretation is the operator's: this tool measures, it does not gate.")
     print("A low rate is evidence the ambient verification rules are working and")
     print("no gate is warranted. A high rate is the first real basis for one.")

@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-HARNESSES = (
+DECLARED_HARNESSES = (
     "deep-dive",
     "evaluate-repos",
     "gather-claude",
@@ -23,6 +23,13 @@ HARNESSES = (
     "investigate",
     "triage",
 )
+HARNESSES = tuple(
+    name
+    for name in DECLARED_HARNESSES
+    if (ROOT / "skills" / name / "harness" / "run_live.py").is_file()
+    and (ROOT / "skills" / name / "harness" / "results.json").is_file()
+)
+assert HARNESSES, "curated export contains no runnable historical harnesses"
 HISTORICAL_MODEL = "claude-opus-4-8"
 CURRENT_MODEL = "claude-opus-5"
 COVERED_MODELS = ("claude-fable-5", "claude-mythos-5")

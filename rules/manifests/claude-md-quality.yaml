@@ -12,7 +12,6 @@ required_actions:
 prohibited_actions:
   - generic_filler_content
   - duplicating_global_rules
-enforced_by: []
 enforcement_coverage: none
 incidents: []
 created_date: "2026-04-01"

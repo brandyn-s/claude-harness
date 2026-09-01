@@ -1,0 +1,17 @@
+[
+  {
+    "task_id": "known-pass",
+    "expected": "PASS",
+    "observed": {"artifact_matches": true, "truncated": false}
+  },
+  {
+    "task_id": "known-fail",
+    "expected": "FAIL",
+    "observed": {"artifact_matches": false, "truncated": false}
+  },
+  {
+    "task_id": "known-inconclusive",
+    "expected": "INCONCLUSIVE",
+    "observed": {"artifact_matches": true, "truncated": true}
+  }
+]

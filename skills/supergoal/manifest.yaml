@@ -11,7 +11,6 @@ requires_tools:
   - "AskUserQuestion"
 requires_topics: []
 requires_rules:
-  - never-stop-early
   - verify-effectiveness
 requires_skills:
   - supergoal-resume

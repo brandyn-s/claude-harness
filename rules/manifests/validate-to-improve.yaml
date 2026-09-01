@@ -16,8 +16,6 @@ required_actions:
 prohibited_actions:
   - declaring_done_without_fix_list
   - presenting_pass_without_improvement_assessment
-enforced_by:
-  - promise-checker
 enforcement_coverage: none
 incidents:
   - memory_search_incident_2026_03_20

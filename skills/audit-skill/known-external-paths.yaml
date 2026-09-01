@@ -1,0 +1,5 @@
+# Paths intentionally owned outside a checked-out skill repository. Auditors
+# must not classify their absence from the repository as a broken local link.
+external_paths:
+  - pattern: "~/Documents/knowledge-base/"
+    reason: "User-owned knowledge base outside the plugin checkout"
