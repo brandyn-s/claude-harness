@@ -59,7 +59,14 @@ def _hook_block_reason(probe, tmpdir):
     # non-Windows CI host they no-op and emit no signature. This drift guard
     # verifies the SIGNATURE STRING (a rewording check) which is platform-
     # independent, so force the guards active to exercise their emit path.
-    env = {**os.environ, "CLAUDE_ENCODING_GUARD_FORCE": "1"}
+    # Signature coverage spans the full author-workstation policy surface,
+    # including optional portability/workflow checks. Select that profile
+    # explicitly; the fresh-laptop default intentionally omits these checks.
+    env = {
+        **os.environ,
+        "CLAUDE_BASH_POLICY_PACKS": "all",
+        "CLAUDE_ENCODING_GUARD_FORCE": "1",
+    }
     proc = subprocess.run(
         [sys.executable, str(hook_path)],
         input=json.dumps(payload).encode("utf-8"),
