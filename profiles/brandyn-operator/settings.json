@@ -2,6 +2,17 @@
   "env": {
     "CLAUDE_BASH_POLICY_PACKS": "delivery"
   },
+  "enabledPlugins": {
+    "example-operator@claude-config": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-config": {
+      "source": {
+        "source": "github",
+        "repo": "brandyn-s/claude-config"
+      }
+    }
+  },
   "permissions": {
     "ask": [
       "Bash(terraform apply:*)",

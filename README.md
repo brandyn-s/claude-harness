@@ -44,7 +44,9 @@ The operator layer adds one compact discipline rule, the `delivery` Bash policy
 pack, explicit review for high-consequence Terraform/AWS/Git/MCP mutations, a
 non-blocking repeated-failure detector, and prompt/tool-output secret controls.
 It does not restore the phrase-based Stop blocker or the historical ambient
-corpus. The doctor reports the operator layer separately when selected.
+corpus. It also references the private `brandyn-s/claude-config` marketplace and
+enables its narrow `example-operator` protected-release preflight. The doctor
+reports the operator layer separately when selected.
 
 The profile is previewable and independently applicable:
 

@@ -16,6 +16,12 @@ Terraform, AWS, Git-history, and externally mutating MCP operations. The
 installer layers it after `fresh-laptop`; it is not a replacement for the
 sandbox profile.
 
+The overlay also references the private `brandyn-s/claude-config` marketplace
+and enables its `example-operator` plugin. That plugin is deliberately tiny: it
+ships the measured protected-release preflight and no ambient rules, broad Bash
+guard, permission policy, or sandbox configuration. Claude Harness remains the
+runtime owner; `claude-config` supplies only organization-specific capability.
+
 Its Bash hook enables only catastrophic checks by default. Optional policy
 stays in the same process and can be selected without another hook:
 

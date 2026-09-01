@@ -40,6 +40,15 @@ def test_operator_profile_composes_on_fresh_kernel(tmp_path: Path) -> None:
     assert settings["permissions"]["defaultMode"] == "acceptEdits"
     assert settings["env"]["CLAUDE_BASH_POLICY_PACKS"] == "delivery"
     assert "Bash(terraform apply:*)" in settings["permissions"]["ask"]
+    assert settings["enabledPlugins"] == {
+        "example-operator@claude-config": True,
+    }
+    assert settings["extraKnownMarketplaces"]["claude-config"] == {
+        "source": {
+            "source": "github",
+            "repo": "brandyn-s/claude-config",
+        }
+    }
 
 
 def test_operator_profile_preserves_existing_review_boundaries(tmp_path: Path) -> None:

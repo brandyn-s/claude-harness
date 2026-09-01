@@ -38,6 +38,13 @@ tied to the owner's recurring work. It is the middle layer between the portable
 core and the full author mirror; it does not load the historical rule corpus or
 reinstate completion-language blocking.
 
+Organization-specific runtime capability stays behind a separate private
+plugin boundary. The operator profile references `brandyn-s/claude-config` and
+enables `example-operator`; that plugin currently contributes one narrow
+protected-release preflight. It does not own the sandbox, permissions, generic
+Bash policy, or ambient rules, so the portable harness remains independently
+installable and understandable.
+
 The Bash hook has one always-on catastrophic core. Delivery, portability, and
 workflow preferences are opt-in tables evaluated by that same process. This
 keeps credential exposure, exfiltration, reverse shells, security-control
