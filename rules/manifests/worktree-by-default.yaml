@@ -23,7 +23,8 @@ prohibited_actions:
   - "rely on 'I'll commit before any cleanup runs' — hook firing timing unknown"
   - "[WINDOWS-ONLY, inactive on macOS] use /c/path with git worktree add (Git Bash mangles to C:/c/...); on macOS ~/path and $HOME/path are correct"
   - "write a plan/report/output file to repo B's main checkout while continuing work in repo A's worktree (commit in same turn or use temp location)"
-enforced_by: []
+enforced_by:
+  - git-empty-push-guard
 enforcement_coverage: none
 incidents:
   - date: "2026-05-04"

@@ -195,7 +195,7 @@ git add marketplace/ .claude-plugin/
 Rationale: a source edit without a marketplace rebuild publishes a stale plugin bundle; over time the marketplace diverges from what the user is actually running. Shipping both together keeps the two in lockstep.
 
 **Then run the preflight aggregator before pushing** — ONE command that runs every
-`validate.yml` gate a `skills/` change can break (~40s full tier, measured):
+`tests.yml` gate a `skills/` change can break (~40s full tier, measured):
 
 ```bash
 python3 bin/preflight-skill.py            # all current gates

@@ -18,7 +18,8 @@ prohibited_actions:
   - shipping_with_plumbing_only
   - setting_thresholds_without_data
   - declaring_batch_edits_complete_without_verification
-enforced_by: []
+enforced_by:
+  - promise-checker
 enforcement_coverage: none
 incidents:
   - python_script_guard_2026_03_28

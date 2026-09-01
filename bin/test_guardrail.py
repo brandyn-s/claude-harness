@@ -4,7 +4,7 @@ Pins the behaviors the 2026-07-05 roundtable red-team
 surfaced, so a future edit can't silently regress recall, egress deny-by-default,
 dedup, or the freshness guard.
 
-Run: pytest bin/test_guardrail.py -q   (wired into .github/workflows/validate.yml)
+Run: pytest bin/test_guardrail.py -q   (wired into .github/workflows/tests.yml (this export ships gitleaks.yml, plugins.yml, tests.yml; the upstream tests.yml is not part of it))
 
 Secret-shaped fixture values are ASSEMBLED FROM FRAGMENTS at runtime so the
 sanitizer matches them while no contiguous secret literal sits in this file

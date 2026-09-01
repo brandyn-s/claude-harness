@@ -90,11 +90,11 @@ When creating or modifying skills in `~/.claude/skills/`:
 ```bash
 python3 bin/preflight-skill.py              # all current gates (~40s, measured)
 python3 bin/preflight-skill.py --fast       # skips the two >10s gates (~10s; what pre-push runs)
-python3 bin/preflight-skill.py --list       # every gate + the validate.yml step it mirrors
+python3 bin/preflight-skill.py --list       # every gate + the tests.yml step it mirrors
 python3 bin/preflight-skill.py --only <key> # re-run one gate after fixing it
 ```
 
-`bin/preflight-skill.py` mirrors `.github/workflows/validate.yml` step-for-step and
+`bin/preflight-skill.py` mirrors `.github/workflows/tests.yml (this export ships gitleaks.yml, plugins.yml, tests.yml; the upstream tests.yml is not part of it)` step-for-step and
 gates on each tool's EXIT CODE — never on grepping its output, because a changed
 output prefix silently disables that kind of gate (CI itself was fixed away from
 prefix-coupling on 2026-07-26). `.githooks/pre-push` runs `--fast` automatically on

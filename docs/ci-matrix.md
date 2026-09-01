@@ -3,7 +3,7 @@
 > The filename is retained for existing links. The automatic operating-system
 > matrix was deprecated in August 2026.
 
-`.github/workflows/validate.yml` validates the Claude Code architecture, not
+`.github/workflows/tests.yml (this export ships gitleaks.yml, plugins.yml, tests.yml; the upstream tests.yml is not part of it)` validates the Claude Code architecture, not
 an end-user application distributed with a Windows, macOS, or Ubuntu support
 contract. Automatic CI therefore runs the complete architecture suite once on
 `ubuntu-24.04`. That runner is execution infrastructure; it is not a claim
@@ -39,7 +39,7 @@ one runner:
 The equivalent CLI command is:
 
 ```bash
-gh workflow run validate.yml -f runner=windows-2022
+gh workflow run tests.yml -f runner=windows-2022
 ```
 
 Run the diagnostic when a change touches path handling, encoding, shell

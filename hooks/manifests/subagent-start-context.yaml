@@ -5,7 +5,8 @@ matcher: ".*"
 if_condition: null
 action_type: injector
 description: "Auto-injects topic file content into worker agents via additionalContext. Parses 'Load topics:' from dispatch prompt."
-enforces: []
+enforces:
+  - agent-delegation
 blocks_patterns: []
 injects: "concatenated topic file content as additionalContext"
 modifies: null

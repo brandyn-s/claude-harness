@@ -106,7 +106,7 @@ def test_load_settings_hooks_extracts_exec_form_args(tmp_path, monkeypatch):
 
 
 # ── 9b: pytest auto-collection is a consumer that names no file ─────────
-# `validate.yml` runs `pytest scripts/`, so every scripts/test_*.py is consumed
+# `tests.yml` runs `pytest scripts/`, so every scripts/test_*.py is consumed
 # by the COLLECTOR. A basename cross-reference cannot see that, and reported all
 # 34 as orphans (measured 2026-08-30). Deleting one on that evidence silently
 # drops a test — the PR #548 mistake in a new place.
@@ -122,7 +122,7 @@ def _workflows(tmp_path, monkeypatch, **files):
 
 def test_pytest_collected_targets_reads_ci_invocations(tmp_path, monkeypatch):
     _workflows(tmp_path, monkeypatch, **{
-        "validate.yml": (
+        "tests.yml": (
             "jobs:\n  a:\n    steps:\n"
             "      - run: pytest scripts/ -q\n"
             "      - run: pytest hooks/test-hooks/ -q\n"
@@ -153,7 +153,7 @@ def test_collected_test_file_is_not_an_orphan(tmp_path, monkeypatch):
     _skills, _hooks, scripts = _wire(tmp_path, monkeypatch)
     (scripts / "test_collected.py").write_text("def test_a():\n    pass\n", encoding="utf-8")
     _workflows(tmp_path, monkeypatch, **{
-        "validate.yml": "jobs:\n  a:\n    steps:\n      - run: pytest scripts/ -q\n"
+        "tests.yml": "jobs:\n  a:\n    steps:\n      - run: pytest scripts/ -q\n"
     })
     monkeypatch.setattr(hc, "KNOWN_CLI_UTILITIES", set(), raising=False)
     assert hc.check_orphan_scripts() == []
@@ -164,7 +164,7 @@ def test_uncollected_non_test_script_is_still_an_orphan(tmp_path, monkeypatch):
     _skills, _hooks, scripts = _wire(tmp_path, monkeypatch)
     (scripts / "nobody_calls_me.py").write_text("x = 1\n", encoding="utf-8")
     _workflows(tmp_path, monkeypatch, **{
-        "validate.yml": "jobs:\n  a:\n    steps:\n      - run: pytest scripts/ -q\n"
+        "tests.yml": "jobs:\n  a:\n    steps:\n      - run: pytest scripts/ -q\n"
     })
     monkeypatch.setattr(hc, "KNOWN_CLI_UTILITIES", set(), raising=False)
     issues = hc.check_orphan_scripts()

@@ -405,9 +405,6 @@ HOOK_RULE_MAP = {
     "subagent-stop.py": [
         "Surface agent work and capture learnings",
     ],
-    "sync-repo.py": [
-        "Sync architecture files to GitHub backup repo",
-    ],
     "task-completed.py": [
         "Verify task results before marking complete",
     ],

@@ -61,7 +61,7 @@ Glob `~/.claude/.github/workflows/*.yml`. For each file, extract all `.py`
 file references (patterns like `python hooks/X.py`, `python scripts/X.py`,
 `run: python X.py`). Verify each referenced file exists on disk.
 
-Report: "validate.yml references hooks/test-routing.py which does not exist
+Report: "tests.yml references hooks/test-routing.py which does not exist
 — remove the CI step or restore the file."
 
 ## 9e: Stale local branches

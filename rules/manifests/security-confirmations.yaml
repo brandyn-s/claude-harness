@@ -24,6 +24,9 @@ prohibited_actions:
   - "silently restore a blanket confirmation gate for routine writes"
   - "ask again inside an unchanged authorization envelope"
 enforced_by:
+  - bash-security-audit
+  - bash-security-guard
+  - prompt-secret-scan
   - security-write-confirm
 enforcement_coverage: partial
 incidents: []

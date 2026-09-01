@@ -18,7 +18,7 @@ Contracts enforced:
     orchestrator handles deletions manually after the full
     check-before-change reference grep (.github/workflows + settings
     included; a campaign-11 agent's deletion claim missed a .yml CI
-    reference and would have broken validate.yml)
+    reference and would have broken tests.yml)
   - note/field-mismatch warning: when a fix's prose note mentions a
     replacement reproducer but the structured updated_reproducer field
     is absent, the finding is flagged (campaign 11: one agent described

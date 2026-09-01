@@ -2,7 +2,7 @@
 """Verify marketplace/ and .claude-plugin/ are in sync with canonical sources.
 
 Mirrors the `Verify marketplace is in sync with canonical sources` step in
-.github/workflows/validate.yml, so a local run and CI agree by construction
+.github/workflows/tests.yml (this export ships gitleaks.yml, plugins.yml, tests.yml; the upstream tests.yml is not part of it), so a local run and CI agree by construction
 rather than by two hand-maintained copies of the same shell.
 
 MUTATES THE TREE, deliberately and idempotently: build-marketplace.py always

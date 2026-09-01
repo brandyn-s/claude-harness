@@ -616,10 +616,10 @@ def test_every_cli_flag_is_exercised_in_tests():
     test_content = ""
     for tf in tests_dir.rglob("test_*.py"):
         test_content += tf.read_text(errors="ignore")
-    # Also count the validate.yml workflow + the SKILL.md as legitimate
+    # Also count the tests.yml workflow + the SKILL.md as legitimate
     # exercise sites — a flag run in CI is exercised even without a
     # python test.
-    workflow_file = REPO / ".github" / "workflows" / "validate.yml"
+    workflow_file = REPO / ".github" / "workflows" / "tests.yml"
     if workflow_file.is_file():
         test_content += workflow_file.read_text(errors="ignore")
     skill_md = REPO / "skills" / "audit-skill" / "SKILL.md"
@@ -630,7 +630,7 @@ def test_every_cli_flag_is_exercised_in_tests():
     assert not missing, (
         f"CLI flags exist in audit-skill.py main() but are not exercised "
         f"in tests, CI, or documented in SKILL.md: {missing}. Either add a "
-        f"test that runs the flag, wire it into .github/workflows/validate.yml, "
+        f"test that runs the flag, wire it into .github/workflows/tests.yml (this export ships gitleaks.yml, plugins.yml, tests.yml; the upstream tests.yml is not part of it), "
         f"or remove it from main()."
     )
 

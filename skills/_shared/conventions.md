@@ -154,4 +154,4 @@ python3 scripts/token-audit.py --over 5000        # token budget
 python3 scripts/validate-skills.py --triggers     # corpus trigger conflicts
 ```
 
-CI runs all four on every PR. See `.github/workflows/validate.yml`.
+CI runs all four on every PR. See `.github/workflows/tests.yml (this export ships gitleaks.yml, plugins.yml, tests.yml; the upstream tests.yml is not part of it)`.

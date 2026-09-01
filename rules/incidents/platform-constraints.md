@@ -1204,7 +1204,7 @@ INCIDENT 2026-04-29 [WINDOWS] Exp 1/4 invalidation: 40% (Exp 4) and 60%
   # WHY: `fcntl` (also `termios`, `grp`, `pwd`, `posix`) is Unix-only. A top-level
   #      `import fcntl` compiles fine everywhere (py_compile does not execute imports)
   #      and runs fine on the macOS host — but the moment a pytest test IMPORTS the
-  #      module, the Windows CI matrix (validate.yml) ImportErrors at COLLECTION and the
+  #      module, the Windows CI matrix (tests.yml) ImportErrors at COLLECTION and the
   #      whole `validate` job goes red. The bug hides until a test first imports the
   #      module, which can be long after the import shipped.
   #      USE the guarded form when a module may be imported on Windows CI:

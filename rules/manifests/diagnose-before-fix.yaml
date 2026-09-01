@@ -18,7 +18,9 @@ required_actions:
 prohibited_actions:
   - "guess the cause without reading logs"
   - "ship a fix without confirming what's broken"
-enforced_by: []
+enforced_by:
+  - bash-error-classifier
+  - post-failure-guide
 enforcement_coverage: none
 incidents:
   - date: "2026-03-01"

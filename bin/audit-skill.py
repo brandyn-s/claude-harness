@@ -1224,7 +1224,7 @@ def audit(skill_name, strict_tools=False):
             # Prose mention in any references/*.md?
             if script.name in refs_text:
                 continue
-            # Invoked by a CI workflow? (e.g. validate.yml marker round-trip)
+            # Invoked by a CI workflow? (e.g. tests.yml marker round-trip)
             if script.name in workflow_text:
                 continue
             # Imported / called from this skill's tests/ ? (golden-test

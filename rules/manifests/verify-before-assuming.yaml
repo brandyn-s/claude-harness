@@ -14,8 +14,7 @@ required_actions:
 prohibited_actions:
   - claiming_unavailable_without_evidence
   - assuming_mcp_is_read_only
-enforced_by:
-  - verify-before-assuming
+enforced_by: []
 enforcement_coverage: partial
 incidents:
   - firecrawl_claimed_unavailable_2026_04_12

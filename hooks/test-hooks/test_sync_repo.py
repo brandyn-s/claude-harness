@@ -13,7 +13,7 @@ from pathlib import Path
 
 _HOOK_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _spec = importlib.util.spec_from_file_location(
-    "sync_repo", os.path.join(_HOOK_DIR, "sync-repo.py")
+    "sync_repo", os.path.join(os.path.dirname(_HOOK_DIR), "bin", "sync-repo.py")
 )
 _mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_mod)

@@ -26,7 +26,7 @@ to be REMEMBERED rather than EXECUTED. This file makes it executable.
 
 DESIGN NOTES
 ------------
-- Gate definitions mirror `.github/workflows/validate.yml` step-for-step, with
+- Gate definitions mirror `.github/workflows/tests.yml (this export ships gitleaks.yml, plugins.yml, tests.yml; the upstream tests.yml is not part of it)` step-for-step, with
   the CI step name recorded on each gate so a drift between this file and the
   workflow is greppable. `--list` prints the mapping.
 - Every gate is gated on its EXIT CODE, never on grepping stdout. CI itself was
@@ -85,7 +85,7 @@ PYTEST = shutil.which("pytest") or "pytest"
 @dataclass(frozen=True)
 class Gate:
     key: str
-    ci_step: str  # the validate.yml step name this mirrors -- keeps drift greppable
+    ci_step: str  # the tests.yml step name this mirrors -- keeps drift greppable
     cmd: list[str]
     slow: bool = False  # measured >10s; excluded from --fast
     mutates: bool = False  # writes to the tree; needs explicit opt-in

@@ -4,16 +4,16 @@
     "version": "1.1.12"
   },
   "knowledge-ops": {
-    "content_hash": "ee8b732b17544517ea9220f5d41e85adc525fce92a598408bf9efeb9928f846f",
-    "version": "1.1.41"
+    "content_hash": "d7aa2b810284d72c1818fcee23076286f373ccbdf5e8ef8b069684cf73d8a059",
+    "version": "1.1.42"
   },
   "planning-toolkit": {
-    "content_hash": "259379eb88ce0fb624e73ddb823e991719d081be7ff6bf2e3248d5f9a1467498",
-    "version": "1.1.27"
+    "content_hash": "417f1de25cef5619d9319f237298d8856063daa5a308d5db370539613e5a2421",
+    "version": "1.1.28"
   },
   "research-intel": {
-    "content_hash": "5c9f904800d7e6e7b79e5b454584225cf70e27dc3858ab8472ce15161f471b2c",
-    "version": "1.1.18"
+    "content_hash": "dab41e4dab28d1002519f463d9b4e41a26d9e36dfbe42cbd294ba9fe9625f2ad",
+    "version": "1.1.19"
   },
   "safety-net": {
     "content_hash": "21a03571ce6fe44dd7d5269d61c380117bf59332f1bb14cfc0dea85a56c47507",

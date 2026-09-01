@@ -13,7 +13,7 @@ HOOK = "post-write-edit.py"
 # check_ruff_lint swallows FileNotFoundError, so on a runner without ruff the
 # hook silently does nothing. That makes a "the hook preserved my noqa" test
 # pass VACUOUSLY -- it preserved it by never touching the file. ruff is NOT in
-# requirements-dev.txt, so the validate.yml hook-test job has no ruff, and the
+# requirements-dev.txt, so the tests.yml hook-test job has no ruff, and the
 # vacuum is the normal CI condition rather than an edge case.
 #
 # Skip rather than pass: a green test that proves nothing is worse than an

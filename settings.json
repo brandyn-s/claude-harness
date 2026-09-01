@@ -232,8 +232,7 @@
       "mcp__websets__list_websets",
       "mcp__websets__update_webset",
       "mcp__xai__answer_query_websearch",
-      "mcp__xai__get_filesystem_info",
-      "Bash(python3 $HOME/.claude/bin/dynamic_rules.py *)"
+      "mcp__xai__get_filesystem_info"
     ],
     "deny": [
       "Read(~/.ssh/**)",

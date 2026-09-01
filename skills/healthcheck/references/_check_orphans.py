@@ -185,7 +185,7 @@ def pytest_collected_targets() -> set[str]:
     """Repo-relative paths that a CI `pytest` invocation collects.
 
     A `test_*.py` under scripts/ is consumed by pytest AUTO-COLLECTION, not by
-    any file naming it — `.github/workflows/validate.yml` runs `pytest scripts/`.
+    any file naming it — `.github/workflows/tests.yml (this export ships gitleaks.yml, plugins.yml, tests.yml; the upstream tests.yml is not part of it)` runs `pytest scripts/`.
     A basename cross-reference cannot see that consumer, so all 34 such files
     read as orphans (measured 2026-08-30). Deleting one on that evidence would
     silently drop a test, which is the same class of mistake as PR #548

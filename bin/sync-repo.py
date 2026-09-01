@@ -1,3 +1,8 @@
+# Relocated from hooks/ to bin/ on 2026-08-31. It has zero
+# settings.json references: it is an operator CLI (--git-status /
+# --pull), not a hook. Living in hooks/ made every hook census
+# overcount, and an audit's own probe tripped on it by invoking it
+# with a hook payload, where argparse correctly exits 2.
 """Refresh and report status of local clones of managed Example repos.
 
 Usage:

@@ -31,6 +31,21 @@ import os
 import re
 import sys
 
+# Bytes-per-token: 2.72, MEASURED 2026-08-31 against Anthropic's
+# /v1/messages/count_tokens on this repository's own ambient corpus
+# (206,488 B -> 75,420 tokens, claude-sonnet-5, corpus in the `system`
+# field because that is how ambient rules actually load).
+#
+# It was 4.0 (a bytes/4 estimate), which understated the corpus by 47% --
+# this advisory reported ~51,607 tokens against a 50,000-60,000 target band
+# while the true figure was 75,413, i.e. 25% ABOVE the band's ceiling. A
+# self-measurement that flatters the thing it measures is worse than none.
+#
+# Re-derive rather than trust this constant if the corpus changes character:
+# prose with dense code blocks and DSL markers tokenizes very differently
+# from ordinary English, and 2.72 is specific to THIS corpus.
+BYTES_PER_TOKEN = 2.72
+
 # Extensions common enough that scoping to them is not scoping. Deliberately a
 # LIST rather than a cleverness: a maintainer can see exactly what is counted and
 # argue with it.
@@ -121,7 +136,7 @@ def main() -> int:
         return 0
 
     def band(b: int) -> str:
-        return f"{b:>9,} B  ~{b // 4:>7,} tok"
+        return f"{b:>9,} B  ~{int(b / BYTES_PER_TOKEN):>7,} tok"
 
     print("Ambient rule load\n" + "=" * 58)
     print(f"  unconditional (what the budget gates on) {band(u)}")

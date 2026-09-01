@@ -500,7 +500,7 @@ entries. Both keys MUST be emitted on every write; no lifecycle hook consumes
 the marker implicitly.
 
 The contract is captured by `manifests/schemas/last-distill.schema.json`
-and enforced in CI (`validate.yml` → "Validate marker schemas"). If you
+and enforced in CI (`tests.yml` → "Validate marker schemas"). If you
 change the marker shape, update the schema in the same commit — the
 validator runs every PR.
 

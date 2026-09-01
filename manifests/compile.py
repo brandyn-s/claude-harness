@@ -17,6 +17,7 @@ Usage:
   python compile.py --quiet            # suppress success output (only print on issues)
 """
 import argparse
+import re
 import json
 import sys
 from pathlib import Path
@@ -54,7 +55,140 @@ def load_manifests(root: Path):
     return components
 
 
-def validate(components):
+# ── ENFORCEMENT-EDGE DERIVATION ───────────────────────────────────────────
+# `enforced_by` on a rule manifest used to be a hand-maintained back-reference
+# to the hooks that enforce it. Measured 2026-08-31 across this repository: 20
+# drift edges, 19 of them in the same direction -- a wired hook declaring
+# `enforces: [rule]` while that rule's manifest did not name it back, four of
+# those rules reporting `coverage: none` while a hook actively enforced them.
+#
+# The ratio is the diagnosis. Hook manifests are written when the hook is built,
+# so `enforces` is accurate; the rule-side back-reference is the unmaintained
+# half, and a one-way hand-maintained edge decays toward the unmaintained side.
+# So DERIVE the rule side from the hook side intersected with actual wiring,
+# and make --check fail on divergence rather than hoping for discipline.
+#
+# This is what makes `unenforced_rules` and `enforcement_chain` trustworthy:
+# before, both keyed off self-declared metadata that no gate compared to
+# settings.json.
+
+_HOOK_NAME_RX = re.compile(r"([A-Za-z0-9_./-]+\.py)")
+_RUN_HOOK_RX = re.compile(r"run-hook\s+([A-Za-z0-9_-]+)")
+
+
+def wired_hook_ids(root):
+    """Hook ids actually reachable at runtime: settings.json + dispatcher guards.
+
+    A hook present on disk but absent from settings.json enforces nothing, and a
+    guard invoked inside a wired dispatcher enforces something even though it
+    has no settings entry of its own. Both cases are why "does the file exist"
+    is the wrong question.
+    """
+    ids = set()
+    settings_path = Path(root) / "settings.json"
+    if settings_path.exists():
+        try:
+            with open(settings_path, encoding="utf-8") as fh:
+                settings = json.load(fh)
+        except (OSError, json.JSONDecodeError) as exc:
+            print(f"  WARNING: settings.json unreadable ({exc}); enforcement "
+                  f"derivation skipped", file=sys.stderr)
+            return None
+        for _event, groups in (settings.get("hooks") or {}).items():
+            for group in groups:
+                for handler in group.get("hooks", []):
+                    blob = json.dumps(handler)
+                    for m in _HOOK_NAME_RX.finditer(blob):
+                        ids.add(Path(m.group(1)).stem)
+                    for m in _RUN_HOOK_RX.finditer(blob):
+                        ids.add(m.group(1))
+    dispatcher = Path(root) / "hooks" / "write-edit-dispatcher.py"
+    if dispatcher.exists():
+        text = dispatcher.read_text(encoding="utf-8", errors="replace")
+        m = re.search(r"GUARDS\s*[:=].*?\n(?=\S)", text, re.S)
+        for g in re.findall(r"[\"']([a-z0-9][a-z0-9_-]+)\.py[\"']",
+                            m.group(0) if m else text):
+            ids.add(g)
+    return ids
+
+
+def derive_enforced_by(components, root):
+    """Return {rule_id: sorted[hook_id]} implied by wiring + hook manifests."""
+    wired = wired_hook_ids(root)
+    if wired is None:
+        return None
+    derived = {}
+    for cid, c in components.items():
+        if c.get("type") != "hook" or cid not in wired:
+            continue
+        for rid in c.get("enforces") or []:
+            if isinstance(rid, str) and components.get(rid, {}).get("type") == "rule":
+                derived.setdefault(rid, set()).add(cid)
+    return {k: sorted(v) for k, v in derived.items()}
+
+
+def validate_enforcement_edges(components, root):
+    """Classify every rule->hook enforcement claim three ways, not two.
+
+    A two-way check (declared == derived) is tempting and WRONG, because a hook
+    manifest's `enforces: []` is overwhelmingly an UNFILLED field rather than a
+    positive denial. Treating the hook side as authoritative therefore deletes
+    true edges to make the gate green -- reducing coverage rather than fixing
+    it. Measured 2026-08-31 while building this very check: the naive version
+    dropped `agent-delegation -> [pre-agent-dispatch, subagent-start-context]`,
+    two hooks that ARE wired and do inject agent-delegation guidance, purely
+    because their manifests' `enforces` was blank.
+
+    So:
+      CONFIRMED  hook wired AND its manifest declares `enforces: [rule]`
+                 -> the rule MUST list it (omission is a false gap)
+      FALSE      rule claims a hook that is NOT wired
+                 -> must be removed (`enforcement_chain` lies otherwise)
+      AMBIGUOUS  rule claims a WIRED hook whose manifest declares nothing
+                 -> keep the edge, report the blank `enforces` as a work item
+    """
+    wired = wired_hook_ids(root)
+    if wired is None:
+        return []
+    confirmed = {}
+    for cid, c in components.items():
+        if c.get("type") != "hook" or cid not in wired:
+            continue
+        for rid in c.get("enforces") or []:
+            if isinstance(rid, str) and components.get(rid, {}).get("type") == "rule":
+                confirmed.setdefault(rid, set()).add(cid)
+
+    issues = []
+    for cid, c in sorted(components.items()):
+        if c.get("type") != "rule":
+            continue
+        declared = {x for x in (c.get("enforced_by") or []) if isinstance(x, str)}
+        want = confirmed.get(cid, set())
+
+        for h in sorted(want - declared):
+            issues.append(
+                f"  ENFORCEMENT-DRIFT: {cid}.enforced_by omits '{h}', which is "
+                f"wired and declares it enforces {cid} -- `unenforced_rules` "
+                f"reports a false gap"
+            )
+        for h in sorted(declared - want):
+            if h not in wired:
+                issues.append(
+                    f"  ENFORCEMENT-DRIFT: {cid}.enforced_by claims '{h}', "
+                    f"which is not wired in settings.json -- "
+                    f"`enforcement_chain` reports false enforcement"
+                )
+            else:
+                issues.append(
+                    f"  ENFORCEMENT-UNDECLARED: {cid} claims wired hook '{h}', "
+                    f"but hooks/manifests/{h}.yaml has a blank `enforces` -- "
+                    f"fill it in; do NOT resolve this by deleting the edge"
+                )
+    return issues
+# ── end ENFORCEMENT-EDGE DERIVATION ───────────────────────────────────────
+
+
+def validate(components, root="."):
     """Validate cross-references between manifests. Returns list of issues."""
     issues = []
     known_ids = set(components.keys())
@@ -78,6 +212,7 @@ def validate(components):
                 )
 
     issues.extend(validate_placeholders(components))
+    issues.extend(validate_enforcement_edges(components, root))
     return issues
 
 
@@ -257,7 +392,7 @@ def compile_graph(
     if not quiet:
         print(f"Loaded {total} manifests: {skills} skills, {hooks} hooks, {rules} rules")
 
-    struct_issues = validate(components)
+    struct_issues = validate(components, root)
     route_issues = validate_skill_rules(root)
     sem_issues = validate_semantic(root, components)
 

@@ -19,6 +19,10 @@ prohibited_actions:
   - "push to example-technologies org"
 enforced_by:
   - bash-security-guard
+  - git-empty-push-guard
+  - post-merge-sync
+  - staged-additions-guard
+  - worktree-enforcement
 enforcement_coverage: partial
 incidents:
   - date: "2026-02-28"

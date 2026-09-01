@@ -5,7 +5,8 @@ matcher: "Agent"
 if_condition: null
 action_type: injector
 description: "Warns when dispatching workers that reference authenticated remote MCPs. Non-blocking advisory."
-enforces: []
+enforces:
+  - agent-delegation
 blocks_patterns: []
 injects: "systemMessage warning about auth limitation"
 modifies: null
