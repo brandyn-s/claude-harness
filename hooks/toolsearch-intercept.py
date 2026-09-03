@@ -50,9 +50,12 @@ from pathlib import Path
 SESSION_MARKER_DIR = Path.home() / ".claude" / "session-env"
 
 
-def _marker_path():
-    """Session-scoped marker tracking which tools have been select:-loaded."""
-    sid = os.environ.get("CLAUDE_SESSION_ID") or os.environ.get("CLAUDE_CODE_SESSION_ID", "default")
+def _marker_path(session_id=None):
+    """Session-scoped marker tracking which tools have been select:-loaded.
+
+    `session_id` is the hook payload's id (env vars are only a fallback).
+    """
+    sid = str(session_id or os.environ.get("CLAUDE_SESSION_ID") or os.environ.get("CLAUDE_CODE_SESSION_ID") or "default")
     SESSION_MARKER_DIR.mkdir(parents=True, exist_ok=True)
     return SESSION_MARKER_DIR / f"toolsearch-selected-{sid[:12]}.json"
 
@@ -104,7 +107,7 @@ def main():
     if not is_test:
         tools = _select_tools(query)
         if tools:
-            marker = _marker_path()
+            marker = _marker_path(data.get("session_id") or None)
             already = _load_selected(marker)
             dup = [t for t in tools if t in already]
             if dup and len(dup) == len(tools):

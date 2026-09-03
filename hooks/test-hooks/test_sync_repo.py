@@ -231,3 +231,17 @@ def test_cmd_pull_prunes_the_stale_tracking_ref(tmp_path, monkeypatch, capsys):
     assert after.returncode != 0, (
         "cmd_pull must fetch --prune, clearing the stale tracking ref"
     )
+
+
+def test_label_resolves_home_through_symlinks(tmp_path, monkeypatch):
+    """Review 2026-09-03: macOS resolves /tmp -> /private/tmp, and Path.home()
+    may be the unresolved spelling. relative_to() of a RESOLVED repo path
+    against an UNRESOLVED HOME raises ValueError, so any user whose $HOME
+    traverses a symlink lost the disambiguating label."""
+    real_home = tmp_path / "real-home"
+    (real_home / ".claude").mkdir(parents=True)
+    link_home = tmp_path / "link-home"
+    link_home.symlink_to(real_home, target_is_directory=True)
+    monkeypatch.setattr(_mod, "HOME", link_home)
+    assert _mod._label("claude-config", link_home / ".claude", {"claude-config": 2}) \
+        == "claude-config @~/.claude"

@@ -1,6 +1,8 @@
 """Tests for config-guard.py hook self-protection."""
 import importlib.util
+import json
 import os
+import subprocess
 import sys
 
 # Load the module
@@ -29,18 +31,63 @@ def test_settings_filenames():
 
 
 def test_detects_disable_all():
-    """disableAllHooks=true should be detected in content."""
-    content = '{"disableAllHooks": true, "hooks": {}}'
-    assert "disableAllHooks" in content and "true" in content.lower()
+    """disableAllHooks=true in a settings Write blocks (exercise check(), not a
+    re-implementation of its logic -- the old test asserted its own substring
+    search, so the vacuous `"true" in content` check could never fail it)."""
+    os.environ.pop("SKIP_CONFIG_GUARD", None)
+    code, msg, _ = _mod.check({
+        "tool_name": "Write",
+        "tool_input": {
+            "file_path": "/home/user/.claude/settings.json",
+            "content": '{"disableAllHooks": true, "hooks": {"PreToolUse": []}}',
+        },
+    })
+    assert code == 2 and "disableAllHooks" in msg
     print("PASS: detects disableAllHooks=true")
 
 
 def test_allows_normal_edits():
     """Normal settings edits should not trigger."""
-    content = '{"permissions": {"allow": ["Read(**)"]}}'
-    has_disable = "disableAllHooks" in content and "true" in content.lower()
-    assert not has_disable
+    code, msg, _ = _mod.check({
+        "tool_name": "Write",
+        "tool_input": {
+            "file_path": "/home/user/.claude/settings.json",
+            "content": '{"permissions": {"allow": ["Read(**)"]}}',
+        },
+    })
+    assert code == 0, msg
     print("PASS: allows normal settings edits")
+
+
+def test_disable_all_hooks_false_beside_other_true_values_is_allowed(monkeypatch):
+    """Review 2026-09-03: the check was `"disableAllHooks" in content and "true"
+    in content.lower()`, so `"disableAllHooks": false` was blocked whenever ANY
+    other key in the same write was true (`"enabled": true` is in nearly every
+    settings.json). Match the key/value pair, not two independent substrings."""
+    monkeypatch.delenv("SKIP_CONFIG_GUARD", raising=False)
+    code, msg, _ = _mod.check({
+        "tool_name": "Write",
+        "tool_input": {
+            "file_path": "settings.json",
+            "content": '{"disableAllHooks": false, "sandbox": {"enabled": true}, '
+                       '"hooks": {"PreToolUse": []}}',
+        },
+    })
+    assert code == 0, msg
+
+
+def test_crash_inside_check_fails_closed():
+    """Wired directly (the fresh-laptop profile) there is no dispatcher wrapper,
+    so an exception inside check() must exit 2. Exit 1 is a NON-blocking error
+    in Claude Code, which would make a crashed self-protection guard fail open."""
+    hook = os.path.join(_hook_dir, "config-guard.py")
+    proc = subprocess.run(
+        [sys.executable, hook],
+        input=json.dumps({"tool_name": "Write", "tool_input": "not-a-dict"}),
+        capture_output=True, text=True, timeout=30,
+    )
+    assert proc.returncode == 2, (proc.returncode, proc.stderr)
+    assert "config-guard" in proc.stderr
 
 
 def test_detects_hook_deletion_command():

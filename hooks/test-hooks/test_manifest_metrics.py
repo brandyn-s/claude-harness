@@ -122,3 +122,53 @@ def test_guard_suite_leaves_block_counter_untouched(tmp_path):
             f"guard suite injected {blocks} phantom blocks into the session counter")
     finally:
         live.unlink(missing_ok=True)
+
+
+# ── Review 2026-09-03: session id must come from the hook payload ─────────
+#
+# Claude Code delivers `session_id` in the stdin JSON; it does NOT export
+# CLAUDE_SESSION_ID / CLAUDE_CODE_SESSION_ID to hook processes. Keying the
+# marker on the env var therefore collapsed every real session into one
+# `advisory-<hook>-default.json`, and the "blocked N TIMES THIS SESSION"
+# banner became a lifetime counter (measured: three sessions, one marker, 3).
+
+def _run_env(code: str, home: Path, extra_env: dict) -> subprocess.CompletedProcess:
+    env = {
+        "HOME": str(home),
+        "USERPROFILE": str(home),
+        "PATH": os.environ.get("PATH", ""),
+        "SYSTEMROOT": os.environ.get("SYSTEMROOT", ""),
+        "PYTHONPATH": str(HOOKS),
+    }
+    env.update(extra_env)
+    return subprocess.run([sys.executable, "-c", code], capture_output=True,
+                          text=True, timeout=60, env=env, check=False)
+
+
+def test_record_block_keys_marker_on_explicit_session_id(tmp_path):
+    code = (
+        "import manifest_metrics as m\n"
+        "print(m.record_block('probe-guard', session_id='session-aaaa'))\n"
+        "print(m.record_block('probe-guard', session_id='session-bbbb'))\n"
+    )
+    proc = _run_env(code, tmp_path, {})  # deliberately no CLAUDE_SESSION_ID
+    assert proc.returncode == 0, proc.stderr
+    assert proc.stdout.split() == ["1", "1"], proc.stdout
+    markers = sorted(
+        p.name for p in (tmp_path / ".claude" / "session-env").glob("advisory-probe-guard-*.json")
+    )
+    assert markers == [
+        "advisory-probe-guard-session-aaaa.json",
+        "advisory-probe-guard-session-bbbb.json",
+    ], markers
+
+
+def test_repeat_escalation_is_silent_on_first_block_of_a_new_session(tmp_path):
+    code = (
+        "import manifest_metrics as m\n"
+        "m.repeat_escalation('probe-guard', session_id='session-aaaa')\n"
+        "print(repr(m.repeat_escalation('probe-guard', session_id='session-bbbb')))\n"
+    )
+    proc = _run_env(code, tmp_path, {})
+    assert proc.returncode == 0, proc.stderr
+    assert proc.stdout.strip() == "''", proc.stdout

@@ -40,22 +40,25 @@ VERIFIED_PATTERNS = re.compile(
 )
 
 
-def _get_session_marker():
-    """Track whether ToolSearch was used recently in this session."""
-    sid = os.environ.get("CLAUDE_SESSION_ID") or os.environ.get("CLAUDE_CODE_SESSION_ID", "default")
+def _get_session_marker(session_id=None):
+    """Track whether ToolSearch was used recently in this session.
+
+    `session_id` is the hook payload's id (env vars are only a fallback).
+    """
+    sid = str(session_id or os.environ.get("CLAUDE_SESSION_ID") or os.environ.get("CLAUDE_CODE_SESSION_ID") or "default")
     SESSION_ENV_DIR.mkdir(parents=True, exist_ok=True)
     return SESSION_ENV_DIR / f"toolsearch-used-{sid[:12]}.flag"
 
 
-def _toolsearch_was_used():
+def _toolsearch_was_used(session_id=None):
     """Check if ToolSearch has been called in this session."""
-    marker = _get_session_marker()
+    marker = _get_session_marker(session_id)
     return marker.exists()
 
 
-def _mark_toolsearch_used():
+def _mark_toolsearch_used(session_id=None):
     """Record that ToolSearch was called."""
-    marker = _get_session_marker()
+    marker = _get_session_marker(session_id)
     marker.write_text("1", encoding="utf-8")
 
 
@@ -70,10 +73,11 @@ def main():
     # hooks read `input`, which silently no-op'd the check. Prefer the
     # canonical key; fall back to `input` for any caller still using it.
     tool_input = data.get("tool_input") or data.get("input") or {}
+    session_id = data.get("session_id") or None
 
     # Track ToolSearch usage
     if tool_name == "ToolSearch":
-        _mark_toolsearch_used()
+        _mark_toolsearch_used(session_id)
         sys.exit(0)
 
     # Only check Agent and Skill tool calls
@@ -101,7 +105,7 @@ def main():
         sys.exit(0)  # Agent is citing evidence, not assuming
 
     # Check if ToolSearch was used this session
-    if _toolsearch_was_used():
+    if _toolsearch_was_used(session_id):
         sys.exit(0)  # ToolSearch was run — agent likely verified
 
     matched = unavailable_match.group()
@@ -109,8 +113,9 @@ def main():
     # Log the advisory warning
     try:
         from manifest_metrics import log_advisory_warning, increment_warning
-        log_advisory_warning("verify-before-assuming", tool_name, f"claimed: {matched}", warned=True)
-        increment_warning("verify-before-assuming")
+        log_advisory_warning("verify-before-assuming", tool_name, f"claimed: {matched}",
+                             warned=True, session_id=session_id)
+        increment_warning("verify-before-assuming", session_id=session_id)
     except Exception:
         pass
 

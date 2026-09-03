@@ -23,6 +23,8 @@ depends_on_files:
   - bash_policy_tables.py
 depends_on_env:
   - CLAUDE_BASH_POLICY_PACKS
+  - CLAUDE_AWS_DEFAULT_PROFILE
+  - CLAUDE_FORBIDDEN_GITHUB_ORGS
 exit_codes:
   "0": "allow (or auto-fix via updated_input)"
   "2": "block"

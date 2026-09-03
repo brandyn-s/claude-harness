@@ -21,6 +21,25 @@ SESSION_ENV_DIR = Path.home() / ".claude" / "session-env"
 _TEST_BLOCKS: dict[str, int] = {}
 
 
+def _session_key(session_id=None, default="default"):
+    """12-char session key for on-disk markers and log rows.
+
+    Claude Code delivers `session_id` in the hook's stdin payload; it does NOT
+    export CLAUDE_SESSION_ID / CLAUDE_CODE_SESSION_ID to hook processes (docs,
+    verified 2026-09-03). Keying on the env vars alone therefore merged every
+    real session into one `...-default.json`, which turned the "blocked N TIMES
+    THIS SESSION" banner into a lifetime counter. Callers pass the payload id;
+    the env vars remain as a fallback for launchers that do export them.
+    """
+    sid = (
+        session_id
+        or os.environ.get("CLAUDE_SESSION_ID")
+        or os.environ.get("CLAUDE_CODE_SESSION_ID")
+        or default
+    )
+    return str(sid)[:12]
+
+
 def _test_mode():
     """True when running under the test suite.
 
@@ -42,7 +61,8 @@ def _ensure_audit_dir():
     AUDIT_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def log_manifest_query(hook_name, query_type, result_summary, used_fallback=False):
+def log_manifest_query(hook_name, query_type, result_summary, used_fallback=False,
+                       session_id=None):
     """Log a manifest graph query from a hook.
 
     Args:
@@ -50,6 +70,7 @@ def log_manifest_query(hook_name, query_type, result_summary, used_fallback=Fals
         query_type: e.g. "auth_enrichment", "topic_derivation", "auth_check"
         result_summary: brief description of what the query returned
         used_fallback: True if fell back to non-manifest code path
+        session_id: the payload's session_id (preferred over env vars)
     """
     if _test_mode():
         return
@@ -63,7 +84,7 @@ def log_manifest_query(hook_name, query_type, result_summary, used_fallback=Fals
             "query_type": query_type,
             "result": result_summary[:200],
             "used_fallback": used_fallback,
-            "session": (os.environ.get("CLAUDE_SESSION_ID") or os.environ.get("CLAUDE_CODE_SESSION_ID", "unknown"))[:12],
+            "session": _session_key(session_id, default="unknown"),
         }
         with open(path, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry) + "\n")
@@ -71,7 +92,7 @@ def log_manifest_query(hook_name, query_type, result_summary, used_fallback=Fals
         pass  # Fire-and-forget
 
 
-def log_advisory_warning(hook_name, tool_name, operation, warned=True):
+def log_advisory_warning(hook_name, tool_name, operation, warned=True, session_id=None):
     """Log when an advisory hook fires a warning.
 
     Args:
@@ -79,6 +100,7 @@ def log_advisory_warning(hook_name, tool_name, operation, warned=True):
         tool_name: the MCP tool or tool type that triggered the warning
         operation: what the tool was doing (e.g. "assign_alert", "dispatch agent")
         warned: True if warning was emitted (write detected), False if passed (read)
+        session_id: the payload's session_id (preferred over env vars)
     """
     if _test_mode():
         return
@@ -92,7 +114,7 @@ def log_advisory_warning(hook_name, tool_name, operation, warned=True):
             "tool": tool_name,
             "operation": operation,
             "warned": warned,
-            "session": (os.environ.get("CLAUDE_SESSION_ID") or os.environ.get("CLAUDE_CODE_SESSION_ID", "unknown"))[:12],
+            "session": _session_key(session_id, default="unknown"),
         }
         with open(path, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry) + "\n")
@@ -100,10 +122,9 @@ def log_advisory_warning(hook_name, tool_name, operation, warned=True):
         pass  # Fire-and-forget
 
 
-def get_session_warning_count(hook_name):
+def get_session_warning_count(hook_name, session_id=None):
     """Get warning count for a hook in the current session. For compliance tracking."""
-    sid = (os.environ.get("CLAUDE_SESSION_ID") or os.environ.get("CLAUDE_CODE_SESSION_ID", "default"))[:12]
-    marker = SESSION_ENV_DIR / f"advisory-{hook_name}-{sid}.json"
+    marker = SESSION_ENV_DIR / f"advisory-{hook_name}-{_session_key(session_id)}.json"
     if marker.exists():
         try:
             return json.loads(marker.read_text(encoding="utf-8"))
@@ -112,14 +133,13 @@ def get_session_warning_count(hook_name):
     return {"warnings": 0, "complied": 0, "ignored": 0}
 
 
-def increment_warning(hook_name):
+def increment_warning(hook_name, session_id=None):
     """Increment warning count for current session."""
     if _test_mode():
         return
-    sid = (os.environ.get("CLAUDE_SESSION_ID") or os.environ.get("CLAUDE_CODE_SESSION_ID", "default"))[:12]
     SESSION_ENV_DIR.mkdir(parents=True, exist_ok=True)
-    marker = SESSION_ENV_DIR / f"advisory-{hook_name}-{sid}.json"
-    counts = get_session_warning_count(hook_name)
+    marker = SESSION_ENV_DIR / f"advisory-{hook_name}-{_session_key(session_id)}.json"
+    counts = get_session_warning_count(hook_name, session_id)
     counts["warnings"] += 1
     marker.write_text(json.dumps(counts), encoding="utf-8")
 
@@ -141,7 +161,7 @@ def increment_warning(hook_name):
 # any guard's block rate and needs no replay measurement to ship.
 # --------------------------------------------------------------------------
 
-def record_block(hook_name):
+def record_block(hook_name, session_id=None):
     """Count a BLOCK (not an advisory warning) for this hook this session.
 
     Returns the new total. Kept separate from `warnings` because a warning is
@@ -153,22 +173,24 @@ def record_block(hook_name):
         # silent under test -- but the return value is still a real count.
         _TEST_BLOCKS[hook_name] = _TEST_BLOCKS.get(hook_name, 0) + 1
         return _TEST_BLOCKS[hook_name]
-    sid = (os.environ.get("CLAUDE_SESSION_ID") or os.environ.get("CLAUDE_CODE_SESSION_ID", "default"))[:12]
     SESSION_ENV_DIR.mkdir(parents=True, exist_ok=True)
-    marker = SESSION_ENV_DIR / f"advisory-{hook_name}-{sid}.json"
-    counts = get_session_warning_count(hook_name)
+    marker = SESSION_ENV_DIR / f"advisory-{hook_name}-{_session_key(session_id)}.json"
+    counts = get_session_warning_count(hook_name, session_id)
     counts["blocks"] = counts.get("blocks", 0) + 1
     marker.write_text(json.dumps(counts), encoding="utf-8")
     return counts["blocks"]
 
 
-def repeat_escalation(hook_name, remedy=""):
+def repeat_escalation(hook_name, remedy="", session_id=None):
     """Record a block and return an escalation note for the 2nd+ block this session.
 
     Returns "" on the first block so a one-off block reads exactly as it does today.
+    `session_id` is the hook payload's session_id; without it the counter falls back
+    to env vars and then to a shared "default" bucket, which is exactly the lifetime
+    counter this parameter exists to prevent.
     """
     try:
-        n = record_block(hook_name)
+        n = record_block(hook_name, session_id)
     except Exception:
         return ""
     if n < 2:

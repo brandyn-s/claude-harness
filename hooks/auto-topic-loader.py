@@ -201,9 +201,13 @@ def _build_server_to_topic_map():
 SERVER_TO_TOPIC = STATIC_MAP  # Default; _build_server_to_topic_map() called at runtime
 
 
-def get_marker_path():
-    """Session-scoped marker file to track loaded topics."""
-    sid = os.environ.get("CLAUDE_SESSION_ID") or os.environ.get("CLAUDE_CODE_SESSION_ID", "default")
+def get_marker_path(session_id=None):
+    """Session-scoped marker file to track loaded topics.
+
+    `session_id` is the hook payload's id; Claude Code does not export it as an
+    env var, so without it every session shared one marker (review 2026-09-03).
+    """
+    sid = str(session_id or os.environ.get("CLAUDE_SESSION_ID") or os.environ.get("CLAUDE_CODE_SESSION_ID") or "default")
     SESSION_MARKER_DIR.mkdir(parents=True, exist_ok=True)
     return SESSION_MARKER_DIR / f"topics-loaded-{sid[:12]}.json"
 
@@ -268,7 +272,7 @@ def main():
     if not tool_name:
         sys.exit(0)
 
-    marker_path = get_marker_path()
+    marker_path = get_marker_path(data.get("session_id") or None)
     loaded = get_loaded_topics(marker_path)
 
     sections = []  # list of (label, content) to inject

@@ -44,6 +44,9 @@ os.environ["CLAUDE_ENCODING_GUARD_FORCE"] = "1"
 # profile. Fresh-laptop default tests override this with an explicit empty
 # value and prove that only catastrophic checks remain enabled there.
 os.environ.setdefault("CLAUDE_BASH_POLICY_PACKS", "all")
+# The org guard is configuration (review 2026-09-03); the guard tests keep the
+# historical fixture org so their block/allow assertions are unchanged.
+os.environ.setdefault("CLAUDE_FORBIDDEN_GITHUB_ORGS", "example-technologies")
 
 windows_only = pytest.mark.skipif(
     platform.system() != "Windows",
