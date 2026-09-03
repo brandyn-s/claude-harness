@@ -89,7 +89,7 @@ Bigger skills push detail into `references/` and deterministic helpers into
 | [`triage`](./triage/SKILL.md) | Triage findings from any tool — severity-score, correlate, and produce an actionable report. | references, tests |
 | [`validate-changes`](./validate-changes/SKILL.md) | Validate architecture changes (skills, hooks, rules, MCP) with regression and A/B testing. | references, scripts, tests |
 | [`variant-analysis`](./variant-analysis/SKILL.md) | Hunt similar vulnerabilities and bug variants across codebases via pattern analysis. | references, scripts, tests |
-| [`verification-before-completion`](./verification-before-completion/SKILL.md) | Run verification commands and confirm output before claiming work complete. | - |
+| [`verification-before-completion`](./verification-before-completion/SKILL.md) | Prove the requested outcome with the smallest decisive evidence before claiming completion. | - |
 | [`verify-search-result`](./verify-search-result/SKILL.md) | Verify a CALLS-edge or search result before a security-critical decision (CONFIRMED/FP/AMBIGUOUS). | - |
 | [`work`](./work/SKILL.md) | Create a per-session git worktree with auto-prefixed branch to isolate concurrent sessions. | - |
 

@@ -47,13 +47,13 @@ REQUIRED state_the_action_and_target_before_or_with_the_write
   #   - mcp__remote-msgraph__* / mcp__msgraph__*  (create_* / update_* / delete_* / patch_*)
   #   - Slack write ops on the current install — the Slack MCP is
   #     registered under GUID prefix
-  #     `mcp__036e0c74-1e0e-4bce-ad71-2a678d79b204__*` (slack_send_message,
+  #     `mcp__00000000-0000-4000-8000-000000000001__*` (slack_send_message,
   #     slack_send_message_draft, slack_schedule_message, slack_update_canvas,
   #     etc.); legacy `mcp__slack-user__*` is also matched
   #   - Linear write ops — prefix depends on install: macOS/CLI registers
   #     the named prefix `mcp__linear-server__*` (current on this host);
   #     claude.ai-connector installs use the GUID prefix
-  #     `mcp__93acadff-cc17-4b6c-b323-1d575dcca6d3__*`. The hook matches
+  #     `mcp__00000000-0000-4000-8000-000000000002__*`. The hook matches
   #     BOTH — named by prefix, GUID by operation-name (LINEAR_WRITE_TOOLS)
   #     — so save_*/create_*/delete_* stay gated under either id
   #   - mcp__compliance-access-framework__*  (provisioning writes:

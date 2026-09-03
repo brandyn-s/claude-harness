@@ -404,8 +404,10 @@ def main():
 
     try:
         from manifest_metrics import increment_warning, log_advisory_warning
-        log_advisory_warning("security-write-confirm", tool_name, operation or "", warned=True)
-        increment_warning("security-write-confirm")
+        _sid = data.get("session_id") or None
+        log_advisory_warning("security-write-confirm", tool_name, operation or "", warned=True,
+                             session_id=_sid)
+        increment_warning("security-write-confirm", session_id=_sid)
     except Exception:
         pass
 

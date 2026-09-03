@@ -98,7 +98,7 @@
       "date": "2026-08-30",
       "rule": "platform-constraints.md",
       "bytes": 833,
-      "reason": "ECHO A RESOLVED ID AND STOP IF IT IS EMPTY. An empty shell capture interpolated into an AWS `--ids`-family argument does not error \u2014 it returns a DIFFERENT resource's data, which reads as a successful answer. Measured 2026-08-29: an empty `--group-ids \"\"` returned some other security group whose egress rules were one step from being published as a release runner's security posture. Ambient because it fires on any shell capture feeding a cloud CLI, before any file is chosen, so no path- or skill-scoped delivery reaches it."
+      "reason": "ECHO A RESOLVED ID AND STOP IF IT IS EMPTY. An empty shell capture interpolated into an AWS `--ids`-family argument does not error — it returns a DIFFERENT resource's data, which reads as a successful answer. Measured 2026-08-29: an empty `--group-ids \"\"` returned some other security group whose egress rules were one step from being published as a release runner's security posture. Ambient because it fires on any shell capture feeding a cloud CLI, before any file is chosen, so no path- or skill-scoped delivery reaches it."
     },
     {
       "date": "2026-08-30",
@@ -116,7 +116,25 @@
       "date": "2026-08-30",
       "rule": "verify-before-assuming.md",
       "bytes": 740,
-      "reason": "Two additions to the primary-evidence and deployed-state checks. (a) Read EVERY section of the release notes before advising on upgrade priority: `Added` reads as optional while `Fixed`/`Security` carries the cross-tenant leaks, auth bypasses and session-invalidation repairs that decide the recommendation, and version distance is not a proxy for diff size. (b) One already-observed staleness signal \u2014 a create that returns 'already exists', a resource whose id you did not author \u2014 invalidates the WHOLE state read, not just the item that produced it. Ambient because both fire while forming a claim, before any file is chosen."
+      "reason": "Two additions to the primary-evidence and deployed-state checks. (a) Read EVERY section of the release notes before advising on upgrade priority: `Added` reads as optional while `Fixed`/`Security` carries the cross-tenant leaks, auth bypasses and session-invalidation repairs that decide the recommendation, and version distance is not a proxy for diff size. (b) One already-observed staleness signal — a create that returns 'already exists', a resource whose id you did not author — invalidates the WHOLE state read, not just the item that produced it. Ambient because both fire while forming a claim, before any file is chosen."
+    },
+    {
+      "date": "2026-09-01",
+      "rule": "operator-discipline.md",
+      "bytes": 1202,
+      "reason": "Added with the brandyn-operator profile on 2026-09-01 without a ledger row (recorded 2026-09-03). Three decision boundaries (diagnose from evidence; check why before changing behaviour; prove negative findings) that the operator layer needs ambient because they fire before any file is chosen. It defers to outcome-over-verification.md for the stop condition."
+    },
+    {
+      "date": "2026-09-03",
+      "rule": "skill-standards.md",
+      "bytes": -1170,
+      "reason": "Correction. The 2026-08-29 row credited +1,170 B for skill-standards.md, but that rule carries paths: frontmatter and is never in the unconditional corpus, so the row raised the ceiling for bytes the gate does not measure. The ledger is append-only; this row reverses the credit."
+    },
+    {
+      "date": "2026-09-03",
+      "rule": "outcome-over-verification.md + scope-discipline.md + verify-effectiveness.md",
+      "bytes": 0,
+      "reason": "Descope record, deliberately zero: relocations of 1,465 B closed the pre-existing overage instead of ratcheting the ceiling (outcome-over-verification -77: two @reference lines to rules the fresh core does not install and a GUARD that named one; scope-discipline -302: a closing paragraph and a bullet duplicated by blind appends; verify-effectiveness -1,086: a pointer paragraph present twice, a terse trailing pointer to the same file, INCIDENT 2026-08-15 moved verbatim to rules/incidents/, and the mcp-servers #1362 measurement replaced by a pointer to its existing incidents entry). The 2026-08-29 row left that overage for its own descope decision; this is it. scripts/test_context_policy_contracts.py now enforces the ceiling in CI."
     }
   ]
 }

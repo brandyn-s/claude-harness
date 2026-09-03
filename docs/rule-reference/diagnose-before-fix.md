@@ -400,7 +400,7 @@ GUARD pattern="grep shows the code is correct" or "the source looks fine" or "th
 
 GUARD pattern="it's actually fine / working as intended / that's a red herring" (for a problem a USER REPORTED, concluded from ONE user's data):
   REFUSE the not-a-problem conclusion when the user reports it PERSISTS, pushes back, or names MULTIPLE affected people. A reported problem recurring after your "fix" is EVIDENCE the diagnosis/fix was wrong — NOT that the user is mistaken. REQUIRED: pull the SAME diagnostic evidence for the OTHER affected entities (users/hosts/tenants) and compare — a second identical failure turns "user-specific" into "systemic" and changes the fix. Do NOT re-assert the prior fix or dismiss the lived report. NO EXCEPTIONS when a problem is reported by 2+ users or re-reported after a fix.
-  # WHY: 2026-07-07 example.au MFA — concluded "Jessica is fine, the passkey error is a red herring" from her logs alone; user pushed back ("you are being dismissive… both jessica and beau"). Pulling Beau's audit logs showed BOTH failed identically (Beau fully locked out) — a tenant-wide `Enforce attestation=Yes` misconfig breaking desktop passkey registration, not a one-user quirk. The earlier "push-first" fix had even disabled the WRONG setting (self-service, never the blocker).
+  # WHY: 2026-07-07 example.au MFA — concluded "contributor-a is fine, the passkey error is a red herring" from their logs alone; user pushed back ("you are being dismissive… both contributor-a and contributor-b"). Pulling contributor-b's audit logs showed BOTH failed identically (contributor-b fully locked out) — a tenant-wide `Enforce attestation=Yes` misconfig breaking desktop passkey registration, not a one-user quirk. The earlier "push-first" fix had even disabled the WRONG setting (self-service, never the blocker).
 
 # ─── FAILURE MODES to recognise ───
 # Per-failure incident citations: incidents#failure-mode-incident-citations
@@ -422,7 +422,7 @@ FAILURE reframed_user_question_through_compliance_lens:
 
 FAILURE declared_reported_issue_user_specific_without_systemic_check:
   RECOVERY: pull the same diagnostic for every other affected entity and compare; 2+ identical
-  failures = systemic → re-open root-cause, don't re-assert the fix.  # 2026-07-07 example.au MFA (Jessica+Beau: tenant-wide attestation block)
+  failures = systemic → re-open root-cause, don't re-assert the fix.  # 2026-07-07 example.au MFA (contributor-a+contributor-b: tenant-wide attestation block)
 
 FAILURE ignored_no_batches_methodology:
   RECOVERY: follow user's methodology exactly, even if "same pattern".  # STIG POA&M, 2026-03-17

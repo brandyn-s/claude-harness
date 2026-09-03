@@ -37,7 +37,7 @@ def test_recommended_install_builds_portable_core_in_empty_config(tmp_path: Path
         "enabled": True,
         "allowUnsandboxedCommands": True,
     }
-    assert "Bash" not in settings["permissions"]["allow"]
+    assert "Bash" not in settings["permissions"].get("allow", [])
     handlers = [
         hook
         for groups in settings["hooks"].values()

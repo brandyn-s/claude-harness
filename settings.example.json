@@ -706,6 +706,14 @@
               "prompt-secret-scan.py"
             ],
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "compaction-continuity.py"
+            ],
+            "timeout": 10
           }
         ]
       }

@@ -5,8 +5,6 @@ description: Verification is bounded evidence for the requested outcome; verific
 @rule outcome_over_verification
 @version 2026-08-22
 @scope every implementation, deployment, review, investigation, plan, and verification task
-@reference rules/scope-discipline.md
-@reference rules/verify-effectiveness.md
 
 # OUTCOME OVER VERIFICATION — STOP CONTRACT
 
@@ -74,7 +72,7 @@ GUARD pattern="more verification is safer" or "the reviewer found another harnes
 
 GUARD pattern="we are in a hurry" or "skip live proof" or "the tests already passed":
   REFUSE to confuse bounded verification with absent verification. USE the smallest
-  fresh plumbing-plus-outcome proof required by `verify-effectiveness.md`. NO EXCEPTIONS.
+  fresh proof that exercises the real entry point AND observes the outcome. NO EXCEPTIONS.
 
 GUARD pattern="it is only one more check" or "I already reviewed it" or "I prefer exhaustive proof":
   REFUSE checks that cannot change the decision and claimed-prior-review shortcuts.

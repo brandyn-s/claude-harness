@@ -116,6 +116,9 @@ TAIL_REMEDY = (
 )
 
 
+_SESSION_ID = ""  # set from the payload in main(); read by _repeat_note
+
+
 def _repeat_note(hook_name, remedy=""):
     """Escalation text for the 2nd+ block from this guard in one session.
 
@@ -127,7 +130,7 @@ def _repeat_note(hook_name, remedy=""):
         import sys as _sys
         _sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         from manifest_metrics import repeat_escalation
-        return repeat_escalation(hook_name, remedy)
+        return repeat_escalation(hook_name, remedy, session_id=_SESSION_ID or None)
     except Exception:
         return ""
 
@@ -778,8 +781,10 @@ def _audit_log(action, reason, command):
 
 
 def main():
+    global _SESSION_ID
     try:
         data = json.loads(sys.stdin.read())
+        _SESSION_ID = str(data.get("session_id") or "")
         tool_name = data.get("tool_name", "")
         if tool_name != "Bash":
             sys.exit(0)

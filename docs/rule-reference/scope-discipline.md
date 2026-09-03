@@ -307,5 +307,5 @@ GUARD pattern="produce a document / report / overview / brief for an EXTERNAL, c
   constraints. A 30-second AskUserQuestion up front collapses the rewrite cascade. Producing a
   comprehensive internal-style draft first and discovering the constraints one correction at a
   time is the failure mode.
-  # WHY: 2026-07-17 ExampleTarget+Echelon security overview — drafted a comprehensive internal-style
-  #   Full: incidents#2026-07-17-example-target-echelon-security-overview-drafted-a
+  # WHY: 2026-07-17 ExampleTarget+ExampleTargetB security overview — drafted a comprehensive internal-style
+  #   Full: incidents#2026-07-17-example-target-and-target-b-security-overview-drafted-a

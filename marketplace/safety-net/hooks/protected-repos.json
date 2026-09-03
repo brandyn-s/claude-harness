@@ -1,17 +1,19 @@
 {
-  "_comment": "CUSTOMIZE: Update local_paths to match your repo locations. Use absolute paths.",
+  "_comment": "CUSTOMIZE: Update repos/local_paths to match your repo locations (absolute paths). forbidden_orgs lists GitHub orgs whose WRITES bash-security-guard's delivery pack refuses; CLAUDE_FORBIDDEN_GITHUB_ORGS (comma-separated) overrides it. Empty means the org guard is inert.",
   "repos": [
     "mcp-servers",
     "mcp-infra",
     "example-compliance-repo",
     "example-sbom-tool",
     "claude-config",
+    "claude-harness",
     ".claude",
     "claude-knowledge-base",
     "knowledge-base",
     "code-search",
     "code-graph"
   ],
+  "forbidden_orgs": [],
   "local_paths": {
     "mcp-servers": "~/Documents/GitHub/mcp-servers",
     "mcp-infra": "~/Documents/GitHub/mcp-infra",

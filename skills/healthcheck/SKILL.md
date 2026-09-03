@@ -1,7 +1,7 @@
 ---
 name: healthcheck
 description: "Quick architecture health check — hooks, config syntax, skill frontmatter, memory, and indexes."
-when_to_use: 'Quick architecture health check — runs hook tests, validates config syntax, checks skill frontmatter, verifies memory consistency, detects stale file paths, ARCHITECTURE.md drift, dead routing references, and MCP index integrity. Use when: "run tests", "health check", "check everything", "run checks", "are things healthy", "validate config", "hygiene check", "verify indexes". Do NOT use for full architecture audit (/audit-architecture), change-specific validation (/validate-changes), or MCP server debugging (/mcp-diagnose).'
+when_to_use: 'Quick architecture health check — runs hook tests, validates config syntax, checks skill frontmatter, verifies memory consistency, detects stale file paths, ARCHITECTURE.md drift, dead routing references, and MCP index integrity. Use when: "run tests", "health check", "check everything", "run checks", "are things healthy", "validate config", "hygiene check", "verify indexes". Do NOT use for full architecture audit (/audit-architecture), change-specific validation (/validate-changes), or MCP server debugging (inspect the server with /mcp and its logs).'
 argument-hint: "[optional: hooks, config, skills, memory, paths, drift, routing, targets, orphans, manifest, indexes, or omit for all]"
 effort: medium
 metadata:

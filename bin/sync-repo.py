@@ -94,7 +94,9 @@ def _label(name: str, repo_dir: Path, name_counts: dict[str, int]) -> str:
     if name_counts.get(name, 0) <= 1:
         return name
     try:
-        rel = str(repo_dir.resolve().relative_to(HOME)).replace("\\", "/")
+        # Both sides resolved: macOS spells /tmp as /private/tmp after resolve(),
+        # and a $HOME that traverses a symlink otherwise raises ValueError here.
+        rel = str(repo_dir.resolve().relative_to(HOME.resolve())).replace("\\", "/")
         return f"{name} @~/{rel}"
     except ValueError:
         return f"{name} @{repo_dir}"

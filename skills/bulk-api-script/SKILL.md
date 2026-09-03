@@ -36,7 +36,7 @@ AVOID paginating bulk data through MCP tools by default. Write a standalone Pyth
 - `type` field MUST be a list: `{'type': [2]}` not `{'type': 2}`
 - `hashes` field MUST be a list: `{'hashes': ['abc...']}` not `{'hashes': 'abc...'}`
 - Pagination breaks at 10K events -- use checkpoint-based retrieval
-- Server: sa9964.am.managedwhitelisting.com:3129, all operations are POST
+- Server: airlock.example.internal:3129, all operations are POST
 - Auth: `headers = {'X-ApiKey': os.environ['AIRLOCK_API_KEY']}`
 - API can return `None` instead of `[]` -- always guard with `events = resp.json()['response']['exechistories'] or []`
 - SSL: add `--insecure` flag support and `urllib3.disable_warnings()` for self-signed certs
@@ -96,7 +96,7 @@ AVOID paginating bulk data through MCP tools by default. Write a standalone Pyth
 ### MS Graph GCC High
 - Endpoints: login.microsoftonline.us / graph.microsoft.us (NOT .com)
 - Scope: https://graph.microsoft.us/.default
-- Auth: OBO delegated only (via MCP Gateway app `cb4439fe...`). No client credentials fallback.
+- Auth: OBO delegated only (via MCP Gateway app `00000000...`). No client credentials fallback.
   For standalone scripts, use MSAL client credentials:
   ```python
   from msal import ConfidentialClientApplication

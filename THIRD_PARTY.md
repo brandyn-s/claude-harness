@@ -13,8 +13,13 @@ here; local files identify the adapted mechanism where practical.
 | [prompt-master](https://github.com/nidhinjs/prompt-master) | Copyright (c) 2026 Nidhin Joseph Nelson | MIT | prompt diagnostic reference patterns |
 | [claude-pipeline](https://github.com/aaddrick/claude-pipeline) | Copyright (c) 2025 aaddrick | MIT | resolution-gate pattern in distill |
 | [microsoft/skills](https://github.com/microsoft/skills) | Copyright (c) Microsoft Corporation | MIT | architecture-review template structure |
+| [trailofbits/skills](https://github.com/trailofbits/skills) | Copyright (c) Trail of Bits | CC BY-SA 4.0 | `fp-check`, `semgrep`, `codeql`, `differential-review`, `semgrep-rule-creator`, `threat-model` skill structure and the `data-flow-analyzer`, `exploitability-verifier`, `poc-builder`, `semgrep-scanner` agents |
 
-For each entry, the MIT License grants permission, free of charge, to use,
+The Trail of Bits material is licensed CC BY-SA 4.0, not MIT: the files adapted
+from it carry that attribution and remain available under the same
+ShareAlike terms regardless of this repository's top-level LICENSE.
+
+For each MIT entry, the MIT License grants permission, free of charge, to use,
 copy, modify, merge, publish, distribute, sublicense, and sell copies of the
 software, subject to inclusion of the copyright and permission notice. The
 software is provided "as is", without warranty of any kind. See each linked

@@ -1,7 +1,7 @@
 ---
 name: systematic-debugging
 description: "Root-cause-first debugging — gather evidence, form hypotheses, test systematically."
-when_to_use: 'Use when encountering any bug, test failure, or unexpected behavior, including when the user asks why something is not working or broken. Enforces root-cause-first debugging: gather evidence, form hypotheses, test systematically — never guess-and-fix. Trigger phrases: "debug this", "debug why", "debug what", "why is X failing", "why is X not working", "why is X broken", "X is not working", "X is not working again", "X no longer working", "find the root cause", "test failure". Do NOT use for known issues with documented fixes, for adding new features, or for MCP-server-specific issues (any "X mcp not working" / "why is X mcp broken" pattern routes to /mcp-diagnose — that skill owns MCP diagnostics).'
+when_to_use: 'Use when encountering any bug, test failure, or unexpected behavior, including when the user asks why something is not working or broken. Enforces root-cause-first debugging: gather evidence, form hypotheses, test systematically — never guess-and-fix. Trigger phrases: "debug this", "debug why", "debug what", "why is X failing", "why is X not working", "why is X broken", "X is not working", "X is not working again", "X no longer working", "find the root cause", "test failure". Do NOT use for known issues with documented fixes, for adding new features, or for MCP-server-specific issues (any "X mcp not working" / "why is X mcp broken" pattern — inspect the server with /mcp and its own logs first).'
 argument-hint: "[error message or symptom to debug]"
 effort: high
 metadata:

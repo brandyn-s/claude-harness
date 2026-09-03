@@ -16,7 +16,7 @@ compatibility:
   # precondition that would block the skill on machines without that
   # MCP installed.
   requires: []
-allowed-tools: AskUserQuestion Bash Edit Glob Grep Read ToolSearch Write mcp__4c2bb016-a49e-4043-8a0f-35135dea63a2__web_fetch_exa mcp__4c2bb016-a49e-4043-8a0f-35135dea63a2__web_search_exa mcp__exa__web_fetch_exa mcp__exa__web_search_exa mcp__firecrawl__firecrawl_search mcp__memory-search__memory_search mcp__tavily__tavily_crawl mcp__tavily__tavily_extract mcp__tavily__tavily_map mcp__tavily__tavily_research mcp__tavily__tavily_search
+allowed-tools: AskUserQuestion Bash Edit Glob Grep Read ToolSearch Write mcp__00000000-0000-4000-8000-000000000003__web_fetch_exa mcp__00000000-0000-4000-8000-000000000003__web_search_exa mcp__exa__web_fetch_exa mcp__exa__web_search_exa mcp__firecrawl__firecrawl_search mcp__memory-search__memory_search mcp__tavily__tavily_crawl mcp__tavily__tavily_extract mcp__tavily__tavily_map mcp__tavily__tavily_research mcp__tavily__tavily_search
 ---
 > **Compaction continuity:** Claude Code reattaches only the first 5,000
 > tokens of an invoked skill after compaction, within a 25,000-token shared

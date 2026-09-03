@@ -8,7 +8,7 @@ effort: max
 metadata:
   author: example-security-engineering
   version: "1.0"
-allowed-tools: Read Grep Glob Bash AskUserQuestion mcp__crowdstrike__* mcp__tenable__* mcp__airlock__* mcp__msgraph__* mcp__linear-server__* mcp__93acadff-cc17-4b6c-b323-1d575dcca6d3__* mcp__ramp__* mcp__codebase-memory-mcp__* mcp__tavily__tavily_search
+allowed-tools: Read Grep Glob Bash AskUserQuestion mcp__crowdstrike__* mcp__tenable__* mcp__airlock__* mcp__msgraph__* mcp__linear-server__* mcp__00000000-0000-4000-8000-000000000002__* mcp__ramp__* mcp__codebase-memory-mcp__* mcp__tavily__tavily_search
 ---
 > **Compaction continuity:** Claude Code reattaches only the first 5,000
 > tokens of an invoked skill after compaction, within a 25,000-token shared

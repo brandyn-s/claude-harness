@@ -47,9 +47,9 @@ def test_find_tool_references_matches_hyphenated_server():
 def test_find_tool_references_matches_uuid_server():
     """UUID-namespaced servers (Linear, Slack variants) — must match too."""
     audit = _load_audit_module()
-    text = "Save via mcp__93acadff-cc17-4b6c-b323-1d575dcca6d3__save_status_update."
+    text = "Save via mcp__00000000-0000-4000-8000-000000000002__save_status_update."
     found = [name for _ln, name in audit._find_tool_references(text)]
-    assert any("93acadff" in n for n in found), f"got {found}"
+    assert any("00000000-0000-4000-8000-000000000002" in n for n in found), f"got {found}"
 
 
 def test_find_tool_references_returns_line_numbers():
@@ -87,10 +87,10 @@ def test_tool_is_known_real_regex_match_uuid_pattern():
            r"[0-9a-f]{4}-[0-9a-f]{12}__.*")
     reals = [("regex", pat)]
     assert audit._tool_is_known_real(
-        "mcp__93acadff-cc17-4b6c-b323-1d575dcca6d3__save_status_update", reals
+        "mcp__00000000-0000-4000-8000-000000000002__save_status_update", reals
     )
     assert audit._tool_is_known_real(
-        "mcp__036e0c74-1e0e-4bce-ad71-2a678d79b204__slack_send_message", reals
+        "mcp__00000000-0000-4000-8000-000000000001__slack_send_message", reals
     )
     assert not audit._tool_is_known_real("mcp__exa__web_search_exa", reals)
     # The pre-fix pattern (`__*`) MUST NOT match — protects against a
@@ -98,7 +98,7 @@ def test_tool_is_known_real_regex_match_uuid_pattern():
     bad_pat = (r"mcp__[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-"
                r"[0-9a-f]{4}-[0-9a-f]{12}__*")
     assert not audit._tool_is_known_real(
-        "mcp__93acadff-cc17-4b6c-b323-1d575dcca6d3__save_status_update",
+        "mcp__00000000-0000-4000-8000-000000000002__save_status_update",
         [("regex", bad_pat)]
     ), "the pre-fix `__*` pattern should never match a real tool name"
 

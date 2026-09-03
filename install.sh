@@ -27,16 +27,23 @@ warn()  { echo -e "${YELLOW}[warn]${NC} $1"; }
 err()   { echo -e "${RED}[error]${NC} $1"; }
 
 # ── Detect Python ─────────────────────────────────────────────────────
+# Floor is 3.11: scripts/install-profile.py imports datetime.UTC (3.11+) and
+# bin/fresh_laptop_doctor.py requires 3.10+. The installer used to say 3.8+
+# and never checked, so a stock-Python host failed inside the profile step.
 detect_python() {
     if command -v python3 &>/dev/null; then
         PYTHON_CMD="python3"
     elif command -v python &>/dev/null; then
         PYTHON_CMD="python"
     else
-        err "Python not found. Hooks require Python 3.8+."
+        err "Python not found. This installer and its hooks require Python 3.11+."
         exit 1
     fi
     PYTHON_PATH="$(command -v "$PYTHON_CMD")"
+    if ! "$PYTHON_CMD" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)'; then
+        err "Python 3.11+ is required; $PYTHON_PATH is $("$PYTHON_CMD" --version 2>&1). On macOS: brew install python@3.13"
+        exit 1
+    fi
     info "Using Python: $PYTHON_PATH"
 }
 
@@ -201,10 +208,12 @@ install_skills() {
         fi
     done
 
-    # Copy _shared if any skill that cites _shared/repo-map.md was installed
-    # (STIG/compliance skills + security-alerts all read the canonical repo map)
-    if [[ -d "$dest_dir/stig-assess" || -d "$dest_dir/stig-verify" || -d "$dest_dir/security-alerts" ]]; then
-        cp -r "$src_dir/_shared" "$dest_dir/_shared" 2>/dev/null || true
+    # skills/_shared/ (oracle, conventions, model overlays) is read by ~60 of the
+    # shipped skills. The copy used to be gated on three skills that this export
+    # does not contain, so no menu path ever installed it (review 2026-09-03).
+    if (( ${#skills[@]} )) && [[ -d "$src_dir/_shared" ]]; then
+        cp -r "$src_dir/_shared" "$dest_dir/_shared"
+        ok "  Installed skills/_shared"
     fi
 
     ok "Installed ${#skills[@]} skills"

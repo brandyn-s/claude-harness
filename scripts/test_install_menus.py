@@ -577,3 +577,31 @@ def test_ask_yn_still_signals_through_exit_status():
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+# ---------------------------------------------------------------------------
+# Review 2026-09-03 -- shared skill assets and the Python floor
+# ---------------------------------------------------------------------------
+def test_shared_skill_assets_ship_with_any_skill_selection():
+    """`skills/_shared/` is referenced by ~60 skills, but the copy was gated on
+    three skills (stig-assess, stig-verify, security-alerts) that were removed
+    from this export -- so no menu path ever installed it."""
+    src = INSTALLER.read_text(encoding="utf-8")
+    body = src[src.index("install_skills() {"):src.index("install_hooks() {")]
+    assert "stig-assess" not in body and "security-alerts" not in body, (
+        "the _shared copy is still gated on skills this repo does not ship"
+    )
+    lines = body.splitlines()
+    copy_lines = [i for i, line in enumerate(lines) if 'cp -r "$src_dir/_shared" "$dest_dir/_shared"' in line]
+    assert len(copy_lines) == 1, "expected exactly one _shared copy in install_skills"
+    assert "${#skills[@]}" in lines[copy_lines[0] - 1], (
+        "the _shared copy must be conditioned on at least one skill being installed"
+    )
+
+
+def test_installer_states_the_real_python_floor():
+    """install-profile.py imports datetime.UTC (3.11+) and the doctor requires
+    3.10+; the installer told users 3.8+ and never checked."""
+    src = INSTALLER.read_text(encoding="utf-8")
+    assert "Python 3.8+" not in src
+    assert "(3, 11)" in src

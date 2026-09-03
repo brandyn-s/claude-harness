@@ -112,7 +112,7 @@ RETIRED / HOST-MIGRATED — these names no longer resolve here:
   `mcp__exa__crawling_exa` — consolidated upstream
 - `mcp__arxiv-mcp-server__*`, `mcp__xai__*` — Windows-era local servers,
   not migrated
-- `mcp__93acadff-cc17-4b6c-b323-1d575dcca6d3__*` — the Linear connector
+- `mcp__00000000-0000-4000-8000-000000000002__*` — the Linear connector
   GUID (Windows install); the macOS form is `mcp__linear-server__*`
 
 **Audit handling for RETIRED names**: a skill citing one of these IS

@@ -12,8 +12,8 @@ requires_tools:
   - Read
   - ToolSearch
   - Write
-  - mcp__4c2bb016-a49e-4043-8a0f-35135dea63a2__web_fetch_exa
-  - mcp__4c2bb016-a49e-4043-8a0f-35135dea63a2__web_search_exa
+  - mcp__00000000-0000-4000-8000-000000000003__web_fetch_exa
+  - mcp__00000000-0000-4000-8000-000000000003__web_search_exa
   - mcp__exa__get_code_context_exa
   - mcp__exa__web_search_advanced_exa
   - mcp__exa__web_search_exa

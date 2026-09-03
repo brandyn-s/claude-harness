@@ -23,6 +23,12 @@ import os
 import re
 import sys
 
+# The KEY/VALUE pair, not two independent substrings. The previous test was
+# `"disableAllHooks" in content and "true" in content.lower()`, which fired on
+# `"disableAllHooks": false` whenever any other key in the write was true --
+# and `"enabled": true` is in nearly every settings.json (review 2026-09-03).
+_DISABLE_ALL_HOOKS_RE = re.compile(r'"disableAllHooks"\s*:\s*true\b')
+
 # Our registered hook filenames — protect these from deletion
 PROTECTED_HOOKS = [
     "bash-security-guard.py",
@@ -96,7 +102,7 @@ def check(hook_input):
     if not content:
         return (0, None, None)
 
-    if "disableAllHooks" in content and "true" in content.lower():
+    if _DISABLE_ALL_HOOKS_RE.search(content):
         msg = (
             "[config-guard] BLOCKED: Detected disableAllHooks=true in settings edit. "
             "This would disable ALL security hooks including bash-security-guard, "
@@ -142,7 +148,19 @@ def main():
         hook_input = json.loads(raw)
     except (json.JSONDecodeError, Exception):
         sys.exit(0)
-    code, stderr_msg, stdout_msg = check(hook_input)
+    try:
+        code, stderr_msg, stdout_msg = check(hook_input)
+    except Exception as exc:  # noqa: BLE001
+        # FAIL-CLOSED. Wired directly (the fresh-laptop profile) there is no
+        # write-edit-dispatcher wrapper to enforce the "closed" posture, and an
+        # uncaught exception exits 1 -- a NON-blocking error in Claude Code -- so
+        # a crashed self-protection guard silently permitted the settings edit.
+        sys.stderr.write(
+            f"[config-guard] BLOCKED: hook crashed ({exc.__class__.__name__}: {exc}). "
+            "A self-protection guard that cannot run must not approve the edit; "
+            "set SKIP_CONFIG_GUARD=1 to bypass deliberately.\n"
+        )
+        sys.exit(2)
     if stderr_msg:
         sys.stderr.write(stderr_msg + "\n")
     if stdout_msg:

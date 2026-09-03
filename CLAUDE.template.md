@@ -1,49 +1,35 @@
 # CLAUDE.md — Session Instructions
 
-> Copy this to `~/.claude/CLAUDE.md` and customize. Claude Code loads it every session.
+> Copy this to `~/.claude/CLAUDE.md` and customize. Claude Code loads it every
+> session, so keep it short and operational (see `rules/claude-md-quality.md`).
 
 ## Who I Am
 
 <!-- CUSTOMIZE: Replace with your role and context -->
 I'm a software engineer working on [project/domain]. I prefer [concise/detailed] responses.
 
-## How We Work Together
+## How This Harness Is Wired
 
-### Rules (loaded from `~/.claude/rules/`)
+The fresh-laptop core installs one ambient rule, one path-scoped rule, and three
+hooks. Hooks are mechanical; do not restate them here.
 
-Rules are ambient guidance loaded every turn. The installed rules enforce:
+- `rules/outcome-over-verification.md` — verification is bounded evidence for the
+  requested outcome; stop when decisive evidence answers the decision.
+- `rules/claude-md-quality.md` — loads only when a `CLAUDE.md` is edited.
+- `hooks/bash-security-guard.py` — blocks credential exposure, exfiltration, and
+  destructive shell commands.
+- `hooks/config-guard.py` — blocks settings edits that disable hooks.
+- `hooks/result-injection-guard.py` — flags instruction-shaped text in MCP results.
 
-- **check-before-change** — Verify WHY something exists before modifying it. Search git history and memory for prior decisions.
-- **diagnose-before-fix** — Read actual errors before proposing fixes. No guessing.
-- **never-stop-early** — Complete the task. Never suggest "let's continue in a new session."
-- **validate-to-improve** — Every test pass produces a fix list, not just "PASS."
-- **search-efficiency** — Read budgets prevent excessive file scanning.
-
-### Skills (invoked with `/skill-name`)
-
-Skills are multi-step workflows. Use them by typing the slash command:
-
-- `/brainstorm` — Design exploration before creative work
-- `/superplan` — Context-aware planning for non-trivial tasks
-- `/interview` — Adversarial stress-test for plans
-- `/semgrep` — Run static analysis scans
-- `/handoff` — Write a session handoff document
-
-### Hooks (fire automatically)
-
-Hooks enforce rules mechanically — they fire every time regardless of context:
-
-- **loop-detector** — Catches repeated failing actions (3+ identical calls)
-- **bash-security-guard** — Blocks credential exposure and destructive shell commands
-- **result-injection-guard** — Scans MCP results for prompt injection
-- **promise-checker** — Blocks early session termination phrases
+The operator layer adds `rules/operator-discipline.md`, the loop detector, and
+the prompt/output secret hooks. Optional skills are invoked with `/skill-name`;
+`skills/README.md` is the index.
 
 ## Coding Standards
 
 <!-- CUSTOMIZE: Add your language preferences, frameworks, conventions -->
 
 - Write tests for new features
-- No `console.log` in production code
 - Prefer composition over inheritance
 - Error messages should be actionable
 
@@ -59,5 +45,4 @@ Hooks enforce rules mechanically — they fire every time regardless of context:
 
 - Don't add features beyond what was asked
 - Don't add comments to code you didn't change
-- Don't suggest "continuing in a new session"
 - Don't create documentation files unless explicitly asked
