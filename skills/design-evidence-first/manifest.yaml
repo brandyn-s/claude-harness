@@ -1,0 +1,37 @@
+id: design-evidence-first
+type: skill
+description: "Companion to superpowers:brainstorming — answer clarifying questions from transcripts, memory, git and code first; one interpretation checkpoint; competing-constraint agents for significant designs; Critical/High/Nice/Skip triage."
+category: planning
+
+requires_tools:
+  - "Read"
+  - "Grep"
+  - "Glob"
+  - "Bash"
+  - "Agent"
+  - AskUserQuestion
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    topic:
+      type: string
+      required: false
+      description: "The feature, component, or decision being designed"
+  scope_from: user_prompt
+output_contract:
+  produces: [evidence_summary, interpretation_checkpoint, competing_designs, triaged_ideas]
+  format: markdown
+
+side_effects: [dispatches_read_only_subagents]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "3-8"
+
+preconditions:
+  - "the topic has local history, or the design decision is significant"
+guardrails: []
+threat_model: read_only

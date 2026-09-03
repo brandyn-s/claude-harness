@@ -105,20 +105,6 @@
       "priority": "medium"
     },
     {
-      "pattern": "\\b(debug|debugg\\w*|bisect|reproduce.{0,15}(bug|issue|error)|root cause|why (is|does|did).{0,20}(fail|crash|break|error|wrong))\\b",
-      "skill": "systematic-debugging",
-      "agent": null,
-      "desc": "Structured debugging — reproduce, isolate, bisect, fix",
-      "priority": "high"
-    },
-    {
-      "pattern": "\\b(TDD|test.?driven|red.?green.?refactor|write (the )?test(s)? first|failing test)\\b",
-      "skill": "test-driven-development",
-      "agent": null,
-      "desc": "Test-driven development — tests first, then implementation",
-      "priority": "medium"
-    },
-    {
       "pattern": "\\b(threat model|attack (surface|vector)|STRIDE|risk assessment|security (design|architecture) review|red[- ]?team(?!.{0,25}(architecture|system|config|finding)))\\b",
       "skill": "threat-model",
       "agent": null,
@@ -260,13 +246,6 @@
       "priority": "medium"
     },
     {
-      "pattern": "\\b(brainstorm|ideate|explore ideas|think through|what if we|creative session|blue ?sky)\\b",
-      "skill": "brainstorm",
-      "agent": null,
-      "desc": "Structured brainstorming with diverge/converge phases",
-      "priority": "low"
-    },
-    {
       "pattern": "\\b(PR (fail|broke|blocked|fix)|fix (the |this )?PR|CI (fail|broke)|merge conflict|failed check)\\b",
       "skill": "pr-fix",
       "agent": null,
@@ -356,28 +335,6 @@
       "skill": "ship-hook",
       "agent": null,
       "desc": "Install staged hook specs from /distill T0 classification",
-      "priority": "medium"
-    },
-    {
-      "pattern": "\\b(verify.{0,10}(before|completion|done|finished|complete)|before (claiming|marking).{0,10}(done|complete))\\b",
-      "skill": "verification-before-completion",
-      "agent": null,
-      "desc": "Pre-completion verification checklist",
-      "priority": "medium",
-      "must_activate": true
-    },
-    {
-      "pattern": "\\b(execute.{0,10}plan|follow.{0,10}plan|run.{0,10}plan|implement.{0,10}plan)\\b",
-      "skill": "subagent-driven-development",
-      "agent": null,
-      "desc": "Execute implementation plans with parallel agents",
-      "priority": "medium"
-    },
-    {
-      "pattern": "\\b(subagent.{0,5}(driven|dev)|delegate.{0,10}(implement|code|build)|agent.{0,5}per.{0,5}task)\\b",
-      "skill": "subagent-driven-development",
-      "agent": null,
-      "desc": "Dispatch one fresh subagent per implementation task",
       "priority": "medium"
     },
     {

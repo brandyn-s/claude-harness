@@ -17,7 +17,6 @@ requires_rules:
   - red-team-rubric-discipline
   - verify-effectiveness
 requires_skills:
-  - brainstorm
   - fp-check
   - scout-frontier
   - triage

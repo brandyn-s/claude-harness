@@ -18,7 +18,6 @@ requires_rules:
   - red-team-rubric-discipline
   - symmetric-evidentiary-burden
 requires_skills:
-  - brainstorm
   - distill
   - fp-check
   - triage

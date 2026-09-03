@@ -10,7 +10,7 @@ decline them** — that second axis is the one that matters.
 |---|---|---|
 | **Hooks** (73 available; 3 in the default) | on matching tool calls | **No** — enforced by the runtime |
 | **Rules** (38) | always, in context | Yes (they are text) |
-| **Skills** (82) | on invocation | Yes |
+| **Skills** (81) | on invocation | Yes |
 | **Agents** | on dispatch | Yes |
 | **Reference docs** | on demand | Yes |
 
@@ -118,7 +118,7 @@ should not be re-derived by a model each run.
 
 Clusters here: planning (`superplan`, `supergoal`), knowledge
 (`capture`, `recall`, `distill`, `garden`), verification
-(`validate-changes`, `verification-before-completion`), security review
+(`validate-changes`, plus the installed `superpowers:verification-before-completion`), security review
 (`semgrep`, `codeql`, `fp-check`, `threat-model`), research
 (`deep-dive`, `gather-*`, `scout*`), and meta-maintenance
 (`audit-*`, `healthcheck`, `context-budget`, `harness-prune`).
@@ -142,7 +142,7 @@ that transfers.
 ```
 rules/            always-loaded contracts (+ incidents/, manifests/)
 hooks/            enforcement (+ test-hooks/, session_start_modules/, staged/)
-skills/           invocable procedures (82)
+skills/           invocable procedures (81)
 agents/           subagent definitions
 docs/rule-reference/   long-form rationale, on demand
 platform-rules/   host overlays (macOS / Windows)

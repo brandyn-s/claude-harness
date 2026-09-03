@@ -39,7 +39,7 @@ def test_mutation_verdict_guidance_has_cross_language_delivery():
     )
     frontmatter = rule_text.split("---", 2)[1]
     paths = set(yaml.safe_load(frontmatter)["paths"])
-    skill = (REPO / "skills" / "test-driven-development" / "SKILL.md").read_text(
+    skill = (REPO / "skills" / "legacy-code-tdd" / "SKILL.md").read_text(
         encoding="utf-8"
     )
 
@@ -54,7 +54,7 @@ def test_mutation_verdict_guidance_has_cross_language_delivery():
     ):
         assert pattern in paths
     assert "REQUIRED READ" in skill
-    assert "references/mutation-verdict-interpretation.md" in skill
+    assert "docs/rule-reference/tdd-mutation-verdict-interpretation.md" in skill
 
 
 def test_agent_delegation_retains_authenticated_remote_mcp_gate():
@@ -132,7 +132,7 @@ def test_output_grounding_consumers_do_not_claim_final_answer_hook_coverage():
     paths = [
         REPO / "hooks" / "creative-output-grounding-check.py",
         REPO / "skills" / "scout-frontier" / "SKILL.md",
-        REPO / "skills" / "brainstorm" / "SKILL.md",
+        REPO / "skills" / "design-evidence-first" / "SKILL.md",
         REPO / "skills" / "deep-dive" / "SKILL.md",
         REPO / "skills" / "refine" / "SKILL.md",
         REPO / "docs" / "DESIGN_RATIONALE.md",

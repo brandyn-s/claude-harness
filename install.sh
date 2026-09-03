@@ -148,7 +148,8 @@ install_skills() {
     # with a guess: none of them exists anywhere in the repo under any name
     # (verified against every SKILL.md, including marketplace/), so there is no
     # rename to follow and inventing a substitute would misrepresent the kit.
-    local planning=(brainstorm superplan interview refine subagent-driven-development)
+    local planning=(superplan interview refine design-evidence-first debugging-hypotheses
+                    legacy-code-tdd review-depth-by-risk)
     local security=(semgrep codeql fp-check differential-review insecure-defaults
                     sharp-edges variant-analysis sarif-parsing
                     agentic-actions-auditor triage semgrep-rule-creator

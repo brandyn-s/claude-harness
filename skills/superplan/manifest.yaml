@@ -17,7 +17,6 @@ requires_rules:
   - agent-delegation
   - search-efficiency
 requires_skills:
-  - brainstorm
 requires_auth: []
 input_contract:
   parameters:

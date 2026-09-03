@@ -1,7 +1,7 @@
 # claude-harness
 
 A working [Claude Code](https://docs.claude.com/en/docs/claude-code) harness:
-**73 hooks**, **38 ambient rules**, **82 skills**, and the agent
+**73 hooks**, **38 ambient rules**, **81 skills**, and the agent
 definitions that tie them together — about 1,568 source files, plus a generated
 plugin tree under `marketplace/` that roughly doubles the file count and is not
 meant to be read (see [marketplace/README.md](marketplace/README.md)).
@@ -75,7 +75,7 @@ than byte estimates, is:
 | component | measured tokens |
 |---|---|
 | always-loaded rules (31 files) | 75,413 |
-| skill listing (82 skills, 8 already suppressed to name-only) | 18,687 |
+| skill listing (81 skills, 8 already suppressed to name-only) | 18,687 |
 | `CLAUDE.md` + `AGENTS.md` | 3,280 |
 | **ambient floor, before your first message** | **97,380** |
 | plus broadly-scoped rules that load in most coding sessions | ~12,000 |
@@ -200,7 +200,7 @@ secret before it believes a clean scan.
 ```
 rules/            ambient engineering rules (+ incidents/ and manifests/)
 hooks/            PreToolUse / PostToolUse / session-lifecycle enforcement
-skills/           invocable procedures (82 of them)
+skills/           invocable procedures (81 of them)
 agents/           subagent definitions
 docs/rule-reference/   long-form rationale, loaded on demand
 platform-rules/   host-specific overlays (macOS / Windows)
@@ -223,7 +223,7 @@ that you almost certainly do not need it. So, in order:
 | **three files** | + [`rules/verify-effectiveness.md`](rules/verify-effectiveness.md), [`rules/diagnose-before-fix.md`](rules/diagnose-before-fix.md) | The two rules that pay for themselves fastest |
 | **the argument** | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Five layers, and which of them can actually enforce anything |
 | **the receipts** | [`rules/incidents/`](rules/incidents/) | The failures each rule was written against |
-| **everything** | [`skills/README.md`](skills/README.md) | Index of all 82 skills |
+| **everything** | [`skills/README.md`](skills/README.md) | Index of all 81 skills |
 
 Taking one hook is a legitimate outcome. Nothing here requires adopting the
 whole thing, and most of it you shouldn't.

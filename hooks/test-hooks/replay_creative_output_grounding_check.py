@@ -40,7 +40,7 @@ def _resolve_project_dir() -> Path:
 
 
 TRANSCRIPTS_DIR = _resolve_project_dir()
-TARGET_SKILLS = {"scout-frontier", "brainstorm", "deep-dive", "refine"}
+TARGET_SKILLS = {"scout-frontier", "design-evidence-first", "deep-dive", "refine"}
 
 
 def find_skill_invocations(transcript_path: Path):

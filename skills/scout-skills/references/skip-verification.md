@@ -98,7 +98,7 @@ per SKIP verdict:
 Confirmed already-adopted (no action):
   - Pre-Conclusion Audit (getsentry/skills) → differential-review L145
     [Quorum: SKIP-CONFIRMED, grok=CONFIRMED-COVERED, gpt=CONFIRMED-COVERED]
-  - Three-strike architecture gate (obra/superpowers-skills) → systematic-debugging Phase 4.4
+  - Three-strike architecture gate (obra/superpowers-skills) → superpowers:systematic-debugging Phase 4.4
     [Quorum: SKIP-CONFIRMED, grok=AMBIGUOUS, gpt=CONFIRMED-COVERED]
 ```
 

@@ -1,6 +1,6 @@
 # Skills index
 
-82 skills. **Generated from each `SKILL.md` frontmatter -- do not
+81 skills. **Generated from each `SKILL.md` frontmatter -- do not
 hand-edit; regenerate instead.**
 
 A skill is a procedure Claude invokes by matching your request against the
@@ -19,7 +19,6 @@ Bigger skills push detail into `references/` and deterministic helpers into
 | [`audit-fix`](./audit-fix/SKILL.md) | Dispatch one fix-agent per verified audit finding, with pre/post oracle verification; commit only verified fixes. | scripts, tests |
 | [`audit-rules`](./audit-rules/SKILL.md) | Measure rule compliance from transcripts and recommend promotions for the most-violated rules. | references, scripts, tests |
 | [`audit-skill`](./audit-skill/SKILL.md) | Audit a skill (or all skills) for external-contract drift, content hygiene, and behavior gaps. | references, scripts, tests |
-| [`brainstorm`](./brainstorm/SKILL.md) | Explore intent, requirements, and design before any creative or build work. | - |
 | [`build-measurement-harness`](./build-measurement-harness/SKILL.md) | Build an instrumented measurement harness with two-source ground truth and freshness gates from day one. | references |
 | [`bulk-api-script`](./bulk-api-script/SKILL.md) | Generate a Python script for bulk API operations (100+ results) instead of MCP pagination. | - |
 | [`capture`](./capture/SKILL.md) | Record session decisions, lessons, and breakthroughs as dated entries in the digital garden. | references |
@@ -29,7 +28,9 @@ Bigger skills push detail into `references/` and deterministic helpers into
 | [`codebase-memory-tracing`](./codebase-memory-tracing/SKILL.md) | Trace call chains, callers/callees, and change impact via the code graph. | - |
 | [`codeql`](./codeql/SKILL.md) | Deep dataflow and taint-tracking security analysis with CodeQL. | references |
 | [`context-budget`](./context-budget/SKILL.md) | Audit token overhead from loaded skills, rules, MCP tools, hooks, and CLAUDE.md. | - |
+| [`debugging-hypotheses`](./debugging-hypotheses/SKILL.md) | Companion to superpowers:systematic-debugging for bugs whose cause is not obvious after the first evidence pass: enumerate the code's unusual mechanisms, form two... | - |
 | [`deep-dive`](./deep-dive/SKILL.md) | Thorough multi-source research (Tavily + Exa + Firecrawl) synthesized into an evidence-graded report. | references, tests |
+| [`design-evidence-first`](./design-evidence-first/SKILL.md) | Companion to superpowers:brainstorming: before the first clarifying question, answer it from transcripts, memory, git history, and the existing code; validate one... | - |
 | [`differential-review`](./differential-review/SKILL.md) | Security-focused review of PRs, commits, or diffs, with blast-radius and test-coverage checks. | - |
 | [`distill`](./distill/SKILL.md) | Extract a session's errors, failed approaches, and workarounds into governed persistence targets. | references, scripts |
 | [`evaluate-repos`](./evaluate-repos/SKILL.md) | Evaluate external patterns against our architecture with advocate/skeptic agent pairs. | references, tests |
@@ -47,6 +48,7 @@ Bigger skills push detail into `references/` and deterministic helpers into
 | [`index-repo`](./index-repo/SKILL.md) | Index a repository for code search, or audit existing indexes for corruption. | references, tests |
 | [`insecure-defaults`](./insecure-defaults/SKILL.md) | Detect fail-open insecure defaults — hardcoded secrets, weak auth, permissive security. | references, scripts, tests |
 | [`interview`](./interview/SKILL.md) | Adversarially stress-test a plan, design, or proposal to expose hidden assumptions. | - |
+| [`legacy-code-tdd`](./legacy-code-tdd/SKILL.md) | Companion to superpowers:test-driven-development for untested code and multi-layer features: characterization tests that pin current behavior before a change, a w... | - |
 | [`manifest-gen`](./manifest-gen/SKILL.md) | Generate or refresh manifest.yaml files for skills, hooks, rules, KB topics, and more. | - |
 | [`mega-capture`](./mega-capture/SKILL.md) | Recover the COMPLETE record of a large auto-compacted session and feed /capture's whole-session judgment, so strategic knowledge from the compacted-away head reac... | - |
 | [`mega-distill`](./mega-distill/SKILL.md) | Recover the COMPLETE record of a large auto-compacted session into a condensed signal slice, so /distill judges the whole session instead of only the post-compact... | references, scripts, tests |
@@ -61,6 +63,7 @@ Bigger skills push detail into `references/` and deterministic helpers into
 | [`refine`](./refine/SKILL.md) | Enrich a complex prompt with missing constraints, success criteria, and decomposition. | - |
 | [`retro`](./retro/SKILL.md) | Session wrap-up — runs /distill and /capture (using /mega-distill and /mega-capture for compacted sessions), then lands session artifacts through /ship. | references, tests |
 | [`retrospective`](./retrospective/SKILL.md) | Review what went well, what went wrong, and what's missing across recent sessions. | references |
+| [`review-depth-by-risk`](./review-depth-by-risk/SKILL.md) | Companion to superpowers:subagent-driven-development: size each task's review to its risk tier, allow one repair batch and one re-review then stop, keep concurren... | - |
 | [`review-learnings`](./review-learnings/SKILL.md) | Audit, prune, and correct agent persistent memory across topic files and pattern stores. | references, scripts, tests |
 | [`roundtable`](./roundtable/SKILL.md) | Run a multi-agent adversarial roundtable (Claude, Grok, GPT) for independent critique. | references, scripts, tests |
 | [`run-status`](./run-status/SKILL.md) | Show the live state of long-running background work (oracle runs, terraform applies, measurement harnesses, deploy monitors) from their durable status files. | - |
@@ -76,20 +79,16 @@ Bigger skills push detail into `references/` and deterministic helpers into
 | [`sharp-edges`](./sharp-edges/SKILL.md) | Identify error-prone APIs, footgun configs, and insecure-by-default designs. | references |
 | [`ship`](./ship/SKILL.md) | Take pending changes through the full PR lifecycle — commit, push, branch, PR, auto-merge. | references, scripts, tests |
 | [`ship-hook`](./ship-hook/SKILL.md) | Install a staged hook spec from hooks/staged/ — write, register, and test it. | - |
-| [`subagent-driven-development`](./subagent-driven-development/SKILL.md) | Execute a plan with fresh subagents and bounded, risk-based review. | - |
 | [`supergoal`](./supergoal/SKILL.md) | Drive a superplan plan-file to completion autonomously with tool-backed verification. | references, scripts, tests |
 | [`supergoal-pause`](./supergoal-pause/SKILL.md) | Pause an active supergoal loop without losing prior-arc lineage. | - |
 | [`supergoal-resume`](./supergoal-resume/SKILL.md) | Resume a paused supergoal loop after verifying the plan is untampered. | - |
 | [`superplan`](./superplan/SKILL.md) | Plan any non-trivial task — load operational knowledge and tools, produce a context-aware plan. | references, tests |
 | [`superplan-loop`](./superplan-loop/SKILL.md) | Re-check supergoal progress on a cadence and surface concerning signals (read-only). | - |
 | [`superplan-status`](./superplan-status/SKILL.md) | Report the current state of an active supergoal loop in-conversation (read-only). | - |
-| [`systematic-debugging`](./systematic-debugging/SKILL.md) | Root-cause-first debugging — gather evidence, form hypotheses, test systematically. | - |
-| [`test-driven-development`](./test-driven-development/SKILL.md) | Red-green-refactor TDD — write the failing test first, then minimal code to pass. | references |
 | [`threat-model`](./threat-model/SKILL.md) | Build a structured threat model — assets, trust boundaries, attacker stories, severity. | references, scripts, tests |
 | [`triage`](./triage/SKILL.md) | Triage findings from any tool — severity-score, correlate, and produce an actionable report. | references, tests |
 | [`validate-changes`](./validate-changes/SKILL.md) | Validate architecture changes (skills, hooks, rules, MCP) with regression and A/B testing. | references, scripts, tests |
 | [`variant-analysis`](./variant-analysis/SKILL.md) | Hunt similar vulnerabilities and bug variants across codebases via pattern analysis. | references, scripts, tests |
-| [`verification-before-completion`](./verification-before-completion/SKILL.md) | Prove the requested outcome with the smallest decisive evidence before claiming completion. | - |
 | [`verify-search-result`](./verify-search-result/SKILL.md) | Verify a CALLS-edge or search result before a security-critical decision (CONFIRMED/FP/AMBIGUOUS). | - |
 | [`work`](./work/SKILL.md) | Create a per-session git worktree with auto-prefixed branch to isolate concurrent sessions. | - |
 

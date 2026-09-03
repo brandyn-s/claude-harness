@@ -1,6 +1,6 @@
 @rule output_grounding
 @version 2026-04-29
-@scope every output from creative-discovery skills (/scout-frontier, /brainstorm, /deep-dive, /refine) where the user is not the domain expert and cannot validate output by reading it
+@scope every output from creative-discovery skills (/scout-frontier, /design-evidence-first, /deep-dive, /refine) where the user is not the domain expert and cannot validate output by reading it
 
 # ─── INVARIANTS (always-true) ───
 
@@ -18,7 +18,7 @@ INVARIANT counterfactual_offered_for_at_least_one_recommendation_per_output
 
 # ─── PROCEDURE: structured output format requirements ───
 
-For every recommendation surfaced by /scout-frontier, /brainstorm, /deep-dive, /refine:
+For every recommendation surfaced by /scout-frontier, /design-evidence-first, /deep-dive, /refine:
 
 STEP_1 Label confidence per claim:
          HIGH (vendor production case study + reproducible benchmark)
@@ -121,7 +121,7 @@ FAILURE explanation_theater:
 This rule applies to outputs from these four skills only:
 
   - /scout-frontier (frontier paradigm scout)
-  - /brainstorm (creative design exploration)
+  - /design-evidence-first (creative design exploration)
   - /deep-dive (general-purpose research synthesis)
   - /refine (prompt enrichment)
 
@@ -132,7 +132,7 @@ EXCLUSIONS (the rule does NOT apply):
   - Internal LLM reasoning that doesn't surface to the user
 
 REQUIRED at compile.py time: `output-grounding.md` manifest declares
-`applies_to: [/scout-frontier, /brainstorm, /deep-dive, /refine]` and
+`applies_to: [/scout-frontier, /design-evidence-first, /deep-dive, /refine]` and
 the corresponding skills cite this rule at Tier 2 (one-line pointer).
 
 # ─── ENFORCEMENT ───

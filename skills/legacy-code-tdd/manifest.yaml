@@ -1,0 +1,37 @@
+id: legacy-code-tdd
+type: skill
+description: "Companion to superpowers:test-driven-development — characterization tests for untested code, walking-skeleton first slice, acceptance tests that run the literal documented invocation."
+category: engineering
+
+requires_tools:
+  - "Read"
+  - "Grep"
+  - "Glob"
+  - "Bash"
+  - "Write"
+  - "Edit"
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    target:
+      type: string
+      required: false
+      description: "The untested module or multi-layer feature under change"
+  scope_from: conversation
+output_contract:
+  produces: [characterization_tests, walking_skeleton, acceptance_test]
+  format: code
+
+side_effects: [writes_test_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "5-20"
+
+preconditions:
+  - "the code under change has no tests or coverage below 80 percent, or the feature spans several layers"
+guardrails: []
+threat_model: local_write

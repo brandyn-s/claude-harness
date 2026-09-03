@@ -323,11 +323,9 @@ def audit_claude_md(state):
             if re.search(rf'\|\s*`{re.escape(name)}`\s*\|', delegation_section):
                 findings.append(('CLAUDE.md', f'Delegation table references `{name}` — skill not found on disk'))
 
-    # 2. Check for deprecated superpowers references
-    if 'superpowers:' in content:
-        for m in re.finditer(r'superpowers:([a-z-]+)', content):
-            findings.append(('CLAUDE.md', f'Deprecated superpowers reference: superpowers:{m.group(1)}'))
-
+    # `superpowers:<skill>` references are valid: the installed plugin owns
+    # brainstorming, TDD, debugging, subagent-driven development and completion
+    # verification (this repo's same-named forks were removed 2026-09-03).
     return findings
 
 

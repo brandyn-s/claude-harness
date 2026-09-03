@@ -353,7 +353,7 @@ Cross-reference known constraints against session errors to find rules being vio
 Detect effective approaches that repeat across sessions but aren't codified:
 
 1. **Tool call sequences**: Extract the ordered sequence of tool calls per session. Find sequences of 3+ tools that appear in 3+ sessions. Examples: "Read → Grep → Edit" (understand-then-fix), "git stash → git rebase → git stash pop" (safe rebase). Filter out universal sequences (every session starts with Read).
-2. **Skill chains**: From Pass 7's co-occurrence data, identify chains of 3+ skills that appear together in temporal order across 3+ sessions. Example: brainstorm → /superplan → subagent-driven-development is a known chain. NEW chains (not in any skill's workflow) are discovery candidates.
+2. **Skill chains**: From Pass 7's co-occurrence data, identify chains of 3+ skills that appear together in temporal order across 3+ sessions. Example: brainstorm → /superplan → superpowers:subagent-driven-development is a known chain. NEW chains (not in any skill's workflow) are discovery candidates.
 3. **Recovery patterns**: When an error occurs, what does the NEXT successful action look like? Repeated error→recovery pairs are candidates for automated recovery (hook or skill step). Example: "CRLF mismatch error → re-read in binary mode" appears 5 times → candidate for a hook.
 4. **Report**:
    - **Codified patterns** (already in a skill/rule) — confirm they're still effective, note frequency

@@ -55,7 +55,7 @@ def test_backfill_external_path_demoted_not_converted():
     m = _load_module()
     pats = m.load_external_patterns()
     f = {
-        "skill": "brainstorm",
+        "skill": "design-evidence-first",
         "code": "D4",
         "label": "doc-fix",
         "description": "Line 18 cites `~/Documents/knowledge-base/topics/x.md` — file doesn't exist.",

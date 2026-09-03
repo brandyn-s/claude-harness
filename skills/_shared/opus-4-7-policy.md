@@ -73,7 +73,7 @@ implication:
 | Response length calibrates to task complexity | Drop fixed-length scaffolding ("respond in exactly 5 paragraphs"). |
 | Fewer tool calls by default; reasons more between calls | Drop scaffolding that forces tool use ("always call tool X first"). |
 | More regular progress updates by default | Drop interim-status scaffolding ("after every 3 steps, print STATUS:"). |
-| Fewer subagents spawned by default | Skills that need parallel agents (e.g., `subagent-driven-development`, `roundtable`) should explicitly prompt for it. |
+| Fewer subagents spawned by default | Skills that need parallel agents (e.g., `superpowers:subagent-driven-development`, `roundtable`) should explicitly prompt for it. |
 
 ## Tokenizer (1–1.35× expansion vs 4.6)
 

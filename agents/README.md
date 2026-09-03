@@ -60,7 +60,7 @@ The keyword-to-topic mapping is defined in `rules/agent-delegation.md`. Keywords
 - **Worktree isolation**: File-writing workers operate in temporary git worktrees by default
 - **Transparency protocol**: Announces learnings inline, classifies as `[observed]` (first occurrence) or `[confirmed]` (seen 2+ times)
 - **Model selection**: Inherits the parent session's model by default. Per-agent models now work (see below) — set `model:` in an agent's frontmatter or `CLAUDE_CODE_SUBAGENT_MODEL` to override (e.g. a cheaper model for `semgrep-scanner`)
-- **Preloaded skills**: systematic-debugging and verification-before-completion
+- **Preloaded skills**: superpowers:systematic-debugging and superpowers:verification-before-completion
 
 ## Known Limitations
 
@@ -94,8 +94,8 @@ maxTurns: 200
 disallowedTools:
   - Agent
 skills:
-  - systematic-debugging
-  - verification-before-completion
+  - superpowers:systematic-debugging
+  - superpowers:verification-before-completion
 ---
 
 [Agent instructions in markdown body]

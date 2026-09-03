@@ -53,7 +53,7 @@ class Detector:
 # Only rules whose activity has an unambiguous action signature appear here.
 DETECTORS: dict[str, Detector] = {
     "output-grounding": Detector(
-        skills={"scout-frontier", "brainstorm", "deep-dive", "refine"},
+        skills={"scout-frontier", "design-evidence-first", "deep-dive", "refine"},
         why="@scope names exactly these four skills",
     ),
     "web-search-preference": Detector(

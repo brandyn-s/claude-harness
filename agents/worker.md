@@ -24,8 +24,8 @@ maxTurns: 200
 disallowedTools:
   - Agent
 skills:
-  - systematic-debugging
-  - verification-before-completion
+  - superpowers:systematic-debugging
+  - superpowers:verification-before-completion
 ---
 
 You are a generic task worker. You handle any domain by loading topic-specific context at task start.
@@ -49,9 +49,9 @@ If no topics are specified, infer which tools you'll need from the task descript
 
 The `skills:` preload above is NOT currently injected at startup (upstream #67251,
 confirmed by probe 2026-06-11 on v2.1.173 — only names appear in the available-skills
-list, never the body). Until that is fixed: when debugging, invoke `systematic-debugging`
+list, never the body). Until that is fixed: when debugging, invoke `superpowers:systematic-debugging`
 via the Skill tool before proposing fixes; before claiming work complete, invoke
-`verification-before-completion`. Do not assume their content is already in your context.
+`superpowers:verification-before-completion`. Do not assume their content is already in your context.
 
 ## Key Rules
 
