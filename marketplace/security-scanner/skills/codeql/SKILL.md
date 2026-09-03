@@ -14,21 +14,12 @@ compatibility:
     - cli: codeql
 
 ---
-> **Compaction continuity:** Claude Code reattaches only the first 5,000
-> tokens of an invoked skill after compaction, within a 25,000-token shared
-> newest-first budget. If compaction occurs, re-invoke this skill before
-> continuing; if model invocation is disabled, stop and ask the user to invoke
-> it. Do not rely on tail instructions until the full body is restored.
-
 
 # CodeQL Analysis
 
 Supported languages: Python, JavaScript/TypeScript, Go, Java/Kotlin, C/C++, C#, Ruby, Rust, Swift, and GitHub Actions workflows (`actions`).
 
 **Skill resources:** Reference files and templates are located at `references/` and `workflows/`.
-
-
-> **Runtime policy:** Resolve the effective model and preserve refusal/fallback provenance per `../_shared/model-runtime-policy.md`.
 
 ## Essential Principles
 

@@ -14,9 +14,6 @@ metadata:
 
 Create production-quality Semgrep rules with proper testing and validation.
 
-
-> **Runtime policy:** Resolve the effective model and preserve refusal/fallback provenance per `../_shared/model-runtime-policy.md`.
-
 ## When to Use
 
 **Ideal scenarios:**

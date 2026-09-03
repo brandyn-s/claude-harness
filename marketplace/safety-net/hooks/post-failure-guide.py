@@ -123,7 +123,10 @@ def main():
         )
 
     msg = " ".join(parts)
-    print(json.dumps({"message": msg}))
+    # additionalContext is the documented channel to the model; a top-level
+    # "message" never reached it (live-probed 2026-09-03).
+    print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUseFailure",
+                                             "additionalContext": msg}}))
     sys.exit(0)
 
 

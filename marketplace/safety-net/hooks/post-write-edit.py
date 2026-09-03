@@ -338,8 +338,10 @@ def check_ruff_lint(file_path):
                 print(
                     json.dumps(
                         {
-                            "decision": "approve",
-                            "reason": f"ruff auto-fixed {fixed_count} lint issue(s) in {os.path.basename(file_path)}",
+                            "hookSpecificOutput": {
+                                "hookEventName": "PostToolUse",
+                                "additionalContext": f"ruff auto-fixed {fixed_count} lint issue(s) in {os.path.basename(file_path)}; re-read before further edits",
+                            }
                         }
                     )
                 )

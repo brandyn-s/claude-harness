@@ -6,15 +6,20 @@ destruction. Non-catastrophic delivery, portability, and workflow preferences
 are selected from ``bash_policy_tables.py`` through
 ``CLAUDE_BASH_POLICY_PACKS``. ``all`` preserves the author-workstation profile.
 
-Three response modes (updated 2026-03-31 based on source code analysis):
+Three response modes:
   Exit code 2 + stderr message = BLOCK
-  Exit code 0 + JSON stdout with updated_input = AUTO-FIX (rewrite command)
+  Exit code 0 + JSON stdout with hookSpecificOutput.updatedInput = AUTO-FIX
   Exit code 0 + stderr message = ADVISORY (warn only)
   Exit code 0 (no output) = ALLOW (passthrough)
 
-Auto-fix uses the hook JSON return schema (hooks.ts:382-450):
-  {"decision": "approve", "updated_input": {...}, "reason": "..."}
-  The updated_input replaces tool_input, auto-fixing the command.
+Auto-fix uses the documented PreToolUse output (hooks reference):
+  {"hookSpecificOutput": {"hookEventName": "PreToolUse",
+                          "permissionDecision": "allow",
+                          "permissionDecisionReason": "...",
+                          "updatedInput": {...}}}
+Live-probed 2026-09-03 on Claude Code 2.1.259: the former top-level
+`{"decision": "approve", "updated_input": ...}` shape was IGNORED and the
+original command ran, so every auto-fix had been a silent no-op.
 """
 
 import hashlib
@@ -37,6 +42,18 @@ from bash_policy_tables import entries, pattern_block_reason, resolve_policy_pac
 SEC_REMEDY = (
     "Cheapest fix: write the code to a .py FILE and run it, and split any credential read away from any network call."
 )
+
+
+def _autofix_output(tool_input, reason, **updated_fields):
+    """Documented PreToolUse rewrite: permissionDecision allow + updatedInput."""
+    return {
+        "hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "permissionDecision": "allow",
+            "permissionDecisionReason": reason,
+            "updatedInput": {**tool_input, **updated_fields},
+        }
+    }
 
 
 def _repeat_note(hook_name, remedy=""):
@@ -1420,11 +1437,7 @@ def handle_inline_python_oversize(command, tool_input):
         f"inline-python-guard: rewrote {len(body)}-char `python -c` body to "
         f"{path} (lossless extraction; escape-bug-safe)."
     )
-    return ("approve", {
-        "decision": "approve",
-        "reason": reason,
-        "updated_input": {**tool_input, "command": new_command},
-    })
+    return ("approve", _autofix_output(tool_input, reason, command=new_command))
 
 
 # ── HEREDOC PYTHON ENCODING CHECK (BLOCK) ───────────────────────────
@@ -2414,7 +2427,8 @@ def main():
                 print(payload + _repeat_note("bash-security-guard", SEC_REMEDY),
                       file=sys.stderr)
                 sys.exit(2)
-            _audit_log(command, "auto-fixed", payload["reason"])
+            _audit_log(command, "auto-fixed",
+                       payload["hookSpecificOutput"]["permissionDecisionReason"])
             print(json.dumps(payload))
             sys.exit(0)
 
@@ -2442,12 +2456,7 @@ def main():
     if fixes_applied:
         fix_reason = "Auto-fixed: " + "; ".join(fixes_applied)
         _audit_log(command, "auto-fixed", fix_reason)
-        result = {
-            "decision": "approve",
-            "reason": fix_reason,
-            "updated_input": {**tool_input, "command": fixed_command},
-        }
-        print(json.dumps(result))
+        print(json.dumps(_autofix_output(tool_input, fix_reason, command=fixed_command)))
         sys.exit(0)
 
     # Phase 3: Optional advisories (warn only, never block).

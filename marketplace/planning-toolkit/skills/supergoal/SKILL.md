@@ -55,12 +55,6 @@ hooks:
             Note on stop_hook_active reset semantics: supergoal also honors $CLAUDE_CODE_STOP_HOOK_BLOCK_CAP. The skill body Step 4 derives this cap from the selected turn budget before /goal invocation so we don't fight Anthropic's 8-block default or permit a hidden unbounded loop. The hook STILL must check stop_hook_active for correctness — env override raises the cap, doesn't disable the flag.
           timeout: 120
 ---
-> **Compaction continuity:** Claude Code reattaches only the first 5,000
-> tokens of an invoked skill after compaction, within a 25,000-token shared
-> newest-first budget. If compaction occurs, re-invoke this skill before
-> continuing; if model invocation is disabled, stop and ask the user to invoke
-> it. Do not rely on tail instructions until the full body is restored.
-
 
 ## supergoal
 

@@ -207,7 +207,7 @@ def score(fixture_path: Path) -> int:
     if unverifiable:
         reasons.append(f"{unverifiable} entr(y/ies) have no axis values (cannot verify)")
     print("FAIL: " + "; ".join(reasons))
-    print("Investigate before publishing measurements (see ~/.claude/rules/validate-to-improve.md).")
+    print("Investigate before publishing measurements (see ~/.claude/rules/verify-effectiveness.md).")
     return 1
 
 

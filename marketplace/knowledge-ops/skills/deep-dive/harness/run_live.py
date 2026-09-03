@@ -191,7 +191,7 @@ def _call_arm(system: str, q: str) -> tuple[dict, list[dict]]:
     response_provenance = []
     while True:
         guard += 1
-        msg = client.messages.create(model=MODEL, max_tokens=1500, system=system,
+        msg = client.messages.create(model=MODEL, max_tokens=MAX_TOKENS, system=system,
                                      output_config=EFFORT_CONFIG,
                                      tools=[WEB_SEARCH_TOOL], messages=messages)  # type: ignore[arg-type]
         stop_reason = getattr(msg, "stop_reason", None)
@@ -294,8 +294,11 @@ def run(n_runs: int, limit, workers: int) -> dict:
     return results
 
 
+MAX_TOKENS = 1500  # per-call output budget, applied to BOTH arms; --max-tokens overrides
+
+
 def main(argv=None):
-    global MODEL, RESULTS, RUN_RECEIPT, EFFORT_CONFIG, PROVIDER
+    global MODEL, RESULTS, RUN_RECEIPT, EFFORT_CONFIG, PROVIDER, MAX_TOKENS
     ap = argparse.ArgumentParser(description="deep-dive live efficacy A/B (calibration)")
     ap.add_argument("--historical-reproduction", action="store_true")
     ap.add_argument("--approve-covered-model-retention", action="store_true",
@@ -303,6 +306,8 @@ def main(argv=None):
     ap.add_argument("--output", type=Path, required=True)
     ap.add_argument("--plan-only", action="store_true")
     ap.add_argument("--runs", type=int, default=8)
+    ap.add_argument("--max-tokens", type=int, default=MAX_TOKENS,
+                    help="per-call output budget for BOTH arms (frozen baseline used 1500)")
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--workers", type=int, default=5)
     add_qualification_arguments(ap, require_model=False)
@@ -324,6 +329,7 @@ def main(argv=None):
     RUN_RECEIPT = {
         "mode": "historical_reproduction" if args.historical_reproduction else "current_model",
         "requested_model": model,
+        "max_tokens": args.max_tokens,
         "effort": args.effort,
         "provider": "<unavailable>",
         "qualification_status": "UNVERIFIED",
@@ -340,7 +346,7 @@ def main(argv=None):
     if args.plan_only:
         print(json.dumps(RUN_RECEIPT, indent=2))
         return 0
-    MODEL, RESULTS = model, output
+    MODEL, RESULTS, MAX_TOKENS = model, output, args.max_tokens
     EFFORT_CONFIG, PROVIDER = {"effort": args.effort}, args.provider
     with RUNTIME_LOCK:
         RUNTIME_OBSERVATIONS.clear()

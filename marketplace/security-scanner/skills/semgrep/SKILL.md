@@ -19,9 +19,6 @@ compatibility:
 
 Run a Semgrep scan with automatic language detection, parallel execution via Task subagents, and merged SARIF output.
 
-
-> **Runtime policy:** Resolve the effective model and preserve refusal/fallback provenance per `../_shared/model-runtime-policy.md`.
-
 ## Essential Principles
 
 1. **Always use `--metrics=off` in scan/validate commands** — Semgrep sends telemetry by default; `--config auto` also phones home. Every scan and validation `semgrep` command must include `--metrics=off` to prevent data leakage during security audits. (Version checks like `semgrep --version` are exempt.)

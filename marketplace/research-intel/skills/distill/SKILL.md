@@ -15,12 +15,6 @@ compatibility:
     - mcp: memory-search
 
 ---
-> **Compaction continuity:** Claude Code reattaches only the first 5,000
-> tokens of an invoked skill after compaction, within a 25,000-token shared
-> newest-first budget. If compaction occurs, re-invoke this skill before
-> continuing; if model invocation is disabled, stop and ask the user to invoke
-> it. Do not rely on tail instructions until the full body is restored.
-
 
 # Distill - Hard Lessons from Session Errors
 
@@ -407,44 +401,19 @@ Quick map for the common case:
   rules/memory writes.
 - **T0** — stage to `hooks/staged/{name}.spec.md` for `/ship-hook`;
   do NOT install inline.
-- **T1** — append to the appropriate `rules/*.md`; check size budget,
-  apply the T1 rule/incident split pattern if the rule exceeds 35K chars.
-  **TEN rules have a 10,000-BYTE cap that the hook does NOT enforce — measure
-  it before appending.** See the T1 size-budget note below.
+- **T1** — append to the appropriate `rules/*.md`. The ambient tier is
+  net-zero-growth: offset the bytes or record a ledger entry (see below).
 - **T2** — write to `$PROJECT_MEMORY_WRITE_TARGET`; in Codex this means creating a governed extension note, never editing `memories/MEMORY.md` in place.
 - **T4** — append to agent memory using the root-cause-required
   format; API gotchas dual-write to
   `~/Documents/api-docs/{api-name}/gotchas.md`.
 - **T5** — skip with reason; no writes.
 
-**Before any T1/T2/T4 write, check that `$CONFIG_ROOT` can actually SHIP the
-target file — on a divergent checkout the write is invisible to every future
-session.** `$CONFIG_ROOT` is usually `$HOME/.claude`, which on this host is
-**278 commits ahead / 216 behind `origin/main`** with most of `agent-memory/topics/`
-already dirty arc content. Appending there produces a file that can never be
-merged (the arc's semantic conflicts), so the lesson lives only on one disk and
-the next session reads `origin/main` without it.
-
-For each resolved target, run `git -C "$CONFIG_ROOT" status --short -- <target>`:
-- **clean** → append in place; `/retro` Step 5 ships it normally.
-- **dirty (`M`/`MM`)** → do NOT append blind, and do NOT
-  `git checkout origin/main -- <target>` (that destroys the local-only content,
-  which is frequently a PRIOR session's unshipped lesson). Cut a worktree —
-  `git -C "$CONFIG_ROOT" worktree add <path> -b distill/<slug> origin/main` —
-  write there, and ship that branch. If the same lesson must also be visible in
-  the live checkout, hand-merge it in and mark what it supersedes.
-- Report which targets were shippable and which were worktree-routed. A write
-  the skill cannot ship is not persistence, and reporting it as `NEW` is a false
-  completion claim.
-
-`/garden` already branches from `origin/main` for exactly this reason
-(`skills/garden/references/checks-staging.md`, "Why Step 1 branches from
-origin/main"); distill did not, and the cost is measurable. 2026-08-25: a
-`topics/msgraph.md` bullet written 2026-08-24 recording that
-`bin/msgraph_helper.py` was GET-only sat in a LOCAL-ONLY copy of that file. The
-next day's session re-derived the whole app-only Graph write path from scratch —
-the note existed, had the right content, and was structurally unreadable. Two
-consecutive sessions paid for one unshippable write.
+**Before any T1/T2/T4 write, confirm the target file can be shipped.** Run
+`git -C "$CONFIG_ROOT" status --short -- <target>`. Clean: append in place. Dirty:
+do not append blind and do not check out `origin/main` over it (that destroys a
+prior session's unshipped lesson); cut a worktree from `origin/main`, write there,
+and ship that branch. A write that cannot ship is not persistence.
 
 After all writes: report counts by tier and friction category, promotions,
 and the worst offender (single pain point that consumed the most turns).
@@ -510,7 +479,6 @@ timestamp. The `lessons` array is included so the same-session gate can also
 report what was already distilled when it skips with "nothing new since last
 distill"; it is NOT used for keyword-overlap filtering.
 
-
 ---
 
 ## Success Criteria
@@ -529,88 +497,15 @@ distill"; it is NOT used for keyword-overlap filtering.
 - Zero duplicate entries created across any tier
 - When deleting or moving files (pattern files, topic sections), grep topic files for `> Deep reference:` lines pointing to the deleted path and remove them
 - T1 writes that would push a rule file >35K use the T1 rule/incident split pattern (strongwording in the rule, narrative in `rules/incidents/<name>.md`). The incident reference is not a T2 system-fact write. T1 writes that would push past 38K are blocked by `rule-size-guard.py` — extract older incidents first.
-- **The ambient tier is NET-ZERO-GROWTH by default. Before any T1 append, plan the
-  offset.** The two per-file caps this section used to describe (10,000 B on ten
-  `formerly_dominant` rules, 5,000 B on ten `quality_rules`) are RETIRED. They were
-  cliffs: repairs converged to just under them and the next append breached again --
-  `git-hygiene.md` went breach -> repair FOUR times in 16 days at ~9,800 of 10,000,
-  across 13 dedicated cap-repair PRs, and at retirement SIX rules across the two caps
-  sat under 500 B of headroom while the corpus as a whole had room.
-
-  What binds now:
-  - `manifests/ambient-budget.json` sets a DERIVED ceiling on the whole unconditional
-    corpus: `baseline + sum(justified ledger entries)`. There is no stored number to
-    edit, so raising it requires appending an entry with a byte count and a reason.
-  - `scripts/test_context_policy_contracts.py` enforces it (and RAISES on a missing or
-    malformed ledger, so the gate cannot be deleted).
-  - `rule-size-guard.py` still enforces WARN 35,000 / BLOCK 38,000 per file, and warns
-    at authoring time when a write would breach the ledger ceiling. It is ADVISORY
-    there and silent when the ledger is simply absent, because the deployed `~/.claude`
-    can sit behind `origin/main`; CI is the enforcement.
-
-  So a T1 append that grows the corpus needs one of these, cheapest first:
-  1. relocate >= the added bytes out of ambient in the SAME change (to
-     `rules/incidents/<name>.md` or `docs/rule-reference/<name>.md`, which cost nothing
-     until read);
-  2. route the lesson to `agent-memory/topics/` (T4) or a skill step instead;
-  3. add `paths:` frontmatter if the rule is genuinely path-scoped -- it then leaves
-     the unconditional corpus entirely;
-  4. only if none fit, append a justified ledger entry.
-
-  Measure against `origin/main`, not local HEAD: on a content-diverged checkout local
-  HEAD understates the real figure (measured 2026-08-25: by 1,082 B, the whole margin).
-
-  **So a T1 append to any of those ten passes the hook, passes this skill's
-  stated gate, and reddens CI** — the guard has no per-file 10,000 rule, and the
-  test runs in the "Run scripts/ tests" step that `validate` gates on, so every
-  open PR in the repo then inherits a failure it did not cause.
-
-  Measured, three times: #2013 and #2111 were both titled "bring git-hygiene.md
-  back under the cap", and #2111 landed at **215 bytes** of headroom before the
-  next distill broke it **one day later** (#2119 appended the
-  hand-typed-object-ID FORBIDDEN → 10,345 B). #2127 was the third repair.
-  Treat sub-500-byte headroom on these ten as "does not fit", and prefer routing
-  the narrative to `rules/incidents/<name>.md` or
-  `docs/rule-reference/<name>.md` over growing the ambient file.
-
-  If an append genuinely will not fit, the honest outcomes are: relocate older
-  detail out of the ambient rule in the SAME change, or record the lesson at T4
-  and say the T1 slot is full. Do NOT raise the test's constant to accommodate a
-  write.
-
-- **The per-file byte caps this section describes were REPLACED upstream by a
-  DELTA LEDGER. Read `manifests/ambient-budget.json` before any T1 append.** The
-  operative ceiling is derived, not stored:
-  `allowed = baseline_unconditional_bytes + sum(entry.bytes for entry in ledger)`,
-  so there is no constant to edit — growth requires appending a ledger entry with
-  a byte count and a reason. The old ten-rule 10,000-byte cap was retired for a
-  measured reason: a cliff makes every repair converge just under it, which
-  produced 13 cap-repair PRs between 2026-07-01 and 2026-08-26 and left 16,395
-  bytes unused across seven files while three sat under 500 bytes of headroom.
-  The `formerly_dominant` / `quality_rules` tuples still exist in
-  `scripts/test_context_policy_contracts.py`, but they now gate only the
-  `docs/rule-reference/<name>.md` existence-and-pointer assertions, NOT bytes.
-
-  **The ladder, cheapest first, from the ledger's own comment:** (1) relocate
-  equivalent bytes out of ambient in the SAME change — to `rules/incidents/<name>.md`
-  or `docs/rule-reference/<name>.md`, which cost nothing until read; net zero, no
-  ledger entry needed. (2) Route the lesson to a lazily-loaded tier instead
-  (`agent-memory/topics/` for a domain gotcha, a skill step for an activity
-  discipline). (3) Add `paths:` frontmatter if the rule is genuinely path-scoped.
-  (4) Only if none fit, append a ledger entry and say why the bytes must be
-  ambient. A NEGATIVE entry is how the ceiling ratchets DOWN.
-
-  **Measure against `origin/main`, never the local checkout.** This host's
-  `~/.claude` runs hundreds of commits behind, so its copy of both the test and
-  `hooks/rule_context_budget.py` can describe a superseded mechanism. Measured
-  2026-08-29: the local test still asserted the 10,000/5,000 per-file tuples and
-  the local module reported `WARN_BYTES = 225_000`, while upstream had moved to
-  the ledger and pristine `origin/main` was already **2,515 bytes over** its
-  derived ceiling — so a T1 append sized against the local numbers reds CI on a
-  gate the local tree cannot even see.
-
----
-
+- **The ambient tier is net-zero-growth.** `manifests/ambient-budget.json` derives
+  the ceiling as `baseline + sum(ledger entries)`; `scripts/test_context_policy_contracts.py`
+  enforces it in CI and `rule-size-guard.py` warns at authoring time. A T1 append
+  that grows the corpus needs, cheapest first: (1) relocate at least as many bytes
+  out of ambient in the same change, to `rules/incidents/<name>.md` or
+  `docs/rule-reference/<name>.md`; (2) route the lesson to a topic file or a skill
+  step instead; (3) add `paths:` frontmatter if the rule is genuinely path-scoped;
+  (4) append a justified ledger entry. Measure against `origin/main`, not a
+  diverged local checkout. Never raise a test constant to admit a write.
 
 See `references/tier-decision-tree.md` for the full tier decision tree.
 

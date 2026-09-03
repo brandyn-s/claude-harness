@@ -140,7 +140,7 @@ def _parse(text: str) -> dict:
 def _one(arm: str, system: str, findings_blob: str) -> dict:
     import anthropic
     msg = anthropic.Anthropic().messages.create(
-        model=MODEL, max_tokens=1500, system=system,
+        model=MODEL, max_tokens=MAX_TOKENS, system=system,
         messages=[{"role": "user", "content": findings_blob}])
     _record_runtime_response(msg)
     text = "".join(getattr(b, "text", "") for b in msg.content if b.type == "text")
@@ -205,8 +205,11 @@ def run(n_runs: int, workers: int) -> dict:
     return results
 
 
+MAX_TOKENS = 1500  # per-call output budget, applied to BOTH arms; --max-tokens overrides
+
+
 def main(argv=None):
-    global MODEL, RESULTS, RUN_RECEIPT
+    global MODEL, RESULTS, RUN_RECEIPT, MAX_TOKENS
     ap = argparse.ArgumentParser(description="triage live efficacy A/B (ranking + correlation)")
     mode = ap.add_mutually_exclusive_group(required=True)
     mode.add_argument("--historical-reproduction", action="store_true")
@@ -216,6 +219,8 @@ def main(argv=None):
     ap.add_argument("--output", type=Path, required=True)
     ap.add_argument("--plan-only", action="store_true")
     ap.add_argument("--runs", type=int, default=8)
+    ap.add_argument("--max-tokens", type=int, default=MAX_TOKENS,
+                    help="per-call output budget for BOTH arms (frozen baseline used 1500)")
     ap.add_argument("--workers", type=int, default=6)
     args = ap.parse_args(argv)
     model = HISTORICAL_MODEL if args.historical_reproduction else args.model
@@ -229,7 +234,7 @@ def main(argv=None):
     if output == FROZEN_RESULTS.resolve():
         ap.error("the frozen 2026-05-31 results.json is immutable")
     RUN_RECEIPT = {"mode": "historical_reproduction" if args.historical_reproduction else "current_model",
-                   "requested_model": model, "qualification_status": "UNVERIFIED",
+                   "requested_model": model, "max_tokens": args.max_tokens, "qualification_status": "UNVERIFIED",
                    "effective_model": "<unavailable>", "provider": "<unavailable>",
                    "refusal_detected": "<unavailable>", "truncation_detected": "<unavailable>",
                    "stop_outcomes": "<unavailable>",
@@ -241,7 +246,7 @@ def main(argv=None):
     if args.plan_only:
         print(json.dumps(RUN_RECEIPT, indent=2))
         return 0
-    MODEL, RESULTS = model, output
+    MODEL, RESULTS, MAX_TOKENS = model, output, args.max_tokens
     with RUNTIME_LOCK:
         RUNTIME_OBSERVATIONS.clear()
     t0 = time.time()

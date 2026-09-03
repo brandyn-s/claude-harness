@@ -14,9 +14,6 @@ metadata:
 
 Evaluates whether APIs, configurations, and interfaces are resistant to developer misuse. Identifies designs where the "easy path" leads to insecurity.
 
-
-> **Runtime policy:** Resolve the effective model and preserve refusal/fallback provenance per `../_shared/model-runtime-policy.md`.
-
 ## When to Use
 
 - Reviewing API or library design decisions

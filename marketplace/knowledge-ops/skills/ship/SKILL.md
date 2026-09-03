@@ -16,12 +16,6 @@ compatibility:
     - skill: differential-review
       fallback: "differential-review unavailable — surface that via the Step 4 AskUserQuestion gate and let the user decide to push anyway; do not silently skip"
 ---
-> **Compaction continuity:** Claude Code reattaches only the first 5,000
-> tokens of an invoked skill after compaction, within a 25,000-token shared
-> newest-first budget. If compaction occurs, re-invoke this skill before
-> continuing; if model invocation is disabled, stop and ask the user to invoke
-> it. Do not rely on tail instructions until the full body is restored.
-
 
 # Ship
 
@@ -439,8 +433,6 @@ State: MERGED | QUEUED — terminal verification delegated to <owner/status file
 Linear: posted to <project> | repo not mapped | unavailable
 ```
 
-
-
 ---
 
 ## Examples
@@ -459,7 +451,6 @@ Result: PR merged against the fork target (not upstream), confirmed by terminal 
 User says: `/ship --queue-only --session-start <verified-oid> distill: persist session lessons`
 Actions: Separate current-session commits from older ahead history, complete the same branch, validation, push, PR, and enforcement preflight. Run the verified helper with `--queue-only`; require `QUEUED` or `MERGED`, then return the PR URL and state owner to `/retro`.
 Result: Auto-merge is durably armed; retro launches detached terminal verification and preserves the worktree until `MERGED`.
-
 
 ## Success Criteria
 

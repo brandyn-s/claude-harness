@@ -9,12 +9,6 @@ metadata:
   version: "1.0"
 allowed-tools: Glob Grep Read Write Bash mcp__codebase-memory-mcp__get_architecture mcp__codebase-memory-mcp__search_graph
 ---
-> **Compaction continuity:** Claude Code reattaches only the first 5,000
-> tokens of an invoked skill after compaction, within a 25,000-token shared
-> newest-first budget. If compaction occurs, re-invoke this skill before
-> continuing; if model invocation is disabled, stop and ask the user to invoke
-> it. Do not rely on tail instructions until the full body is restored.
-
 
 # Threat Model
 
@@ -34,9 +28,6 @@ the specified area. Still produce all four sections, but title the overview
 to reflect the narrowed scope and note what is excluded.
 
 ---
-
-
-> **Runtime policy:** Resolve the effective model and preserve refusal/fallback provenance per `../_shared/model-runtime-policy.md`.
 
 ## Step 0: Scope Detection
 

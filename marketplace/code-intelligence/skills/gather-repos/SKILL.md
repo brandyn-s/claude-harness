@@ -17,12 +17,6 @@ compatibility:
     - cli: gh
 allowed-tools: Bash Read Write Edit Glob Grep mcp__exa__get_code_context_exa mcp__exa__web_search_exa mcp__firecrawl__firecrawl_search mcp__tavily__tavily_search AskUserQuestion
 ---
-> **Compaction continuity:** Claude Code reattaches only the first 5,000
-> tokens of an invoked skill after compaction, within a 25,000-token shared
-> newest-first budget. If compaction occurs, re-invoke this skill before
-> continuing; if model invocation is disabled, stop and ask the user to invoke
-> it. Do not rely on tail instructions until the full body is restored.
-
 
 # Gather Repos -- Community Config Discovery & Inventory
 
@@ -241,7 +235,6 @@ Forbidden: filtering candidates by stars BEFORE this checklist. Star-popularity 
 Forbidden: treating "low-star = frontier" as a positive signal. Empirically not supported. Low-star correlates with utility libraries and recent-but-undeveloped repos, not paradigm novelty. Use `/scout-frontier` for paradigm-distance scouting; this skill is config-substance scouting.
 
 Skip multi-signal ranking entirely when score-4+ candidates ≤ inventory budget (just inventory all of them).
-
 
 ## Step 2: Triage
 

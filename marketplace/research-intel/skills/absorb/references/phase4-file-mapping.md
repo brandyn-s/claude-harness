@@ -17,11 +17,11 @@ Use this table when executing Phase 4 Step 1 (Identify the relevant architecture
 | Prompt engineering | The actual text of matching skills/agents — compare instruction structure, constraint style, ambiguity handling |
 | Code style/architecture | `CLAUDE.md`, relevant skill files |
 | Search/research workflow | `rules/search-efficiency.md`, plus `rules/web-search-preference.md` |
-| Testing/validation | `rules/tdd-quality.md`, `rules/validate-to-improve.md` |
+| Testing/validation | `rules/tdd-quality.md` |
 | Decision-making process | `rules/check-before-change.md`, `rules/diagnose-before-fix.md` |
 | Memory/knowledge practices | `knowledge-base/topics/` via `memory_search`, `agent-memory/topics/` |
 | MCP tool usage | `CLAUDE.md` (delegation rules), relevant `agent-memory/topics/` files |
-| Engineering discipline | `rules/tdd-quality.md`, `rules/validate-to-improve.md`, `rules/check-before-change.md` |
+| Engineering discipline | `rules/tdd-quality.md`, `rules/check-before-change.md` |
 | Dependencies & CI | Repo `.github/workflows/`, `CLAUDE.md` CI section, `rules/security-review-before-pr.md` |
 | Documentation & communication | `rules/git-hygiene.md` (commit WHY), skill templates |
 | Other / uncategorized | Grep `rules/` for the pattern's keywords; fallback to `memory_search` |

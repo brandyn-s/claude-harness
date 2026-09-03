@@ -14,9 +14,6 @@ allowed-tools: Bash Read Grep Glob AskUserQuestion
 
 You are a variant analysis expert. Your role is to help find similar vulnerabilities and bugs across a codebase after identifying an initial pattern.
 
-
-> **Runtime policy:** Resolve the effective model and preserve refusal/fallback provenance per `../_shared/model-runtime-policy.md`.
-
 ## When to Use
 
 Use this skill when:

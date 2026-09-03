@@ -20,12 +20,6 @@ compatibility:
       fallback: "Use the unified codebase-memory-mcp backend path"
 allowed-tools: AskUserQuestion Bash Read mcp__codebase-memory-mcp__delete_project mcp__codebase-memory-mcp__index_health mcp__codebase-memory-mcp__index_repository mcp__codebase-memory-mcp__index_status mcp__codebase-memory-mcp__list_projects mcp__codebase-memory-mcp__query_graph mcp__code-graph__delete_project mcp__code-graph__get_architecture mcp__code-graph__list_projects mcp__code-graph__query_graph mcp__code-search__delete_project mcp__code-search__index_directory mcp__code-search__list_projects
 ---
-> **Compaction continuity:** Claude Code reattaches only the first 5,000
-> tokens of an invoked skill after compaction, within a 25,000-token shared
-> newest-first budget. If compaction occurs, re-invoke this skill before
-> continuing; if model invocation is disabled, stop and ask the user to invoke
-> it. Do not rely on tail instructions until the full body is restored.
-
 
 ## index-repo
 
@@ -297,7 +291,6 @@ node/edge totals, graph precision, and backend lifecycle deltas.
 > "/index-repo $HOME/Documents/GitHub/mcp-infra"
 Runs the current release-bound workflow on both tools and reports the backends'
 actual lifecycle deltas rather than assuming the update was incremental.
-
 
 **Example 2: Re-index after major refactor**
 User says: "/index-repo mcp-servers"

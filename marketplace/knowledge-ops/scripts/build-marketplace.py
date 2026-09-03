@@ -116,7 +116,6 @@ PLUGINS = [
         "version": "1.1.0",
         "files": [
             ("skills/superplan/SKILL.md", "skills/superplan/SKILL.md"),
-            ("skills/superplan/references/override-policy.md", "skills/superplan/references/override-policy.md"),
             ("skills/superplan/references/examples.md", "skills/superplan/references/examples.md"),
             ("skills/supergoal/SKILL.md", "skills/supergoal/SKILL.md"),
             ("skills/supergoal/scripts/parse_plan.py", "skills/supergoal/scripts/parse_plan.py"),

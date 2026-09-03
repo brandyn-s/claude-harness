@@ -12,9 +12,6 @@ metadata:
 
 # False Positive Check
 
-
-> **Runtime policy:** Resolve the effective model and preserve refusal/fallback provenance per `../_shared/model-runtime-policy.md`.
-
 ## When to Use
 
 - "Is this bug real?" or "is this a true positive?"

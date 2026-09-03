@@ -1,7 +1,7 @@
 {
   "name": "safety-net",
   "description": "Minimal deterministic safety hooks for Claude Code \u2014 Bash command safety, protected-config integrity, and MCP result-injection detection. Additional policy and observation hooks remain opt-in.",
-  "version": "1.1.30",
+  "version": "1.1.31",
   "author": {
     "name": "Brandyn Schult",
     "url": "https://github.com/brandyn-s"

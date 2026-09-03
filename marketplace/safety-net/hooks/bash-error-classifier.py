@@ -47,7 +47,8 @@ def main():
     for pattern, suggestion_fn in ERROR_PATTERNS:
         match = re.search(pattern, error_text, re.IGNORECASE)
         if match:
-            print(json.dumps({"result": "info", "message": suggestion_fn(match)}))
+            print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUseFailure",
+                                                     "additionalContext": suggestion_fn(match)}}))
             return
 
 if __name__ == "__main__":

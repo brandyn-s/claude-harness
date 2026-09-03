@@ -71,11 +71,6 @@
   "schema_version": 1,
   "shared_assets": [
     "adversarial-validation.md",
-    "model-overlays/fable-5.md",
-    "model-overlays/mythos-5.md",
-    "model-overlays/opus-5.md",
-    "model-overlays/sonnet-5.md",
-    "model-runtime-policy.md",
     "oracle/ROOT-CAUSE-ANALYSIS.md",
     "oracle/SPEC.md",
     "oracle/__init__.py",

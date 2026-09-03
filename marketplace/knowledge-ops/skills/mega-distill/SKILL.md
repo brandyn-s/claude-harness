@@ -19,12 +19,6 @@ compatibility:
       fallback: "Skip the real-token fit smoke; rely on the calibrated UTF-8-byte estimate (2.5 bytes/token), plus the prompt/output headroom left by the conservative 180K default"
 
 ---
-> **Compaction continuity:** Claude Code reattaches only the first 5,000
-> tokens of an invoked skill after compaction, within a 25,000-token shared
-> newest-first budget. If compaction occurs, re-invoke this skill before
-> continuing; if model invocation is disabled, stop and ask the user to invoke
-> it. Do not rely on tail instructions until the full body is restored.
-
 
 # Mega-Distill — Compaction-Recovery Front-End for /distill
 
@@ -506,7 +500,6 @@ and hand them to `/distill` alongside the slice.
 Do NOT report a user-turn count from the slice as the session's ask count, and do NOT
 treat a nonzero wrapper-grep as proof the probe works: filter its hits to real
 `type=="user"` records first, or you are counting this file.
-
 
 ### Fourth blind spot: `attachment` / `queued_command` — and why the phrase-probe misses it
 

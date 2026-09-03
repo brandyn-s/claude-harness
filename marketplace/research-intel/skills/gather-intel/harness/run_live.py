@@ -208,7 +208,7 @@ def _call_arm(system: str, claim: str) -> tuple[dict, str]:
         # Historical Opus 4.8 rejects `temperature`; omission is safe in current mode too.
         # residual run-to-run variance is captured by N>=3 mean+spread.
         msg = client.messages.create(
-            model=MODEL, max_tokens=2000,
+            model=MODEL, max_tokens=MAX_TOKENS,
             system=system, tools=[WEB_SEARCH_TOOL], messages=messages,  # type: ignore[arg-type]
         )
         stop_reason = getattr(msg, "stop_reason", None)
@@ -340,8 +340,11 @@ def _category_counts(claims):
     return out
 
 
+MAX_TOKENS = 2000  # per-call output budget, applied to BOTH arms; --max-tokens overrides
+
+
 def main(argv=None):
-    global MODEL, RESULTS, RUN_RECEIPT
+    global MODEL, RESULTS, RUN_RECEIPT, MAX_TOKENS
     ap = argparse.ArgumentParser(description="gather-intel live efficacy A/B")
     mode = ap.add_mutually_exclusive_group(required=True)
     mode.add_argument("--historical-reproduction", action="store_true")
@@ -351,6 +354,8 @@ def main(argv=None):
     ap.add_argument("--output", type=Path, required=True)
     ap.add_argument("--plan-only", action="store_true")
     ap.add_argument("--runs", type=int, default=3)
+    ap.add_argument("--max-tokens", type=int, default=MAX_TOKENS,
+                    help="per-call output budget for BOTH arms (frozen baseline used 2000)")
     ap.add_argument("--limit", type=int, default=None, help="subset N claims (smoke); writes --output")
     ap.add_argument("--workers", type=int, default=5)
     args = ap.parse_args(argv)
@@ -365,7 +370,7 @@ def main(argv=None):
     if output == FROZEN_RESULTS.resolve():
         ap.error("the frozen 2026-05-31 results.json is immutable")
     RUN_RECEIPT = {"mode": "historical_reproduction" if args.historical_reproduction else "current_model",
-                   "requested_model": model, "qualification_status": "UNVERIFIED",
+                   "requested_model": model, "max_tokens": args.max_tokens, "qualification_status": "UNVERIFIED",
                    "effective_model": "<unavailable>", "provider": "<unavailable>",
                    "refusal_detected": "<unavailable>", "truncation_detected": "<unavailable>",
                    "stop_outcomes": "<unavailable>",
@@ -377,7 +382,7 @@ def main(argv=None):
     if args.plan_only:
         print(json.dumps(RUN_RECEIPT, indent=2))
         return 0
-    MODEL, RESULTS = model, output
+    MODEL, RESULTS, MAX_TOKENS = model, output, args.max_tokens
     with RUNTIME_LOCK:
         RUNTIME_OBSERVATIONS.clear()
     t0 = time.time()
