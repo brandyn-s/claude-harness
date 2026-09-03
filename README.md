@@ -33,7 +33,8 @@ python3 bin/fresh_laptop_doctor.py
 
 For a new machine, accept the fresh-laptop profile and the recommended core.
 The installer then offers the owner-focused Brandyn operator layer. The
-portable core installs two ambient rules and three deterministic hooks:
+portable core installs one ambient rule, one path-scoped rule, and three
+deterministic hooks:
 
 - `outcome-over-verification.md` and `claude-md-quality.md`
 - catastrophic Bash safety, config integrity, and MCP result-injection guards
@@ -44,9 +45,8 @@ The operator layer adds one compact discipline rule, the `delivery` Bash policy
 pack, explicit review for high-consequence Terraform/AWS/Git/MCP mutations, a
 non-blocking repeated-failure detector, and prompt/tool-output secret controls.
 It does not restore the phrase-based Stop blocker or the historical ambient
-corpus. It also references the private `brandyn-s/claude-config` marketplace and
-enables its narrow `example-operator` protected-release preflight. The doctor
-reports the operator layer separately when selected.
+corpus, and it enables no plugins. The doctor reports the operator layer
+separately when selected.
 
 The profile is previewable and independently applicable:
 

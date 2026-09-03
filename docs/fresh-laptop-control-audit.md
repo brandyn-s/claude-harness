@@ -8,7 +8,7 @@ controls that could work against one another.
 
 | Hypothesis | Verdict | Evidence | Design response |
 |---|---|---|---|
-| The harness became bloated | Confirmed | 97,380 measured ambient tokens; roughly 109,000 in a typical coding session after path rescoping | Fresh default is 2 rules and 3 hooks; everything else is opt-in |
+| The harness became bloated | Confirmed | 97,380 measured ambient tokens; roughly 109,000 in a typical coding session after path rescoping | Fresh default is 1 ambient rule, 1 path-scoped rule and 3 hooks; everything else is opt-in |
 | Older-Claude lessons remain ambient | Confirmed in part | `never-stop-early` enforces session persistence; `validate-to-improve` says every passing validation must produce more work | Retained as historical source, removed from the installable rule set |
 | Controls can fight each other | Confirmed for one concrete path | `promise-checker.py` blocks phrases such as “let's wrap up” without checking whether the requested outcome is complete, while `outcome-over-verification` requires stopping once decisive evidence passes | Stop hook demoted; the outcome contract owns termination |
 | Rules can fight each other | Confirmed | `validate-to-improve` prohibits stopping at PASS; `outcome-over-verification` requires stopping when decisive evidence passes | `validate-to-improve` demoted from installation |
