@@ -94,3 +94,42 @@ def test_keychain_get_empty_value_is_none(monkeypatch):
         mod.subprocess, "run", lambda *a, **k: _FakeResult(returncode=0, stdout=b"\n")
     )
     assert mod._keychain_get("EMPTY") is None
+
+
+# ── Review 2026-09-03: bare-name Keychain items ──────────────────────────
+#
+# The operator's secrets live in a custom keychain with service == account ==
+# the bare variable name (TAVILY_API_KEY), while this loader looked only for
+# the `claude/<NAME>` service that bin/keychain-seed writes. Both spellings
+# must resolve; the prefixed one still wins when both exist.
+
+def test_keychain_get_falls_back_to_bare_service_name(monkeypatch):
+    monkeypatch.setattr(mod.sys, "platform", "darwin")
+    monkeypatch.delenv("CLAUDE_KEYCHAIN_SECRETS", raising=False)
+    services = []
+
+    def fake_run(cmd, **kwargs):
+        service = cmd[cmd.index("-s") + 1]
+        services.append(service)
+        if service == "MY_TOKEN":
+            return _FakeResult(returncode=0, stdout=b"bare-value\n")
+        return _FakeResult(returncode=44, stdout=b"")
+
+    monkeypatch.setattr(mod.subprocess, "run", fake_run)
+    assert mod._keychain_get("MY_TOKEN") == "bare-value"
+    assert services == ["claude/MY_TOKEN", "MY_TOKEN"], services
+
+
+def test_keychain_get_prefers_prefixed_item_when_both_exist(monkeypatch):
+    monkeypatch.setattr(mod.sys, "platform", "darwin")
+    monkeypatch.delenv("CLAUDE_KEYCHAIN_SECRETS", raising=False)
+    services = []
+
+    def fake_run(cmd, **kwargs):
+        service = cmd[cmd.index("-s") + 1]
+        services.append(service)
+        return _FakeResult(returncode=0, stdout=b"prefixed-value\n")
+
+    monkeypatch.setattr(mod.subprocess, "run", fake_run)
+    assert mod._keychain_get("MY_TOKEN") == "prefixed-value"
+    assert services == ["claude/MY_TOKEN"], "must not query the bare name once the prefixed item resolved"
