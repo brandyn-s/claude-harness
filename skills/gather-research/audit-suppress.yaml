@@ -5,7 +5,7 @@ suppressions:
     target: "mcp__exa__*"
     reason: invoked via references/search-waves.md as part of Wave 1+2 search routing; the M2 reference-scan covers most but the bare names appear ambiguously enough to occasionally false-positive
   - code: M2
-    target: "mcp__4c2bb016-a49e-4043-8a0f-35135dea63a2__*"
+    target: "mcp__00000000-0000-4000-8000-000000000003__*"
     reason: UUID-namespaced Exa variant; same delegation chain as the named variant above
   - code: D4
     target: "/home/user/Documents/knowledge-base/topics/voice-mode-vs-text-mode-behavior.md"

@@ -9,7 +9,7 @@ requires_tools:
   - "mcp__airlock__*"
   - "mcp__msgraph__*"
   - "mcp__linear-server__*"
-  - "mcp__93acadff-cc17-4b6c-b323-1d575dcca6d3__*"
+  - "mcp__00000000-0000-4000-8000-000000000002__*"
   - "mcp__ramp__*"
   - "mcp__codebase-memory-mcp__*"
   - "mcp__tavily__tavily_search"

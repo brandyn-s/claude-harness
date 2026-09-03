@@ -67,7 +67,7 @@ known_phantom:
   #
   # - name: mcp__confluence-fedramp__          # replaced_by: mcp__confluence__
   #     consumers: skills/gather-internal-intel/{SKILL.md:17,203, manifest.yaml:29}
-  # - name: mcp__036e0c74-1e0e-4bce-ad71-2a678d79b204__   # replaced_by: mcp__slack-user__
+  # - name: mcp__00000000-0000-4000-8000-000000000001__   # replaced_by: mcp__slack-user__
   #     Windows-era claude.ai Slack connector GUID; retired, absent on macOS.
   #     consumers: skills/gather-internal-intel/SKILL.md (frontmatter + body)
   # - name: mcp__exa__web_search_advanced_exa

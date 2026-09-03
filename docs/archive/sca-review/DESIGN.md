@@ -15,7 +15,7 @@ when_to_use: |
   documented stubs — running them exits with a clear message. Skill is not
   yet end-to-end runnable until the helpers ship. This source is intentionally
   inert and excluded from marketplace packaging.
-argument-hint: "[filename.cklb] [--target example-target|physical-mcs] [--repo source-path]"
+argument-hint: "[filename.cklb] [--target example-target|example-target-b] [--repo source-path]"
 effort: max
 metadata:
   author: example-security-engineering

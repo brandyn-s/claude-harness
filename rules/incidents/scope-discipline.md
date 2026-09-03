@@ -198,10 +198,10 @@ asymmetry matters — narrowing is recoverable by shipping the rest, widening wr
 a resource nobody approved.
 ```
 
-## 2026-07-17-example-target-echelon-security-overview-drafted-a
+## 2026-07-17-example-target-and-target-b-security-overview-drafted-a
 
 ```
-WHY: 2026-07-17 ExampleTarget+Echelon security overview — drafted a comprehensive internal-style
+WHY: 2026-07-17 ExampleTarget+ExampleTargetB security overview — drafted a comprehensive internal-style
 doc, then the user revealed piecemeal that it was customer-facing -> positive/high-level ->
 ~3 pages -> no LLM-style bold -> drop the product brand. ~6 full rewrites, each a constraint
 an upfront audience/tone/length/branding question would have surfaced. Distinct from

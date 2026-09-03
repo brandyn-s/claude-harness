@@ -12,8 +12,8 @@ _HOME = str(Path.home())
 # CUSTOMIZE: Update these environment variables for your org
 ENV_VARS = [
     f"PYTHON_EXE={Path(_HOME, 'AppData/Local/Programs/Python/Python312/python.exe') if os.name == 'nt' else 'python3'}",
-    "AIRLOCK_SERVER=sa9964.am.managedwhitelisting.com:3129",
-    "AIRLOCK_BLOCKLIST_GLOBAL=1770699643",
+    "AIRLOCK_SERVER=airlock.example.internal:3129",
+    "AIRLOCK_BLOCKLIST_GLOBAL=0000000000",
     "CS_BASE_URL=api.laggar.gcw.crowdstrike.com",
     f"CS_HYGIENE={Path(_HOME, 'Documents/CrowdStrike/cs_hygiene.py')}",
     "TENABLE_URL=https://fedcloud.tenable.com",
@@ -22,7 +22,7 @@ ENV_VARS = [
     f"CMMC_DIR={Path(_HOME, 'Documents/CMMC/assessment')}",
     f"STIG_LIB={Path(_HOME, 'Downloads/U_SRG-STIG_Library_October_2025')}",
     "RAMP_SQL_LIMIT=100",
-    "CONFLUENCE_SPACES=SEE,DOGE,F2D,ENG,RADT,SEC",
+    "CONFLUENCE_SPACES=EXAMPLE,DOCS",
     "CONFLUENCE_EMAIL=security@example.com",
 ]
 

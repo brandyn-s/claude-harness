@@ -152,7 +152,7 @@ def test_slack_guid_send_message_warns():
     """Current install registers Slack under a GUID prefix; hook must
     match it the same as the legacy mcp__slack-user__ prefix."""
     rc, stdout, _ = run_hook(HOOK, {
-        "tool_name": "mcp__036e0c74-1e0e-4bce-ad71-2a678d79b204__slack_send_message",
+        "tool_name": "mcp__00000000-0000-4000-8000-000000000001__slack_send_message",
         "tool_input": {"channel_id": "C1", "text": "hi"},
     })
     assert rc == 0
@@ -163,7 +163,7 @@ def test_slack_guid_send_message_warns():
 
 def test_slack_guid_schedule_message_warns():
     rc, stdout, _ = run_hook(HOOK, {
-        "tool_name": "mcp__036e0c74-1e0e-4bce-ad71-2a678d79b204__slack_schedule_message",
+        "tool_name": "mcp__00000000-0000-4000-8000-000000000001__slack_schedule_message",
         "tool_input": {"channel_id": "C1", "text": "later", "post_at": 1234},
     })
     assert rc == 0
@@ -173,7 +173,7 @@ def test_slack_guid_schedule_message_warns():
 
 def test_slack_guid_read_passes_through():
     rc, stdout, _ = run_hook(HOOK, {
-        "tool_name": "mcp__036e0c74-1e0e-4bce-ad71-2a678d79b204__slack_read_channel",
+        "tool_name": "mcp__00000000-0000-4000-8000-000000000001__slack_read_channel",
         "tool_input": {"channel_id": "C1"},
     })
     assert rc == 0
@@ -184,7 +184,7 @@ def test_linear_guid_save_issue_warns():
     """Linear is now registered under a GUID prefix. save_issue creates
     or updates an issue — a write op that needs confirmation."""
     rc, stdout, _ = run_hook(HOOK, {
-        "tool_name": "mcp__93acadff-cc17-4b6c-b323-1d575dcca6d3__save_issue",
+        "tool_name": "mcp__00000000-0000-4000-8000-000000000002__save_issue",
         "tool_input": {"title": "incident X"},
     })
     assert rc == 0
@@ -194,7 +194,7 @@ def test_linear_guid_save_issue_warns():
 
 def test_linear_guid_save_status_update_warns():
     rc, stdout, _ = run_hook(HOOK, {
-        "tool_name": "mcp__93acadff-cc17-4b6c-b323-1d575dcca6d3__save_status_update",
+        "tool_name": "mcp__00000000-0000-4000-8000-000000000002__save_status_update",
         "tool_input": {"projectId": "p1", "body": "shipped"},
     })
     assert rc == 0
@@ -204,7 +204,7 @@ def test_linear_guid_save_status_update_warns():
 
 def test_linear_guid_read_passes_through():
     rc, stdout, _ = run_hook(HOOK, {
-        "tool_name": "mcp__93acadff-cc17-4b6c-b323-1d575dcca6d3__list_issues",
+        "tool_name": "mcp__00000000-0000-4000-8000-000000000002__list_issues",
         "tool_input": {},
     })
     assert rc == 0
