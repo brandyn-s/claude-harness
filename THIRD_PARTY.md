@@ -6,7 +6,6 @@ here; local files identify the adapted mechanism where practical.
 
 | Project | Copyright | License | Used for |
 |---|---|---|---|
-| [flonat-research](https://github.com/flonat/flonat-research) | Copyright (c) 2026 Florian Burnat | MIT | selected hook concepts |
 | [paceflow](https://github.com/paceaitian/paceflow) | Copyright (c) 2026 paceaitian | MIT | protected-config guard concept |
 | [superpowers](https://github.com/obra/superpowers) | Copyright (c) 2025 Jesse Vincent | MIT | the four companion skills (`debugging-hypotheses`, `legacy-code-tdd`, `design-evidence-first`, `review-depth-by-risk`) were extracted from earlier forks of its planning, debugging, and TDD skills; the forks themselves were removed 2026-09-03 in favour of the installed plugin |
 | [turbo](https://github.com/tobihagemann/turbo) | Copyright (c) 2026 Tobias Hagemann | MIT | selected planning, review, threat-model, and learning workflow patterns |

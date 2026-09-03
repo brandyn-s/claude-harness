@@ -112,59 +112,6 @@ The full mirror is a host-materialized reference, not a portable file to copy.
 author settings onto a new laptop.
 
 
-## Optional: measure whether the verification rules are working
-
-This repository spends more ambient context on "verify before claiming done"
-than on any other single concern. A few slices have derived partial enforcement,
-but the specific act of making a completion claim without same-turn evidence has
-no mechanical backing. `manifests/compile.py` derives that topology from live
-wiring instead of trusting rule-side declarations.
-
-The obvious move is a Stop hook that blocks an unverified completion claim. That
-move is not shipped, for a reason worth reading: the argument for it rested on a
-count of hook *blocks* with no denominator — how many compliant actions the rules
-had already shaped. An adversarial cross-vendor review rejected that as
-survivorship logic, and it was right. Building an enforcing gate on it would
-repeat the error one layer down.
-
-So what ships is the instrument that produces the missing denominator:
-
-```jsonc
-// ~/.claude/settings.json — opt in explicitly
-{
-  "hooks": {
-    "Stop": [
-      { "hooks": [ { "type": "command",
-                     "command": "python3 ~/.claude/hooks/completion-claim-observer.py" } ] }
-    ]
-  }
-}
-```
-
-It **never blocks** — exit 0 unconditionally, no `decision` key, no network — and
-appends one JSONL row per turn to `~/.claude/state/completion-claims.jsonl`:
-whether the turn made a completion claim, and whether verification-shaped
-evidence appeared in the same turn's tool output.
-
-```bash
-python3 bin/completion-claim-report.py          # distribution
-python3 bin/completion-claim-report.py --json   # machine-readable
-```
-
-The report **refuses to interpret anything** below 100 readable turns or when it
-detects no completion claims. Unreadable transcript tails never satisfy that
-sample floor. A low unverified-claim rate is evidence the ambient rules are doing
-their job and no gate is warranted; a high one is the first real basis for
-building one. Either way the decision comes from a distribution rather than from
-an anecdote.
-
-The detector was qualified against five fixtures before shipping — claim with
-tool evidence, claim with prose evidence only, claim with none, a non-claim, and
-a *hedged* non-claim ("I would need to run the suite before saying anything is
-fixed"). That last case initially registered as a claim, which would have
-inflated the unverified rate in the direction that flatters the case for a gate;
-the negation guard exists because of it.
-
 ## Why this might be worth reading
 
 **Enforcement is mechanical, not advisory.** The design assumes the agent is a
