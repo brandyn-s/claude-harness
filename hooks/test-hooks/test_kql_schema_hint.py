@@ -18,9 +18,7 @@ def test_non_hunting_tool_passes_silently():
         "tool_input": {"name": "msgraph_list_users", "arguments": {}},
     })
     assert rc == 0
-    data = json.loads(out)
-    assert data == {"ok": True}
-    assert "systemMessage" not in data
+    assert out.strip() == ""  # a pass emits nothing
 
 
 def test_hunting_query_without_project_passes():
@@ -32,8 +30,7 @@ def test_hunting_query_without_project_passes():
         },
     })
     assert rc == 0
-    data = json.loads(out)
-    assert "systemMessage" not in data
+    assert out.strip() == ""  # a pass emits nothing
 
 
 def test_single_column_project_passes():
@@ -45,8 +42,7 @@ def test_single_column_project_passes():
         },
     })
     assert rc == 0
-    data = json.loads(out)
-    assert "systemMessage" not in data
+    assert out.strip() == ""  # a pass emits nothing
 
 
 def test_multi_column_project_without_getschema_fires_hint(tmp_path):
@@ -68,10 +64,12 @@ def test_multi_column_project_without_getschema_fires_hint(tmp_path):
     })
     assert rc == 0
     data = json.loads(out)
-    assert data["ok"] is True
-    assert "systemMessage" in data
-    assert "DeviceInfo" in data["systemMessage"]
-    assert "getschema" in data["systemMessage"]
+    # additionalContext is the documented model-facing channel; systemMessage only
+    # reached the user (live-probed 2026-09-03), so the hint never nudged the model.
+    assert data["hookSpecificOutput"]["hookEventName"] == "PreToolUse"
+    hint = data["hookSpecificOutput"]["additionalContext"]
+    assert "DeviceInfo" in hint
+    assert "getschema" in hint
 
 
 def test_prior_getschema_in_transcript_suppresses_hint(tmp_path):
@@ -96,8 +94,7 @@ def test_prior_getschema_in_transcript_suppresses_hint(tmp_path):
         "transcript_path": str(transcript),
     })
     assert rc == 0
-    data = json.loads(out)
-    assert "systemMessage" not in data
+    assert out.strip() == ""  # a pass emits nothing
 
 
 def test_non_watched_table_passes():
@@ -111,16 +108,14 @@ def test_non_watched_table_passes():
         },
     })
     assert rc == 0
-    data = json.loads(out)
-    assert "systemMessage" not in data
+    assert out.strip() == ""  # a pass emits nothing
 
 
 def test_empty_input_passes():
     """Empty/missing input doesn't crash."""
     rc, out, _ = run_hook(HOOK, {})
     assert rc == 0
-    data = json.loads(out)
-    assert data == {"ok": True}
+    assert out.strip() == ""  # a pass emits nothing
 
 
 def test_missing_transcript_path_treats_as_no_prior_getschema(tmp_path):
@@ -136,5 +131,4 @@ def test_missing_transcript_path_treats_as_no_prior_getschema(tmp_path):
     })
     assert rc == 0
     data = json.loads(out)
-    assert "systemMessage" in data
-    assert "AlertInfo" in data["systemMessage"]
+    assert "AlertInfo" in data["hookSpecificOutput"]["additionalContext"]

@@ -5,7 +5,7 @@ tool is `msgraph_run_hunting_query`. Detects queries that reference
 specific columns via `| project col1, col2, ...` WITHOUT a corresponding
 `| getschema` call earlier in the session for the same table.
 
-Behavior: emits a soft `systemMessage` hint (NOT a block). Does not prevent
+Behavior: emits a soft `additionalContext` hint to the model (NOT a block). Does not prevent
 the query — just nudges the model toward running `<Table> | getschema`
 first when uncertain about column names.
 
@@ -125,14 +125,12 @@ def main():
     tool_name = tool_input.get("name")
     # Only fire on the hunting-query tool
     if tool_name != "msgraph_run_hunting_query":
-        print(json.dumps({"ok": True}))
-        return
+        return  # a pass emits nothing
 
     query = _extract_query(tool_input.get("arguments") or {})
     if not query or not _query_has_explicit_project(query):
         # Either no query, or no multi-column project — safe to pass through
-        print(json.dumps({"ok": True}))
-        return
+        return  # a pass emits nothing
 
     transcript_path = hook_input.get("transcript_path")
 
@@ -145,8 +143,7 @@ def main():
         unverified_tables.append(table)
 
     if not unverified_tables:
-        print(json.dumps({"ok": True}))
-        return
+        return  # a pass emits nothing
 
     table_list = ", ".join(unverified_tables[:3])
     hint = (
@@ -157,7 +154,10 @@ def main():
         f"first — Defender hunting schemas drift between tenants and over time. "
         f"Background: rules/incidents/verify-effectiveness.md (2026-05-28 RC1)."
     )
-    print(json.dumps({"ok": True, "systemMessage": hint}))
+    # additionalContext is the documented model-facing PreToolUse channel; the
+    # former top-level systemMessage only reached the user (probed 2026-09-03).
+    print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse",
+                                             "additionalContext": hint}}))
 
 
 if __name__ == "__main__":
@@ -166,6 +166,5 @@ if __name__ == "__main__":
     except SystemExit:
         raise
     except Exception:
-        # Crash-safe: pass through on any internal error
-        print(json.dumps({"ok": True}))
+        # Crash-safe: pass through silently on any internal error
         sys.exit(0)
