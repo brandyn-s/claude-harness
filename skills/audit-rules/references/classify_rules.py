@@ -363,9 +363,6 @@ HOOK_RULE_MAP = {
     "skill-ref-validator.py": [
         "Warn on dead hook/script refs in SKILL.md",
     ],
-    "skill-routing-hint.py": [
-        "Suggest skill/agent routing on user prompt",
-    ],
     "stop-failure-handler.py": [
         "Log API failures and print recovery guidance",
     ],

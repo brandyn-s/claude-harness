@@ -39,9 +39,9 @@ only, which is exactly the list worth shortening.
 python3 manifests/compile.py --root . --check --strict-semantic --no-reindex
 ```
 
-Exits non-zero on dangling routes (a `hooks/skill-rules.json` entry pointing at a
-skill that does not exist), dangling references, and drift between a manifest and
-its source. CI runs this, and also proves it can fail by planting a dangling route.
+Exits non-zero on dangling references and drift between a manifest and its
+source. CI runs this, and also proves it can fail by planting a manifest with a
+dangling reference.
 
 ## Files
 

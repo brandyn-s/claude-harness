@@ -32,7 +32,6 @@ def _make_fake_base(tmp_path):
     (base / 'rules' / 'demo.md').write_text('rule', encoding='utf-8')
     (base / 'hooks').mkdir()
     (base / 'hooks' / 'test-hooks').mkdir()
-    (base / 'hooks' / 'skill-rules.json').write_text('{"rules": []}', encoding='utf-8')
     (base / 'settings.json').write_text('{"hooks": {}}', encoding='utf-8')
     (base / 'ARCHITECTURE.md').write_text('# arch\n', encoding='utf-8')
     return base

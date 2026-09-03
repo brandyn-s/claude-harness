@@ -15,7 +15,6 @@ CLAUDE_DIR = Path.home() / ".claude"
 HOOKS_DIR = CLAUDE_DIR / "hooks"
 AGENTS_DIR = CLAUDE_DIR / "agents"
 SKILLS_DIR = CLAUDE_DIR / "skills"
-RULES_FILE = HOOKS_DIR / "skill-rules.json"
 SETTINGS_FILE = CLAUDE_DIR / "settings.json"
 MCP_JSON = Path.home() / ".mcp.json"
 CLAUDE_JSON = Path.home() / ".claude.json"
@@ -167,48 +166,6 @@ def check_1_agent_denylists():
             if not any(prefix == vp for vp in valid_prefixes):
                 findings.append(
                     f"[CRITICAL] {agent_file.name}: denies '{pattern}' but no server with prefix '{prefix}' exists"
-                )
-    return findings
-
-
-
-def check_2_skill_rules_have_files():
-    findings = []
-    if not RULES_FILE.exists():
-        return ["[HIGH] skill-rules.json not found"]
-    try:
-        with open(RULES_FILE, "r", encoding="utf-8") as f:
-            config = json.load(f)
-    except Exception as e:
-        return [f"[HIGH] skill-rules.json parse error: {e}"]
-    for rule in config.get("rules", []):
-        skill_name = rule.get("skill")
-        if skill_name:
-            skill_path = SKILLS_DIR / skill_name / "SKILL.md"
-            if not skill_path.exists():
-                findings.append(
-                    f"[HIGH] Routing rule references skill '{skill_name}' but {skill_path} does not exist"
-                )
-    return findings
-
-
-
-def check_3_skill_rules_have_agents():
-    findings = []
-    if not RULES_FILE.exists():
-        return []
-    try:
-        with open(RULES_FILE, "r", encoding="utf-8") as f:
-            config = json.load(f)
-    except Exception:
-        return []
-    for rule in config.get("rules", []):
-        agent_name = rule.get("agent")
-        if agent_name:
-            agent_path = AGENTS_DIR / f"{agent_name}.md"
-            if not agent_path.exists():
-                findings.append(
-                    f"[HIGH] Routing rule references agent '{agent_name}' but {agent_path} does not exist"
                 )
     return findings
 
@@ -798,8 +755,6 @@ def run_consistency_check():
 
     checks = [
         ("Agent denylists", check_1_agent_denylists),
-        ("Skill files exist", check_2_skill_rules_have_files),
-        ("Agent files exist", check_3_skill_rules_have_agents),
         ("Stub topic files", check_4_stub_topic_files),
         ("Memory bounds", check_5_memory_bounds),
         ("Dead pipeline", check_7_no_dead_pipeline),

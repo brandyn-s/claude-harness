@@ -7,7 +7,7 @@ Reads manifests from:
 
 Validates references and produces:
   - <root>/manifests/graph.json (compiled graph for query engine)
-  - Validation report (dangling references, missing manifests, dangling routes)
+  - Validation report (dangling references, missing manifests, placeholders)
 
 Usage:
   python compile.py                    # compile and validate (root=~/.claude)
@@ -218,36 +218,6 @@ def validate_placeholders(components):
     return issues
 
 
-def validate_skill_rules(root: Path):
-    """Validate that hooks/skill-rules.json routes point at real skill folders.
-
-    Returns list of issues. Skips silently if skill-rules.json doesn't exist.
-    """
-    issues = []
-    rules_path = root / "hooks" / "skill-rules.json"
-    if not rules_path.exists():
-        return issues
-
-    try:
-        with open(rules_path, encoding="utf-8") as fh:
-            data = json.load(fh)
-    except Exception as e:
-        issues.append(f"  ERROR loading {rules_path}: {e}")
-        return issues
-
-    skills_dir = root / "skills"
-
-    for i, rule in enumerate(data.get("rules", [])):
-        skill_ref = rule.get("skill")
-        if skill_ref and not (skills_dir / skill_ref / "SKILL.md").exists():
-            issues.append(
-                f"  DANGLING_ROUTE: skill-rules.json[{i}] routes to '{skill_ref}' "
-                f"(no skills/{skill_ref}/SKILL.md found)"
-            )
-
-    return issues
-
-
 def validate_semantic(root: Path, components):
     """Cross-reference manifest content against source files.
 
@@ -362,7 +332,6 @@ def compile_graph(
         print(f"Loaded {total} manifests: {skills} skills, {hooks} hooks, {rules} rules")
 
     struct_issues = validate(components, root)
-    route_issues = validate_skill_rules(root)
     sem_issues = validate_semantic(root, components)
 
     if struct_issues:
@@ -371,13 +340,6 @@ def compile_graph(
             print(issue)
     elif not quiet:
         print("Structural validation: OK (no dangling references)")
-
-    if route_issues:
-        print(f"\nRouting issues ({len(route_issues)}):")
-        for issue in route_issues:
-            print(issue)
-    elif not quiet:
-        print("Routing validation: OK (skill-rules.json points at real skills)")
 
     # Split semantic results: MISSING_SOURCE is always a hard error (manifest
     # points at a file that doesn't exist); DRIFT stays advisory for ordinary
@@ -400,7 +362,7 @@ def compile_graph(
     # Hard issues always block. CI/release qualification opts into semantic
     # drift as a gate now that the checked-in baseline is clean; interactive
     # callers retain the advisory default for backwards compatibility.
-    issues = struct_issues + route_issues + sem_errors
+    issues = struct_issues + sem_errors
     if strict_semantic:
         issues += sem_warnings
 

@@ -45,7 +45,7 @@ reproducer:
 | Code | Default severity | Description |
 |------|-----------------|-------------|
 | C1 | info | No owning agent — no agent's allowlist covers this MCP server |
-| C2 | drift | No routing rule — server's keywords absent from `skill-rules.json` |
+| C2 | — | Retired 2026-09-03: skills route natively by frontmatter description; the static routing table was removed |
 | C3 | info | No PreToolUse validation — no PreToolUse hook covers `mcp__{server}__*` |
 | C4 | info | No topic file — no populated `agent-memory/topics/{server}.md` (topic-file tier covers agent memory) |
 | C5 | info | No agent memory — owning agent's memory directory has 0 entries |
@@ -54,12 +54,6 @@ reproducer:
 **Reproducer patterns:**
 
 ```yaml
-# C2 — no routing rule
-reproducer:
-  type: grep_absent
-  command: |
-    grep -q 'server-keyword' ~/.claude/hooks/skill-rules.json
-
 # C4 — no topic file
 reproducer:
   type: file_missing
@@ -100,7 +94,7 @@ reproducer:
 | Code | Default severity | Description |
 |------|-----------------|-------------|
 | D1 | info | Agent denylist mismatch — `disallowedTools` in agent .md differs from what ARCHITECTURE.md documents |
-| D2 | info | Routing rule/CLAUDE.md mismatch — rule in `skill-rules.json` has no matching delegation row, or vice versa |
+| D2 | — | Retired 2026-09-03 with the static routing table |
 | D3 | info | ARCHITECTURE.md count wrong — documented server/agent/hook count differs from actual |
 | D4 | info | Documented phantom — server appears in ARCHITECTURE.md but not in any config |
 | D5 | info | Undocumented server — server in config but missing from ARCHITECTURE.md |

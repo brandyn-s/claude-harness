@@ -271,14 +271,7 @@ class TestC6SizeCheck:
         body = '\n'.join(f'line {i}' for i in range(600))
         _write_skill(skills_root, 'too-long', body=body)
         os.rmdir(os.path.join(skills_root, 'too-long', 'references'))
-        # Need a skill-rules.json present for load_routing_rules.
-        rules_dir = os.path.join(tmp_path, 'hooks')
-        os.makedirs(rules_dir, exist_ok=True)
-        with open(os.path.join(rules_dir, 'skill-rules.json'), 'w', encoding='utf-8') as f:
-            f.write('{"rules": []}')
-        monkeypatch.setattr(sqa, 'rules_path', os.path.join(rules_dir, 'skill-rules.json'))
-
-        _, _, _, _, fails, meta = sqa.evaluate_skill('too-long', set())
+        _, _, _, _, fails, meta = sqa.evaluate_skill('too-long')
         assert meta['lines'] > 500
         assert 'C6_size' not in fails
 
@@ -291,13 +284,7 @@ class TestC6SizeCheck:
         body = ' '.join(f'w{i}' for i in range(5001))
         _write_skill(skills_root, 'too-wordy', body=body)
         os.rmdir(os.path.join(skills_root, 'too-wordy', 'references'))
-        rules_dir = os.path.join(tmp_path, 'hooks')
-        os.makedirs(rules_dir, exist_ok=True)
-        with open(os.path.join(rules_dir, 'skill-rules.json'), 'w', encoding='utf-8') as f:
-            f.write('{"rules": []}')
-        monkeypatch.setattr(sqa, 'rules_path', os.path.join(rules_dir, 'skill-rules.json'))
-
-        _, _, _, _, fails, meta = sqa.evaluate_skill('too-wordy', set())
+        _, _, _, _, fails, meta = sqa.evaluate_skill('too-wordy')
         assert meta['words'] > 5000
         assert 'C6_size' in fails
 
@@ -306,13 +293,7 @@ class TestC6SizeCheck:
         monkeypatch.setattr(sqa, 'skills_dir', skills_root)
         body = '\n'.join(f'line {i}' for i in range(50))
         _write_skill(skills_root, 'compact', body=body)
-        rules_dir = os.path.join(tmp_path, 'hooks')
-        os.makedirs(rules_dir, exist_ok=True)
-        with open(os.path.join(rules_dir, 'skill-rules.json'), 'w', encoding='utf-8') as f:
-            f.write('{"rules": []}')
-        monkeypatch.setattr(sqa, 'rules_path', os.path.join(rules_dir, 'skill-rules.json'))
-
-        _, _, _, _, fails, _ = sqa.evaluate_skill('compact', set())
+        _, _, _, _, fails, _ = sqa.evaluate_skill('compact')
         assert 'C6_size' not in fails
 
 

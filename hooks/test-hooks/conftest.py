@@ -125,9 +125,8 @@ _NEEDS_GIT_PER_TEST = {
     "test_bash_security_guard.py::test_autofix_rebase_already_stashed_noop",
     "test_bash_security_guard.py::test_autofix_rebase_continue_noop",
 }
-_NEEDS_YAML_IN_SYSEXEC = {
-    "test_skill_routing_hint.py",
-}
+# Empty since skill-routing-hint left; keep the slot for the next yaml-importing hook test.
+_NEEDS_YAML_IN_SYSEXEC: set[str] = set()
 _NEEDS_OPENPYXL_IN_SYSEXEC = {
     "test_xlsx_to_md.py",
 }
