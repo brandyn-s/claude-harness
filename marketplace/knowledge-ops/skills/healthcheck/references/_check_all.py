@@ -256,10 +256,6 @@ def main():
 
     results.append(("Drift", *drift))
 
-    progress("[7/11] routing…")
-    rc, out, _ = run(["python3", f"{REF}/_check_routing.py"])
-    results.append(("Routing", "PASS" if rc == 0 else "WARN", cap(out)))
-
     progress("[8/11] targets…")
     rc, out, _ = run(["python3", f"{REF}/_check_targets.py"])
     results.append(("Targets", "PASS" if rc == 0 else "WARN", cap(out)))

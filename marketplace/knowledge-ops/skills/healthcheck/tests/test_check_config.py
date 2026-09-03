@@ -42,7 +42,7 @@ def test_all_valid_passes(tmp_path, monkeypatch):
         monkeypatch,
         {
             "settings.json": "{}",
-            "hooks/skill-rules.json": '{"rules": [], "skip_patterns": []}',
+            "settings.local.json": "{}",
         },
     )
     status, msg = hc.check_config()

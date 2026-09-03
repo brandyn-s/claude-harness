@@ -16,7 +16,6 @@ Read this before starting Phases 0–6. Then audit.
   partial writes.
 - `~/.claude/settings.json` — hooks, permissions, disabled MCP servers
 - `~/.claude/settings.local.json` — local overrides; may not exist
-- `~/.claude/hooks/skill-rules.json` — routing rules
 
 ## Known-OK deviations (do NOT flag these)
 
@@ -111,12 +110,10 @@ This host does NOT use the per-domain owning-agent design that Phase 2's
   updated), not in `agent-memory/worker/`. An empty `worker/` directory is
   by design, not an unused agent. Task-scoped subagents are deliberately
   stateless (no `memory:` field) — do not flag L2 for them either.
-- **C4 (topic file)** and **C2 (routing rule)** remain meaningful, but per
-  compare-by-need they are inventory unless a concrete friction incident
-  exists: routing rules are advisory hints (description-routing still
-  works), and tavily/exa/firecrawl routing is owned by the
-  `web-search-preference` rule, not skill-rules.json.
-- **Router dispatch is priority-sorted**, not first-match — see Phase 4.
+- **C4 (topic file)** remains meaningful, but per compare-by-need it is
+  inventory unless a concrete friction incident exists. **C2 (routing rule)**
+  is retired: skills route natively by frontmatter description, and
+  tavily/exa/firecrawl routing is owned by the `web-search-preference` rule.
 
 ## What to do when uncertain
 

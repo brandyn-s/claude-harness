@@ -2251,8 +2251,8 @@ def _audit_log(command, action, reason):
     block counts feed prune decisions — test fixtures must not skew them).
 
     Stores the session id UNSLICED: manifest_metrics keys its session markers
-    on a 12-char prefix while bash-security-audit.py writes 8, so truncating
-    here would pick one join and break the other.
+    on a 12-char prefix while other audit consumers have keyed on 8, so
+    truncating here would pick one join and break the other.
     """
     if os.environ.get("CLAUDE_HOOK_TEST"):
         return

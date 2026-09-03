@@ -245,8 +245,6 @@ python3 "$MANIFESTS_DIR/scaffold_extended.py" --dry-run --sessions  # should sho
 The compiler checks:
 - **Structural**: no dangling references (every requires_rules,
   requires_skills points to an existing manifest). Counts toward exit code.
-- **Routing**: hooks/skill-rules.json points at real skills. Counts toward
-  exit code.
 - **Semantic**: split into two buckets — `MISSING_SOURCE` (manifest exists
   but its SKILL.md/rule.md is gone — hard error, gates exit code) and
   `DRIFT` (manifest `requires_tools` and SKILL.md prose disagree — soft

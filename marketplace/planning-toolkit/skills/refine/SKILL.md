@@ -12,7 +12,7 @@ allowed-tools: Read Glob Grep
 
 # Refine — Context Engineering Before Execution
 
-> **Output grounding (REQUIRED READ)**: when refining a prompt whose execution will produce output for a non-domain-expert user, read `skills/_shared/output-grounding.md` and make the refined prompt require its three-layer contract (confidence + provenance + counterfactual). That file is NOT ambient — it was relocated out of `rules/` on 2026-08-26 after measuring EXPOSED=0 over 438 transcripts — so it is in context only if you read it. The `creative-output-grounding-check` PostToolUse hook is an advisory payload diagnostic only; it does not grade the later final answer. The in-prompt requirement and final-output evaluation are the primary controls.
+> **Output grounding (REQUIRED READ)**: when refining a prompt whose execution will produce output for a non-domain-expert user, read `skills/_shared/output-grounding.md` and make the refined prompt require its three-layer contract (confidence + provenance + counterfactual). That file is NOT ambient — it was relocated out of `rules/` on 2026-08-26 after measuring EXPOSED=0 over 438 transcripts — so it is in context only if you read it. No hook grades the final answer; the in-prompt requirement and final-output evaluation are the controls.
 
 Lightweight context engineering that injects applicable project rules as
 constraints, decomposes multi-step tasks, and specifies missing data

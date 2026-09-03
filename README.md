@@ -1,7 +1,7 @@
 # claude-harness
 
 A working [Claude Code](https://docs.claude.com/en/docs/claude-code) harness:
-**73 hooks**, **38 ambient rules**, **81 skills**, and the agent
+**60 hooks**, **38 ambient rules**, **81 skills**, and the agent
 definitions that tie them together — about 1,568 source files, plus a generated
 plugin tree under `marketplace/` that roughly doubles the file count and is not
 meant to be read (see [marketplace/README.md](marketplace/README.md)).
