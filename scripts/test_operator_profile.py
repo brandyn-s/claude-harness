@@ -40,15 +40,11 @@ def test_operator_profile_composes_on_fresh_kernel(tmp_path: Path) -> None:
     assert settings["permissions"]["defaultMode"] == "acceptEdits"
     assert settings["env"]["CLAUDE_BASH_POLICY_PACKS"] == "delivery"
     assert "Bash(terraform apply:*)" in settings["permissions"]["ask"]
-    assert settings["enabledPlugins"] == {
-        "example-operator@claude-config": True,
-    }
-    assert settings["extraKnownMarketplaces"]["claude-config"] == {
-        "source": {
-            "source": "github",
-            "repo": "brandyn-s/claude-config",
-        }
-    }
+    # Review 2026-09-03: the overlay enabled an org plugin that the referenced
+    # marketplace catalog did not contain, so a fresh install would fail plugin
+    # resolution at startup. An operator overlay may only wire what exists.
+    assert "enabledPlugins" not in settings
+    assert "extraKnownMarketplaces" not in settings
 
 
 def test_operator_profile_preserves_existing_review_boundaries(tmp_path: Path) -> None:

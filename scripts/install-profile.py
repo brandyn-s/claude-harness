@@ -25,18 +25,29 @@ def _object(path: Path) -> dict[str, Any]:
     return value
 
 
+# Permission rule lists UNION with what is already installed. Replacing them
+# silently discarded a user's own decisions: measured 2026-09-03, applying
+# fresh-laptop over a curated settings.json cut permissions.allow from 34 to 3.
+# Other profile-owned lists (e.g. enabledMcpjsonServers) still replace.
+_APPEND_LISTS = {
+    ("permissions", "allow"),
+    ("permissions", "deny"),
+    ("permissions", "ask"),
+}
+
+
 def merge(
     base: dict[str, Any],
     overlay: dict[str, Any],
     path: tuple[str, ...] = (),
 ) -> dict[str, Any]:
-    """Recursively merge objects; review boundaries append, other lists replace."""
+    """Recursively merge objects; permission lists append + dedupe, other lists replace."""
     result = dict(base)
     for key, value in overlay.items():
         child_path = (*path, key)
         if isinstance(value, dict) and isinstance(result.get(key), dict):
             result[key] = merge(result[key], value, child_path)
-        elif child_path == ("permissions", "ask") and isinstance(value, list):
+        elif child_path in _APPEND_LISTS and isinstance(value, list):
             existing = result.get(key, [])
             if not isinstance(existing, list):
                 existing = []
