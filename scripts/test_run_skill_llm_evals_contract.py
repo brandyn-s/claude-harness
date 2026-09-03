@@ -21,13 +21,15 @@ def load_runner():
     return module
 
 
-def test_default_model_follows_current_repository_policy():
+def test_model_must_be_explicit_now_that_settings_pin_nothing():
+    """settings.json stopped pinning a model on 2026-09-03 (the runtime picks
+    it); an eval run must therefore name its model or fail loudly, never
+    invent one."""
     runner = load_runner()
-    expected_model = json.loads((REPO / "settings.json").read_text(encoding="utf-8"))[
-        "model"
-    ]
+    assert "model" not in json.loads((REPO / "settings.json").read_text(encoding="utf-8"))
 
-    assert runner.resolve_requested_model(None, {}) == expected_model
+    with pytest.raises(ValueError, match="--model or CLAUDE_MODEL"):
+        runner.resolve_requested_model(None, {})
     assert runner.resolve_requested_model("claude-opus-5", {}) == "claude-opus-5"
     assert runner.resolve_requested_model(
         None, {"CLAUDE_MODEL": "claude-sonnet-5"}

@@ -299,6 +299,25 @@ def check_orphan_worktrees():
     return warnings
 
 
+MUTATIONS_ENV = "CLAUDE_SESSION_START_MUTATIONS"
+
+
+def mutations_enabled() -> bool:
+    """Mutating startup modules run only on explicit opt-in.
+
+    repo_sync fetches and resets git checkouts, mcp_zombie_cleanup kills
+    processes, mcp_oauth_heal rewrites the login Keychain, auto_prune deletes
+    files, index_autoheal spawns a detached healer and worktree_gc removes
+    worktrees. None of that belongs in a default session start (review
+    2026-09-03); set CLAUDE_SESSION_START_MUTATIONS=1 to enable them.
+    """
+    return os.environ.get(MUTATIONS_ENV, "").strip() in {"1", "true", "yes"}
+
+
+def _skip(_result=None):
+    return []
+
+
 def main():
     from concurrent.futures import ThreadPoolExecutor
 
@@ -326,21 +345,22 @@ def main():
     run_env_loader()
 
     # 2. Run independent startup tasks in parallel
+    mutate = mutations_enabled()
     with ThreadPoolExecutor(max_workers=8) as executor:
-        fut_sync = executor.submit(sync_tracked_repos, session_id)
-        fut_prune = executor.submit(run_auto_prune)
+        fut_sync = executor.submit(sync_tracked_repos, session_id) if mutate else executor.submit(_skip)
+        fut_prune = executor.submit(run_auto_prune) if mutate else executor.submit(_skip)
         fut_consistency = executor.submit(run_consistency_check)
         fut_hooks = executor.submit(validate_hook_paths)
         fut_staleness = executor.submit(check_index_staleness)
-        fut_autoheal = executor.submit(autoheal_indexes)
+        fut_autoheal = executor.submit(autoheal_indexes) if mutate else executor.submit(_skip)
         fut_corruption = executor.submit(check_index_corruption)
         fut_mcp_staleness = executor.submit(check_mcp_binary_staleness)
-        fut_mcp_zombies = executor.submit(cleanup_stale_mcps)
-        fut_oauth_heal = executor.submit(heal_mcp_oauth_clients)
+        fut_mcp_zombies = executor.submit(cleanup_stale_mcps) if mutate else executor.submit(_skip)
+        fut_oauth_heal = executor.submit(heal_mcp_oauth_clients) if mutate else executor.submit(_skip)
         fut_cg_health = executor.submit(check_code_graph_health)
-        fut_cs_projects = executor.submit(cleanup_stale_projects)
+        fut_cs_projects = executor.submit(cleanup_stale_projects) if mutate else executor.submit(_skip)
         fut_orphans = executor.submit(check_orphan_worktrees)
-        fut_worktree_gc = executor.submit(prune_worktrees)
+        fut_worktree_gc = executor.submit(prune_worktrees) if mutate else executor.submit(_skip)
         fut_stale_config = executor.submit(check_stale_config_checkout)
 
         sync_warnings = fut_sync.result()
@@ -360,6 +380,12 @@ def main():
         stale_config_warnings = fut_stale_config.result()
 
     messages = []
+    if not mutate:
+        messages.append(
+            "Session-start: startup mutations disabled (repo sync, MCP process cleanup, "
+            "OAuth keychain heal, auto-prune, index heal, worktree GC). Set "
+            f"{MUTATIONS_ENV}=1 to enable them."
+        )
 
     # Check for concurrent session risk on claude-config repo
     worktree_warning = check_concurrent_session_risk()

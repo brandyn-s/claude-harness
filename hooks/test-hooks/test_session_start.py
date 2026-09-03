@@ -137,3 +137,18 @@ def test_global_model_silent_without_model_key(tmp_path):
     msg = _system_message_with_model(tmp_path, None)
     assert _MODEL_WARN not in msg
     assert _MODEL_HEAL not in msg
+
+
+def test_mutating_startup_modules_are_opt_in(tmp_path):
+    """repo sync, MCP process cleanup, keychain OAuth healing, pruning, index
+    healing and worktree GC all mutate the host. They run only when
+    CLAUDE_SESSION_START_MUTATIONS=1; a default start must say they were skipped."""
+    home_dir = tmp_path / "home"
+    (home_dir / ".claude").mkdir(parents=True)
+    env = {**os.environ, "HOME": str(home_dir), "USERPROFILE": str(home_dir)}
+    env.pop("CLAUDE_SESSION_START_MUTATIONS", None)
+    proc = subprocess.run(
+        [sys.executable, str(HOOK)], input="{}", capture_output=True, text=True, timeout=120, env=env,
+    )
+    assert proc.returncode == 0, proc.stderr
+    assert "startup mutations disabled" in proc.stdout

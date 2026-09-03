@@ -34,6 +34,7 @@ def _seed(root: Path, *, sandbox: bool = True) -> None:
             }],
         },
     }
+    settings["enabledPlugins"] = {"superpowers@claude-plugins-official": True}
     (root / "settings.json").write_text(json.dumps(settings), encoding="utf-8")
 
 
@@ -49,3 +50,18 @@ def test_config_fails_on_disabled_sandbox_or_missing_hook(tmp_path: Path) -> Non
     checks = {check.name: check for check in MODULE.inspect_config(tmp_path)}
     assert checks["native sandbox"].status == "FAIL"
     assert checks["hook wiring"].status == "FAIL"
+
+
+def test_doctor_warns_when_the_superpowers_plugin_is_missing(tmp_path: Path) -> None:
+    """The companion skills extend superpowers; a kernel without the plugin has
+    nothing for them to extend, so the doctor must say so (review 2026-09-03)."""
+    _seed(tmp_path)
+    settings = json.loads((tmp_path / "settings.json").read_text(encoding="utf-8"))
+    settings.pop("enabledPlugins", None)
+    (tmp_path / "settings.json").write_text(json.dumps(settings), encoding="utf-8")
+    checks = {c.name: c for c in MODULE.inspect_config(tmp_path)}
+    assert checks["superpowers plugin"].status == "WARN"  # advisory: the plugin is installed inside Claude Code, never by the installer
+    settings["enabledPlugins"] = {"superpowers@claude-plugins-official": True}
+    (tmp_path / "settings.json").write_text(json.dumps(settings), encoding="utf-8")
+    checks = {c.name: c for c in MODULE.inspect_config(tmp_path)}
+    assert checks["superpowers plugin"].status == "PASS"

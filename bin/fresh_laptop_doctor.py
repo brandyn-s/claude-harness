@@ -80,6 +80,22 @@ def inspect_config(config_root: Path) -> list[Check]:
         )
     )
 
+    plugins = settings.get("enabledPlugins") or {}
+    has_superpowers = any(
+        str(name).startswith("superpowers@") and enabled for name, enabled in plugins.items()
+    ) if isinstance(plugins, dict) else False
+    checks.append(
+        Check(
+            "superpowers plugin",
+            "PASS" if has_superpowers else "WARN",
+            "companion skills extend superpowers@claude-plugins-official"
+            if has_superpowers
+            else "not enabled; run /plugin install superpowers@claude-plugins-official "
+                 "(debugging-hypotheses, legacy-code-tdd, design-evidence-first and "
+                 "review-depth-by-risk extend it)",
+        )
+    )
+
     handlers = list(_command_hooks(settings))
     missing: list[str] = []
     for event, hook in handlers:

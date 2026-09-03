@@ -52,11 +52,9 @@ def resolve_requested_model(cli_model=None, env=None):
         return cli_model
     if environment.get("CLAUDE_MODEL"):
         return environment["CLAUDE_MODEL"]
-    settings = json.loads((REPO_ROOT / "settings.json").read_text(encoding="utf-8"))
-    model = settings.get("model")
-    if not isinstance(model, str) or not model:
-        raise ValueError("settings.json must declare a nonempty model")
-    return model
+    # settings.json no longer pins a model (the runtime chooses); an eval must
+    # name the model it is measuring rather than inherit an implicit one.
+    raise ValueError("no model requested: name it with --model or CLAUDE_MODEL")
 
 
 def claude_code_version():

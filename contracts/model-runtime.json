@@ -1,10 +1,8 @@
 {
   "schemaVersion": 2,
   "settingsDefaults": {
-    "requestedModel": "claude-fable-5[1m]",
-    "fallbackModels": [
-      "claude-opus-5[1m]"
-    ],
+    "requestedModel": null,
+    "fallbackModels": [],
     "requestedEffort": "high",
     "switchModelsOnFlag": true,
     "effectiveModel": "runtime-unknown",
@@ -18,7 +16,7 @@
       "modelSource": "settings.json:model",
       "contextClass": "runtime-resolved",
       "retentionClass": "account-and-model-contract-required",
-      "retentionEvidence": "The global default is 1P-format by invariant (2026-08-18: provider-prefixed IDs live only in launcher exports); provider, account, and retention remain runtime-verified facts."
+      "retentionEvidence": "No model is pinned in the shipped settings (review 2026-09-03): the CLI default and /model choose; provider, account and retention remain runtime-verified facts. Provider-prefixed IDs live only in launcher exports."
     },
     {
       "id": "external-shell-launchers",

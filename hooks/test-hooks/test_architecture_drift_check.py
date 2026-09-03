@@ -233,7 +233,9 @@ def test_model_runtime_contract_detects_settings_and_provenance_mutations():
     mutations.append((changed_switch, contract, "switchModelsOnFlag"))
 
     claimed_effective = copy.deepcopy(contract)
-    claimed_effective["settingsDefaults"]["effectiveModel"] = settings["model"]
+    # settings.json no longer pins a model (2026-09-03); any concrete claim of an
+    # effective model must still be rejected because only the runtime knows it.
+    claimed_effective["settingsDefaults"]["effectiveModel"] = "claude-fable-5-1"
     mutations.append((settings, claimed_effective, "runtime-unknown"))
 
     missing_retention = copy.deepcopy(contract)
