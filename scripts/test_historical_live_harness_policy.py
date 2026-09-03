@@ -110,6 +110,14 @@ def _fake_runtime(
     fake_sdk = tmp_path / skill_name / "fake-sdk"
     fake_sdk.mkdir(parents=True)
     (fake_sdk / "anthropic.py").write_text(FAKE_ANTHROPIC, encoding="utf-8")
+    # Real runs need httpx for grounding fetches and the gather harnesses fail fast
+    # without it (2026-09-03). The fake runtime never grounds, so a stub that
+    # refuses to fetch satisfies the pre-flight and proves nothing is fetched.
+    (fake_sdk / "httpx.py").write_text(
+        "def get(*args, **kwargs):\n"
+        "    raise AssertionError('the fake runtime must not perform grounding fetches')\n",
+        encoding="utf-8",
+    )
     output = tmp_path / skill_name / "measurement.json"
     mode_args = ["--historical-reproduction"] if historical else ["--model", CURRENT_MODEL]
     args = [

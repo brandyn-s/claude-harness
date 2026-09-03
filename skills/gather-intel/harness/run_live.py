@@ -26,7 +26,7 @@ hand-labels (verdict correctness) + deterministic HTTP grounding (grade.py).
 Usage:
     python3 skills/gather-intel/harness/run_live.py --model claude-opus-5 --output /tmp/gather-intel.json
     Add --runs 1 --limit 2 for a cheap smoke, or --runs 3 --workers 5.
-Env: ANTHROPIC_API_KEY (only key required).
+Env: ANTHROPIC_API_KEY (only key required). Deps: anthropic, httpx, pyyaml.
 
 Refreshing the committed sample (see harness/README.md for the full procedure):
 this script writes runs/transcripts-<ts>.json as a top-level LIST of
@@ -385,6 +385,15 @@ def main(argv=None):
     MODEL, RESULTS, MAX_TOKENS = model, output, args.max_tokens
     with RUNTIME_LOCK:
         RUNTIME_OBSERVATIONS.clear()
+    try:
+        import httpx  # noqa: F401  # grounding fetches; anthropic>=1.3 no longer pulls it in
+    except ImportError:
+        print("error: httpx not importable; the grounding step needs it, and without it every "
+              "SUPPORTED verdict is recorded as CALL_ERROR after the model call has been paid for",
+              file=sys.stderr)
+        print("hint: uv run --with anthropic --with httpx --with pyyaml python3 run_live.py ...",
+              file=sys.stderr)
+        return 2
     t0 = time.time()
     try:
         run(args.runs, args.limit, args.workers)
