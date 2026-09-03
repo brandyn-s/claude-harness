@@ -193,7 +193,7 @@ Report: `"Effectiveness: PASS/FAIL — {describe what was tested}"`
 
 ## Step 3b: Creative-Regression Mode (if change affects creative-discovery skills)
 
-Fires when the change set includes any of `/scout-frontier`, `/brainstorm`, `/deep-dive`, `/refine`, OR when a model-migration is being evaluated against these skills.
+Fires when the change set includes any of `/scout-frontier`, `/design-evidence-first`, `/deep-dive`, `/refine`, OR when a model-migration is being evaluated against these skills.
 
 Use the canonical fixture at `references/creative-test-prompts.md` (7 prompts modeled on the KINTAL Creative Benchmark). Each prompt is scored on two dimensions: distinctness (1-5) and grounding (1-5). Pass criterion: ≥80% of prompts score within 1 rubric-point of baseline on both dimensions.
 

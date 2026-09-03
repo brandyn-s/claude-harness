@@ -25,7 +25,8 @@ sys.stdout.reconfigure(encoding='utf-8')
 # Skills this hook applies to (creative-discovery / knowledge-asymmetric)
 TARGET_SKILLS = {
     "scout-frontier",
-    "brainstorm",
+    "design-evidence-first",
+    "superpowers:brainstorming",
     "deep-dive",
     "refine",
 }

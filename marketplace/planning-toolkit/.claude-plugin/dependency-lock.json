@@ -4,7 +4,6 @@
     "bin/pr-merge-verified.py"
   ],
   "packaged_skills": [
-    "brainstorm",
     "superplan",
     "supergoal",
     "supergoal-pause",
@@ -12,29 +11,28 @@
     "superplan-status",
     "superplan-loop",
     "interview",
+    "design-evidence-first",
+    "debugging-hypotheses",
+    "legacy-code-tdd",
+    "review-depth-by-risk",
     "refine",
-    "subagent-driven-development",
     "ship",
     "pr-fix",
-    "systematic-debugging",
-    "test-driven-development",
     "api-guardrails",
     "bulk-api-script",
-    "work",
-    "verification-before-completion"
+    "work"
   ],
   "requires_skills": {
     "api-guardrails": [],
-    "brainstorm": [],
     "bulk-api-script": [],
+    "debugging-hypotheses": [],
+    "design-evidence-first": [],
     "interview": [],
+    "legacy-code-tdd": [],
     "pr-fix": [],
     "refine": [],
+    "review-depth-by-risk": [],
     "ship": [],
-    "subagent-driven-development": [
-      "test-driven-development",
-      "ship"
-    ],
     "supergoal": [
       "supergoal-resume",
       "supergoal-pause",
@@ -50,9 +48,7 @@
       "supergoal-pause",
       "superplan"
     ],
-    "superplan": [
-      "brainstorm"
-    ],
+    "superplan": [],
     "superplan-loop": [
       "supergoal",
       "supergoal-pause",
@@ -64,18 +60,11 @@
       "supergoal-resume",
       "superplan-loop"
     ],
-    "systematic-debugging": [
-      "test-driven-development",
-      "verification-before-completion"
-    ],
-    "test-driven-development": [],
-    "verification-before-completion": [],
     "work": [
       "ship"
     ]
   },
   "root_skills": [
-    "brainstorm",
     "superplan",
     "supergoal",
     "supergoal-pause",
@@ -83,12 +72,13 @@
     "superplan-status",
     "superplan-loop",
     "interview",
+    "design-evidence-first",
+    "debugging-hypotheses",
+    "legacy-code-tdd",
+    "review-depth-by-risk",
     "refine",
-    "subagent-driven-development",
     "ship",
     "pr-fix",
-    "systematic-debugging",
-    "test-driven-development",
     "api-guardrails",
     "bulk-api-script",
     "work"

@@ -77,8 +77,8 @@ def test_repo_agent_corpus_matches_documented_inventory_and_tool_policy():
     assert vaf.parse_frontmatter_values(worker, "tools") == []
     assert vaf.parse_frontmatter_values(worker, "disallowedTools") == ["Agent"]
     assert vaf.parse_frontmatter_values(worker, "skills") == [
-        "systematic-debugging",
-        "verification-before-completion",
+        "superpowers:systematic-debugging",
+        "superpowers:verification-before-completion",
     ]
 
     readme = (REPO / "agents" / "README.md").read_text(encoding="utf-8")

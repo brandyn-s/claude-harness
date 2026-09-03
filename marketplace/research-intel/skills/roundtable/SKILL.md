@@ -95,9 +95,9 @@ The harness handles model dispatch, retries on transient failures, embedding-bas
 - **Section-header audit reminder**: when the context.md frames events with a count or category in a header ("Three executions", "Five rounds", "Two patterns"), audit the count against the cited evidence before submitting. R1's framing audit will catch some miscounts, but author-side discipline is cheaper than relying on agents to discover it.
 
 **Triage gate** — if the user's question is:
-- Bug-shaped with obvious cause → use systematic-debugging instead
+- Bug-shaped with obvious cause → use superpowers:systematic-debugging instead
 - Single-tool lookup → just use the tool
-- Brainstorming with no friction signal → use /brainstorm
+- Brainstorming with no friction signal → use /superpowers:brainstorming
 - Audit-class verdict gathering → use /fp-check or /triage
 
 Roundtable is for **methodologically subtle** targets where individual blind spots are likely and structured cross-talk earns its cost.
@@ -290,9 +290,9 @@ results-dir/
 
 ## When NOT to use
 
-- Bug-shaped problems with obvious causes (use systematic-debugging)
+- Bug-shaped problems with obvious causes (use superpowers:systematic-debugging)
 - Single-tool lookups (just call the tool)
-- Brainstorming with no friction signal (use /brainstorm)
+- Brainstorming with no friction signal (use /superpowers:brainstorming)
 - Audit-class verdict gathering (use /fp-check, /triage)
 - When budget is <$10 (the protocol's value comes from sustained cross-talk)
 

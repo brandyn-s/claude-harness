@@ -112,10 +112,9 @@ PLUGINS = [
     },
     {
         "name": "planning-toolkit",
-        "description": "Design-before-code and ship-safely workflow skills — brainstorming, architecture planning, adversarial review, prompt refinement, TDD, systematic debugging, ship/PR lifecycle, PR cleanup, Claude API guardrails, and bulk scripting.",
+        "description": "Design-before-code and ship-safely workflow skills — architecture planning, adversarial review, prompt refinement, companions to the superpowers plugin for evidence-first design, hypothesis-driven debugging, legacy-code TDD and risk-tiered review, ship/PR lifecycle, PR cleanup, Claude API guardrails, and bulk scripting.",
         "version": "1.1.0",
         "files": [
-            ("skills/brainstorm/SKILL.md", "skills/brainstorm/SKILL.md"),
             ("skills/superplan/SKILL.md", "skills/superplan/SKILL.md"),
             ("skills/superplan/references/override-policy.md", "skills/superplan/references/override-policy.md"),
             ("skills/superplan/references/examples.md", "skills/superplan/references/examples.md"),
@@ -136,9 +135,12 @@ PLUGINS = [
             ("skills/superplan-status/SKILL.md", "skills/superplan-status/SKILL.md"),
             ("skills/superplan-loop/SKILL.md", "skills/superplan-loop/SKILL.md"),
             ("skills/interview/SKILL.md", "skills/interview/SKILL.md"),
+            # Companions to the installed superpowers plugin (forks removed 2026-09-03)
+            ("skills/design-evidence-first/SKILL.md", "skills/design-evidence-first/SKILL.md"),
+            ("skills/debugging-hypotheses/SKILL.md", "skills/debugging-hypotheses/SKILL.md"),
+            ("skills/legacy-code-tdd/SKILL.md", "skills/legacy-code-tdd/SKILL.md"),
+            ("skills/review-depth-by-risk/SKILL.md", "skills/review-depth-by-risk/SKILL.md"),
             ("skills/refine/SKILL.md", "skills/refine/SKILL.md"),
-            ("skills/subagent-driven-development/SKILL.md", "skills/subagent-driven-development/SKILL.md"),
-            ("skills/subagent-driven-development/code-reviewer.md", "skills/subagent-driven-development/code-reviewer.md"),
             # Ship / PR / debug workflow
             ("skills/ship/SKILL.md", "skills/ship/SKILL.md"),
             ("skills/pr-fix/SKILL.md", "skills/pr-fix/SKILL.md"),
@@ -151,11 +153,6 @@ PLUGINS = [
             ("skills/pr-fix/references/diagnose.md", "skills/pr-fix/references/diagnose.md"),
             ("skills/pr-fix/references/dirty-tree-discovery.md", "skills/pr-fix/references/dirty-tree-discovery.md"),
             ("skills/pr-fix/references/worktree-cleanup.md", "skills/pr-fix/references/worktree-cleanup.md"),
-            ("skills/systematic-debugging/SKILL.md", "skills/systematic-debugging/SKILL.md"),
-            ("skills/test-driven-development/SKILL.md", "skills/test-driven-development/SKILL.md"),
-            ("skills/test-driven-development/references/five-step-cycle.md", "skills/test-driven-development/references/five-step-cycle.md"),
-            ("skills/test-driven-development/references/legacy-code.md", "skills/test-driven-development/references/legacy-code.md"),
-            ("skills/test-driven-development/references/rationalizations.md", "skills/test-driven-development/references/rationalizations.md"),
             # Claude API / bulk scripting
             ("skills/api-guardrails/SKILL.md", "skills/api-guardrails/SKILL.md"),
             ("skills/api-guardrails/references/prompt-diagnostic.md", "skills/api-guardrails/references/prompt-diagnostic.md"),
@@ -246,7 +243,6 @@ PLUGINS = [
             ("skills/retro/references/postmortem-templates.md", "skills/retro/references/postmortem-templates.md"),
             ("skills/mega-distill/SKILL.md", "skills/mega-distill/SKILL.md"),
             ("skills/mega-capture/SKILL.md", "skills/mega-capture/SKILL.md"),
-            ("skills/verification-before-completion/SKILL.md", "skills/verification-before-completion/SKILL.md"),
             # Engineering methodology
             ("skills/plateau-diagnose/SKILL.md", "skills/plateau-diagnose/SKILL.md"),
             ("skills/build-measurement-harness/SKILL.md", "skills/build-measurement-harness/SKILL.md"),

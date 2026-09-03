@@ -56,7 +56,7 @@ def _padded(text: str) -> str:
 def test_missing_confidence_warns():
     payload = {
         "tool_name": "Skill",
-        "tool_input": {"skill": "brainstorm"},
+        "tool_input": {"skill": "design-evidence-first"},
         "tool_result": _padded(
             "Recommended approach. Source: https://example.com/paper. "
             "Counterfactual analysis: if the approach lacked property P, "
@@ -145,7 +145,7 @@ def test_meta_message_forked_execution_skipped():
 def test_short_meta_message_skipped():
     payload = {
         "tool_name": "Skill",
-        "tool_input": {"skill": "brainstorm"},
+        "tool_input": {"skill": "design-evidence-first"},
         "tool_result": "Launching skill: brainstorm",
     }
     code, out, _ = run(payload)
@@ -257,7 +257,7 @@ RETIRED_AMBIENT_PATH = "rules/output-grounding.md"
 def test_single_missing_signal_warning_cites_the_live_contract_path():
     payload = {
         "tool_name": "Skill",
-        "tool_input": {"skill": "brainstorm"},
+        "tool_input": {"skill": "design-evidence-first"},
         "tool_result": _padded(
             "Recommended approach. Source: https://example.com/paper. "
             "Counterfactual analysis: if the approach lacked property P, "

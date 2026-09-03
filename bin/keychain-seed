@@ -3,7 +3,9 @@
 
 Stores each secret as a generic password with service "claude/<NAME>" and
 account $USER, which hooks/session_start_modules/env_loader.py resolves at
-SessionStart (env var first, Keychain second).
+SessionStart (env var first, Keychain second). The loader also accepts items
+whose service is the bare NAME, so a custom keychain seeded elsewhere works
+without re-seeding here.
 
 Usage:
   bin/keychain-seed NAME [NAME ...]   # hidden interactive prompt per name

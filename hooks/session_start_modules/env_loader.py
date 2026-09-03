@@ -37,7 +37,12 @@ _SECRET_ENV_VARS = ["CONFLUENCE_API_TOKEN"]
 
 
 def _keychain_get(name: str) -> str | None:
-    """macOS Keychain lookup for service claude/<name>. None on any miss.
+    """macOS Keychain lookup: service ``claude/<name>`` first, then bare ``<name>``.
+
+    bin/keychain-seed writes the prefixed form; operators who keep secrets in a
+    custom keychain (service == account == variable name) use the bare form.
+    Both resolve, the prefixed item wins when both exist, and `security` searches
+    every keychain in the user's search list (review 2026-09-03).
 
     Returns None off-darwin, when CLAUDE_KEYCHAIN_SECRETS=0, or on any
     `security` failure — callers fall through to other sources.
@@ -46,18 +51,21 @@ def _keychain_get(name: str) -> str | None:
         return None
     if os.environ.get("CLAUDE_KEYCHAIN_SECRETS") == "0":
         return None
-    try:
-        r = subprocess.run(
-            ["security", "find-generic-password", "-s", f"claude/{name}", "-w"],
-            capture_output=True,
-            timeout=5,
-        )
-    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
-        return None
-    if r.returncode != 0:
-        return None
-    val = r.stdout.decode("utf-8", errors="replace").strip()
-    return val or None
+    for service in (f"claude/{name}", name):
+        try:
+            r = subprocess.run(
+                ["security", "find-generic-password", "-s", service, "-w"],
+                capture_output=True,
+                timeout=5,
+            )
+        except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+            return None
+        if r.returncode != 0:
+            continue
+        val = r.stdout.decode("utf-8", errors="replace").strip()
+        if val:
+            return val
+    return None
 
 
 def _resolve_secret(name: str) -> str | None:

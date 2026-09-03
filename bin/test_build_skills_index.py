@@ -2,7 +2,7 @@
 """skills/README.md claims to be generated from SKILL.md frontmatter. Prove it.
 
 Measured 2026-09-03: no generator existed in the repo and one row was stale
-(verification-before-completion's description predated its v2.0 rewrite). This
+(a since-removed skill's description predated its v2.0 rewrite). This
 pins the index to a real generator so the claim in the file header is true.
 
 Run: pytest bin/test_build_skills_index.py -q

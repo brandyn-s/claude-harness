@@ -35,7 +35,7 @@ domain is primary before loading context.
 | **PowerShell script** [Windows-era] | Azure/Graph automation (prior Windows host) | Write .ps1, run `pwsh -File script.ps1`. **macOS:** prefer a Python script (`python3`) — pwsh isn't installed by default. |
 | **Parallel dispatch** | 2+ independent entities/streams that don't depend on each other | Multiple Task calls in one message, each to the appropriate agent |
 | **Sequential pipeline** | Steps that depend on previous results | Agent Task → read result → next Agent Task |
-| **Example SDLC chain** | Full software development lifecycle (design → plan → implement → test → commit) | brainstorm → /superplan → subagent-driven-development → /ship |
+| **Example SDLC chain** | Full software development lifecycle (design → plan → implement → test → commit) | brainstorm → /superplan → superpowers:subagent-driven-development → /ship |
 | **Main thread inline** | Simple task, no agent memory benefit, no MCP tools needed | Handle directly, no delegation |
 
 ## Plan Structure Template
@@ -173,7 +173,7 @@ A plan with no documented falsifier means the planner can't tell when the plan i
 - For agent work: "Delegate to {agent} via Task tool"
 - For scripts: "Write to {path}, execute with {command}"
 - For parallel work: "Dispatch N Tasks simultaneously"
-- For SDLC chain: "Hand off the plan to subagent-driven-development for parallel-subagent execution"
+- For SDLC chain: "Hand off the plan to superpowers:subagent-driven-development for parallel-subagent execution"
 ```
 
 ## Plan Quality Checks
@@ -213,7 +213,7 @@ A plan with no documented falsifier means the planner can't tell when the plan i
 | Plan type | Recommended execution |
 |----------|----------------------|
 | Single-domain, few steps | Delegate to the domain agent directly with the plan as context |
-| Multi-step implementation (code, scripts, configs) | Hand off to `subagent-driven-development` for one-subagent-per-task execution |
+| Multi-step implementation (code, scripts, configs) | Hand off to `superpowers:subagent-driven-development` for one-subagent-per-task execution |
 | Cross-domain investigation | Use `security-investigation` pattern: parallel Tasks to domain agents, main thread correlates |
 | Bulk data collection | Use `bulk-api-script` skill, then process results |
 | One-shot query with context | Delegate to domain agent — the plan is the prompt |

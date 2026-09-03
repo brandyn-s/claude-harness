@@ -1,0 +1,36 @@
+id: debugging-hypotheses
+type: skill
+description: "Companion to superpowers:systematic-debugging — enumerate mechanisms, form two or more hypotheses across six failure categories, rank by evidence tier, run bounded parallel investigators."
+category: engineering
+
+requires_tools:
+  - "Read"
+  - "Grep"
+  - "Glob"
+  - "Bash"
+  - "Agent"
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    symptom:
+      type: string
+      required: false
+      description: "The error, failing test, or unexpected behavior under investigation"
+  scope_from: conversation
+output_contract:
+  produces: [hypothesis_table, evidence_tiers, investigation_results]
+  format: markdown
+
+side_effects: [dispatches_read_only_subagents]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "3-12"
+
+preconditions:
+  - "superpowers:systematic-debugging Phase 1 evidence has been gathered"
+guardrails: []
+threat_model: read_only

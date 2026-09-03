@@ -135,7 +135,7 @@ class Candidate:
 CANDIDATES = [
     Candidate(
         rule="output-grounding",
-        owner_skills={"scout-frontier", "brainstorm", "deep-dive", "refine"},
+        owner_skills={"scout-frontier", "design-evidence-first", "deep-dive", "refine"},
         note="@scope is literally these four skills, so activity == owner invocation",
     ),
     Candidate(

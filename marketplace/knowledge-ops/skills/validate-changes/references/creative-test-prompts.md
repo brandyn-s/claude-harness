@@ -1,6 +1,6 @@
 # Creative-Regression Test Fixture
 
-Canonical 7-prompt fixture for validating creative-output skills (`/scout-frontier`, `/brainstorm`, `/deep-dive`, `/refine`) when:
+Canonical 7-prompt fixture for validating creative-output skills (`/scout-frontier`, `/design-evidence-first`, `/deep-dive`, `/refine`) when:
 
 - A change affects diversity primitives (PR #2 of the implementation plan)
 - A change affects output grounding (PR #3)

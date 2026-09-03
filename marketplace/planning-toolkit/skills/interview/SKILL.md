@@ -1,7 +1,7 @@
 ---
 name: interview
 description: "Adversarially stress-test a plan, design, or proposal to expose hidden assumptions."
-when_to_use: 'Adversarial stress-test for plans, designs, proposals, or skill drafts. Asks probing non-obvious questions that expose hidden assumptions, missing edge cases, and untested dependencies before committing to implementation. Use after /superplan produces a plan, before an architecture decision is locked in, or before a proposal ships to stakeholders. Trigger phrases: "interview this", "stress-test this plan", "challenge this", "poke holes", "what am I missing". Do NOT use for brainstorming (use /brainstorm), prompt enrichment (use /refine), or planning from scratch (use /superplan).'
+when_to_use: 'Adversarial stress-test for plans, designs, proposals, or skill drafts. Asks probing non-obvious questions that expose hidden assumptions, missing edge cases, and untested dependencies before committing to implementation. Use after /superplan produces a plan, before an architecture decision is locked in, or before a proposal ships to stakeholders. Trigger phrases: "interview this", "stress-test this plan", "challenge this", "poke holes", "what am I missing". Do NOT use for brainstorming (use /superpowers:brainstorming), prompt enrichment (use /refine), or planning from scratch (use /superplan).'
 argument-hint: "[plan, design, or proposal to interrogate]"
 effort: high
 metadata:

@@ -112,4 +112,4 @@ python3 bench/dump_edges.py --type HTTP_CALLS --repo psm --limit 5
 ## Execution
 
 - For scripts: write to bench/classify_drops.py, execute with `python3 bench/classify_drops.py`
-- For agent work: main thread inline; hand off to subagent-driven-development only if Phase B fans out
+- For agent work: main thread inline; hand off to superpowers:subagent-driven-development only if Phase B fans out

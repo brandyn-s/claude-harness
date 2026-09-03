@@ -70,6 +70,6 @@ state before believing either outcome (27).
 The individual mutation cases (items 18-41: unreachable fixtures, inert
 mutations, overwritten knobs, harness defects, tautological fixtures,
 false CAUGHT verdicts) live in
-`skills/test-driven-development/references/mutation-verdict-interpretation.md`.
+`docs/rule-reference/tdd-mutation-verdict-interpretation.md`.
 They are read while interpreting a specific verdict, so they load on
 demand rather than on every edit. Item numbers are unchanged.

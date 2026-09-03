@@ -1,4 +1,4 @@
-« Output-grounding contract — REQUIRED READ for /scout-frontier, /brainstorm, /deep-dive, /refine »
+« Output-grounding contract — REQUIRED READ for /scout-frontier, /design-evidence-first, /deep-dive, /refine »
 
 **Relocated from `rules/output-grounding.md` (ambient) on 2026-08-26.** It was measured
 `SAFE` to relocate by `bin/rule_relocation_pilot.py` over 438 local transcripts:
@@ -19,7 +19,7 @@ Failure-mode narratives: `rules/incidents/output-grounding.md`.
 
 @rule output_grounding
 @version 2026-08-26
-@scope every output from creative-discovery skills (/scout-frontier, /brainstorm,
+@scope every output from creative-discovery skills (/scout-frontier, /design-evidence-first,
        /deep-dive, /refine) where the user is not the domain expert and cannot
        validate output by reading it
 
@@ -29,7 +29,7 @@ INVARIANT counterfactual_offered_for_at_least_one_recommendation_per_output
 
 # Required three-layer output contract
 
-For recommendations from `/scout-frontier`, `/brainstorm`, `/deep-dive`, or `/refine`:
+For recommendations from `/scout-frontier`, `/design-evidence-first`, `/deep-dive`, or `/refine`:
 
 1. Confidence per load-bearing claim:
    - HIGH: production case study plus reproducible benchmark.

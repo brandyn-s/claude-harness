@@ -1,0 +1,36 @@
+id: review-depth-by-risk
+type: skill
+description: "Companion to superpowers:subagent-driven-development — review sized to risk tier, one repair and one re-review then stop, disjoint-scope concurrency, scope-change barrier."
+category: planning
+
+requires_tools:
+  - "Read"
+  - "Grep"
+  - "Glob"
+  - "Agent"
+  - AskUserQuestion
+requires_topics: []
+requires_rules: []
+requires_skills: []
+requires_auth: []
+
+input_contract:
+  parameters:
+    task:
+      type: string
+      required: false
+      description: "The completed task slice awaiting review"
+  scope_from: conversation
+output_contract:
+  produces: [risk_tier, review_path, issue_set]
+  format: markdown
+
+side_effects: [dispatches_reviewer_subagents]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "2-6"
+
+preconditions:
+  - "an implementer subagent has completed a task under superpowers:subagent-driven-development"
+guardrails: []
+threat_model: read_only
