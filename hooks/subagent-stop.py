@@ -587,8 +587,8 @@ def main():
     if block_reason:
         print(f"[SubagentStop] BLOCK: {block_reason}", file=sys.stderr)
         sys.exit(2)
-
-    print(json.dumps({"result": "pass"}))
+    # A pass emits nothing: {"result": "pass"} is not a documented shape and
+    # never reached the model (live-probed 2026-09-03).
 
 
 if __name__ == "__main__":

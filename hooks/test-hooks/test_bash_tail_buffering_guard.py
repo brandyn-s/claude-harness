@@ -3,7 +3,7 @@
 Contract (v4, 2026-06-13): PreToolUse:Bash. Detection is unchanged from v3
 (FIRST pipe segment's producer is long-running AND LAST segment is a buffering
 filter). The ACTION changed:
-  - tail/grep consumers  -> AUTO-REWRITE (exit 0 + updated_input):
+  - tail/grep consumers  -> AUTO-REWRITE (exit 0 + hookSpecificOutput.updatedInput):
         `PRODUCER | filter` becomes `PRODUCER > FILE 2>&1\\ncat FILE | filter`.
   - head consumers       -> BLOCK (exit 2): head intends early termination
         (SIGPIPE); a run-to-completion redirect would regress it.
@@ -23,8 +23,8 @@ ENV = {"CLAUDE_TAILBUF_DIR": "/tmp/claude/guardtest-tail"}
 
 
 def _rewrite_cmd(out):
-    """Extract updated_input.command from a rewrite (exit-0 JSON) stdout."""
-    return json.loads(out)["updated_input"]["command"]
+    """Extract hookSpecificOutput.updatedInput.command from a rewrite (exit-0 JSON) stdout."""
+    return json.loads(out)["hookSpecificOutput"]["updatedInput"]["command"]
 
 
 def _run(cmd):

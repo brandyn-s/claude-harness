@@ -14,8 +14,8 @@ def test_module_not_found_suggests_pip():
     assert rc == 0
     if out.strip():
         data = json.loads(out)
-        assert "requests" in data["message"]
-        assert "pip install" in data["message"]
+        assert "requests" in data["hookSpecificOutput"]["additionalContext"]
+        assert "pip install" in data["hookSpecificOutput"]["additionalContext"]
 
 
 def test_aws_credentials_expired():
@@ -27,7 +27,7 @@ def test_aws_credentials_expired():
     assert rc == 0
     if out.strip():
         data = json.loads(out)
-        assert "AWS" in data["message"] or "sso login" in data["message"]
+        assert "AWS" in data["hookSpecificOutput"]["additionalContext"] or "sso login" in data["hookSpecificOutput"]["additionalContext"]
 
 
 def test_non_bash_tool_ignored():

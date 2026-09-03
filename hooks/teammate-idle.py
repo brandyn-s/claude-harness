@@ -57,18 +57,20 @@ def main():
         print(
             json.dumps(
                 {
-                    "result": "warn",
-                    "message": (
-                        f"[TeammateIdle] Teammate {agent_id[:8]} going idle with "
-                        f"minimal activity ({tool_call_count} tool calls, "
-                        f"no file changes). Review if task was too small for a teammate."
-                    ),
+                    "hookSpecificOutput": {
+                        "hookEventName": "TeammateIdle",
+                        "additionalContext": (
+                            f"[TeammateIdle] Teammate {agent_id[:8]} going idle with "
+                            f"minimal activity ({tool_call_count} tool calls, "
+                            f"no file changes). Review if task was too small for a teammate."
+                        ),
+                    }
                 }
             )
         )
     else:
+        # A pass emits nothing: the former {"result": "pass"} never reached the model.
         _notify("Claude teammate idle", f"{agent_id[:8]} finished its work and is idle.")
-        print(json.dumps({"result": "pass"}))
 
 
 if __name__ == "__main__":

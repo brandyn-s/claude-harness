@@ -93,7 +93,10 @@ STATIC_MAP = {
     # Python2 autoSync trap: the topic never injected because this map lacked
     # the prefix — 2 of that night's 3 rediscovered gotchas were on file.
     "mcp__azure-automation__": "azure-automation-hub.md",
-    "mcp__netcloud__": "infrastructure.md",
+    # Was "infrastructure.md" (25,914 chars): 2.7x the delivery budget, so this
+    # route injected NOTHING on every netcloud call. netcloud.md fits the budget
+    # and is the subject-matched topic. Ported from claude-config d6f1eddf.
+    "mcp__netcloud__": "netcloud.md",
     "mcp__hologram__": "hologram.md",
     # B12/F3 tier decision (2026-06-10): 44 skill references and no topic was
     # the clearest routing gap in the B7 reachability computation.

@@ -149,7 +149,7 @@ def test_linked_worktree_skips_sync(tmp_path):
     })
     assert rc == 0
     assert stdout.strip(), "expected a skip message, got silence"
-    reason = _json.loads(stdout).get("reason", "")
+    reason = _json.loads(stdout)["hookSpecificOutput"]["additionalContext"]
     assert "linked worktree" in reason.lower()
     # The worktree must still be on its feature branch
     branch = _git(wt, "branch", "--show-current").stdout.strip()
@@ -177,7 +177,8 @@ def test_main_checkout_not_flagged_as_worktree(tmp_path):
         "tool_result": "queued to merge",
     })
     assert rc == 0
-    reason = _json.loads(stdout).get("reason", "") if stdout.strip() else ""
+    reason = (_json.loads(stdout).get("hookSpecificOutput", {}).get("additionalContext", "")
+              if stdout.strip() else "")
     assert "linked worktree" not in reason.lower()
 
 

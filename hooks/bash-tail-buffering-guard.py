@@ -752,7 +752,7 @@ _BLOCK_MESSAGE = (
 def _audit_log(action, reason, command):
     """Append a guard decision (auto-fixed / blocked) to the daily JSONL audit
     log so bin/hook-fire-report.py can read the auto-fix-vs-block breakdown —
-    exit codes alone can't tell an auto-rewrite (exit 0 + updated_input) from a
+    exit codes alone can't tell an auto-rewrite (exit 0 + updatedInput) from a
     plain allow (exit 0). Best-effort; never fails the guard.
 
     Skips under CLAUDE_HOOK_TEST so the test suite never contaminates the
@@ -845,15 +845,21 @@ def main():
         except Exception:
             new_command = None
         if new_command is not None:
+            fix_reason = (
+                "tail-buffering-guard: redirected producer to a file then "
+                f"filtered (buffering-safe). {reason}"
+            )
+            # Documented PreToolUse rewrite shape; the former top-level
+            # updated_input was ignored by the runtime (probed 2026-09-03).
             result = {
-                "decision": "approve",
-                "reason": (
-                    "tail-buffering-guard: redirected producer to a file then "
-                    f"filtered (buffering-safe). {reason}"
-                ),
-                "updated_input": {**tool_input, "command": new_command},
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "allow",
+                    "permissionDecisionReason": fix_reason,
+                    "updatedInput": {**tool_input, "command": new_command},
+                }
             }
-            _audit_log("auto-fixed", result["reason"], command)
+            _audit_log("auto-fixed", fix_reason, command)
             print(json.dumps(result))
             sys.exit(0)
         _audit_log("blocked", reason, command)

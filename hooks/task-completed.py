@@ -409,7 +409,8 @@ def main():
     if os.environ.get("CLAUDE_NOTIFY_TASKS") == "1":
         _notify("Claude task completed", msg)
 
-    print(json.dumps({"result": "pass", "message": msg}))
+    # A pass emits nothing: the former {"result": "pass", "message": ...} was
+    # not a documented shape and never reached the model (probed 2026-09-03).
 
 
 if __name__ == "__main__":

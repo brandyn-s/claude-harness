@@ -16,10 +16,10 @@ def test_timeout_with_request_id_injects_poll():
         "tool_result": {"result": inner},
     })
     assert rc == 0
-    if out.strip():
-        data = json.loads(out)
-        assert data.get("decision") == "approve"
-        assert "req-abc" in data.get("reason", "")
+    assert out.strip(), "expected poll instructions for the model"
+    data = json.loads(out)
+    assert data["hookSpecificOutput"]["hookEventName"] == "PostToolUse"
+    assert "req-abc" in data["hookSpecificOutput"]["additionalContext"]
 
 
 def test_completed_status_no_output():

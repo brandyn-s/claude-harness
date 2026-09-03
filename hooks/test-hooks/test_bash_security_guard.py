@@ -338,7 +338,7 @@ def test_rewrites_complex_inline_python_double_quoted():
     assert len(long_code) > 300
     rc, out, _err = run_hook(HOOK, make_bash_input(f'python -c "{long_code}"'), env=_INLINE_ENV)
     assert rc == 0, f"expected REWRITE (exit 0), got {rc}"
-    new = json.loads(out)["updated_input"]["command"]
+    new = json.loads(out)["hookSpecificOutput"]["updatedInput"]["command"]
     assert new.startswith("python3 ") and new.rstrip().endswith(".py")
 
 
@@ -347,7 +347,7 @@ def test_rewrites_singlequoted_inline_python():
     long_code = "x = " + "1+" * 160 + "1"
     rc, out, _err = run_hook(HOOK, make_bash_input(f"python3 -c '{long_code}'"), env=_INLINE_ENV)
     assert rc == 0
-    assert ".py" in json.loads(out)["updated_input"]["command"]
+    assert ".py" in json.loads(out)["hookSpecificOutput"]["updatedInput"]["command"]
 
 
 def test_blocks_unsafe_inline_python_with_shell_expansion():
@@ -374,7 +374,7 @@ def test_rewritten_inline_file_is_created_and_runs():
     body = "total = sum(range(10)); print('result', total); pad = '" + "z" * 280 + "'"
     rc, out, _err = run_hook(HOOK, make_bash_input(f'python3 -c "{body}"'), env=_INLINE_ENV)
     assert rc == 0
-    new = json.loads(out)["updated_input"]["command"]
+    new = json.loads(out)["hookSpecificOutput"]["updatedInput"]["command"]
     path = new.split("python3 ", 1)[1].strip()
     assert os.path.exists(path)
     # Use the running interpreter, not literal "python3" — the Windows CI leg
@@ -420,7 +420,7 @@ def test_rewrites_regex_backslash_double_quoted():
     assert len(body) > 300 and "\\d" in body
     rc, out, err = run_hook(HOOK, make_bash_input(f'python -c "{body}"'), env=_INLINE_ENV)
     assert rc == 0, f"regex-backslash body should rewrite, not block; rc={rc} err={err[:160]!r}"
-    assert ".py" in json.loads(out)["updated_input"]["command"]
+    assert ".py" in json.loads(out)["hookSpecificOutput"]["updatedInput"]["command"]
 
 
 # ── Heredoc python encoding guard ──
@@ -1877,7 +1877,7 @@ def test_workflow_pack_injects_configured_aws_profile():
     })
     assert rc == 0
     payload = json.loads(stdout)
-    assert payload["updated_input"]["command"].startswith("export AWS_PROFILE=dev-profile && ")
+    assert payload["hookSpecificOutput"]["updatedInput"]["command"].startswith("export AWS_PROFILE=dev-profile && ")
 
 
 def test_forbidden_org_guard_is_configured_not_hardcoded():

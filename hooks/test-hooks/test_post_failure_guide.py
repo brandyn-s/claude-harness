@@ -12,7 +12,7 @@ def test_max_file_read_token_exceeded():
     })
     assert rc == 0
     data = json.loads(out)
-    assert "offset/limit" in data["message"] or "paginate" in data["message"]
+    assert "offset/limit" in data["hookSpecificOutput"]["additionalContext"] or "paginate" in data["hookSpecificOutput"]["additionalContext"]
 
 
 def test_timeout_suggests_connectivity():
@@ -22,7 +22,7 @@ def test_timeout_suggests_connectivity():
     })
     assert rc == 0
     data = json.loads(out)
-    assert "timeout" in data["message"].lower() or "connectivity" in data["message"].lower()
+    assert "timeout" in data["hookSpecificOutput"]["additionalContext"].lower() or "connectivity" in data["hookSpecificOutput"]["additionalContext"].lower()
 
 
 def test_unknown_tool_suggests_toolsearch():
@@ -32,7 +32,7 @@ def test_unknown_tool_suggests_toolsearch():
     })
     assert rc == 0
     data = json.loads(out)
-    assert "ToolSearch" in data["message"]
+    assert "ToolSearch" in data["hookSpecificOutput"]["additionalContext"]
 
 
 def test_no_error_still_produces_message():
@@ -42,4 +42,4 @@ def test_no_error_still_produces_message():
     })
     assert rc == 0
     data = json.loads(out)
-    assert "Diagnose root cause" in data["message"]
+    assert "Diagnose root cause" in data["hookSpecificOutput"]["additionalContext"]

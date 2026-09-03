@@ -7,7 +7,7 @@ HOOK = "tavily-search-cap.py"
 
 
 def test_over_cap_clamped():
-    """2026-06-27: max_results>5 is CLAMPED to 5 (approve + updated_input), not
+    """2026-06-27: max_results>5 is CLAMPED to 5 (permissionDecision allow + updatedInput), not
     blocked. The cap is token control; a clamp achieves it at zero friction
     (was 73 hard blocks/14d, each a +1 correction turn)."""
     rc, out, _err = run_hook(HOOK, {
@@ -16,9 +16,9 @@ def test_over_cap_clamped():
     })
     assert rc == 0, f"expected clamp (approve, exit 0), got rc={rc}"
     payload = json.loads(out)
-    assert payload["decision"] == "approve"
-    assert payload["updated_input"]["max_results"] == 5
-    assert payload["updated_input"]["query"] == "test"  # other params preserved
+    assert payload["hookSpecificOutput"]["permissionDecision"] == "allow"
+    assert payload["hookSpecificOutput"]["updatedInput"]["max_results"] == 5
+    assert payload["hookSpecificOutput"]["updatedInput"]["query"] == "test"  # other params preserved
 
 
 def test_at_cap_allowed():
@@ -51,7 +51,7 @@ def test_boundary_six_clamped():
         "tool_input": {"max_results": 6, "query": "test"},
     })
     assert rc == 0
-    assert json.loads(out)["updated_input"]["max_results"] == 5
+    assert json.loads(out)["hookSpecificOutput"]["updatedInput"]["max_results"] == 5
 
 
 def test_hint_shown_when_no_chunks():

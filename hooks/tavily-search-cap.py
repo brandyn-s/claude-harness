@@ -34,12 +34,15 @@ if max_results > 5:
     # correction turn (the model had to re-issue the whole call). 2026-06-27
     # friction audit: 73 blocks/14d, every one trivially satisfiable by clamping.
     print(json.dumps({
-        "decision": "approve",
-        "reason": (
-            f"[tavily-cap] clamped max_results {max_results} -> 5 "
-            "(token control; ~1,200B saved per dropped result)."
-        ),
-        "updated_input": {**tool_input, "max_results": 5},
+        "hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "permissionDecision": "allow",
+            "permissionDecisionReason": (
+                f"[tavily-cap] clamped max_results {max_results} -> 5 "
+                "(token control; ~1,200B saved per dropped result)."
+            ),
+            "updatedInput": {**tool_input, "max_results": 5},
+        }
     }))
     sys.exit(0)
 

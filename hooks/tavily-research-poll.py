@@ -71,10 +71,10 @@ def main():
             f"Keep polling until you get a terminal status (completed or failed).\n"
             f"IMPORTANT: Report progress between each poll so the user knows it is working."
         )
-        result = {
-            "decision": "approve",
-            "reason": instructions,
-        }
+        # Documented PostToolUse channel to the model; the former top-level
+        # {"decision": "approve", "reason": ...} was ignored (probed 2026-09-03).
+        result = {"hookSpecificOutput": {"hookEventName": "PostToolUse",
+                                         "additionalContext": instructions}}
         json.dump(result, sys.stdout)
         sys.exit(0)
 

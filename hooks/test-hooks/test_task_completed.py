@@ -18,9 +18,7 @@ def test_in_git_repo():
     """Running in a git repo should always exit 0 (no failure signal)."""
     rc, out, err = run_hook(HOOK, {"cwd": os.path.expanduser("~/.claude")})
     assert rc == 0
-    data = json.loads(out)
-    assert data["result"] == "pass"
-    assert "TaskCompleted" in data["message"]
+    assert out.strip() == "", "a pass emits nothing: top-level result/message never reached the model"
 
 
 def test_in_non_git_dir():
@@ -29,8 +27,7 @@ def test_in_non_git_dir():
     tmp = tempfile.mkdtemp()
     rc, out, err = run_hook(HOOK, {"cwd": tmp})
     assert rc == 0
-    data = json.loads(out)
-    assert data["result"] == "pass"
+    assert out.strip() == "", "a pass emits nothing"
     os.rmdir(tmp)
 
 
@@ -41,8 +38,7 @@ def test_explicit_success_passes():
         {"cwd": os.path.expanduser("~/.claude"), "status": "completed", "success": True},
     )
     assert rc == 0
-    data = json.loads(out)
-    assert data["result"] == "pass"
+    assert out.strip() == "", "a pass emits nothing"
 
 
 def test_status_completed_with_errors_does_not_block():

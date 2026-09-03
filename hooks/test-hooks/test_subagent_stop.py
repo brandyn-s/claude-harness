@@ -38,8 +38,7 @@ def test_no_learnings_passes():
         "transcript": "No markers here",
     })
     assert rc == 0
-    data = json.loads(out)
-    assert data["result"] == "pass"
+    assert out.strip() == ""  # a pass emits nothing; {"result": "pass"} never reached the model
     assert "SubagentStop" in err
 
 
@@ -50,15 +49,13 @@ def test_with_learning_marker():
         "transcript": "[observed] generic synthetic learning for test",
     })
     assert rc == 0
-    data = json.loads(out)
-    assert data["result"] == "pass"
+    assert out.strip() == ""  # a pass emits nothing; {"result": "pass"} never reached the model
 
 
 def test_empty_input():
     rc, out, err = run_hook(HOOK, {})
     assert rc == 0
-    data = json.loads(out)
-    assert data["result"] == "pass"
+    assert out.strip() == ""  # a pass emits nothing; {"result": "pass"} never reached the model
     assert "unknown-agent" in err or "SubagentStop" in err
 
 
@@ -73,8 +70,7 @@ def test_transcript_path_is_read(tmp_path):
         "transcript_path": str(tr),
     })
     assert rc == 0
-    data = json.loads(out)
-    assert data["result"] == "pass"
+    assert out.strip() == ""  # a pass emits nothing; {"result": "pass"} never reached the model
 
 
 def test_transcript_path_missing_file_does_not_crash(tmp_path):
@@ -84,8 +80,7 @@ def test_transcript_path_missing_file_does_not_crash(tmp_path):
         "transcript_path": str(tmp_path / "does-not-exist.txt"),
     })
     assert rc == 0
-    data = json.loads(out)
-    assert data["result"] == "pass"
+    assert out.strip() == ""  # a pass emits nothing; {"result": "pass"} never reached the model
 
 
 def test_jsonl_hook_attachment_with_observed_marker_does_not_capture(tmp_path):
@@ -113,8 +108,7 @@ def test_jsonl_hook_attachment_with_observed_marker_does_not_capture(tmp_path):
         "transcript_path": str(tr),
     })
     assert rc == 0
-    data = json.loads(out)
-    assert data["result"] == "pass"
+    assert out.strip() == ""  # a pass emits nothing; {"result": "pass"} never reached the model
     # Negative assertion on stderr: no "Captured learning -> ..." emitted
     assert "Captured learning" not in err
 
@@ -137,8 +131,7 @@ def test_jsonl_assistant_text_with_observed_marker_is_captured(tmp_path):
         "transcript_path": str(tr),
     }, env=env)
     assert rc == 0
-    data = json.loads(out)
-    assert data["result"] == "pass"
+    assert out.strip() == ""  # a pass emits nothing; {"result": "pass"} never reached the model
     assert "Captured learning" in err
     assert tp.read_text(encoding="utf-8").count("### [auto-captured]") == 1
 
@@ -178,7 +171,7 @@ def test_layer_d_gate_fail_safe_on_session_mismatch(tmp_path):
         env={"AUDIT_SKILL_ORACLE_TRACE": str(trace)},
     )
     assert rc == 0
-    assert json.loads(out)["result"] == "pass"
+    assert out.strip() == ""
 
 
 def test_layer_d_gate_latest_verdict_wins(tmp_path):
@@ -198,7 +191,7 @@ def test_layer_d_gate_latest_verdict_wins(tmp_path):
         env={"AUDIT_SKILL_ORACLE_TRACE": str(trace)},
     )
     assert rc == 0, "latest VERIFIED should supersede the earlier FIX-INEFFECTIVE"
-    assert json.loads(out)["result"] == "pass"
+    assert out.strip() == ""
 
 
 def test_layer_d_gate_window_excludes_stale_records(tmp_path):
@@ -213,7 +206,7 @@ def test_layer_d_gate_window_excludes_stale_records(tmp_path):
         env={"AUDIT_SKILL_ORACLE_TRACE": str(trace), "AUDIT_SKILL_ORACLE_GATE_WINDOW": "1800"},
     )
     assert rc == 0
-    assert json.loads(out)["result"] == "pass"
+    assert out.strip() == ""
 
 
 def test_jsonl_huge_prose_does_not_crash_or_bypass_cap(tmp_path):
@@ -235,8 +228,7 @@ def test_jsonl_huge_prose_does_not_crash_or_bypass_cap(tmp_path):
         "transcript_path": str(tr),
     })
     assert rc == 0
-    data = json.loads(out)
-    assert data["result"] == "pass"
+    assert out.strip() == ""  # a pass emits nothing; {"result": "pass"} never reached the model
 
 
 def test_genuine_learning_is_captured_to_topic(tmp_path):
@@ -249,7 +241,7 @@ def test_genuine_learning_is_captured_to_topic(tmp_path):
         "transcript": "[observed] crowdstrike FQL date filters need quoted timestamps",
     }, env=env)
     assert rc == 0
-    assert json.loads(out)["result"] == "pass"
+    assert out.strip() == ""
     assert "Captured learning" in err
     body = tp.read_text(encoding="utf-8")
     assert body.count("### [auto-captured]") == 1
@@ -297,7 +289,7 @@ def test_distill_table_meta_output_is_not_captured(tmp_path):
         "transcript": row,
     }, env=env)
     assert rc == 0
-    assert json.loads(out)["result"] == "pass"
+    assert out.strip() == ""
     assert "Captured learning" not in err
     assert "### [auto-captured]" not in tp.read_text(encoding="utf-8")
 
@@ -402,7 +394,7 @@ def test_duplicate_learning_is_not_reappended(tmp_path):
         "transcript": learning,
     }, env=env)
     assert rc == 0
-    assert json.loads(out)["result"] == "pass"
+    assert out.strip() == ""
     assert "Captured learning" not in err
     assert tp.read_text(encoding="utf-8").count("### [auto-captured]") == 1
 
@@ -429,7 +421,7 @@ def test_jsonl_user_dispatch_prompt_is_not_captured(tmp_path):
         "transcript_path": str(tr),
     }, env=env)
     assert rc == 0
-    assert json.loads(out)["result"] == "pass"
+    assert out.strip() == ""
     assert "Captured learning" not in err
     assert "### [auto-captured]" not in tp.read_text(encoding="utf-8")
 
@@ -452,7 +444,7 @@ def test_unicode_arrow_promote_notation_is_not_captured(tmp_path):
         "transcript_path": str(tr),
     }, env=env)
     assert rc == 0
-    assert json.loads(out)["result"] == "pass"
+    assert out.strip() == ""
     assert "Captured learning" not in err
     assert "### [auto-captured]" not in tp.read_text(encoding="utf-8")
 
@@ -481,7 +473,7 @@ def test_code_graph_learning_routes_to_code_graph_dev_not_msgraph(tmp_path):
         "transcript_path": str(tr),
     }, env={"CLAUDE_TOPICS_DIR": str(topics)})
     assert rc == 0
-    assert json.loads(out)["result"] == "pass"
+    assert out.strip() == ""
     assert "Captured learning" in err
     assert cg.read_text(encoding="utf-8").count("### [auto-captured]") == 1
     assert "### [auto-captured]" not in msg.read_text(encoding="utf-8")

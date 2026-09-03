@@ -387,6 +387,15 @@ def _update_auto_merge_marker(command, cwd, tool_result):
 # ── MAIN ─────────────────────────────────────────────────────────────
 
 
+def _advisory(text):
+    """Documented PostToolUse output: additionalContext reaches the model.
+
+    The former top-level {"decision": "approve", "reason": ...} was ignored by
+    the runtime (live-probed 2026-09-03), so every sync note was silent.
+    """
+    return {"hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": text}}
+
+
 def main():
     try:
         hook_input = json.load(sys.stdin)
@@ -443,14 +452,11 @@ def main():
     # wrong branch of the live config. The main checkout's main syncs on the
     # next merge from it (or via repo_sync at session start).
     if _is_linked_worktree(cwd):
-        json.dump({
-            "decision": "approve",
-            "reason": (
-                f"POST-MERGE SYNC SKIPPED: {cwd} is a linked worktree — "
-                "syncing here would move it off its feature branch. The main "
-                "checkout syncs on the next merge from it (or at session start)."
-            ),
-        }, sys.stdout)
+        json.dump(_advisory(
+            f"POST-MERGE SYNC SKIPPED: {cwd} is a linked worktree — "
+            "syncing here would move it off its feature branch. The main "
+            "checkout syncs on the next merge from it (or at session start)."
+        ), sys.stdout)
         sys.exit(0)
 
     # Guard: skip sync if working tree has uncommitted changes.
@@ -474,7 +480,7 @@ def main():
                 f"Files: {', '.join(f.split()[-1] for f in dirty_files[:5])}. "
                 "Run `git stash` or commit before syncing to avoid losing edits."
             )
-            json.dump({"decision": "approve", "reason": msg}, sys.stdout)
+            json.dump(_advisory(msg), sys.stdout)
             sys.exit(0)
     except Exception:
         pass  # If the check itself fails, proceed with sync
@@ -676,7 +682,7 @@ def main():
     # Trigger mcp-servers deploy if this was an infra change
     trigger_deploy_if_infra(cwd)
 
-    json.dump({"decision": "approve", "reason": message}, sys.stdout)
+    json.dump(_advisory(message), sys.stdout)
     sys.exit(0)
 
 
