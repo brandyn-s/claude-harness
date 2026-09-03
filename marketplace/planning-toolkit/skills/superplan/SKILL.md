@@ -516,7 +516,7 @@ See `references/examples.md` for three worked examples covering cross-domain sec
 ## When NOT to Use This Skill
 
 - Simple one-shot queries ("how many open CrowdStrike detections?") — just ask, no plan needed
-- Brainstorming / design exploration — use `brainstorm` instead
+- Brainstorming / design exploration — use `superpowers:brainstorming` instead
 - Pure research / learning — just explore, don't plan
 - Tasks the user already fully understands — if the user says "just do X," do X. Don't impose ceremony on a clear instruction.
 

@@ -351,7 +351,7 @@ python3 ${CLAUDE_PLUGIN_ROOT}/skills/audit-architecture/references/doc_accuracy_
 
 The scanner checks ARCHITECTURE.md, CLAUDE.md, and MEMORY.md against disk state:
 - Every skill, agent, topic, rule, and MCP server on disk is mentioned in ARCHITECTURE.md
-- CLAUDE.md delegation table references only skills that exist (no deprecated `superpowers:` refs)
+- CLAUDE.md delegation table references only skills that exist locally or in an installed plugin (`superpowers:` names are valid)
 - MEMORY.md links all resolve and no orphaned files exist
 
 If the scanner script is unavailable, fall back to manual checks:
@@ -383,7 +383,7 @@ against actual `~/.claude/hooks/*.py` in BOTH directions:
 
 ### 6d: CLAUDE.md stale reference check
 
-Grep CLAUDE.md for `superpowers:` or skill names that don't exist in
+Grep CLAUDE.md for skill names that don't exist locally or in an installed plugin under
 `${CLAUDE_PLUGIN_ROOT}/skills/`. Flag deprecated references.
 
 Report:

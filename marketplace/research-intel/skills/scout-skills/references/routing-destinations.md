@@ -143,7 +143,7 @@ to `verify_skip.py`, and as routing-decision starting points.
 
 ### Testing / TDD / test methodology
 
-- `skills/test-driven-development/SKILL.md` + `references/`
+- `skills/legacy-code-tdd/SKILL.md` (companion to the installed `superpowers:test-driven-development`)
 - `rules/diagnose-before-fix.md` (root-cause testing)
 - `rules/eval-shipping-discipline.md`
 - `rules/verify-effectiveness.md`
@@ -152,7 +152,7 @@ to `verify_skip.py`, and as routing-decision starting points.
 
 ### Debugging / root cause analysis
 
-- `skills/systematic-debugging/SKILL.md` + `references/`
+- `skills/debugging-hypotheses/SKILL.md` (companion to the installed `superpowers:systematic-debugging`)
 - `rules/diagnose-before-fix.md`
 - `rules/verify-before-assuming.md`
 - `rules/verify-instrument-before-fix.md`

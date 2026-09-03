@@ -37,7 +37,6 @@
     "retro",
     "mega-distill",
     "mega-capture",
-    "verification-before-completion",
     "plateau-diagnose",
     "build-measurement-harness",
     "manifest-gen",
@@ -47,7 +46,6 @@
     "gather-claude",
     "ship",
     "persona",
-    "brainstorm",
     "fp-check",
     "scout-frontier",
     "triage",
@@ -64,7 +62,6 @@
     "audit-rules": [
       "validate-changes"
     ],
-    "brainstorm": [],
     "build-measurement-harness": [
       "persona",
       "plateau-diagnose",
@@ -102,7 +99,6 @@
       "ship"
     ],
     "persona": [
-      "brainstorm",
       "fp-check",
       "scout-frontier",
       "triage"
@@ -140,8 +136,7 @@
     "triage": [],
     "validate-changes": [
       "gather-claude"
-    ],
-    "verification-before-completion": []
+    ]
   },
   "root_skills": [
     "distill",
@@ -156,7 +151,6 @@
     "retro",
     "mega-distill",
     "mega-capture",
-    "verification-before-completion",
     "plateau-diagnose",
     "build-measurement-harness",
     "manifest-gen",

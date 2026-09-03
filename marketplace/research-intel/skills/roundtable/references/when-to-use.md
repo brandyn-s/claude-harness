@@ -15,7 +15,7 @@ Decision guidance for choosing /roundtable vs other review skills.
 |---|---|
 | Bug-shaped problem with obvious cause | /systematic-debugging |
 | Single-tool lookup | the tool directly |
-| Brainstorming, no friction signal | /brainstorm |
+| Brainstorming, no friction signal | /superpowers:brainstorming |
 | Verifying a security finding | /fp-check |
 | Triaging multiple findings by severity | /triage |
 | Stress-testing a single proposal | /interview |

@@ -205,7 +205,7 @@ analyze.py with --aggregate to compare cells side-by-side.
   exits)
 - Trivial bug fixes (use diagnostic engineering, not dispatch)
 - Curiosity-driven application without a friction signal (use
-  `/scout-frontier` or `/brainstorm`)
+  `/scout-frontier` or `/superpowers:brainstorming`)
 - Audit-class assessments where verdict-gathering is the goal (use
   `/fp-check` or `/triage`)
 
