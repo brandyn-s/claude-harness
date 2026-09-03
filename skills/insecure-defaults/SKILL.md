@@ -17,9 +17,6 @@ Finds **fail-open** vulnerabilities where apps run insecurely with missing confi
 - **Fail-open (CRITICAL):** `SECRET = env.get('KEY') or 'default'` → App runs with weak secret
 - **Fail-secure (SAFE):** `SECRET = env['KEY']` → App crashes if missing
 
-
-> **Runtime policy:** Resolve the effective model and preserve refusal/fallback provenance per `../_shared/model-runtime-policy.md`.
-
 ## When to Use
 
 - **Security audits** of production applications (auth, crypto, API security)

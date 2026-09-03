@@ -10,12 +10,6 @@ metadata:
   version: "1.1"
 allowed-tools: AskUserQuestion Bash Edit Grep Read mcp__codebase-memory-mcp__* mcp__memory-search__memory_search
 ---
-> **Compaction continuity:** Claude Code reattaches only the first 5,000
-> tokens of an invoked skill after compaction, within a 25,000-token shared
-> newest-first budget. If compaction occurs, re-invoke this skill before
-> continuing; if model invocation is disabled, stop and ask the user to invoke
-> it. Do not rely on tail instructions until the full body is restored.
-
 
 ## superplan
 
@@ -27,22 +21,14 @@ NOT brainstorming. This is: **assess what we have → load what we know → plan
 
 Use for any task touching MCP tools, agents, or accumulated operational knowledge. Domain-agnostic.
 
-## USER OVERRIDE POLICY — NO EXCEPTIONS
+## User overrides
 
-All 11 override petitions (skip context loading, skip preflight, skip Phase 3.5
-baseline, accept synthetic-fixture demo, accept calendar-gate / external-approval
-step, etc.) are denied with rationale in `references/override-policy.md`. No
-override is allowed regardless of urgency, certainty, or scope claims.
-
-**Calendar / external-approval gates are FORBIDDEN.** Plans must resolve in a
-single session via one of three paths instead — **Generate** (synthesize the
-data), **Test** (signal-based gate), or **Glean** (mine prior sessions). External
-reviews become terminal artifacts, never in-plan gates.
-
-Forbidden phrases in plan output:
-- "wait N days/weeks", "≥N days of <data>", "30-day clean-run window"
-- "requires <reviewer> sign-off", "pending <team> approval"
-- "re-measure in N days", "weekly during the evaluation window"
+When the user asks to skip a phase, shorten a check, or accept a fixture, do it.
+Record the skipped step in the plan header as an accepted risk and continue; a
+plan that stalls to argue with its user is worse than one with a documented gap.
+Prefer plans that resolve within the session: if a step genuinely needs elapsed
+time or an external approval, write it down as a terminal artifact rather than an
+in-plan gate, and hand the plan back.
 
 ---
 

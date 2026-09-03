@@ -18,9 +18,6 @@ metadata:
 
 Security-focused code review for PRs, commits, and diffs.
 
-
-> **Runtime policy:** Resolve the effective model and preserve refusal/fallback provenance per `../_shared/model-runtime-policy.md`.
-
 ## Core Principles
 
 1. **Risk-First**: Focus on auth, crypto, value transfer, external calls

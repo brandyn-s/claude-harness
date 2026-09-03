@@ -7,7 +7,6 @@ action_type: guard
 description: "Checks for unfulfilled promises or incomplete tasks before session end."
 enforces:
   - verify-effectiveness
-  - validate-to-improve
 blocks_patterns: []
 injects: null
 modifies: null

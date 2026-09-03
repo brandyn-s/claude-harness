@@ -154,7 +154,7 @@ where a structured workflow is preferred over ambient guidance.
 - `symmetric-evidentiary-burden.md` — covers citation rigor (refutations
   need same source bar as claims). This rule covers severity rubric
   rigor (severity needs explicit goal-classification before assignment).
-- `validate-to-improve.md` — covers the 6-question gate for validation.
+- `verify-effectiveness.md` — a validation reports what it measured and what remains unverified.
   This rule extends it: when validating a multi-mode artifact, run the
   6 questions per mode, not once aggregated.
 

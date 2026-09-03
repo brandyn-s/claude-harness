@@ -93,7 +93,6 @@ NO_DETECTOR = [
     ("red-team-rubric-discipline", "red-team / severity assessment"),
     ("outcome-over-verification", "reporting an outcome"),
     ("complete-the-whole-instruction", "multi-part instruction"),
-    ("validate-to-improve", "test / validation / done claim"),
     ("symmetric-evidentiary-burden", "audit / refutation"),
     ("compare-by-need", "comparison / worth-adopting"),
     ("reproduce-before-optimize", "empirical task w/ known reference"),

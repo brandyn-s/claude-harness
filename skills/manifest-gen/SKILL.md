@@ -15,10 +15,6 @@ effort: medium
 Generate structured YAML manifests for architecture components across three
 scaffold generators covering 8 domains.
 
-**Compaction continuity:** If this skill is truncated after compaction,
-re-invoke `/manifest-gen` before continuing. If re-invocation is unavailable,
-stop and ask rather than guessing the missing validation or write steps.
-
 ## Domains and Scaffolds
 
 Paths under the claude-config repo root are written as `skills/...`. Paths

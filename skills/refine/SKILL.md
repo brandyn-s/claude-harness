@@ -43,7 +43,7 @@ Common high-value matches (not exhaustive — check all loaded rules):
 - Comparison/adoption prompts → compare-by-need
 - Fix/debug prompts → diagnose-before-fix
 - Modify/remove prompts → check-before-change
-- Review/audit prompts → validate-to-improve
+- Review/audit prompts → verify-effectiveness
 - Bulk data prompts → bulk-data
 - Write/mutation prompts → security-confirmations
 - Test/validate prompts → verify-effectiveness
@@ -144,7 +144,7 @@ the decomposed steps, not the original prose.
 User: `/refine Review my last 14 days of local session transcripts. Compare my skills with Trail of Bits. Recommend where to incorporate their skills.`
 
 Enriched:
-- **Constraints**: compare-by-need — verify each gap causes real friction; don't feature-list compare. validate-to-improve — review must produce a fix list, not just inventory.
+- **Constraints**: compare-by-need — verify each gap causes real friction; don't feature-list compare. verify-effectiveness — a review reports what it measured and what it did not.
 - **Clarifications**: "incorporate" → three options: (a) drop-in import, (b) merge logic into existing skill, (c) chain skill. "Local transcripts" → `~/.claude/projects/*/` conversation files, memory-search MCP, or code-search MCP
 - **Steps**: (1) Search local session data for skill usage patterns (14d), (2) Inventory existing skills, (3) Read ToB skills, (4) Compare by need — only recommend where real friction exists, (5) Recommend with evidence per gap
 - **Success criteria**: Every recommendation cites a real usage gap from step 1, not a feature-list observation

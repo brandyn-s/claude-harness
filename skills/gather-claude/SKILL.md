@@ -16,12 +16,6 @@ compatibility:
     - cli: gh
 allowed-tools: Bash Read Write Edit Glob Grep mcp__exa__web_search_exa mcp__tavily__tavily_map mcp__tavily__tavily_extract mcp__tavily__tavily_search mcp__firecrawl__firecrawl_scrape AskUserQuestion
 ---
-> **Compaction continuity:** Claude Code reattaches only the first 5,000
-> tokens of an invoked skill after compaction, within a 25,000-token shared
-> newest-first budget. If compaction occurs, re-invoke this skill before
-> continuing; if model invocation is disabled, stop and ask the user to invoke
-> it. Do not rely on tail instructions until the full body is restored.
-
 
 ## gather-claude
 

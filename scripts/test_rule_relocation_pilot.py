@@ -72,7 +72,6 @@ def test_known_positive_output_grounding_scope_names_its_owner_skills():
     "security-critical-search-verification",
     "verify-instrument-before-fix",
     "red-team-rubric-discipline",
-    "validate-to-improve",
     "symmetric-evidentiary-burden",
     "compare-by-need",
     "reproduce-before-optimize",

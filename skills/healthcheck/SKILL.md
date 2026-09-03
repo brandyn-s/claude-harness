@@ -9,12 +9,6 @@ metadata:
   version: "1.0"
 allowed-tools: Agent AskUserQuestion Bash Glob Grep Read
 ---
-> **Compaction continuity:** Claude Code reattaches only the first 5,000
-> tokens of an invoked skill after compaction, within a 25,000-token shared
-> newest-first budget. If compaction occurs, re-invoke this skill before
-> continuing; if model invocation is disabled, stop and ask the user to invoke
-> it. Do not rely on tail instructions until the full body is restored.
-
 
 ## healthcheck
 

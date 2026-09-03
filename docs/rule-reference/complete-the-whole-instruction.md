@@ -176,7 +176,7 @@ FAILURE deferred_ungated_deliverable_behind_self_justifying_prerequisites:
   A prerequisite being real is not evidence it is GATING.
 
 # ─── RELATION TO OTHER RULES ───
-- never-stop-early.md — that rule says don't STOP before the task is done
+- never-stop-early.md (deleted 2026-09-03; it compensated for an older model that suggested new sessions) said don't STOP before the task is done
   (don't punt to a new session). THIS rule says don't redefine DONE down to a
   shippable slice. Siblings: one guards against quitting, one against
   truncating the definition of complete.

@@ -45,27 +45,31 @@ def test_over_filter_does_not_corrupt_corpus_summary():
         filtered["skills_over_compaction_reattach_proxy"]
         == full["skills_over_compaction_reattach_proxy"]
     )
-    assert filtered["compaction_continuity_gaps"] == full[
-        "compaction_continuity_gaps"
-    ]
     assert len(filtered["skills"]) < len(full["skills"])
 
 
-def test_report_exposes_documented_compaction_lifecycle_and_zero_gaps():
+def test_report_exposes_documented_compaction_lifecycle_without_banner_policing():
+    """Claude Code re-attaches an invoked skill's opening tokens after compaction
+    by itself, so the audit reports the budget and no longer polices a
+    '**Compaction continuity:**' banner (removed from skill bodies 2026-09-03)."""
     report = run_json()
 
     assert report["compaction_contract"] == {
         "per_invoked_skill_reattach_tokens": 5000,
         "combined_reattach_tokens": 25000,
         "ordering": "newest_invoked_first",
-        "recovery_proxy_cap": 4000,
     }
     assert report["skills_over_compaction_reattach_proxy"] > 0
-    assert report["compaction_continuity_gaps"] == 0
+    assert "compaction_continuity_gaps" not in report
     for row in report["skills"]:
-        if row["needs_compaction_recovery_contract"]:
-            assert row["compaction_recovery_contract_present"] is True
-            assert row["compaction_continuity_ok"] is True
+        assert "compaction_recovery_contract_present" not in row
+        assert "compaction_continuity_ok" not in row
+
+
+def test_default_skills_dir_is_repo_relative_not_cwd_relative(tmp_path):
+    """Run from an unrelated cwd the audit must still find the repo's skills
+    instead of silently reporting an empty corpus."""
+    assert run_json(cwd=tmp_path)["total_skills"] > 0
 
 
 def test_discovery_cost_includes_when_to_use_and_hides_user_only_skills(tmp_path):
@@ -98,7 +102,7 @@ disable-model-invocation: true
         encoding="utf-8",
     )
 
-    report = run_json(cwd=tmp_path)
+    report = run_json("--skills-dir", str(tmp_path / "skills"), cwd=tmp_path)
     rows = {row["skill"]: row for row in report["skills"]}
 
     visible_description_only = (len("visible: short description") + 3) // 4
@@ -109,28 +113,3 @@ disable-model-invocation: true
     assert rows["hidden"]["idle_loading"] == "not_advertised_to_model"
     assert rows["hidden"]["advertised_tokens_estimate"] == 0
     assert report["skills_hidden_from_model_discovery"] == 1
-
-
-def test_compaction_marker_without_recovery_instructions_is_a_gap(tmp_path):
-    skill = tmp_path / "skills" / "oversized"
-    skill.mkdir(parents=True)
-    (skill / "SKILL.md").write_text(
-        """---
-name: oversized
-description: oversized fixture
----
-
-**Compaction continuity:** arbitrary words do not restore the lost contract.
-
-"""
-        + ("body text\n" * 2000),
-        encoding="utf-8",
-    )
-
-    report = run_json(cwd=tmp_path)
-    row = report["skills"][0]
-
-    assert row["needs_compaction_recovery_contract"] is True
-    assert row["compaction_recovery_contract_present"] is False
-    assert row["compaction_continuity_ok"] is False
-    assert report["compaction_continuity_gaps"] == 1

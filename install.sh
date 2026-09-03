@@ -105,9 +105,7 @@ install_rules() {
     local rules=()
     while IFS= read -r f; do
         rules+=("$(basename "$f")")
-    done < <(find "$src_dir" -maxdepth 1 -name "*.md" -type f \
-        ! -name "never-stop-early.md" \
-        ! -name "validate-to-improve.md" | sort)
+    done < <(find "$src_dir" -maxdepth 1 -name "*.md" -type f | sort)
 
     local choice
     choice=$(ask_choice "Install which rules?" "All ${#rules[@]} rules" "Pick individually" "Skip rules")
@@ -400,6 +398,20 @@ echo ""
 detect_python
 check_claude_version
 
+# The companion skills extend the superpowers plugin; without it they have
+# nothing to extend. Warn early rather than after the copy.
+if ! "$PYTHON_CMD" - "$CLAUDE_DIR/settings.json" <<'PY'
+import json, sys
+try:
+    plugins = json.load(open(sys.argv[1], encoding="utf-8")).get("enabledPlugins") or {}
+except (OSError, ValueError):
+    plugins = {}
+sys.exit(0 if any(k.startswith("superpowers@") and v for k, v in plugins.items()) else 1)
+PY
+then
+    warn "superpowers plugin not enabled in $CLAUDE_DIR/settings.json. Install it first: /plugin install superpowers@claude-plugins-official"
+fi
+
 if [[ ! -d "$CLAUDE_DIR" ]]; then
     mkdir -p "$CLAUDE_DIR"
     info "Created $CLAUDE_DIR"
@@ -428,7 +440,7 @@ if ask_yn "Install the recommended fresh-laptop core? (2 rules + 3 deterministic
     # These used to be two hand-maintained lists and they had DRIFTED: the
     # inventory checked 5 paths (1 rule + 4 hooks) while the copy wrote 11
     # (5 rules + 6 files under hooks/). So a user with local edits to
-    # diagnose-before-fix.md, never-stop-early.md, validate-to-improve.md,
+    # diagnose-before-fix.md and two since-deleted rules,
     # search-efficiency.md, hook_input.py or atomic_write.py had them silently
     # overwritten -- and the guard could still print "existing files kept",
     # having never looked at 6 of the files it was about to clobber. Deriving

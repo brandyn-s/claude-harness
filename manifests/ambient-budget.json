@@ -135,6 +135,18 @@
       "rule": "outcome-over-verification.md + scope-discipline.md + verify-effectiveness.md",
       "bytes": 0,
       "reason": "Descope record, deliberately zero: relocations of 1,465 B closed the pre-existing overage instead of ratcheting the ceiling (outcome-over-verification -77: two @reference lines to rules the fresh core does not install and a GUARD that named one; scope-discipline -302: a closing paragraph and a bullet duplicated by blind appends; verify-effectiveness -1,086: a pointer paragraph present twice, a terse trailing pointer to the same file, INCIDENT 2026-08-15 moved verbatim to rules/incidents/, and the mcp-servers #1362 measurement replaced by a pointer to its existing incidents entry). The 2026-08-29 row left that overage for its own descope decision; this is it. scripts/test_context_policy_contracts.py now enforces the ceiling in CI."
+    },
+    {
+      "date": "2026-09-03",
+      "rule": "never-stop-early.md",
+      "bytes": -2160,
+      "reason": "Deleted. Phrase-list compensation for an older model that proposed continuing in a new session; the fresh-laptop control audit had already demoted it and it contradicted outcome-over-verification. Negative so the freed budget cannot be silently re-spent."
+    },
+    {
+      "date": "2026-09-03",
+      "rule": "validate-to-improve.md",
+      "bytes": -5034,
+      "reason": "Deleted with its incidents and rule-reference files. Required every passing validation to produce more work, which the control audit measured as fighting outcome-over-verification's stop condition. Negative ratchet."
     }
   ]
 }

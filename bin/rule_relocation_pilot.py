@@ -193,11 +193,6 @@ CANDIDATES = [
         note="named by requires_rules in 3 skill(s), but @scope is a TASK TYPE -- expected to refuse",
     ),
     Candidate(
-        rule="validate-to-improve",
-        owner_skills={"validate-changes", "verification-before-completion"},
-        note="named by requires_rules in 2 skill(s), but @scope is a TASK TYPE -- expected to refuse",
-    ),
-    Candidate(
         rule="symmetric-evidentiary-burden",
         owner_skills={"roundtable", "software-security-review", "vendor-breach"},
         note="named by requires_rules in 3 skill(s), but @scope is a TASK TYPE -- expected to refuse",

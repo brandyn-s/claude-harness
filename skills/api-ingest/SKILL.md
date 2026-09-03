@@ -18,12 +18,6 @@ metadata:
 allowed-tools: Agent AskUserQuestion Bash Glob Read Write mcp__codebase-memory-mcp__index_repository mcp__codebase-memory-mcp__index_status mcp__codebase-memory-mcp__search_code_semantic mcp__context7-docs__query-docs mcp__context7-docs__resolve-library-id mcp__firecrawl__*
 effort: medium
 ---
-> **Compaction continuity:** Claude Code reattaches only the first 5,000
-> tokens of an invoked skill after compaction, within a 25,000-token shared
-> newest-first budget. If compaction occurs, re-invoke this skill before
-> continuing; if model invocation is disabled, stop and ask the user to invoke
-> it. Do not rely on tail instructions until the full body is restored.
-
 
 # API Ingest — Add API Documentation to Searchable Library
 

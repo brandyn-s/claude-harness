@@ -19,13 +19,8 @@ import yaml
 SOFT_BODY_CAP = 6000
 COMPACTION_REATTACH_PER_SKILL = 5000
 COMPACTION_REATTACH_COMBINED = 25000
-COMPACTION_RECOVERY_PROXY_CAP = 4000
-COMPACTION_RECOVERY_RE = re.compile(
-    r"\*\*Compaction continuity:\*\*"
-    r"(?=.{0,1200}\bre-invoke\b)"
-    r"(?=.{0,1200}\bstop and ask\b)",
-    re.IGNORECASE | re.DOTALL,
-)
+# Claude Code re-attaches an invoked skill's opening tokens after compaction on
+# its own, so the audit reports that budget and no longer polices a banner.
 LISTING_CHARACTER_CAP = 1536
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---", re.DOTALL)
 
@@ -57,10 +52,16 @@ def main(argv=None) -> int:
         help="model tag for the report; does not change proxy counting",
     )
     parser.add_argument("--json", action="store_true")
+    parser.add_argument(
+        "--skills-dir",
+        type=Path,
+        default=Path(__file__).resolve().parent.parent / "skills",
+        help="skills corpus to audit (default: this repo's skills/, whatever the cwd)",
+    )
     args = parser.parse_args(argv)
 
     all_rows = []
-    for skill_md in sorted(Path("skills").glob("*/SKILL.md")):
+    for skill_md in sorted(args.skills_dir.glob("*/SKILL.md")):
         if args.skill and skill_md.parent.name != args.skill:
             continue
         skill_text = skill_md.read_text(encoding="utf-8")
@@ -104,19 +105,8 @@ def main(argv=None) -> int:
             "over_compaction_reattach_proxy": (
                 body_tokens > COMPACTION_REATTACH_PER_SKILL
             ),
-            "needs_compaction_recovery_contract": (
-                body_tokens > COMPACTION_RECOVERY_PROXY_CAP
-                and not intentionally_inert
-            ),
             "intentionally_inert": intentionally_inert,
-            "compaction_recovery_contract_present": (
-                COMPACTION_RECOVERY_RE.search(skill_text[:20_000]) is not None
-            ),
         }
-        row["compaction_continuity_ok"] = (
-            not row["needs_compaction_recovery_contract"]
-            or row["compaction_recovery_contract_present"]
-        )
         all_rows.append(row)
 
     all_rows.sort(key=lambda row: -row["body_tokens_proxy"])
@@ -130,7 +120,6 @@ def main(argv=None) -> int:
             "per_invoked_skill_reattach_tokens": COMPACTION_REATTACH_PER_SKILL,
             "combined_reattach_tokens": COMPACTION_REATTACH_COMBINED,
             "ordering": "newest_invoked_first",
-            "recovery_proxy_cap": COMPACTION_RECOVERY_PROXY_CAP,
         },
         "total_skills": len(all_rows),
         "advertised_tokens_estimate_total": sum(
@@ -147,9 +136,6 @@ def main(argv=None) -> int:
         ),
         "skills_over_compaction_reattach_proxy": sum(
             1 for row in all_rows if row["over_compaction_reattach_proxy"]
-        ),
-        "compaction_continuity_gaps": sum(
-            1 for row in all_rows if not row["compaction_continuity_ok"]
         ),
         "skills": rows,
     }
@@ -172,8 +158,7 @@ def main(argv=None) -> int:
     print(
         "Post-compaction contract: first "
         f"{COMPACTION_REATTACH_PER_SKILL} tokens per invoked skill, "
-        f"{COMPACTION_REATTACH_COMBINED} combined newest-first; "
-        f"continuity gaps={report['compaction_continuity_gaps']}"
+        f"{COMPACTION_REATTACH_COMBINED} combined newest-first"
     )
     return 0
 

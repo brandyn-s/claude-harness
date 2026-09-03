@@ -12,13 +12,6 @@ allowed-tools: Bash Read Edit Write Grep Glob Agent AskUserQuestion
 
 ## audit-fix
 
-> **Compaction continuity:** Claude Code reattaches only the first 5,000
-> tokens of an invoked skill after compaction, within a 25,000-token shared
-> newest-first budget. If compaction occurs, re-invoke this skill before
-> continuing; if model invocation is disabled, stop and ask the user to invoke
-> it. Do not rely on tail instructions (Step 3's gates, Step 5's tracker
-> contract) until the full body is restored.
-
 Closes the discovery → fix loop for audit-skill. Each STILL-FIRES finding in
 the input worklist gets a dedicated fix-agent that:
 

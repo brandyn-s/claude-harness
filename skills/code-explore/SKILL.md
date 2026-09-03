@@ -15,12 +15,6 @@ compatibility:
     - mcp: codebase-memory-mcp
 allowed-tools: Read mcp__codebase-memory-mcp__detect_changes mcp__codebase-memory-mcp__get_architecture mcp__codebase-memory-mcp__get_code_snippet mcp__codebase-memory-mcp__get_graph_schema mcp__codebase-memory-mcp__list_projects mcp__codebase-memory-mcp__query_graph mcp__codebase-memory-mcp__query_security_surfaces mcp__codebase-memory-mcp__rank_by_query mcp__codebase-memory-mcp__search_code_semantic mcp__codebase-memory-mcp__search_graph mcp__codebase-memory-mcp__trace_call_path mcp__codebase-memory-mcp__find_similar_functions mcp__codebase-memory-mcp__index_status mcp__codebase-memory-mcp__search_code
 ---
-> **Compaction continuity:** Claude Code reattaches only the first 5,000
-> tokens of an invoked skill after compaction, within a 25,000-token shared
-> newest-first budget. If compaction occurs, re-invoke this skill before
-> continuing; if model invocation is disabled, stop and ask the user to invoke
-> it. Do not rely on tail instructions until the full body is restored.
-
 
 ## code-explore
 

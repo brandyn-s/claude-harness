@@ -14,7 +14,6 @@ requires_tools:
 requires_topics: []
 requires_rules:
   - verify-effectiveness
-  - validate-to-improve
 requires_skills:
   - gather-claude
 requires_auth: []
