@@ -2,7 +2,7 @@
 
 name: audit-architecture
 description: "Audit the Claude Code architecture for drift and coverage gaps across MCP servers, agents, hooks, skills, and rules."
-when_to_use: "Use when asked to audit the Claude Code architecture, validate system health after changes, or find drift and coverage gaps across MCP servers, agents, hooks, skills, and routing rules. Runs live runtime probes, coverage analysis, consistency checks, and offers ranked batch fixes. Do NOT use for simple status checks (/mcp-diagnose), single-component debugging (/systematic-debugging), or querying a specific MCP tool."
+when_to_use: "Use when asked to audit the Claude Code architecture, validate system health after changes, or find drift and coverage gaps across MCP servers, agents, hooks, skills, and routing rules. Runs live runtime probes, coverage analysis, consistency checks, and offers ranked batch fixes. Do NOT use for simple status checks (/healthcheck), single-component debugging (/systematic-debugging), or querying a specific MCP tool."
 disable-model-invocation: true
 argument-hint: "[optional focus, e.g. 'hooks', 'topics', 'routing', 'skills', 'MCP servers']"
 effort: high
