@@ -38,13 +38,7 @@ GUARD pattern="I verified it live, it works" or "the fix is deployed and
 confirmed": state the SOURCE status in the same breath as the live status. Two
 states, two sentences. NO EXCEPTIONS.
 
-INCIDENT 2026-08-15, both directions inside one session: an IAM grant and an SCP
-change were found committed-and-never-applied (a JSON document in a repository
-is not an SCP), which was correctly recorded. Hours later the same session's own
-WAF fix — a rule removed from a live web ACL and verified with a 130,154-byte
-request returning 200 — turned out never to have been committed at all. The only
-commit touching that file was the original deployment, so the next apply would
-have re-added it. Recognising the pattern in one direction did not transfer.
+  # Full: incidents#2026-08-15-source-and-live-drift-in-both-directions
 
 Never promote evidence from one state into another by inference. Every claim
 names its state, mechanism, timestamp/freshness, target, and limitations.
@@ -388,16 +382,4 @@ constant, print it on every run, and add a test that fails when an entry goes
 stale. A silently-subtracted baseline is a coverage lie; a printed one is a
 backlog. Never raise a threshold or delete an assertion to accommodate a write.
 
-Measured 2026-08-29 (mcp-servers #1362): a catalog-coverage gate was red on 4
-uncatalogued dirs. All 4 were `requirements.lock`-only with no MCP entrypoint,
-so requiring an entrypoint looked like the principled fix. The truth table over
-all 34 discovered dirs refuted it — EIGHT CATALOGUED servers are lock-only too,
-including two unquestionably real ones, so that change would have dropped 8
-servers from the audit while reporting success.
-
-Detailed incident mechanisms, domain-specific measurement traps, and worked
-examples live in `rules/incidents/verify-effectiveness.md` and are loaded on
-demand for diagnosis.
-
-
-Narrative: `rules/incidents/verify-effectiveness.md`.
+  # Full: incidents#2026-08-29-greening-a-red-gate-by-narrowing-its-detector

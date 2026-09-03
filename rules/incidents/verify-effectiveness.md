@@ -1182,6 +1182,7 @@ locally that CI does not install. A dev-extra is the usual one — `pip install
 difference.
 
 ## 2026-08-29 greening a red gate by narrowing its detector
+<a id="2026-08-29-greening-a-red-gate-by-narrowing-its-detector"></a>
 
 When a check is red and the available fix NARROWS what the detector looks at,
 enumerate the FULL population before adopting it. A narrower detector turns the
@@ -1344,3 +1345,17 @@ GUARD pattern="read-back matched, the upload is verified":
   REFUSE. Name the resolved ref and re-fetch it in the same sequence. NO EXCEPTIONS.
 GUARD pattern="I already fetched at the start of the session":
   REFUSE. Merges land between the fetch and the upload; re-resolve immediately before.
+
+## 2026-08-15 source-and-live drift in both directions inside one session
+<a id="2026-08-15-source-and-live-drift-in-both-directions"></a>
+
+Relocated verbatim from the ambient rule body on 2026-09-03 (net-zero ambient
+relocation; the GUARD that cites it stayed in the rule).
+
+INCIDENT 2026-08-15, both directions inside one session: an IAM grant and an SCP
+change were found committed-and-never-applied (a JSON document in a repository
+is not an SCP), which was correctly recorded. Hours later the same session's own
+WAF fix — a rule removed from a live web ACL and verified with a 130,154-byte
+request returning 200 — turned out never to have been committed at all. The only
+commit touching that file was the original deployment, so the next apply would
+have re-added it. Recognising the pattern in one direction did not transfer.

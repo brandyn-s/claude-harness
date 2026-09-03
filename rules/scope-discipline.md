@@ -145,8 +145,3 @@ GUARD pattern="the option the user picked from my menu just failed, so the task 
   # already in memory as verified since 2026-06-15, and was ONE call. The user had to
   # correct me twice. Compounding cause: no option had been exercised before it was
   # offered — the violation of check #8 above, which already forbids exactly that.
-- Drafting a full external artifact before its delivery constraints are known.
-
-After the primary deliverable lands, offer deferred improvements as explicit follow-ups.
-Load the archived reference when a specialized scope case is needed rather than returning
-its incident narrative to ambient context.
