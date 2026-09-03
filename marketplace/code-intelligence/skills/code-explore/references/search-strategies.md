@@ -145,13 +145,13 @@ any category. Average overlap: 18% (even lower than the security-query 22%). Per
 winners are unpredictable — `voyage` wins on some, `voyage-context` on others, most tie.
 
 **Learned per-category weighting requires:**
-1. 200+ queries accumulated in `query-routing-log.jsonl` with outcome labels
+1. 200+ logged queries with outcome labels (no capture exists today: the `query-routing-log.py` PostToolUse logger was removed 2026-09-03 because nothing consumed its output)
 2. Categories classified (networking, hardware, service, library, secrets)
 3. Per-category win rate computed for each model
 4. Weighting applied accordingly
 
-The `query-routing-log.py` hook is already capturing the data. The analysis script
-doesn't exist yet. Until it does, equal weighting (union + dedup) is the right default.
+Neither the capture nor the analysis script exists. Until both do, equal weighting
+(union + dedup) is the right default.
 
 **Research alignment (EMNLP 2025):** The "Mixture of Retrievers" paper confirms that
 per-query routing requires enough logged data to identify statistical patterns. With

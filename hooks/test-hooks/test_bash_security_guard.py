@@ -487,7 +487,7 @@ def test_block_heredoc_python_nested_paren_no_encoding():
     cmd = """python3 <<'PYEOF'
 import json
 from pathlib import Path
-cfg = json.load(open(Path.home() / ".claude/hooks/skill-rules.json"))
+cfg = json.load(open(Path.home() / ".claude/hooks/judgment-rules.json"))
 print(len(cfg))
 PYEOF"""
     rc, _, stderr = run_hook(HOOK, make_bash_input(cmd))
@@ -574,7 +574,7 @@ def test_allow_inline_python_urlopen():
 def test_block_inline_python_c_open_no_encoding():
     """Inline `python -c "...open('file.json')..."` missing encoding= is blocked."""
     cmd = (
-        """python -c "import json; d=json.load(open('hooks/skill-rules.json')); """
+        """python -c "import json; d=json.load(open('hooks/judgment-rules.json')); """
         """print(len(d['rules']))" """
     )
     rc, _, stderr = run_hook(HOOK, make_bash_input(cmd))
@@ -586,7 +586,7 @@ def test_block_inline_python_c_open_no_encoding():
 def test_allow_inline_python_c_open_with_encoding():
     """Inline `python -c` with encoding='utf-8' is allowed."""
     cmd = (
-        """python -c "import json; d=json.load(open('hooks/skill-rules.json',encoding='utf-8')); """
+        """python -c "import json; d=json.load(open('hooks/judgment-rules.json',encoding='utf-8')); """
         """print(len(d['rules']))" """
     )
     rc, _, _ = run_hook(HOOK, make_bash_input(cmd))

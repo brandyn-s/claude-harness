@@ -2,13 +2,12 @@
 
 Emits ONE JSON document covering the deterministic parts of the audit:
 MCP server inventory, per-server coverage matrix, hook matchers, agent
-frontmatter, routing stats, self-improvement loop checks, and scaling
-numbers. Replaces ~200 lines of per-run ad-hoc Python (measured
+frontmatter, self-improvement loop checks, and scaling numbers. Replaces ~200 lines of per-run ad-hoc Python (measured
 2026-08-22, where hand-rolled matchers also produced two false coverage
 gaps).
 
 Path semantics match doc_accuracy_audit.py:
-- REPO content (agents/, skills/, hooks/skill-rules.json, settings.json,
+- REPO content (agents/, skills/, settings.json,
   agent-memory/topics/) resolves under CLAUDE_CONFIG_DIR when set (the
   stale-base worktree redirect), else ~/.claude.
 - RUNTIME state (~/.claude.json, ~/.mcp.json, projects/<dir>/ memory and
@@ -17,9 +16,6 @@ Path semantics match doc_accuracy_audit.py:
 
 Usage:
   python3 discovery.py > discovery.json
-  python3 discovery.py --route "why is the tenable scan failing"
-      # simulate the ACTUAL router dispatch (skip patterns first, then
-      # all matches sorted by (priority, match.start())) — NOT first-match.
 
 Exit code: 0 on success (findings are data, not exit status); 2 on a
 config parse failure that makes discovery incomplete.
@@ -50,9 +46,6 @@ ALIASES = {
     'compliance-access-framework': 'compliance-access',
     'workspace-provisioner': 'provision',
 }
-
-PRIORITY_ORDER = {'critical': 0, 'high': 1, 'medium': 2, 'low': 3}
-
 
 def _load_json(path):
     try:
@@ -133,26 +126,12 @@ def discover_project_dir():
     return sorted(cands, reverse=True)[0][1] if cands else None
 
 
-def build(route_prompts):
+def build():
     result = {'base': BASE, 'errors': []}
 
     servers, errs = load_servers()
     result['errors'].extend(errs)
     result['mcp_servers'] = servers
-
-    # --- Routing rules (repo) ---
-    sr, err = _load_json(os.path.join(BASE, 'hooks', 'skill-rules.json'))
-    if err:
-        result['errors'].append(f'skill-rules.json: {err}')
-    sr = sr or {'rules': [], 'skip_patterns': []}
-    rules = sr.get('rules', [])
-    invalid = []
-    for i, r in enumerate(rules):
-        try:
-            re.compile(r.get('pattern') or '')
-        except re.error as e:
-            invalid.append({'index': i, 'error': str(e)})
-    rules_blob = json.dumps(sr).lower()
 
     # --- Hooks (repo settings.json; deployed may differ — see banner) ---
     st, err = _load_json(os.path.join(BASE, 'settings.json'))
@@ -244,10 +223,8 @@ def build(route_prompts):
     for s in sorted(servers):
         variants = name_variants(s)
         topic = next((v for v in variants if v in topics), None)
-        routing = any(v.lower() in rules_blob for v in variants)
         matrix[s] = {
             'topic_file': topic,
-            'routing_keyword_hit': routing,
             'pre_tool_use': pre_covered(s),
             'claude_md_mention': any(v.lower() in claude_md for v in variants),
         }
@@ -260,66 +237,25 @@ def build(route_prompts):
         'error_learning_universal': any('mcp' in m and 'Bash' in m for m in ptuf),
         'subagent_stop_wildcard': '.*' in substop,
         'agents_with_memory': sorted(a for a, v in agents.items() if v['memory']),
-        'gather_skills_present_and_routed': {
-            sk: {'exists': sk in skills, 'routed': sk in rules_blob}
-            for sk in ('gather-intel', 'gather-internal-intel')
+        'gather_skills_present': {
+            sk: sk in skills for sk in ('gather-intel', 'gather-internal-intel')
         },
     }
 
     # --- Scaling ---
     result['scaling'] = {
         'memory_md_lines': mem_lines,
-        'routing_rules': len(rules),
-        'skip_patterns': len(sr.get('skip_patterns', [])),
-        'invalid_rule_regexes': invalid,
         'topic_files': len(topics),
         'topic_stubs': len(stubs),
     }
 
-    # --- Optional router simulation (the ACTUAL dispatch semantics) ---
-    if route_prompts:
-        result['routes'] = {p: simulate_route(sr, p) for p in route_prompts}
     return result
-
-
-def simulate_route(sr, prompt):
-    """Mirror hooks/skill-routing-hint.py: skip patterns hard-exit, then all
-    matches sorted by (priority, match.start()). NOT first-match-wins."""
-    for s in sr.get('skip_patterns', []):
-        try:
-            if re.search(s, prompt, re.IGNORECASE):
-                return {'result': 'SKIPPED', 'skip_pattern': s}
-        except re.error:
-            continue
-    matches = []
-    for i, r in enumerate(sr.get('rules', [])):
-        pat = r.get('pattern') or ''
-        try:
-            m = re.search(pat, prompt, re.IGNORECASE)
-        except re.error:
-            continue
-        if m:
-            matches.append((PRIORITY_ORDER.get(r.get('priority', 'medium'), 2),
-                            m.start(), i, r, m.group()[:40]))
-    if not matches:
-        return {'result': 'NO-MATCH'}
-    matches.sort(key=lambda x: (x[0], x[1]))
-    _, _, idx, rule, frag = matches[0]
-    return {
-        'result': rule.get('skill') or rule.get('agent'),
-        'rule_index': idx,
-        'priority': rule.get('priority', 'medium'),
-        'matched': frag,
-        'total_matches': len(matches),
-    }
 
 
 def main():
     ap = argparse.ArgumentParser(description='Architecture discovery for /audit-architecture')
-    ap.add_argument('--route', action='append', default=[],
-                    help='simulate router dispatch for a prompt (repeatable)')
-    args = ap.parse_args()
-    result = build(args.route)
+    ap.parse_args()
+    result = build()
     json.dump(result, sys.stdout, indent=1)
     sys.stdout.write('\n')
     return 2 if result['errors'] else 0

@@ -81,7 +81,6 @@ via the recipe in `_shared/project-dir.md` before the reads in items 4–5.
 Skipping this fallback silently reads empty paths and corrupts the baseline.
 6. `~/.claude/agent-memory/topics/security.md` - security domain gotchas and patterns
 7. `~/.claude/agent-memory/topics/infrastructure.md` - infrastructure domain gotchas and patterns. **Precondition**: only a subset of source `topics/*.md` files are symlinked into the deployed `~/.claude/agent-memory/topics/` directory. If this file does not resolve, fall back to the source path at `<claude-config-repo>/agent-memory/topics/infrastructure.md` (typically `/home/user/claude-config/agent-memory/topics/infrastructure.md`) before declaring the baseline empty.
-8. `~/.claude/hooks/skill-rules.json` - routing hook config
 
 **Semantic memory search**: Run `mcp__memory-search__memory_search(query="<focus area or 'Claude Code community patterns'>", limit=10)` in parallel with the file reads above. This surfaces relevant entries from agent memory and topic files that may not be in the files listed above (e.g., `[tool-gotcha]` and `[operational]` entries in `~/.claude/agent-memory/`).
 

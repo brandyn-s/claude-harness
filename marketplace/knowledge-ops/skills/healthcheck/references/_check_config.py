@@ -679,7 +679,6 @@ def check_config():
         CLAUDE_DIR / "settings.local.json",
         HOME / ".mcp.json",
         HOME / ".claude.json",
-        CLAUDE_DIR / "hooks" / "skill-rules.json",
         (CLAUDE_DIR / "projects" / PROJ / "settings.json") if PROJ else None,
     ]
     ok = total = 0

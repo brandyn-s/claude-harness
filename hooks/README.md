@@ -34,7 +34,6 @@ PostToolUse hooks can modify outputs via `updatedMCPToolOutput`.
 | `session-start.py` | SessionStart | Persists `CLAUDE_ENV_FILE` and injects the active OS's compact `session-start.md` digest (legacy fallback: top-level OS rules) | Keeps first-response latency predictable and output below the 10,000-character inline cap; full incident catalogs, health, sync, pruning, and repair stay on demand. |
 | `session-end.py` | SessionEnd | Atomically records a bounded receipt plus the official SessionStart model seed when available | Keeps exit fast; the local scheduled `bin/enrich-session-end-receipts.py` job recovers model/fallback/refusal metadata without retaining prompt content, and leaves unsupported facts explicitly `runtime-unknown`. |
 | `stop-failure-handler.py` | StopFailure | Logs API failures, injects recovery guidance for rate limits, auth errors, billing, server errors | API failures at session end are invisible without this. Provides immediate fix instructions. |
-| `promise-checker.py` | Stop | Catches performative compliance and banned session-closure phrases ("let's continue in a new session") | Prevents the #1 most frustrating agent behavior: stopping early and suggesting a new session. Registered on Stop (it reads `transcript_path`, a Stop field — moving it to StopFailure would silently break it). |
 
 The former `session-stop.py` and InstructionsLoaded validator implementations
 were removed after their replacement coverage landed; Git history is the
@@ -45,7 +44,7 @@ workflows own analysis and repair.
 
 | Hook | Matcher | What it does | Why it exists |
 |------|---------|-------------|---------------|
-| `bash-security-guard.py` | `Bash` | Always blocks credential exposure, exfiltration, reverse shells, security-control disablement, and broad destruction; optionally applies delivery, portability, and workflow policy from `bash_policy_tables.py` | One process and one JSON parse. Fresh-laptop loads the catastrophic core; the author profile sets `CLAUDE_BASH_POLICY_PACKS=all`. Audit trail in `bash-security-audit.py`. |
+| `bash-security-guard.py` | `Bash` | Always blocks credential exposure, exfiltration, reverse shells, security-control disablement, and broad destruction; optionally applies delivery, portability, and workflow policy from `bash_policy_tables.py` | One process and one JSON parse. Fresh-laptop loads the catastrophic core; the author profile sets `CLAUDE_BASH_POLICY_PACKS=all`. Writes its own per-decision audit trail to `~/.claude/audit/bash-security-*.jsonl`. |
 | `config-guard.py` | `Write\|Edit` | Blocks attempts to disable hooks via settings.json edits | Self-protection. Prevents an agent or subagent from disabling its own safety net. |
 | `memory-write-guard.py` | `Write\|Edit` | Blocks prompt injection patterns and oversized entries in memory file writes | Defends against ASI06 (indirect prompt injection via memory persistence). |
 | `search-path-guard.py` | `Glob\|Grep` | Blocks overly broad search paths (home dir, C:/, ~/.claude/plugins) | Prevents ripgrep from scanning gigabytes of irrelevant files. A single broad Grep can timeout for 2 minutes. |
@@ -58,7 +57,6 @@ workflows own analysis and repair.
 |------|---------|-------------|---------------|
 | `pre-agent-dispatch.py` | `Agent` | Warns when dispatching workers that reference authenticated remote MCPs | Sub-agents can't authenticate to MCP Gateway. Warning prevents wasted turns on auth failures. |
 | `auto-topic-loader.py` | `mcp__remote-.*` etc. | Auto-loads topic context on first call to each MCP server | Workers get domain-specific gotchas without needing to remember to load them. |
-| `pdf-to-text.py` | `Read` (with `if: "Read(*.pdf)"`) | Converts PDF reads to text, saving ~48K tokens per PDF | Claude can't read raw PDF binary. Without conversion, it sees garbage. The `if` filter prevents spawning on 99% of Read calls. |
 
 ### Quality Enforcement (PostToolUse)
 
@@ -68,9 +66,7 @@ workflows own analysis and repair.
 | `post-merge-sync.py` | `Bash` | Auto-syncs local main after `gh pr merge` (checkout main, fetch, rebase) | Prevents local/remote divergence after merges. Without this, the next PR creation fails with "up to date" errors. |
 | `result-injection-guard.py` | `mcp__.*` | Scans MCP tool results for embedded instruction patterns | Defends against ASI01 (indirect prompt injection via MCP results). Warns the agent to treat flagged results as data, not instructions. |
 | `loop-detector.py` | `mcp__.*\|Bash\|Read\|Glob\|Grep` | Detects no-op loops (3+ identical calls) and retry storms (4+ consecutive failures) | Prevents the agent from burning turns on repeated identical calls that will never succeed. |
-| `query-routing-log.py` | `mcp__codebase-memory-mcp__search_code\|mcp__codebase-memory-mcp__search_code_semantic\|mcp__codebase-memory-mcp__query_graph\|mcp__codebase-memory-mcp__search_graph\|mcp__memory-search__memory_search` | Logs queries to JSONL for routing analysis | Provides data for evaluating search quality and routing decisions across sessions. |
 | `tavily-research-poll.py` | `mcp__tavily__tavily_research` | Polls async Tavily research tasks for completion | Tavily research is async — without polling, the agent doesn't get results. |
-| `bash-security-audit.py` | `Bash` | Logs **security-relevant** Bash decisions (blocks, auto-fixes, advisories) to a JSONL audit trail. Skips `passthrough` events by design, and returns early when `CLAUDE_EFFORT=low` — so it is NOT a complete record of every Bash decision (corrected 2026-07-26). The blocking guard runs regardless. | Security audit trail. Blocked commands are recorded for post-session analysis. |
 
 Oversized MCP results use Claude Code's native 25,000-token persistence limit
 and tool-specific `anthropic/maxResultSizeChars` metadata. The former custom
@@ -115,7 +111,7 @@ prompt.
 2. **Hooks don't ask the agent to remember — they fire mechanically.** The `encoding='utf-8'` check runs on every Python write whether the agent thinks about encoding or not.
 3. **Guard hooks block silently dangerous operations. Visible errors don't need guards.** A `SyntaxError` is self-correcting (agent reads the traceback). But cp1252 encoding silently mangles Unicode with no error — that needs a guard.
 4. **Every hook was tested retroactively against session transcripts before shipping.** The python-script-guard incident (85.6% block rate on historical commands) proved that unit tests alone don't catch aggressive hooks. Retroactive testing against 1-2 weeks of real tool calls is required.
-5. **`if` conditions prevent unnecessary process spawning.** `pdf-to-text.py` uses `if: "Read(*.pdf)"` — spawns only for PDF reads, not the 99% of Read calls that are source files.
+5. **`if` conditions prevent unnecessary process spawning.** The Read converters (`nessus-to-md.py`, `cklb-to-md.py`, `xlsx-to-md.py`) use `if: "Read(*.nessus)"` and friends — they spawn only for those file types, not the 99% of Read calls that are source files. (Claude Code reads PDFs natively, so no PDF converter is needed.)
 
 ## Creating New Hooks
 

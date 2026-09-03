@@ -117,12 +117,6 @@ GATES: tuple[Gate, ...] = (
         why="cross-session messages must refuse inbound delivery and isolate peers",
     ),
     Gate(
-        "skill-rules-json",
-        "Validate skill-rules.json",
-        [PY, "-c", "import json;json.load(open('hooks/skill-rules.json',encoding='utf-8'))"],
-        why="skill routing silently stops firing if this fails to parse",
-    ),
-    Gate(
         "hook-paths",
         "Verify every registered hook script exists + no orphan test files",
         [PY, "scripts/validate-hook-paths.py"],
@@ -154,7 +148,7 @@ GATES: tuple[Gate, ...] = (
     ),
     Gate(
         "manifest-refs",
-        "Validate manifests (dangling refs, dangling routes, missing sources)",
+        "Validate manifests (dangling refs, missing sources)",
         [PY, "manifests/compile.py", "--root", ".", "--check", "--no-reindex"],
         why="reference fields (requires_rules, guardrails) must name IDs, not prose "
         "-- prose there is 4 DANGLING errors (#1740)",

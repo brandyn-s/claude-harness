@@ -74,7 +74,6 @@ Load the baseline **selectively, scoped to the run**. Two of these files are too
 3. `MEMORY.md` — **do not re-read**: it is injected into session context at startup (verify by checking the session context; read from `~/.claude/projects/$CLAUDE_PROJECT_ID/memory/MEMORY.md` only if genuinely absent).
 4. `~/.claude/projects/$CLAUDE_PROJECT_ID/CLAUDE.md` — behavioral rules and constraints (skip when already injected into session context, which is the normal case).
 5. `~/.claude/agent-memory/topics/` — **focused run**: only topics matching the focus area (e.g. `fastmcp.md` for MCP focus). **Full-scope run**: `security.md` + `infrastructure.md` (scan for research-derived entries).
-6. `~/.claude/hooks/skill-rules.json` — routing hook config (**full-scope runs only**; skip on focused runs unless the focus area touches routing).
 
 If `$CLAUDE_PROJECT_ID` isn't set (headless / worktree sessions), resolve it
 via `_shared/project-dir.md`'s recipe before items 3–4. Skip items 3–4 if no

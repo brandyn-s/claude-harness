@@ -97,8 +97,8 @@ def test_repo_agent_corpus_matches_documented_inventory_and_tool_policy():
 def test_worker_denies_the_agent_tool():
     """worker must not be able to dispatch subagents.
 
-    No worker route needs delegation (all 20 skill-rules routes are domain-tool
-    operations; the PARENT fans out per agent-delegation.md). Denying `Agent` also
+    No worker task needs delegation (worker work is domain-tool operations; the
+    PARENT fans out per agent-delegation.md). Denying `Agent` also
     covers the documented fork exception, which otherwise inherits the parent's
     full tool list.
     """

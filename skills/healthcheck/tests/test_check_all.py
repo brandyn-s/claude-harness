@@ -42,7 +42,7 @@ def test_parse_pytest_empty_output_is_zero_zero():
 def test_strip_prefix_removes_label_and_status():
     assert hc.strip_prefix("Skills: PASS — 92/92 validated") == "92/92 validated"
     assert hc.strip_prefix("Paths: PASS - 50 paths verified") == "50 paths verified"
-    assert hc.strip_prefix("Routing: WARN — 2 dead references") == "2 dead references"
+    assert hc.strip_prefix("Orphans: WARN — 2 orphan hooks") == "2 orphan hooks"
 
 
 def test_strip_prefix_label_without_status():

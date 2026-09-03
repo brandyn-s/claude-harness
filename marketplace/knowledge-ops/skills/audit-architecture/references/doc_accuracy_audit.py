@@ -188,15 +188,6 @@ def load_actual_state():
         mcp.add(srv)
     state['mcp_servers'] = sorted(mcp)
 
-    # Routing rules
-    skill_rules_path = f'{base}/hooks/skill-rules.json'
-    try:
-        with open(skill_rules_path, 'r', encoding='utf-8') as f:
-            state['routing_count'] = len(json.load(f).get('rules', []))
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        print(f"ERROR: {skill_rules_path}: {e}", file=sys.stderr)
-        state['routing_count'] = 0
-
     # Plugins
     state['plugins'] = settings.get('enabledPlugins', {})
 

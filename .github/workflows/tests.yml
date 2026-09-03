@@ -35,10 +35,8 @@ jobs:
       # The runner exits non-zero on any failing directory AND on a run that
       # collected zero tests, so a suite that silently stops discovering
       # anything cannot report success.
-      # Restores the gate the source repo had and this export lost. Its step name
-      # there was literally "Validate manifests (dangling refs, dangling routes,
-      # missing sources)" -- and dropping it is why 17 dangling routes were live in
-      # hooks/skill-rules.json with nothing complaining.
+      # Restores the gate the source repo had and this export lost; without it,
+      # dangling manifest references accumulated with nothing complaining.
       - name: Validate the manifest graph
         run: python3 manifests/compile.py --root . --check --strict-semantic --no-reindex
 
@@ -46,27 +44,30 @@ jobs:
         run: python3 scripts/validate-hook-paths.py
 
       # Prove that gate can fail. A validator nobody has watched reject anything is
-      # a hypothesis; this one is only reachable by running it deliberately.
+      # a hypothesis; this one is only reachable by running it deliberately. The
+      # control plants a hook manifest whose requires_rules names a rule that does
+      # not exist (a DANGLING reference), then removes it and re-runs clean.
       - name: Prove the manifest gate fires
         run: |
           set -euo pipefail
-          cp hooks/skill-rules.json /tmp/sr.bak
-          python3 - <<'EOF'
-          import json
-          p = "hooks/skill-rules.json"
-          d = json.load(open(p, encoding="utf-8"))
-          d["rules"].append({"pattern": "zzz-control", "skill": "no-such-skill-control",
-                             "agent": None, "desc": "drift control", "priority": "low"})
-          json.dump(d, open(p, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
-          EOF
+          control=hooks/manifests/zzz-drift-control.yaml
+          test ! -e "$control"
+          printf '%s\n' \
+            'id: zzz-drift-control' \
+            'type: hook' \
+            'event: PreToolUse' \
+            'matcher: "Bash"' \
+            'description: "CI drift control; never committed"' \
+            'requires_rules:' \
+            '  - no-such-rule-control' > "$control"
           if python3 manifests/compile.py --root . --check --no-reindex >/dev/null 2>&1; then
-            cp /tmp/sr.bak hooks/skill-rules.json
-            echo "::error::manifest gate did NOT reject a dangling route - it is vacuous"
+            rm -f "$control"
+            echo "::error::manifest gate did NOT reject a dangling reference - it is vacuous"
             exit 1
           fi
-          cp /tmp/sr.bak hooks/skill-rules.json
+          rm -f "$control"
           python3 manifests/compile.py --root . --check --no-reindex >/dev/null
-          echo "manifest gate fires on a dangling route, and is clean after restore"
+          echo "manifest gate fires on a dangling reference, and is clean after removal"
 
       - name: Run the suite
         run: python3 scripts/run-tests.py --timeout 600

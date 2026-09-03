@@ -1,8 +1,8 @@
 ---
 name: healthcheck
 description: "Quick architecture health check — hooks, config syntax, skill frontmatter, memory, and indexes."
-when_to_use: 'Quick architecture health check — runs hook tests, validates config syntax, checks skill frontmatter, verifies memory consistency, detects stale file paths, ARCHITECTURE.md drift, dead routing references, and MCP index integrity. Use when: "run tests", "health check", "check everything", "run checks", "are things healthy", "validate config", "hygiene check", "verify indexes". Do NOT use for full architecture audit (/audit-architecture), change-specific validation (/validate-changes), or MCP server debugging (inspect the server with /mcp and its logs).'
-argument-hint: "[optional: hooks, config, skills, memory, paths, drift, routing, targets, orphans, manifest, indexes, or omit for all]"
+when_to_use: 'Quick architecture health check — runs hook tests, validates config syntax, checks skill frontmatter, verifies memory consistency, detects stale file paths, ARCHITECTURE.md drift, and MCP index integrity. Use when: "run tests", "health check", "check everything", "run checks", "are things healthy", "validate config", "hygiene check", "verify indexes". Do NOT use for full architecture audit (/audit-architecture), change-specific validation (/validate-changes), or MCP server debugging (inspect the server with /mcp and its logs).'
+argument-hint: "[optional: hooks, config, skills, memory, paths, drift, targets, orphans, manifest, indexes, or omit for all]"
 effort: medium
 metadata:
   author: example-security-engineering
@@ -175,7 +175,7 @@ python3 ${CLAUDE_PLUGIN_ROOT}/skills/healthcheck/references/_check_config.py
 ```
 
 It JSON-parses each config file — settings.json, settings.local.json,
-~/.mcp.json, ~/.claude.json, hooks/skill-rules.json, and the project
+~/.mcp.json, ~/.claude.json, and the project
 settings.json at `projects/$CLAUDE_PROJECT_ID/` — skipping absent ones and
 reporting the first parse error with its filename. It then inventories personal
 skills and legacy commands, project skills/commands from the starting directory
@@ -386,26 +386,12 @@ Report:
 
 ---
 
-## Check 7: Routing Health (`routing`)
+## Check 7: Routing Health — retired
 
-**Run the helper** rather than re-implementing inline:
-
-```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/healthcheck/references/_check_routing.py
-```
-
-It validates `~/.claude/hooks/skill-rules.json`: structure (a dict with `rules`
-+ `skip_patterns`, not the legacy bare array), dead skill refs (skill dir
-missing from `${CLAUDE_PLUGIN_ROOT}/skills/`), dead agent refs (agent `.md` missing from
-`~/.claude/agents/`), and duplicate patterns (the second is dead under
-first-match-wins). Each rule carries BOTH `skill` and `agent` keys with one set
-to `null` — a null value is NOT a dead reference. Do NOT re-implement inline: an
-earlier inline version treated `"skill": null` as a reference to a skill dir
-named "None" and reported 85 phantom dead refs (2026-06-16).
-
-Exit 0 = PASS, 1 = WARN. Report:
-- `"Routing: PASS — {N} rules valid, no dead references"` if clean
-- `"Routing: WARN — {dead} dead references, {dupes} duplicates"` + details
+Retired 2026-09-03. Claude Code routes skills natively from each SKILL.md
+frontmatter description; the static `hooks/skill-rules.json` table and its
+router hook were removed, so there is no routing state left to validate. The
+number is kept so Checks 8-10 keep their stable IDs.
 
 ---
 
@@ -648,14 +634,13 @@ had a golden test pinning the old "optional" label the retarget removed.)
 
 ## Report
 
-Present a summary table mapping Check 0 plus each of the 11 main checks to
+Present a summary table mapping Check 0 plus each of the 10 main checks to
 PASS / WARN / FAIL, plus an `Overall:` line (HEALTHY / HEALTHY-with-warnings
 / UNHEALTHY). The orchestrator (`_check_all.py`, see "Run all at once" above)
 emits exactly this matrix — already `[POSSIBLY STALE]`-stamped and with
 WIP-FAIL labelling applied — so prefer relaying its output over hand-assembling
 the table. For failures, list actionable fix suggestions and offer to fix
-auto-safe issues (orphan memory entries, dead routing rules, stale branch
-cleanup, etc.).
+auto-safe issues (orphan memory entries, stale branch cleanup, etc.).
 
 **Freshness banner (Check 0 WARN)**: if Check 0 reported WARN, prepend
 the summary with a banner naming the staleness condition ("main checkout
@@ -672,7 +657,7 @@ and fix-suggestion conventions live in `references/report-format.md`.
 ## Success Criteria
 
 - Check 0 (freshness) runs first and stamps subsequent findings as `[POSSIBLY STALE]` when WARN
-- All 11 main checks run to completion (no silent skips)
+- All 10 main checks run to completion (no silent skips; Check 7 is retired)
 - Hook test failures include the specific test name and assertion
 - Disabled/unknown plugin hooks include plugin/event/state-source evidence; incomplete plugin metadata hard-fails
 - Config errors include the file path and parse error details
@@ -681,11 +666,9 @@ and fix-suggestion conventions live in `references/report-format.md`.
 - Memory orphans identified with specific filenames
 - Stale paths identified with which config file references them
 - ARCHITECTURE.md drift shows bidirectional diff (phantoms + undocumented)
-- Dead routing references name the missing skill/agent
 - Total runtime under 30 seconds when hook tests are excluded; ~11 minutes when `hooks` (Check 1) is run (see "Runtime expectations" near the top of this skill)
 
 ## Examples
 
-See `references/examples.md` for 5 worked invocations covering full-run,
-hooks-only, drift-after-MCP-add, routing-after-skill-delete, and
-orphans-cleanup scenarios.
+See `references/examples.md` for 4 worked invocations covering full-run,
+hooks-only, drift-after-MCP-add, and orphans-cleanup scenarios.

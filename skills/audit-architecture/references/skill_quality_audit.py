@@ -1,10 +1,10 @@
-"""Skill quality evaluation: S1-S7, C1-C7, X1-X3 + portfolio health.
+"""Skill quality evaluation: S1-S7, C1-C7, X1-X2 + portfolio health.
 
 Run from audit-architecture Phase 2b or standalone:
   python ~/.claude/skills/audit-architecture/references/skill_quality_audit.py
 
 Outputs JSON to stdout for programmatic use, human-readable to stderr.
-Exit code: 0 if all skills >= 12/17, 1 otherwise.
+Exit code: 0 if all skills >= 12/16, 1 otherwise.
 """
 import json
 import os
@@ -16,7 +16,6 @@ sys.stderr.reconfigure(encoding='utf-8')
 
 base = os.environ.get('CLAUDE_CONFIG_DIR') or os.path.expanduser('~/.claude')
 skills_dir = f'{base}/skills'
-rules_path = f'{base}/hooks/skill-rules.json'
 
 # Anthropic's authoritative skill-body cap (rules/skill-standards.md).
 SKILL_BODY_LINE_CAP = 510  # SOFT proxy (rules/skill-standards.md, ≤510 non-failing); advisory only — C6 fails on the ~5000-word token-budget proxy, not on line count
@@ -56,36 +55,13 @@ def _is_mechanical(folder, frontmatter):
     return folder in MECHANICAL_SKILLS
 
 
-def load_routing_rules():
-    """Read skill-rules.json and return the set of routed skill names.
-
-    Mirrors the May 2026 graceful-handling pattern in doc_accuracy_audit.py:
-    a missing or malformed skill-rules.json must NOT crash the scanner.
-    Emit "ERROR: ..." to stderr and fall through with an empty set —
-    every skill will fail X3 (no routing rule), which is honest output,
-    not a Python traceback. Phase 0's "Probe error handling" promise
-    ("Never let a single probe failure stall the entire audit") applies
-    to Phase 2b too.
-    """
-    try:
-        with open(rules_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-    except FileNotFoundError:
-        print(f"ERROR: {rules_path} not found", file=sys.stderr)
-        return set()
-    except json.JSONDecodeError as e:
-        print(f"ERROR: {rules_path} malformed ({e})", file=sys.stderr)
-        return set()
-    return {r['skill'] for r in data.get('rules', []) if r.get('skill')}
-
-
 def _safe_listdir(path):
     """os.listdir(path) but returns [] if the directory doesn't exist.
 
     Mirrors doc_accuracy_audit.py — a missing skills/ directory (e.g. a
     CLAUDE_CONFIG_DIR pointed at a non-existent path) must NOT crash the
     scanner with a traceback. Phase 0's "Probe error handling" promise
-    applies to the full Phase 2b scanner, not just load_routing_rules().
+    applies to the full Phase 2b scanner.
     """
     try:
         return os.listdir(path)
@@ -94,7 +70,7 @@ def _safe_listdir(path):
         return []
 
 
-def evaluate_skill(d, routed_skills):
+def evaluate_skill(d):
     """Evaluate one skill directory. Returns (name, score, total, rating, fails, meta)."""
     skill_path = f'{skills_dir}/{d}/SKILL.md'
     with open(skill_path, 'r', encoding='utf-8') as f:
@@ -223,8 +199,6 @@ def evaluate_skill(d, routed_skills):
         checks['X2_crossref'] = 'PASS' if has_redirect else 'PARTIAL'
     else:
         checks['X2_crossref'] = 'FAIL'
-
-    checks['X3_routing'] = 'PASS' if d in routed_skills else 'FAIL'
 
     # ── EXTRA CHECKS ──
     effort_match = re.search(r'^effort:\s*(\w+)', fm, re.MULTILINE)
@@ -440,7 +414,6 @@ def validate_references():
 
 
 def main():
-    routed = load_routing_rules()
     results = []
     effort_dist = {'low': 0, 'medium': 0, 'high': 0, 'max': 0, 'missing': 0}
 
@@ -450,7 +423,7 @@ def main():
         if not os.path.isfile(f'{skills_dir}/{d}/SKILL.md'):
             continue
 
-        name, score, total, rating, fails, meta = evaluate_skill(d, routed)
+        name, score, total, rating, fails, meta = evaluate_skill(d)
 
         if meta['effort']:
             effort_dist[meta['effort']] = effort_dist.get(meta['effort'], 0) + 1
@@ -501,7 +474,7 @@ def main():
 
     top_fails = sorted(all_fails.items(), key=lambda x: -x[1])[:5]
     print(f'\nTop failures: {", ".join(f"{k} ({v})" for k, v in top_fails)}', file=sys.stderr)
-    print(f'Compliance: {len(good)}/{len(results)} (>= 12/17)', file=sys.stderr)
+    print(f'Compliance: {len(good)}/{len(results)} (>= 12/16)', file=sys.stderr)
 
     # ── JSON output to stdout ──
     output = {

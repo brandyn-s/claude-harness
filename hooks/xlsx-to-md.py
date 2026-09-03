@@ -4,7 +4,7 @@ Intercepts Read tool calls on .xlsx files, converts each sheet into a markdown
 table, caches in ~/Documents/converted-xlsx/, and blocks the Read with a redirect
 to the .md file.
 
-Mirrors pdf-to-text.py: sentinel header, freshness check, subprocess isolation,
+Converter-hook pattern: sentinel header, freshness check, subprocess isolation,
 paths via argv. Requires openpyxl in the target Python environment.
 """
 

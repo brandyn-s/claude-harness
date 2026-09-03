@@ -28,22 +28,6 @@ def test_auto_topic_loader_marker_uses_payload_session(tmp_path, monkeypatch):
     assert mod.get_marker_path("session-bbbb").name == "topics-loaded-session-bbbb.json"
 
 
-def test_toolsearch_intercept_marker_uses_payload_session(tmp_path, monkeypatch):
-    mod = _load("toolsearch-intercept.py")
-    monkeypatch.setattr(mod, "SESSION_MARKER_DIR", tmp_path)
-    monkeypatch.delenv("CLAUDE_SESSION_ID", raising=False)
-    monkeypatch.delenv("CLAUDE_CODE_SESSION_ID", raising=False)
-    assert mod._marker_path("session-aaaa").name == "toolsearch-selected-session-aaaa.json"
-
-
-def test_verify_before_assuming_marker_uses_payload_session(tmp_path, monkeypatch):
-    mod = _load("verify-before-assuming.py")
-    monkeypatch.setattr(mod, "SESSION_ENV_DIR", tmp_path)
-    monkeypatch.delenv("CLAUDE_SESSION_ID", raising=False)
-    monkeypatch.delenv("CLAUDE_CODE_SESSION_ID", raising=False)
-    assert mod._get_session_marker("session-aaaa").name == "toolsearch-used-session-aaaa.flag"
-
-
 def test_env_var_remains_the_fallback(tmp_path, monkeypatch):
     mod = _load("auto-topic-loader.py")
     monkeypatch.setattr(mod, "SESSION_MARKER_DIR", tmp_path)

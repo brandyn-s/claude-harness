@@ -58,11 +58,11 @@ def test_autofixing_guard_not_prune_flagged(tmp_path):
 def test_idle_blocking_guard_still_prune_flagged(tmp_path):
     # A blocking guard with 0 blocks AND 0 auto-fixes IS a prune/test candidate.
     _seed(tmp_path,
-          [{"ts": 1, "hook": "promise-checker.py", "exit": 0, "ms": 5}] * 15,
+          [{"ts": 1, "hook": "search-path-guard.py", "exit": 0, "ms": 5}] * 15,
           {})
     out = _run(tmp_path)
     prune = out.split("PRUNE/TEST CANDIDATES", 1)
-    assert len(prune) > 1 and "promise-checker.py" in prune[1]
+    assert len(prune) > 1 and "search-path-guard.py" in prune[1]
 
 
 def test_friction_summary_present(tmp_path):

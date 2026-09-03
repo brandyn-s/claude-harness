@@ -81,7 +81,8 @@ GUARD pattern="the model already self-verified" or "Opus 4.7 has self-verificati
   Self-verification reduces some failure modes but does NOT substitute
   for external grounding (the 57% false-data finding shows the model
   can self-verify and still produce false claims that pass review).
-  Hooks audit the OUTPUT the user sees, not the model's internal reasoning.
+  Final-output evaluation audits the OUTPUT the user sees, not the model's
+  internal reasoning.
   NO EXCEPTIONS.
 
 # ─── FAILURE MODES to recognise ───
@@ -97,8 +98,8 @@ FAILURE mode_collapsed_variations_pass_as_diverse:
   # INCIDENT class: Opus 4.7 KINTAL T4 mode-collapse. "5 different
   #   Full: incidents#class-opus-4-7-kintal-t4-mode-collapse-5
   RECOVERY: scout-frontier's diversity primitives (PR #2) catch this
-  at generation time. Output-grounding hook catches it at output time
-  by warning if no counterfactual is offered.
+  at generation time; final-output evaluation catches it at output time
+  when no counterfactual is offered.
 
 FAILURE hyperpolation_overclaim:
   # Outputs labeled "novel" / "transcendent" / "frontier" when actually
@@ -112,9 +113,9 @@ FAILURE explanation_theater:
   # gives the user FALSE confidence (worse than no rationale). Three-
   # layer defense detects this: rationale without provenance fails
   # Layer 2.
-  RECOVERY: detection hook scans for confidence-cue words paired with
-  absence of source URLs / `[INFERRED]` tags. Warns when both signals
-  present (rationale + no provenance).
+  RECOVERY: final-output evaluation scans for confidence-cue words paired
+  with absence of source URLs / `[INFERRED]` tags and flags rationale that
+  carries no provenance.
 
 # ─── PROCEDURE: enforcement scope ───
 
@@ -137,17 +138,15 @@ the corresponding skills cite this rule at Tier 2 (one-line pointer).
 
 # ─── ENFORCEMENT ───
 
-This is a prompt and evaluation contract. The PostToolUse hook remains
-registered as a non-blocking advisory diagnostic. When Claude Code supplies a
-substantive Skill tool response, it can warn that the payload lacks one or more
-signals. In normal Skill execution, however, the payload contains launcher
-metadata rather than the later user-facing final answer, so the hook normally
-skips it. It cannot grade the final answer, and silence is not evidence of
-compliance.
+This is a prompt and evaluation contract. No hook enforces it: the PostToolUse
+`Skill` payload contains launcher metadata rather than the later user-facing
+final answer, so a hook there cannot grade the answer. The former advisory
+diagnostic hook was removed on 2026-09-03 after a 30-day replay found zero
+substantive payloads for it to grade.
 
 Enforce the three signals through skill instructions, deterministic fixtures,
-transcript replay, and final-output evaluation. Treat hook warnings only as an
-additional diagnostic; never use hook silence as a final-output oracle.
+transcript replay, and final-output evaluation. Only final-output evaluation is
+evidence that an answer met the contract.
 
 # ─── REFERENCE ───
 

@@ -65,7 +65,5 @@ preconditions:
   - "Provider API keys configured for whichever servers are used (e.g., TAVILY_API_KEY, EXA_API_KEY)"
   - "target_problem is open-ended (not a closed bug-shaped problem)"
 guardrails:
-  - creative-output-grounding-check
-  - context-monitor
   - tavily-search-cap
 threat_model: read_only

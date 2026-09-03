@@ -32,7 +32,6 @@ Evaluate each skill discovered in `~/.claude/skills/*/SKILL.md` against these cr
 |---|---|---|---|
 | X1 | No exclusive assumption | Skill doesn't assume it's the only one active | No "disable other skills" language |
 | X2 | Cross-references | Negative triggers redirect to specific alternative skills | Named skill in each "Do NOT" clause |
-| X3 | Routing rule exists | Skill has a matching entry in `skill-rules.json` | Pattern matches skill name |
 
 ## Scoring
 
@@ -40,7 +39,7 @@ Per skill: count PASS / FAIL / PARTIAL across all checks.
 
 | Score | Rating | Action |
 |---|---|---|
-| 15-17 PASS | Excellent | No action needed |
+| 15-16 PASS | Excellent | No action needed |
 | 12-14 PASS | Good | Note gaps for next iteration |
 | 8-11 PASS | Needs Work | Flag specific failures for remediation |
 | <8 PASS | Poor | Recommend rewrite using skill-development-patterns.md |

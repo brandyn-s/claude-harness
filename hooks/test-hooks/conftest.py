@@ -13,8 +13,8 @@ HOOKS_DIR = Path(__file__).resolve().parent.parent
 PYTHON = sys.executable
 
 # Test-vs-production provenance: mark every hook invocation from this suite
-# so hooks that write PRODUCTION telemetry (e.g. toolsearch-intercept's
-# query log) can skip it. The 2026-06-12 Fable 5 recurrence recompute found
+# so hooks that write PRODUCTION telemetry (audit logs, query logs) can
+# skip it. The 2026-06-12 Fable 5 recurrence recompute found
 # 21/21 bare-keyword entries in the production query log were this suite's
 # fixtures — the instrument that guard keep/prune audits read had been
 # contaminated by the guard's own tests. run_hook() inherits os.environ,
@@ -125,9 +125,8 @@ _NEEDS_GIT_PER_TEST = {
     "test_bash_security_guard.py::test_autofix_rebase_already_stashed_noop",
     "test_bash_security_guard.py::test_autofix_rebase_continue_noop",
 }
-_NEEDS_YAML_IN_SYSEXEC = {
-    "test_skill_routing_hint.py",
-}
+# Empty since skill-routing-hint left; keep the slot for the next yaml-importing hook test.
+_NEEDS_YAML_IN_SYSEXEC: set[str] = set()
 _NEEDS_OPENPYXL_IN_SYSEXEC = {
     "test_xlsx_to_md.py",
 }

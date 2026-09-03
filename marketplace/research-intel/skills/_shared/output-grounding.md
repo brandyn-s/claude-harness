@@ -70,8 +70,8 @@ knowledge-asymmetric collaboration. It excludes compiler/proof-oracle engineerin
 fail-loud operational work, expert-readable outputs, and internal reasoning.
 
 Enforce through skill instructions, deterministic fixtures, transcript replay, and
-final-output evaluation. The configured `creative-output-grounding-check` PostToolUse
-hook is an advisory payload diagnostic only: it can warn when a substantive Skill tool
-response is present, but the payload normally contains launcher metadata rather than the
-later user-facing answer. Hook silence is not evidence that the final answer met this
+final-output evaluation. No hook enforces this contract: a PostToolUse `Skill` payload
+contains launcher metadata rather than the later user-facing answer, so a hook there
+cannot grade the final answer (the former advisory diagnostic was removed 2026-09-03 for
+exactly that reason). Only final-output evaluation is evidence that the answer met this
 contract.

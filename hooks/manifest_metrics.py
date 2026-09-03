@@ -96,7 +96,7 @@ def log_advisory_warning(hook_name, tool_name, operation, warned=True, session_i
     """Log when an advisory hook fires a warning.
 
     Args:
-        hook_name: e.g. "security-write-confirm", "verify-before-assuming"
+        hook_name: e.g. "security-write-confirm", "pre-agent-dispatch"
         tool_name: the MCP tool or tool type that triggered the warning
         operation: what the tool was doing (e.g. "assign_alert", "dispatch agent")
         warned: True if warning was emitted (write detected), False if passed (read)

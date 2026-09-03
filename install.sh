@@ -244,7 +244,7 @@ install_hooks() {
                'PostToolUse|mcp__.*|result-injection-guard.py|30'
            ) ;;
         2) hooks=(loop-detector.py result-injection-guard.py bash-security-guard.py
-                  destructive-ops-guard.py bash-security-audit.py bash-error-classifier.py
+                  destructive-ops-guard.py bash-error-classifier.py
                   config-guard.py memory-write-guard.py worktree-enforcement.py
                   rule-size-guard.py rule_context_budget.py home-scratch-guard.py
                   write-edit-dispatcher.py block-partial-read.py search-path-guard.py
@@ -269,7 +269,6 @@ install_hooks() {
                'PostToolUse|Write|Edit|post-write-edit.py|30'
                'PostToolUse|mcp__.*|result-injection-guard.py|30'
                'PostToolUse|mcp__.*|Bash|Read|Glob|Grep|loop-detector.py|20'
-               'PostToolUse|Bash|bash-security-audit.py|30'
                'PostToolUseFailure|mcp__.*|Bash|Read|Edit|Write|post-failure-guide.py|20'
                'PostToolUseFailure|Bash|bash-error-classifier.py|30'
                'SessionStart||session-start.py|30'

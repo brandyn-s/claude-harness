@@ -62,7 +62,7 @@ Run live checks FIRST — these find problems that static analysis cannot.
 
 **Stale file paths:** Read `~/.mcp.json` and `~/.claude/settings.json`. For `args` arrays, check each `.py` and `.ps1` path exists. For hook commands, extract the script path and verify. Flag missing files.
 
-**Config syntax:** JSON-parse `~/.mcp.json` (if present — absent on macOS hosts, where MCP config lives only in `~/.claude.json`), `~/.claude/settings.json`, `settings.local.json`, project `settings.json`, and `skill-rules.json`. Flag parse errors.
+**Config syntax:** JSON-parse `~/.mcp.json` (if present — absent on macOS hosts, where MCP config lives only in `~/.claude.json`), `~/.claude/settings.json`, `settings.local.json`, and project `settings.json`. Flag parse errors.
 
 **Executable collision and plugin-hook guards:** Run both canonical healthcheck
 helpers before declaring discovery complete:
@@ -108,22 +108,20 @@ Do NOT hardcode file paths, agent names, or MCP names — discover them from the
 3. **Skills and legacy commands**: Inventory `${CLAUDE_PLUGIN_ROOT}/skills/*/SKILL.md` and `~/.claude/commands/*.md`; for the active project, inspect `.claude/skills/` and `.claude/commands/` in the starting directory and every parent through the repository root, plus nested `.claude/skills/` directories that can load on file access. Also inventory plugin default/custom/root skill shapes for visibility. Personal/project skill runtime identity is the directory name and command identity is the file stem; frontmatter `name` is display-only there. Use the executable guard for exact case-sensitive standalone MCP collisions only; do not hard-fail a bare standalone name against a plugin component.
 4. **Hooks**: Read `~/.claude/settings.json` — extract all hook entries by event type with their matchers and types. For each agent `.md` file, also check for `hooks:` in YAML frontmatter. Include agent-scoped hooks tagged as 'agent-scoped'.
 5. **Plugin hooks**: Read `~/.claude/plugins/installed_plugins.json`, then inspect every recorded `installPath` for `.claude-plugin/plugin.json` and `hooks/hooks.json`. A manifest `hooks` string/array/object field replaces the default hook file; never treat `.claude-plugin/hooks.json` or root `hooks.json` as implicit defaults. Require custom paths to start with `./` and remain contained after resolution. Inventory definitions independently of enablement and `/hooks`; tag plugin id, tri-state enabled/disabled/unknown state, state source, event, matcher, and exact source path. Resolve `enabledPlugins` with local > project > user precedence, then marketplace/manifest `defaultEnabled`. Treat malformed/unreadable relevant metadata as incomplete discovery, not zero hooks. Surface disabled definitions because upstream #85893 shows they can remain active after disablement, and report unresolved state separately.
-6. **Routing rules**: Read `~/.claude/hooks/skill-rules.json` — extract all rules (pattern, skill, agent) and skip patterns
-7. **CLAUDE.md**: Read `$PROJECT_DIR/CLAUDE.md` — extract delegation tables
-8. **MEMORY.md**: Read `$PROJECT_DIR/memory/MEMORY.md` — note total line count
-9. **Topic files**: Glob `~/.claude/agent-memory/topics/*.md` — for each, read first 5 lines to determine stub vs populated. (The former `memory/*-patterns.md` tier was retired 2026-06-10 with the T3 collapse — B7/F3.)
-10. **Agent memory**: Glob `~/.claude/agent-memory/*/` — list directories, count entries, check last-modified date
-11. **ARCHITECTURE.md**: Read `~/.claude/ARCHITECTURE.md` — the documented architecture for drift comparison
-12. **Project settings**: Read `$PROJECT_DIR/settings.json` — check for `disabledMcpServers`
+6. **CLAUDE.md**: Read `$PROJECT_DIR/CLAUDE.md` — extract delegation tables
+7. **MEMORY.md**: Read `$PROJECT_DIR/memory/MEMORY.md` — note total line count
+8. **Topic files**: Glob `~/.claude/agent-memory/topics/*.md` — for each, read first 5 lines to determine stub vs populated. (The former `memory/*-patterns.md` tier was retired 2026-06-10 with the T3 collapse — B7/F3.)
+9. **Agent memory**: Glob `~/.claude/agent-memory/*/` — list directories, count entries, check last-modified date
+10. **ARCHITECTURE.md**: Read `~/.claude/ARCHITECTURE.md` — the documented architecture for drift comparison
+11. **Project settings**: Read `$PROJECT_DIR/settings.json` — check for `disabledMcpServers`
 
 ## Phase 2: Coverage Analysis
 
-Start from `discovery.json`'s `coverage` map (topic file, routing keyword, PreToolUse, CLAUDE.md mention — with the maintained alias map, so `palantir-mcp` → `palantir-foundry.md` resolves and no loose prefix matching occurs). Apply the host profile in `audit-context.md` before flagging: C1/C5 may be N/A by design. For each MCP server discovered in Phase 1, the dimensions are:
+Start from `discovery.json`'s `coverage` map (topic file, PreToolUse, CLAUDE.md mention — with the maintained alias map, so `palantir-mcp` → `palantir-foundry.md` resolves and no loose prefix matching occurs). Apply the host profile in `audit-context.md` before flagging: C1/C5 may be N/A by design. For each MCP server discovered in Phase 1, the dimensions are:
 
 | Dimension | How to check |
 |---|---|
 | **Has owning agent?** | For allowlist agents (those with a `tools:` field), check if the server matches any allowlisted pattern. For denylist agents (those with `disallowedTools:`), check if the server is NOT denied. A server has an owning agent if it matches at least one agent's allowlist OR is not denied by at least one denylist agent. |
-| **Has routing rules?** | Server name or its domain keywords appear in `skill-rules.json` |
 | **Has PreToolUse validation?** | A PreToolUse matcher covers `mcp__{server}__*` tools |
 | **Has populated topic file?** | An `agent-memory/topics/{server}.md` exists and is NOT a stub (T3 pattern-file tier retired 2026-06-10) |
 | **Has agent memory accumulation?** | The agent that owns this server has a memory directory with >0 entries |
@@ -154,7 +152,7 @@ The scanner evaluates all skills against S1-S7 (structure), C1-C7 (content quali
 
 Note: the scanner does NOT check whether trigger phrases appear in the first 250 chars of the description for `/skills` menu visibility. The 250-char menu truncation is still worth manual review, just not via this scanner.
 
-Flag any skill scoring below 12/17 for remediation. Include specific FAIL items in the findings. For skills that only fail on X3 (no routing rule) or X1 (false positive from precedence language), note as acceptable if they are manual-invoke-only.
+Flag any skill scoring below 12/16 for remediation. Include specific FAIL items in the findings. For skills that only fail on X1 (false positive from precedence language), note as acceptable if they are manual-invoke-only.
 
 ## Phase 2c: Self-Audit
 
@@ -233,27 +231,22 @@ After the automated scan, cross-reference sources for contradictions:
 
 0. **Identifier and hidden-hook guards**: Reconcile the full Phase 1 inventories with `_check_config.py` and `_check_hooks_aux.py`. Any exact case-sensitive standalone MCP/skill-or-command runtime-name collision is behavior-impacting drift; case/Unicode variants and plugin namespaces are negative controls, not findings. Any disabled or unknown-state plugin hook definition must remain visible with its evidence even if `/hooks` omits it; an incomplete plugin inventory blocks a clean verdict.
 1. **Agent denylists**: Compare `disallowedTools` in each agent `.md` file vs what ARCHITECTURE.md documents. Flag mismatches.
-2. **Routing rules vs CLAUDE.md**: Compare `skill-rules.json` patterns vs the delegation table in CLAUDE.md. Flag rules that exist in one but not the other.
-3. **ARCHITECTURE.md counts**: Compare documented MCP server count vs actual. Compare documented agent count vs actual. Compare documented hook count vs actual.
-4. **ARCHITECTURE.md MCP bidirectional diff**: Extract every MCP server name from ARCHITECTURE.md (all three tables: remote, local stdio, hosted/remote utility). Compare against the Phase 1 discovery inventory in BOTH directions: (a) servers documented but not in config → flag as "documented phantom", (b) servers in config but not documented → flag as "undocumented server".
-5. **Agent transparency**: Read TEMPLATE.md and compare the transparency/memory section against each agent. Flag agents that have drifted from the template.
-6. **MEMORY.md registry**: Compare the agent list in MEMORY.md vs actual `~/.claude/agents/` directory. Flag missing or extra entries.
-7. **Skills registry**: Compare MEMORY.md skills list vs actual `${CLAUDE_PLUGIN_ROOT}/skills/` directories. Flag missing or extra entries.
-8. **Shell conventions**: Verify hook commands use the cross-platform `run-hook` launcher (resolves to `python3` on macOS, `pythonw.exe` on Windows), not a hardcoded interpreter. (Prior Windows-host check: `pwsh` not `powershell`.)
-9. **Adding-a-New-Agent checklist**: Check if ARCHITECTURE.md documents all necessary steps — and whether the SubagentStop matcher is wildcarded (`.*`) or hardcoded.
-10. **Security-confirmation validation**: Verify `security-confirmations.md`: For each destructive action category, verify at least one confirmation mechanism exists.
-11. **PreCompact echo drift**: Compare PreCompact hook echo content against actual routing rules in `skill-rules.json`. Flag if the echo mentions agents or domains that don't exist, or misses ones that do.
+2. **ARCHITECTURE.md counts**: Compare documented MCP server count vs actual. Compare documented agent count vs actual. Compare documented hook count vs actual.
+3. **ARCHITECTURE.md MCP bidirectional diff**: Extract every MCP server name from ARCHITECTURE.md (all three tables: remote, local stdio, hosted/remote utility). Compare against the Phase 1 discovery inventory in BOTH directions: (a) servers documented but not in config → flag as "documented phantom", (b) servers in config but not documented → flag as "undocumented server".
+4. **Agent transparency**: Read TEMPLATE.md and compare the transparency/memory section against each agent. Flag agents that have drifted from the template.
+5. **MEMORY.md registry**: Compare the agent list in MEMORY.md vs actual `~/.claude/agents/` directory. Flag missing or extra entries.
+6. **Skills registry**: Compare MEMORY.md skills list vs actual `${CLAUDE_PLUGIN_ROOT}/skills/` directories. Flag missing or extra entries.
+7. **Shell conventions**: Verify hook commands use the cross-platform `run-hook` launcher (resolves to `python3` on macOS, `pythonw.exe` on Windows), not a hardcoded interpreter. (Prior Windows-host check: `pwsh` not `powershell`.)
+8. **Adding-a-New-Agent checklist**: Check if ARCHITECTURE.md documents all necessary steps — and whether the SubagentStop matcher is wildcarded (`.*`) or hardcoded.
+9. **Security-confirmation validation**: Verify `security-confirmations.md`: For each destructive action category, verify at least one confirmation mechanism exists.
 
-## Phase 4: Routing Health
+## Phase 4: Routing Health — retired
 
-Test the routing system for problems:
-
-1. **Skip pattern analysis**: For each skip pattern in `skill-rules.json`, generate 3 example operational prompts that would be incorrectly suppressed. Flag overly broad patterns.
-2. **Keyword collision detection**: Find keywords that appear in multiple routing rules. **Dispatch is NOT first-match-wins**: `hooks/skill-routing-hint.py` collects ALL matching rules and sorts by `(priority, match.start())` — priority order critical > high > medium > low, earliest match position as tiebreak. A collision is only a problem when the wrong rule wins under THAT sort (e.g., same priority, earlier match start). Read the router before flagging. (2026-08-22: a first-match analysis produced a false-positive RH2 — the low-priority finance rule appeared to shadow cc-monitor, but priority sort already resolves it correctly.)
-3. **Coverage gaps**: For each MCP domain (CrowdStrike, Tenable, Airlock, Graph, Ramp, Lever, Linear, Confluence, Slack, Tailscale, Lucid), generate 5 natural-language prompts a user might realistically type. Check which would match a routing rule. Flag prompts that fall through with no match.
-4. **Rule ordering**: File order is only a tiebreak within the same priority (see step 2). Verify that broad catch-all rules carry a LOWER priority than specific skill rules that share keywords; flag a broad rule whose priority ties or beats an overlapping specific rule.
-5. **Ambiguous domain words**: Check for words like "compliance", "alert", "status", "export", "block" that have different meanings across domains. Verify the ordering resolves them correctly.
-6. **Live routing test**: For 3-5 representative prompts, use `discovery.py --route "prompt"` (repeatable flag) — it mirrors the ACTUAL router: skip_patterns hard-exit first, then all matches sorted by `(priority, match.start())`. Verify the winning skill/agent matches expectations. A plain first-match loop misdiagnoses collisions.
+Retired 2026-09-03. Skills route natively from their SKILL.md frontmatter
+descriptions; the static `hooks/skill-rules.json` table and the
+`skill-routing-hint` hook were removed, so there are no skip patterns, keyword
+collisions, or rule orderings left to audit. The phase number is kept so Phases
+5-7 keep their stable IDs.
 
 ## Phase 5: Scaling Projections
 
@@ -262,12 +255,11 @@ Evaluate growth health:
 1. **MEMORY.md capacity**: Estimate token count (lines x avg ~15 tokens per line). Compare against ~5K token context budget. Project what adding 5 more MCPs and 3 more agents would cost.
 2. **Denylist complexity**: Count total denylist entries across all agents. Calculate O(agents x MCPs) overhead. Project at N+3 agents.
 3. **Topic files**: Count stubs vs populated. Flag stubs that have existed since the last audit.
-4. **Routing rules**: Current count. Estimate collision probability at 2x current rules.
-5. **Agent memory size**: For each agent, count total entries in memory files. Flag agents with 0 entries (never used?) or >25 entries (needs consolidation).
+4. **Agent memory size**: For each agent, count total entries in memory files. Flag agents with 0 entries (never used?) or >25 entries (needs consolidation).
 
 ## Phase 6: Self-Improvement Loop Validation
 
-Start from `discovery.json`'s `loops` section (PostToolUseFailure universality, SubagentStop wildcard, per-agent `memory:` fields, gather-skill presence/routing). Check that all feedback loops from ARCHITECTURE.md are functional:
+Start from `discovery.json`'s `loops` section (PostToolUseFailure universality, SubagentStop wildcard, per-agent `memory:` fields, gather-skill presence). Check that all feedback loops from ARCHITECTURE.md are functional:
 
 | Loop | What to check |
 |---|---|
@@ -276,7 +268,7 @@ Start from `discovery.json`'s `loops` section (PostToolUseFailure universality, 
 | **Pre-flight Prevention** | Which MCPs are covered by PreToolUse matchers? Which are NOT? |
 | **Transparency + Human Audit** | SubagentStop matcher is `.*` (wildcard)? Or hardcoded to specific agents? |
 | **Pattern Promotion** | Any agent memory entries with 3+ `[confirmed]` tags? (candidates for promotion to agent .md) |
-| **Intelligence Gathering** | `/gather-intel` and `/gather-internal-intel` skills exist and have routing rules? |
+| **Intelligence Gathering** | `/gather-intel` and `/gather-internal-intel` skills exist? |
 
 ## Phase 7: Emit Findings, Oracle Gating & Fix
 
@@ -385,7 +377,7 @@ Apply fixes? Enter "all", specific numbers (e.g. "1,3,5"), or "skip".
 User says: "/audit-architecture"
 Actions:
 1. Phase 0: Run MCP connectivity probes, CPU check, FastMCP version check, knowledge capture health, credential scan
-2. Phase 1: Discover 12 MCP servers, 6 agents, 10 skills, 16 hooks, 17 routing rules
+2. Phase 1: Discover 12 MCP servers, 6 agents, 10 skills, 16 hooks
 3. Phases 2-6: Coverage matrix, consistency checks, routing health, scaling projections
 4. Phase 7A: Screen 15 findings, emit 12 survivors to YAML with reproducers
 5. Phase 7B: Oracle gating — 10 STILL-FIRES, 2 STALE (dropped), 0 ERROR

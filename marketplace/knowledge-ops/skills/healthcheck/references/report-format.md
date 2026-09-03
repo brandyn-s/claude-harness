@@ -12,7 +12,6 @@ Skills:    PASS — 68 skills validated
 Memory:    PASS — 24 entries, all consistent
 Paths:     PASS — 52 paths verified
 Drift:     PASS — counts match, no phantoms
-Routing:   PASS — 47 rules valid, no dead references
 Targets:   PASS — 8 output targets verified
 Orphans:   PASS — no unreferenced files found
 Manifest:  PASS — 81 skills registered, no duplicates or phantoms
@@ -58,5 +57,5 @@ counts as a real FAIL — the marketplace bundle is shipping missing files.
 `Manifest+Drift: WARN` (exit 1) is rebuild-fixable drift.
 
 For failures, list actionable fix suggestions. Offer to fix auto-safe issues
-(orphan memory entries, missing MEMORY.md references, dead routing rules,
-orphan hook/script deletion, stale branch cleanup).
+(orphan memory entries, missing MEMORY.md references, orphan hook/script
+deletion, stale branch cleanup).

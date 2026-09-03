@@ -30,14 +30,12 @@ NOT_ENTRYPOINTS = {
     "atomic_write.py",
     "hook_input.py",  # shared accessors imported by other hooks
     "manifest_metrics.py",
-    "skill-alias.py",  # consumed by other tools, doesn't run from stdin
     "tavily-search-cap.py",  # module-level, no main()
     "stop-failure-handler.py",  # module-level, no main()
     "prompt-secret-scan.py",  # has its own crash test in test_prompt_secret_scan.py
-    # nessus-to-md.py / pdf-to-text.py / cklb-to-md.py / xlsx-to-md.py
+    # nessus-to-md.py / cklb-to-md.py / xlsx-to-md.py
     # invoke subprocesses with their own behavior — covered by dedicated tests.
     "nessus-to-md.py",
-    "pdf-to-text.py",
     "cklb-to-md.py",
     "xlsx-to-md.py",
     # write-edit-dispatcher dispatches to other guards; tested via the guards.

@@ -74,14 +74,13 @@ Validate before you commit:
 python3 manifests/compile.py --root . --check --strict-semantic --no-reindex
 ```
 
-It exits non-zero on dangling routes, dangling references, and manifest/source
-drift. **Run it after touching any skill, hook, rule, or `hooks/skill-rules.json`.**
+It exits non-zero on dangling references and manifest/source drift. **Run it
+after touching any skill, hook, or rule.**
 
 ## 4. Other machine-readable surfaces
 
 | File | Contract |
 |---|---|
-| `hooks/skill-rules.json` | trigger keywords → skill routing. Every target must be a real `skills/<name>/SKILL.md`, or `compile.py --check` fails. |
 | `skills/*/manifest.yaml` | per-skill metadata; `requires_skills` / `requires_rules` are resolved as a dependency closure. |
 | `rules/manifests/*.yaml` | per-rule metadata. One manifest per `rules/*.md`. |
 | `manifests/schema.yaml`, `manifests/schemas/` | the manifest schemas. |

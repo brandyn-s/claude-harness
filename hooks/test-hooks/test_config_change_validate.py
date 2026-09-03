@@ -72,7 +72,6 @@ def _protected_user_settings(hooks_dir: Path) -> dict:
             "PostToolUse": [group("Write|Edit", "post-write-edit.py")],
             "SessionStart": [group(None, "session-start.py")],
             "SessionEnd": [group(".*", "session-end.py", 5)],
-            "Stop": [group(".*", "promise-checker.py", 20)],
         }
     }
 

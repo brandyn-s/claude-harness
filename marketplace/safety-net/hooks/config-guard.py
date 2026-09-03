@@ -33,7 +33,6 @@ _DISABLE_ALL_HOOKS_RE = re.compile(r'"disableAllHooks"\s*:\s*true\b')
 PROTECTED_HOOKS = [
     "bash-security-guard.py",
     "post-write-edit.py",
-    "promise-checker.py",
     "session-start.py",
     "session-end.py",
     "config-guard.py",  # Self-protection

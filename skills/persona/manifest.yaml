@@ -55,7 +55,5 @@ preconditions:
   - "triage gate: conventional engineering tried first (Article VI)"
   - "for rubric mode: structured problem with pre-registered scoring criteria"
 guardrails:
-  - creative-output-grounding-check
-  - context-monitor
   - bash-security-guard
 threat_model: writes_local

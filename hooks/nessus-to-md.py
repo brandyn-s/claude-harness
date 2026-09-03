@@ -4,7 +4,7 @@ Intercepts Read tool calls on .nessus files, converts them to .md with a
 findings summary and per-severity tables, caches in ~/Documents/converted-nessus/,
 and blocks the Read with a redirect to the .md file.
 
-Mirrors pdf-to-text.py: sentinel header, freshness check, subprocess isolation,
+Converter-hook pattern: sentinel header, freshness check, subprocess isolation,
 paths via argv (not f-string interpolation).
 
 Cache dir: ~/Documents/converted-nessus/

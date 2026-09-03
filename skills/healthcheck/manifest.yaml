@@ -1,6 +1,6 @@
 id: healthcheck
 type: skill
-description: "Quick architecture health check -- runs hook tests, validates config syntax, checks skill frontmatter, verifies memory consistency, detects stale file paths, ARCHITECTURE.md drift, dead routing references, and MCP index integrity."
+description: "Quick architecture health check -- runs hook tests, validates config syntax, checks skill frontmatter, verifies memory consistency, detects stale file paths, ARCHITECTURE.md drift, and MCP index integrity."
 category: maintenance
 
 requires_tools:
@@ -20,7 +20,7 @@ input_contract:
     focus:
       type: enum
       required: false
-      description: "hooks, config, skills, memory, paths, drift, routing, targets, orphans, manifest, indexes -- or omit for all"
+      description: "hooks, config, skills, memory, paths, drift, targets, orphans, manifest, indexes -- or omit for all"
   scope_from: argument
 output_contract:
   produces: [health_report, pass_fail_summary]

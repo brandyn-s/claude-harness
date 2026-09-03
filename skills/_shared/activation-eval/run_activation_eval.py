@@ -47,26 +47,6 @@ import sys
 from pathlib import Path
 
 USAGE_FILE = Path(os.path.expanduser("~")) / ".claude" / "skill-usage.jsonl"
-RULES_FILE = Path(__file__).resolve().parent.parent.parent.parent / "hooks" / "skill-rules.json"
-
-
-def load_must_activate() -> set:
-    """Return the set of skill names tagged must_activate in skill-rules.json.
-
-    Fail-open: any error -> empty set (no skills treated as must_activate).
-    """
-    try:
-        with open(RULES_FILE, encoding="utf-8") as f:
-            config = json.load(f)
-    except Exception:
-        return set()
-    out = set()
-    for rule in config.get("rules", []):
-        if rule.get("must_activate") and rule.get("skill"):
-            out.add(rule["skill"])
-    return out
-
-
 def load_events(path: Path) -> list:
     """Parse the jsonl usage log into a list of dicts. Skips malformed lines."""
     events = []
@@ -143,11 +123,6 @@ def main(argv=None) -> int:
         default=str(USAGE_FILE),
         help="Path to skill-usage.jsonl (default: ~/.claude/skill-usage.jsonl)",
     )
-    parser.add_argument(
-        "--must-activate-only",
-        action="store_true",
-        help="Restrict the report to skills tagged must_activate in skill-rules.json",
-    )
     args = parser.parse_args(argv)
 
     usage_path = Path(args.usage_file)
@@ -169,26 +144,13 @@ def main(argv=None) -> int:
         print("METRIC activation_median=NA")
         return 0
 
-    must_activate = load_must_activate()
     stats = compute_per_skill(events)
-
-    if args.must_activate_only:
-        stats = {k: v for k, v in stats.items() if k in must_activate}
-        if not stats:
-            print(
-                "no must_activate skills present in the activation history "
-                "(tagged skills: "
-                + (", ".join(sorted(must_activate)) if must_activate else "none")
-                + ")."
-            )
-            print("METRIC activation_median=NA")
-            return 0
 
     have_signal = _has_invocation_signal(events)
 
     # Per-skill table
     name_w = max([len("skill")] + [len(k) for k in stats]) if stats else len("skill")
-    header = f"{'skill':<{name_w}}  {'count':>6}  {'invoked':>7}  {'activation':>10}  {'false_pos':>9}  must_activate"
+    header = f"{'skill':<{name_w}}  {'count':>6}  {'invoked':>7}  {'activation':>10}  {'false_pos':>9}"
     print(header)
     print("-" * len(header))
     rates = []
@@ -197,10 +159,9 @@ def main(argv=None) -> int:
         ar = e["activation_rate"]
         if ar is not None:
             rates.append(ar)
-        flag = "yes" if skill in must_activate else ""
         print(
             f"{skill:<{name_w}}  {e['count']:>6}  {e['invoked']:>7}  "
-            f"{_fmt_rate(ar):>10}  {_fmt_rate(e['false_positive_rate']):>9}  {flag}"
+            f"{_fmt_rate(ar):>10}  {_fmt_rate(e['false_positive_rate']):>9}"
         )
 
     if not have_signal:

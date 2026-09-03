@@ -48,7 +48,6 @@ BLOCKING_HOOKS = {
     "bash-security-guard.py", "search-path-guard.py", "block-partial-read.py",
     "config-guard.py", "memory-write-guard.py", "destructive-ops-guard.py",
     "git-empty-push-guard.py", "bash-tail-buffering-guard.py",
-    "promise-checker.py",
 }
 
 # Guards that emit a per-decision audit log ({"action": "auto-fixed"|"blocked"}).
