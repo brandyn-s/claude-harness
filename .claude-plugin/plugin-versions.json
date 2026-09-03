@@ -1,26 +1,26 @@
 {
   "code-intelligence": {
-    "content_hash": "bd992fce9756e0d75d5298a94cd62c705f47b6e3af7b3a75583d4acdd99771f9",
-    "version": "1.1.15"
+    "content_hash": "12a61d50d541107d8986b5bb5a6c64ed725717b9f1a4536da2ece9449b5e5ace",
+    "version": "1.1.16"
   },
   "knowledge-ops": {
-    "content_hash": "e4da78c89336fd955431d81e6fe95308bd4453be35b08aab2d38a437c7aae504",
-    "version": "1.1.51"
+    "content_hash": "7d2657e1d15ee71fbad9e8263a20be3eca0183f5a1c4d2a321249ea0789869e2",
+    "version": "1.1.53"
   },
   "planning-toolkit": {
     "content_hash": "3cc46fbd75d93f1112a804f258ff79a388b447f6c8ccf15dd26c3f8794f650df",
     "version": "1.1.34"
   },
   "research-intel": {
-    "content_hash": "a8aa03f9528736a22fd13a8c808611c334420126af2d921387bdc76b81825ed3",
-    "version": "1.1.25"
+    "content_hash": "9231d0d17cb52664e1441046b83008b2a25f86141719d3fabb59cb5637fd6958",
+    "version": "1.1.27"
   },
   "safety-net": {
     "content_hash": "0c600e9124c229527ca3e576695f63ebabcc19c160598ccf72b4eeb0e6987cc9",
     "version": "1.1.32"
   },
   "security-scanner": {
-    "content_hash": "d888ac41dbb7ed0bb23e9b9bbf17090e7bba4a2bdd4c7d99b2467ad804082f31",
-    "version": "1.1.11"
+    "content_hash": "8385a1d782f7f8d91cf807316a785825fa905d6dcd7aa2e87900c5bbc009243b",
+    "version": "1.1.12"
   }
 }
