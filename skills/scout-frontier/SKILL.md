@@ -30,7 +30,7 @@ Find techniques that solve the same outcome **a different way** — not the same
 
 > **When to use vs /gather-research**: /gather-research is scoped to AI-agent architecture and audits/updates an existing research baseline. /scout-frontier is domain-agnostic and frames findings as "what becomes possible" relative to an incumbent system.
 
-> **Output grounding (REQUIRED READ)**: before drafting recommendations, read `skills/_shared/output-grounding.md` and apply its three-layer contract (confidence + provenance + counterfactual) to every load-bearing claim. That file is NOT ambient — it was relocated out of `rules/` on 2026-08-26 after measuring EXPOSED=0 over 438 transcripts — so it is in context only if you read it. The `creative-output-grounding-check` PostToolUse hook is an advisory payload diagnostic only; it does not grade the later final answer. Skill instructions and final-output evaluation are the primary controls.
+> **Output grounding (REQUIRED READ)**: before drafting recommendations, read `skills/_shared/output-grounding.md` and apply its three-layer contract (confidence + provenance + counterfactual) to every load-bearing claim. That file is NOT ambient — it was relocated out of `rules/` on 2026-08-26 after measuring EXPOSED=0 over 438 transcripts — so it is in context only if you read it. No hook grades the final answer; skill instructions and final-output evaluation are the controls.
 
 ---
 

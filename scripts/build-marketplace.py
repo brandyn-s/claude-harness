@@ -79,7 +79,6 @@ PLUGINS = [
             ("hooks/result-injection-guard.py", "hooks/result-injection-guard.py"),
             ("hooks/bash-security-guard.py", "hooks/bash-security-guard.py"),
             ("hooks/bash_policy_tables.py", "hooks/bash_policy_tables.py"),
-            ("hooks/bash-security-audit.py", "hooks/bash-security-audit.py"),
             ("hooks/bash-error-classifier.py", "hooks/bash-error-classifier.py"),
             ("hooks/config-guard.py", "hooks/config-guard.py"),
             ("hooks/block-partial-read.py", "hooks/block-partial-read.py"),

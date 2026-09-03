@@ -27,10 +27,10 @@ def test_hook_invocation_accepts_structured_command_args_registration():
     invocation = _hook_invocation(
         {
             "command": "/Users/example/.claude/hooks/run-hook",
-            "args": ["creative-output-grounding-check.py"],
+            "args": ["prompt-secret-scan.py"],
         }
     )
-    assert "creative-output-grounding-check.py" in invocation
+    assert "prompt-secret-scan.py" in invocation
 
 
 def test_mutation_verdict_guidance_has_cross_language_delivery():
@@ -80,10 +80,14 @@ def test_agent_delegation_retains_authenticated_remote_mcp_gate():
     )
 
 
-def test_output_grounding_records_advisory_payload_check_not_final_enforcement():
+def test_output_grounding_is_a_prompt_and_evaluation_contract_without_a_hook():
     # RELOCATED 2026-08-26: the contract moved out of ambient rules/ to
-    # skills/_shared/ (relocation pilot: EXPOSED=0 over 438 transcripts). The
-    # coherence property this test asserts is unchanged -- only the source path.
+    # skills/_shared/ (relocation pilot: EXPOSED=0 over 438 transcripts).
+    # HOOK REMOVED 2026-09-03: the PostToolUse:Skill advisory diagnostic
+    # (creative-output-grounding-check.py) was deleted. A 30-day replay found
+    # zero substantive Skill payloads -- the tool response is launcher metadata,
+    # never the final answer -- so it could not grade anything the runtime
+    # supplied. Pin that no phantom enforcer creeps back in code or prose.
     rule = (REPO / "skills" / "_shared" / "output-grounding.md").read_text(
         encoding="utf-8"
     )
@@ -93,44 +97,33 @@ def test_output_grounding_records_advisory_payload_check_not_final_enforcement()
     rule_manifest = _yaml(
         REPO / "rules" / "manifests" / "output-grounding.yaml"
     )
-    hook_manifest = _yaml(
-        REPO / "hooks" / "manifests" / "creative-output-grounding-check.yaml"
-    )
     settings = json.loads((REPO / "settings.json").read_text(encoding="utf-8"))
 
-    registrations = [
-        entry
-        for entry in settings["hooks"]["PostToolUse"]
+    skill_hooks = [
+        _hook_invocation(hook)
+        for entry in settings["hooks"].get("PostToolUse", [])
         if entry.get("matcher") == "Skill"
-        and any(
-            "creative-output-grounding-check.py" in _hook_invocation(hook)
-            for hook in entry.get("hooks", [])
-        )
+        for hook in entry.get("hooks", [])
     ]
-    assert len(registrations) == 1
+    assert not any("grounding" in invocation for invocation in skill_hooks)
+    assert not (REPO / "hooks" / "creative-output-grounding-check.py").exists()
+    assert not (
+        REPO / "hooks" / "manifests" / "creative-output-grounding-check.yaml"
+    ).exists()
 
-    # The active hook is retained as a non-blocking diagnostic for any
-    # substantive Skill response it happens to receive. It must not be
-    # represented as grading the later user-facing final answer.
-    reference_lower = reference.lower()
-    assert "retired" not in reference_lower
-    assert "advisory" in reference_lower
-    assert re.search(r"launcher\s+metadata", reference_lower)
-    assert "final answer" in reference_lower
-
-    assert "launcher metadata" in rule.lower()
+    # Both prose surfaces say what enforces the contract and why no hook can.
+    for text in (rule.lower(), reference.lower()):
+        assert "no hook" in text
+        assert re.search(r"launcher\s+metadata", text)
+        assert "final answer" in text
+        assert "final-output evaluation" in text
     assert "enforced_by" not in rule_manifest
     assert rule_manifest["enforcement_coverage"] == "none"
-    assert hook_manifest["action_type"] == "injector"
-    assert hook_manifest["enforces"] == []
-    assert "tool response" in hook_manifest["description"].lower()
-    assert "final answer" in hook_manifest["description"].lower()
-    assert hook_manifest["exit_codes"]["0"].startswith("always")
 
 
 def test_output_grounding_consumers_do_not_claim_final_answer_hook_coverage():
     paths = [
-        REPO / "hooks" / "creative-output-grounding-check.py",
+        REPO / "skills" / "_shared" / "output-grounding.md",
         REPO / "skills" / "scout-frontier" / "SKILL.md",
         REPO / "skills" / "design-evidence-first" / "SKILL.md",
         REPO / "skills" / "deep-dive" / "SKILL.md",
@@ -142,6 +135,8 @@ def test_output_grounding_consumers_do_not_claim_final_answer_hook_coverage():
         "audits output for",
         "audits the eventual output",
         "architectural-layer enforcement",
+        "remains registered",
+        "advisory payload diagnostic only",
     )
 
     for path in paths:
@@ -149,12 +144,9 @@ def test_output_grounding_consumers_do_not_claim_final_answer_hook_coverage():
         for claim in stale_claims:
             assert claim not in text, f"{path}: {claim}"
 
-    hook = paths[0].read_text(encoding="utf-8").lower()
     rationale = paths[-1].read_text(encoding="utf-8").lower()
-    assert "advisory payload diagnostic" in hook
-    assert re.search(r"cannot\s+grade\s+the\s+final\s+answer", hook)
-    assert "advisory payload diagnostic" in rationale
-    assert "silence is not evidence" in rationale
+    assert "no hook enforces it" in rationale
+    assert re.search(r"launcher\s+metadata", rationale)
 
 # ---------------------------------------------------------------------------
 # The manifest compiler's THIRD accepted source location for a type:rule

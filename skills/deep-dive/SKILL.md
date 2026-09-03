@@ -28,7 +28,7 @@ General-purpose research skill. Takes any topic, dynamically generates research 
 
 **Priority: synthesis quality.** Clear trade-offs, honest uncertainty, and defensible recommendations matter more than source quantity. Cost and speed are not constraints.
 
-> **Output grounding (REQUIRED READ)**: before writing research findings, read `skills/_shared/output-grounding.md` and apply its three-layer contract (confidence + provenance + counterfactual) to every load-bearing claim. That file is NOT ambient — it was relocated out of `rules/` on 2026-08-26 after measuring EXPOSED=0 over 438 transcripts — so it is in context only if you read it. The `creative-output-grounding-check` PostToolUse hook is an advisory payload diagnostic only; it does not grade the later final answer. Skill instructions and final-output evaluation are the primary controls.
+> **Output grounding (REQUIRED READ)**: before writing research findings, read `skills/_shared/output-grounding.md` and apply its three-layer contract (confidence + provenance + counterfactual) to every load-bearing claim. That file is NOT ambient — it was relocated out of `rules/` on 2026-08-26 after measuring EXPOSED=0 over 438 transcripts — so it is in context only if you read it. No hook grades the final answer; skill instructions and final-output evaluation are the controls.
 
 ---
 

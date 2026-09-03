@@ -301,9 +301,6 @@ HOOK_RULE_MAP = {
     "post-merge-sync.py": [
         "Post-merge branch sync",
     ],
-    "pdf-to-text.py": [
-        "Convert PDF Read to text",
-    ],
     "post-write-edit.py": [
         "Block Python scripts missing encoding='utf-8' in open()",
         "Syntax check .py files",
@@ -321,9 +318,6 @@ HOOK_RULE_MAP = {
     "bash-error-classifier.py": [
         "Classify bash errors and suggest specific fixes",
     ],
-    "bash-security-audit.py": [
-        "Log every Bash security decision to JSONL",
-    ],
     "bash-tail-buffering-guard.py": [
         "Block long-running Bash piped to filtering tools (tail/head)",
     ],
@@ -335,9 +329,6 @@ HOOK_RULE_MAP = {
     ],
     "config-guard.py": [
         "Block disabling/removing hooks in settings.json",
-    ],
-    "creative-output-grounding-check.py": [
-        "Check creative-skill outputs for grounding signals",
     ],
     "destructive-ops-guard.py": [
         "Block destructive Bash/PowerShell patterns",
@@ -356,9 +347,6 @@ HOOK_RULE_MAP = {
     ],
     "pre-agent-dispatch.py": [
         "Warn when dispatching workers needing remote MCPs",
-    ],
-    "query-routing-log.py": [
-        "Log code-search/code-graph/memory-search calls for routing analysis",
     ],
     "rule-size-guard.py": [
         "Refuse writes pushing rules/*.md past the ambient-load budget",

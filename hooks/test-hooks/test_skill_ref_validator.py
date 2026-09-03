@@ -12,7 +12,7 @@ HOOK = "skill-ref-validator.py"
 # is installed at ~/.claude/. Contributors running pytest from a checkout
 # (not yet installed) will see a false failure otherwise.
 _requires_installed = pytest.mark.skipif(
-    not (Path.home() / ".claude" / "hooks" / "pdf-to-text.py").exists(),
+    not (Path.home() / ".claude" / "hooks" / "nessus-to-md.py").exists(),
     reason="requires the repo installed at ~/.claude/ (hook resolves refs there)",
 )
 
@@ -103,7 +103,7 @@ def test_real_existing_hook_passes(tmp_path):
     skill_dir.mkdir(parents=True)
     skill_file = skill_dir / "SKILL.md"
     skill_file.write_text(
-        "# Real skill\n\nUses `hooks/pdf-to-text.py` (exists).\n",
+        "# Real skill\n\nUses `hooks/nessus-to-md.py` (exists).\n",
         encoding="utf-8",
     )
 
@@ -112,4 +112,4 @@ def test_real_existing_hook_passes(tmp_path):
         "tool_input": {"file_path": str(skill_file)},
     })
     assert rc == 0
-    assert "pdf-to-text.py" not in err
+    assert "nessus-to-md.py" not in err

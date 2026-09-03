@@ -14,7 +14,6 @@ brew "uv"          # uv-managed MCP servers
 # Per-need — uncomment what this machine actually uses:
 # brew "semgrep"      # /semgrep skill
 # brew "awscli"       # prefer boto3 scripts per platform-constraints, but the CLI is handy
-# brew "poppler"      # pdftoppm for the pdf-to-text hook's image fallback
 # cask "powershell"   # pwsh — only if running Intune/STIG .ps1 work from templates/
 # cask "orbstack"     # Docker runtime for local Fargate image work — lighter than Docker
 #                     # Desktop; remember --platform linux/amd64 (see platform-constraints

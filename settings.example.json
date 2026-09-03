@@ -230,45 +230,6 @@
         ]
       },
       {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/absolute/path/to/.claude/hooks/run-hook",
-            "args": [
-              "bash-security-audit.py"
-            ],
-            "timeout": 30
-          }
-        ]
-      },
-      {
-        "matcher": "mcp__codebase-memory-mcp__search_code|mcp__codebase-memory-mcp__search_code_semantic|mcp__codebase-memory-mcp__query_graph|mcp__codebase-memory-mcp__search_graph|mcp__memory-search__memory_search",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/absolute/path/to/.claude/hooks/run-hook",
-            "args": [
-              "query-routing-log.py"
-            ],
-            "timeout": 15
-          }
-        ]
-      },
-      {
-        "matcher": "Skill",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/absolute/path/to/.claude/hooks/run-hook",
-            "args": [
-              "creative-output-grounding-check.py"
-            ],
-            "timeout": 15
-          }
-        ]
-      },
-      {
         "hooks": [
           {
             "type": "command",
@@ -471,15 +432,6 @@
       {
         "matcher": "Read",
         "hooks": [
-          {
-            "type": "command",
-            "command": "/absolute/path/to/.claude/hooks/run-hook",
-            "args": [
-              "pdf-to-text.py"
-            ],
-            "if": "Read(*.pdf)",
-            "timeout": 300
-          },
           {
             "type": "command",
             "command": "/absolute/path/to/.claude/hooks/run-hook",

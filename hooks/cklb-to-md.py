@@ -4,7 +4,7 @@ Intercepts Read tool calls on .cklb files, converts them to .md with a status
 summary and rules table, expands `open` findings with check_content + fix_text,
 caches in ~/Documents/converted-cklb/, and blocks the Read with a redirect to the .md.
 
-Mirrors pdf-to-text.py: sentinel header, freshness check, subprocess isolation,
+Converter-hook pattern: sentinel header, freshness check, subprocess isolation,
 paths via argv.
 """
 

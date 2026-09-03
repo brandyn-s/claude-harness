@@ -74,7 +74,6 @@ preconditions:
 guardrails:
   - bash-security-guard
   - block-partial-read
-  - creative-output-grounding-check
 threat_model: read_only
 prose_only_tools:  # mentioned in SKILL.md prose, deliberately not used (B9/F4; reconcile-skill-tools honors this)
   - Task  # 'not as Claude-driven Task tool invocations' — explicitly negated
