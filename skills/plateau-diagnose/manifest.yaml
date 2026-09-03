@@ -48,6 +48,5 @@ preconditions:
   - "metric is genuinely plateaued (multiple fixes returning diminishing results)"
   - "triage gate: conventional engineering attempted first"
 guardrails:
-  - context-monitor
   - verify-before-assuming
 threat_model: read_only

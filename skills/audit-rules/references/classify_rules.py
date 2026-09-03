@@ -315,9 +315,6 @@ HOOK_RULE_MAP = {
         "Block WebFetch/WebSearch",
     ],
     # 2026-05-26 additions — previously uncurated entry-point hooks.
-    "assessment-class-detector.py": [
-        "Inject symmetric-evidentiary-burden + /interview for assessment prompts",
-    ],
     "auto-topic-loader.py": [
         "Auto-load topic and rule context when MCP tools are called",
     ],
@@ -339,9 +336,6 @@ HOOK_RULE_MAP = {
     "config-guard.py": [
         "Block disabling/removing hooks in settings.json",
     ],
-    "context-monitor.py": [
-        "Warn at 60/80/90% context-window usage",
-    ],
     "creative-output-grounding-check.py": [
         "Check creative-skill outputs for grounding signals",
     ],
@@ -354,9 +348,6 @@ HOOK_RULE_MAP = {
     "config-change-validate.py": [
         "Validate ConfigChange settings preserve required runtime controls",
     ],
-    "mcp-output-trimmer.py": [
-        "Trim large MCP tool responses to reduce context use",
-    ],
     "nessus-to-md.py": [
         "Auto-convert .nessus Tenable XML to Markdown on Read",
     ],
@@ -365,12 +356,6 @@ HOOK_RULE_MAP = {
     ],
     "pre-agent-dispatch.py": [
         "Warn when dispatching workers needing remote MCPs",
-    ],
-    "precompact-checkpoint.py": [
-        "Save structured context state before compaction",
-    ],
-    "promise-checker.py": [
-        "Catch performative compliance + banned session-closure phrases",
     ],
     "query-routing-log.py": [
         "Log code-search/code-graph/memory-search calls for routing analysis",
@@ -386,9 +371,6 @@ HOOK_RULE_MAP = {
     ],
     "session-end.py": [
         "Record a bounded SessionEnd receipt for offline lifecycle enrichment",
-    ],
-    "skill-alias.py": [
-        "Map common skill-name misspellings to canonical names",
     ],
     "skill-ref-validator.py": [
         "Warn on dead hook/script refs in SKILL.md",
@@ -413,12 +395,6 @@ HOOK_RULE_MAP = {
     ],
     "teammate-idle.py": [
         "Quality gate when Agent Teams teammate finishes work",
-    ],
-    "toolsearch-intercept.py": [
-        "Intercept vague keyword ToolSearch queries",
-    ],
-    "verify-before-assuming.py": [
-        "Detect 'unavailable' claims without prior verification",
     ],
     "worktree-enforcement.py": [
         "Enforce worktree isolation for subagent writes to protected repos",

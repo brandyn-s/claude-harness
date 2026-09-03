@@ -2,8 +2,8 @@
 
 Working directory for plan documents. This is a **convention, not an archive**.
 
-`/superplan` and `/superpowers:brainstorming` write plan files here, `hooks/promise-checker.py`
-looks for them, and `tests/superplan/` asserts on the path. Keeping plans on disk
+`/superplan` and `/superpowers:brainstorming` write plan files here, and
+`tests/superplan/` asserts on the path. Keeping plans on disk
 is what lets a later session pick up an earlier one's intent instead of
 reconstructing it.
 

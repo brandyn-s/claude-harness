@@ -500,8 +500,8 @@ def main():
 
     # Rehydrate the acceptance ledger after a compaction (audit Phase 4).
     #
-    # This is the CONSUMER that never existed: precompact-checkpoint.py has been
-    # writing ~/.claude/.precompact-state.json with no reader, so there was no
+    # This is the CONSUMER that never existed: the former precompact-checkpoint
+    # hook wrote ~/.claude/.precompact-state.json with no reader, so there was no
     # rehydration path at all. `PostCompact` cannot inject model context, so
     # SessionStart with source=="compact" is the correct injection point.
     # Scoped to continuation sources only -- injecting a prior conversation's

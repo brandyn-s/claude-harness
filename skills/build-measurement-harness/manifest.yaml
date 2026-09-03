@@ -54,7 +54,6 @@ preconditions:
   - "system to measure has clear input/output boundaries"
   - "ground-truth source available (oracle, manual labels, or known-correct second tool)"
 guardrails:
-  - context-monitor
   - block-partial-read
   - bash-security-guard
 threat_model: writes_local

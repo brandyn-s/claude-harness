@@ -38,7 +38,7 @@ It does NOT block uncontracted soft / ambiguous signals:
 
 When a block fires, an actionable reason is written to stderr and the hook
 exits 2 (the repo's standard Stop-family block convention; see
-subagent-stop.py:362-364 and promise-checker.py:194-199).
+subagent-stop.py:362-364).
 
 FAILURE BOUNDARY
 ----------------
@@ -362,7 +362,7 @@ def main():
         # Blocks are rare and need eyes — always notify (macOS only).
         _notify("Claude task blocked", block_reason)
         # Repo Stop-family block convention: stderr message + exit 2.
-        # (cf. subagent-stop.py:362-364, promise-checker.py:194-199)
+        # (cf. subagent-stop.py:362-364)
         print(f"[TaskCompleted] BLOCK: {block_reason}", file=sys.stderr)
         sys.exit(2)
 

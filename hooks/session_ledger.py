@@ -17,9 +17,10 @@ cause.
 
 WHAT REPLACES WHAT
 ------------------
-`hooks/precompact-checkpoint.py` writes a static hint ("Re-read CLAUDE.md, check
-git status") plus session id and cwd. It carries no acceptance state, and nothing
-reads it: SessionStart never loads it, so there is no rehydration path at all.
+The former `hooks/precompact-checkpoint.py` (deleted 2026-09-03, never wired)
+wrote a static hint ("Re-read CLAUDE.md, check git status") plus session id and
+cwd. It carried no acceptance state, and nothing read it: SessionStart never
+loaded it, so there was no rehydration path at all.
 This module is the real replacement. The old checkpoint is deliberately left in
 place for a dual-run parity window and is NOT removed by this change.
 
@@ -39,7 +40,7 @@ injection point, and its matcher values are exactly
 FAIL-OPEN IS INTENTIONAL
 ------------------------
 `PreCompact` CAN block (exit 2 / {"decision":"block"}), but this module never
-does. `precompact-checkpoint.py` documents why: auto-compaction fires near the
+does. The retired precompact-checkpoint hook documented why: auto-compaction fires near the
 context limit, so blocking it turns a recoverable hiccup (disk full, transient
 permission error) into a session-ending failure. A missing ledger is recoverable;
 a blocked compaction is not. That prior decision is honoured here -- the ability

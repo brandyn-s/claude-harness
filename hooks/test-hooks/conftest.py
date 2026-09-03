@@ -13,8 +13,8 @@ HOOKS_DIR = Path(__file__).resolve().parent.parent
 PYTHON = sys.executable
 
 # Test-vs-production provenance: mark every hook invocation from this suite
-# so hooks that write PRODUCTION telemetry (e.g. toolsearch-intercept's
-# query log) can skip it. The 2026-06-12 Fable 5 recurrence recompute found
+# so hooks that write PRODUCTION telemetry (audit logs, query logs) can
+# skip it. The 2026-06-12 Fable 5 recurrence recompute found
 # 21/21 bare-keyword entries in the production query log were this suite's
 # fixtures — the instrument that guard keep/prune audits read had been
 # contaminated by the guard's own tests. run_hook() inherits os.environ,

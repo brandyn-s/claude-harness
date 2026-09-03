@@ -260,7 +260,6 @@ BLOCKING_HOOKS = {
     "config-guard.py", "config-change-validate.py", "memory-write-guard.py",
     "destructive-ops-guard.py",
     "git-empty-push-guard.py", "bash-tail-buffering-guard.py",
-    "promise-checker.py",
 }
 
 

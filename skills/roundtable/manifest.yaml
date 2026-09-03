@@ -72,7 +72,6 @@ preconditions:
   - "output directory is new or empty, except an Agent D seed at round_1/agent_d.md when injection is enabled"
   - "target context is non-trivial (not a bug-shaped problem with obvious answer)"
 guardrails:
-  - context-monitor
   - bash-security-guard
   - block-partial-read
   - creative-output-grounding-check

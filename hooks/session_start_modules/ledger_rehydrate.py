@@ -3,9 +3,10 @@
 
 THE MISSING CONSUMER
 --------------------
-`precompact-checkpoint.py` has written `~/.claude/.precompact-state.json` for a
-long time, and NOTHING has ever read it: SessionStart had no reader, so there was
-no rehydration path at all. The checkpoint's own docstring says "the instructions
+The former `precompact-checkpoint.py` (deleted 2026-09-03, never wired) wrote
+`~/.claude/.precompact-state.json` for a long time, and NOTHING ever read it:
+SessionStart had no reader, so there was no rehydration path at all. That
+checkpoint's own docstring said "the instructions
 re-injected by the echo command reference this file", but no such consumer exists
 in the tree. This module is that consumer, for the real ledger.
 

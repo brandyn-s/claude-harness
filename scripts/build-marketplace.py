@@ -76,7 +76,6 @@ PLUGINS = [
             # Hooks
             ("hooks/run-hook", "hooks/run-hook"),
             ("hooks/loop-detector.py", "hooks/loop-detector.py"),
-            ("hooks/context-monitor.py", "hooks/context-monitor.py"),
             ("hooks/result-injection-guard.py", "hooks/result-injection-guard.py"),
             ("hooks/bash-security-guard.py", "hooks/bash-security-guard.py"),
             ("hooks/bash_policy_tables.py", "hooks/bash_policy_tables.py"),
@@ -87,13 +86,11 @@ PLUGINS = [
             ("hooks/memory-write-guard.py", "hooks/memory-write-guard.py"),
             ("hooks/search-path-guard.py", "hooks/search-path-guard.py"),
             ("hooks/post-write-edit.py", "hooks/post-write-edit.py"),
-            ("hooks/promise-checker.py", "hooks/promise-checker.py"),
-            ("hooks/precompact-checkpoint.py", "hooks/precompact-checkpoint.py"),
             ("hooks/post-failure-guide.py", "hooks/post-failure-guide.py"),
             ("hooks/protected-repos.json", "hooks/protected-repos.json"),
             # Shared libraries imported by the bundled hooks (must ship so the
             # plugin is self-contained): result-injection-guard imports
-            # hook_input; context-monitor imports atomic_write;
+            # hook_input; loop-detector imports atomic_write;
             # bash-security-guard imports manifest_metrics for the
             # repeat-block escalation and bash_policy_tables for opt-in
             # non-catastrophic command policy.

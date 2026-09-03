@@ -30,7 +30,6 @@ NOT_ENTRYPOINTS = {
     "atomic_write.py",
     "hook_input.py",  # shared accessors imported by other hooks
     "manifest_metrics.py",
-    "skill-alias.py",  # consumed by other tools, doesn't run from stdin
     "tavily-search-cap.py",  # module-level, no main()
     "stop-failure-handler.py",  # module-level, no main()
     "prompt-secret-scan.py",  # has its own crash test in test_prompt_secret_scan.py

@@ -34,7 +34,6 @@ PostToolUse hooks can modify outputs via `updatedMCPToolOutput`.
 | `session-start.py` | SessionStart | Persists `CLAUDE_ENV_FILE` and injects the active OS's compact `session-start.md` digest (legacy fallback: top-level OS rules) | Keeps first-response latency predictable and output below the 10,000-character inline cap; full incident catalogs, health, sync, pruning, and repair stay on demand. |
 | `session-end.py` | SessionEnd | Atomically records a bounded receipt plus the official SessionStart model seed when available | Keeps exit fast; the local scheduled `bin/enrich-session-end-receipts.py` job recovers model/fallback/refusal metadata without retaining prompt content, and leaves unsupported facts explicitly `runtime-unknown`. |
 | `stop-failure-handler.py` | StopFailure | Logs API failures, injects recovery guidance for rate limits, auth errors, billing, server errors | API failures at session end are invisible without this. Provides immediate fix instructions. |
-| `promise-checker.py` | Stop | Catches performative compliance and banned session-closure phrases ("let's continue in a new session") | Prevents the #1 most frustrating agent behavior: stopping early and suggesting a new session. Registered on Stop (it reads `transcript_path`, a Stop field — moving it to StopFailure would silently break it). |
 
 The former `session-stop.py` and InstructionsLoaded validator implementations
 were removed after their replacement coverage landed; Git history is the
