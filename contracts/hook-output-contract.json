@@ -1,0 +1,10 @@
+{
+  "_about": "Hook output contract derived from the installed Claude Code binary (2.1.260, 2026-09-03). Checked by bin/test_hook_output_contract.py: the enum, every key and every wired event must exist in the binary, and no hook source may emit a legacy shape.",
+  "derived_from": "claude 2.1.260",
+  "permissionDecision": ["allow", "deny", "ask", "defer"],
+  "hookSpecificOutput_keys": ["hookEventName", "permissionDecision", "permissionDecisionReason", "updatedInput", "additionalContext"],
+  "top_level_keys": ["continue", "stopReason", "suppressOutput", "systemMessage", "decision", "reason", "hookSpecificOutput"],
+  "legacy_keys_ignored_by_runtime": ["updated_input", "result", "message", "ok", "decision:approve"],
+  "user_facing_only": ["systemMessage"],
+  "events": ["ConfigChange", "Notification", "PostCompact", "PostToolUse", "PostToolUseFailure", "PreCompact", "PreToolUse", "SessionEnd", "SessionStart", "Stop", "StopFailure", "SubagentStart", "SubagentStop", "TaskCompleted", "TeammateIdle", "UserPromptSubmit", "WorktreeRemove"]
+}
