@@ -183,6 +183,12 @@
       "rule": "verify-effectiveness.md",
       "bytes": -5095,
       "reason": "Relocated 9 dated-narrative blocks (2026-08-16 to 2026-08-28) verbatim to rules/incidents/verify-effectiveness.md behind <a id> anchors, the ladder-runs-both-ways mechanism to the existing 2026-08-15 anchor and the pinned-pair worked example to its 2026-08-29 anchor; directives, REQUIRED lines, GUARDs and one-line pointers stay. 23,085 -> 17,990 B. Oracle: 1,699/1,699 literals present with --also rules/incidents. Negative ratchet."
+    },
+    {
+      "date": "2026-09-04",
+      "rule": "verify-before-assuming.md",
+      "bytes": -501,
+      "reason": "Relocated 3 dated-narrative blocks verbatim to rules/incidents/verify-before-assuming.md behind <a id> anchors: the check-3b INCIDENT 2026-08-12 paragraph (Slack's audit-action catalog sampled by group NAME, the 312-action largest group never read), the check-5b 2026-08-15 sentence (5 defects reported off a 70-commit-behind copy) and the closing GUARD's citation of the two 2026-08-15 one-call-probe instances; each leaves its directive and a Full: incidents# pointer in the rule. 10,413 -> 9,912 B. Oracle: 1,608/1,608 literals present with --also rules/incidents, no allow-drop. What remains is directive text (checks, INVARIANTs, GUARD), which is step 8's judgment work, not relocation. Negative so the freed budget cannot be silently re-spent."
     }
   ]
 }

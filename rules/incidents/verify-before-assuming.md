@@ -929,3 +929,38 @@ permission classifier, correctly: "inert probe" and "modify then revert" are
 DIFFERENT acts, and restore-immediately does not convert one into the other.
 `sc_cat_item` also carries **0 `sys_audit` rows** despite `sys_mod_count = 56`, so
 the audit cross-check available on task tables does not exist there.
+
+## 2026-08-12 sampled Slack's audit-action catalog by group name; the largest group was never read
+<a id="2026-08-12-slack-audit-catalog-largest-group-unread"></a>
+
+Relocated verbatim from check 3b of the ambient rule body on 2026-09-04; the
+directive and a pointer stay in `rules/verify-before-assuming.md`.
+
+INCIDENT 2026-08-12: assessing coverage of Slack's 726-entry audit-action catalog
+across 26 groups, I sampled the groups whose NAMES read as security-relevant and
+skipped `workspace_or_org`. That group holds 312 actions — 43% of the entire
+catalog — including 122 `pref.*` actions of which ZERO were covered. The
+coverage claim was reported before the largest group had been read at all.
+
+## 2026-08-15 five defects reported off a 70-commit-behind checkout
+<a id="2026-08-15-five-defects-off-a-70-commit-behind-copy"></a>
+
+Relocated verbatim from check 5b of the ambient rule body on 2026-09-04; the
+directive and a pointer stay in `rules/verify-before-assuming.md`. The fuller
+write-up is `docs/rule-reference/verify-before-assuming.md`, section "2026-08-15 —
+stale deployed copy, and a verdict shipped at first-read confidence".
+
+2026-08-15: 5 defects reported off a 70-commit-behind copy; 2 already fixed upstream.
+
+## 2026-08-15 two first-read verdicts that a one-call probe would have refuted
+<a id="2026-08-15-one-call-probe-both-directions"></a>
+
+Relocated verbatim from the closing GUARD of the ambient rule body on 2026-09-04; the
+directive and a pointer stay in `rules/verify-before-assuming.md`. The GUARD ("the
+mechanism is obvious from what I just read") stays; the full write-up is
+`docs/rule-reference/verify-before-assuming.md`, section "2026-08-15 — stale deployed
+copy, and a verdict shipped at first-read confidence".
+
+Both 2026-08-15 instances (an asserted
+unresolvable fixpoint that was an ordered computation; a dismissed vendor fork
+whose diff was also a major upgrade): docs/rule-reference/verify-before-assuming.md

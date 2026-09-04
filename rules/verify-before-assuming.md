@@ -63,12 +63,7 @@ INVARIANT verify_repo_target_before_push_pr_merge
    called. A group name is a label chosen by the vendor for a different purpose than
    your question, so "that one doesn't sound relevant" is not evidence about its
    contents. Report the fraction of the population actually inspected.
-
-   INCIDENT 2026-08-12: assessing coverage of Slack's 726-entry audit-action catalog
-   across 26 groups, I sampled the groups whose NAMES read as security-relevant and
-   skipped `workspace_or_org`. That group holds 312 actions — 43% of the entire
-   catalog — including 122 `pref.*` actions of which ZERO were covered. The
-   coverage claim was reported before the largest group had been read at all.
+   Full: incidents#2026-08-12-slack-audit-catalog-largest-group-unread
 4. **Primary evidence.** For vendor claims, use the vendor's current source or a
    direct live test; for explicit research, every dated/versioned/availability/
    pricing claim must trace to a source fetched this session. Read bodies, diffs,
@@ -92,7 +87,7 @@ INVARIANT verify_repo_target_before_push_pr_merge
    real file proves only what your checkout holds. `git fetch` first, diagnose against
    `origin/<default>`, and say which you read. Hardest on a DEPLOYED path (`~/.claude`,
    installed package, running container): most likely to lag, least likely to look it.
-   2026-08-15: 5 defects reported off a 70-commit-behind copy; 2 already fixed upstream.
+   Full: incidents#2026-08-15-five-defects-off-a-70-commit-behind-copy
 6. **Configuration absence.** Search memory, then enumerate every relevant current
    and legacy file, registry hive/key family, environment scope, remote-managed
    surface, and product/app variant. When the user says it exists, treat a negative
@@ -146,9 +141,8 @@ unresolvable / clearly abandoned / clearly a no-op":
   RUN THE ONE-CALL PROBE BEFORE THE CLAIM LEAVES. Name the cheapest observation
   that would REFUTE the reading, run it, then report. Fails in BOTH directions,
   which look nothing alike, so neither warns you about the other. NO EXCEPTIONS
-  for a verdict that reaches the user. Both 2026-08-15 instances (an asserted
-  unresolvable fixpoint that was an ordered computation; a dismissed vendor fork
-  whose diff was also a major upgrade): docs/rule-reference/verify-before-assuming.md
+  for a verdict that reaches the user.
+  Full: incidents#2026-08-15-one-call-probe-both-directions
 
 When a specialized case is not resolved by this contract, load the archived reference;
 do not recreate its incident narrative in the always-loaded rule.
