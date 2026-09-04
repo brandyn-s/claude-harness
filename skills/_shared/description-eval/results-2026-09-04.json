@@ -1,0 +1,4893 @@
+{
+  "meta": {
+    "model": "claude-fable-5-1",
+    "effort": "low",
+    "date": "2026-09-04",
+    "started_at": "2026-09-04T03:44:56+00:00",
+    "finished_at": "2026-09-04T03:50:39+00:00",
+    "skills": [
+      "absorb",
+      "agentic-actions-auditor",
+      "api-guardrails",
+      "api-ingest",
+      "api-preflight",
+      "audit-fix",
+      "audit-skill",
+      "build-measurement-harness",
+      "bulk-api-script",
+      "capture",
+      "code-explore",
+      "codebase-memory-exploring",
+      "codebase-memory-quality",
+      "codebase-memory-tracing",
+      "codeql",
+      "context-budget",
+      "debugging-hypotheses",
+      "deep-dive",
+      "design-evidence-first",
+      "differential-review",
+      "distill",
+      "evaluate-repos",
+      "fp-check",
+      "garden",
+      "gather-claude",
+      "gather-claude-endpoints",
+      "gather-intel",
+      "gather-openai-endpoints",
+      "gather-repos",
+      "gather-research",
+      "gather-vendor",
+      "harness-prune",
+      "healthcheck",
+      "index-repo",
+      "insecure-defaults",
+      "interview",
+      "legacy-code-tdd",
+      "manifest-gen",
+      "mega-capture",
+      "mega-distill",
+      "modal",
+      "monitor",
+      "persona",
+      "plateau-diagnose",
+      "pr-fix",
+      "readiness-review",
+      "recall",
+      "red-team-axes",
+      "refine",
+      "retro",
+      "retrospective",
+      "review-depth-by-risk",
+      "roundtable",
+      "run-status",
+      "sarif-parsing",
+      "scout",
+      "scout-frontier",
+      "scout-skills",
+      "search-axis-rotate",
+      "search-campaign",
+      "semgrep",
+      "semgrep-rule-creator",
+      "service-review",
+      "sharp-edges",
+      "ship",
+      "ship-hook",
+      "supergoal",
+      "supergoal-pause",
+      "supergoal-resume",
+      "superplan",
+      "superplan-loop",
+      "superplan-status",
+      "threat-model",
+      "triage",
+      "validate-changes",
+      "variant-analysis",
+      "verify-search-result",
+      "work"
+    ],
+    "system_prompt_sha256": "ed5ec61bd064b8cf7391875d0b719038ad98155d83f72709e1b6453053c589b9",
+    "system_tokens": 20434,
+    "estimate": {
+      "system_tokens": 20434,
+      "requests": 264,
+      "request_tokens_assumed": 53,
+      "output_tokens_assumed": 500,
+      "cache_write_usd": 0.51085,
+      "cache_read_usd": 1.348644,
+      "input_usd": 0.13992,
+      "output_usd": 6.6,
+      "total_usd": 8.599414
+    },
+    "budget_usd": 10.0,
+    "budget_exceeded": false,
+    "limit": null,
+    "usage": {
+      "input_tokens": 16382,
+      "output_tokens": 3808,
+      "cache_creation_input_tokens": 21346,
+      "cache_read_input_tokens": 5613998,
+      "requests": 264
+    },
+    "cost_usd": 2.0245445,
+    "corpus_meta": {
+      "generated_at": "2026-09-04T03:44:23+00:00",
+      "model": "claude-sonnet-5",
+      "effort": "medium",
+      "skills": 78,
+      "positives_per_skill": 3,
+      "negatives": 30,
+      "method": "positives generated from each SKILL.md body with the frontmatter (description, when_to_use) removed; generator told not to name the skill, its slash command, or copy phrases verbatim; negatives hand-written",
+      "usage": {
+        "input_tokens": 530486,
+        "output_tokens": 15021,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "requests": 78
+      },
+      "cost_usd": 1.211182,
+      "generation_errors": {}
+    }
+  },
+  "routes": [
+    {
+      "id": "absorb-1",
+      "request": "Can you dig into how antirez structures his commits and see if there's anything worth stealing for how we work?",
+      "expected": "absorb",
+      "kind": "positive",
+      "answer": "absorb",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 38,
+        "output_tokens": 13,
+        "cache_creation_input_tokens": 21346,
+        "cache_read_input_tokens": 0
+      }
+    },
+    {
+      "id": "absorb-2",
+      "request": "I keep hearing mitchellh has a great engineering workflow — go look at his public repos and PRs and tell me concretely what I should change in our rules/hooks based on real evidence from his code, not just vague impressions.",
+      "expected": "absorb",
+      "kind": "positive",
+      "answer": "absorb",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 75,
+        "output_tokens": 13,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "absorb-3",
+      "request": "There's a dev named bcherny whose CLAUDE.md and automation setup I admire — pull apart what he actually does differently and figure out if any of it should get folded into our own config.",
+      "expected": "absorb",
+      "kind": "positive",
+      "answer": "absorb",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 63,
+        "output_tokens": 13,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "agentic-actions-auditor-1",
+      "request": "We just added Claude Code Action to our CI pipeline that responds to issue comments — can you check our workflows for prompt injection risks before we merge?",
+      "expected": "agentic-actions-auditor",
+      "kind": "positive",
+      "answer": "agentic-actions-auditor",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 53,
+        "output_tokens": 20,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "agentic-actions-auditor-2",
+      "request": "Our repo lets external contributors comment '/gemini review' on PRs and it triggers an AI review bot with pull_request_target. I'm worried an attacker could smuggle malicious instructions through the issue body into the agent's prompt — can you go through .github/workflows and trace how event data flows into the prompt fields, checking env vars, sandbox settings, and allowed users?",
+      "expected": "agentic-actions-auditor",
+      "kind": "positive",
+      "answer": "agentic-actions-auditor",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 127,
+        "output_tokens": 20,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "agentic-actions-auditor-3",
+      "request": "Take a look at github.com/acme/webapp and tell me if any of their CI jobs that call an AI coding agent could be tricked by a malicious PR into leaking secrets or running arbitrary commands.",
+      "expected": "agentic-actions-auditor",
+      "kind": "positive",
+      "answer": "agentic-actions-auditor",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 72,
+        "output_tokens": 20,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "api-guardrails-1",
+      "request": "Can you review my Claude API integration for hallucination risks and make sure I'm handling refusals properly?",
+      "expected": "api-guardrails",
+      "kind": "positive",
+      "answer": "api-guardrails",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 39,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "api-guardrails-2",
+      "request": "We just migrated our ticket classifier from Sonnet 4.6 to Sonnet 5 and I'm getting 400 errors on temperature settings plus some weird prefill failures — can you go through the code and fix the model-specific issues, and also tighten up the prompt so it stops making up citations?",
+      "expected": "api-guardrails",
+      "kind": "positive",
+      "answer": "api-guardrails",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 102,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "api-guardrails-3",
+      "request": "My RAG app sometimes returns confident-sounding answers that aren't actually in the source docs, and I have no idea if a 200 response was actually a refusal or fallback happening silently — help me make this pipeline trustworthy and catch those cases before they ship.",
+      "expected": "api-guardrails",
+      "kind": "positive",
+      "answer": "api-guardrails",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 89,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "api-ingest-1",
+      "request": "Can you pull in the Ashby API docs from their developer site and get them set up so you can search them later?",
+      "expected": "api-ingest",
+      "kind": "positive",
+      "answer": "api-ingest",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 37,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "api-ingest-2",
+      "request": "I found a Postman documenter link for our vendor's payments API and I want it turned into markdown docs stored somewhere you can reference in future sessions instead of me pasting the spec every time.",
+      "expected": "api-ingest",
+      "kind": "positive",
+      "answer": "api-ingest",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 65,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "api-ingest-3",
+      "request": "We have a big openapi.yaml file for our internal service — can you process it and make it queryable so future coding sessions know the auth scopes and rate limits without me re-explaining them?",
+      "expected": "api-ingest",
+      "kind": "positive",
+      "answer": "api-ingest",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 62,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "api-preflight-1",
+      "request": "Before I start building this, what permissions and token type do I need to manage conditional access policies in Microsoft Graph for GCC High?",
+      "expected": "api-preflight",
+      "kind": "positive",
+      "answer": "api-preflight",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 47,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "api-preflight-2",
+      "request": "I'm about to write code to delete private channels in our Slack Enterprise Grid workspace but I want to avoid finding out mid-build that I'm missing some scope or admin consent step — can you check what's actually required first?",
+      "expected": "api-preflight",
+      "kind": "positive",
+      "answer": "api-preflight",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 75,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "api-preflight-3",
+      "request": "We're integrating with the Hologram API to bulk activate SIMs and update data plans — can you dig up what auth setup, scopes, and prerequisites we'll need so I don't hit a wall halfway through coding?",
+      "expected": "api-preflight",
+      "kind": "positive",
+      "answer": "api-preflight",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 75,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "audit-fix-1",
+      "request": "I've got the worklist from the audit run with a bunch of STILL-FIRES findings - can you go fix all of those and verify each one before committing?",
+      "expected": "audit-fix",
+      "kind": "positive",
+      "answer": "audit-fix",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 52,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "audit-fix-2",
+      "request": "We just ran /audit-skill on the doc-audit tracker and it spit out /tmp/wl-batch.yaml with 45 findings across several skills. I want automated proposals for each, applied centrally and verified against the oracle before anything gets committed - one PR for the batch.",
+      "expected": "audit-fix",
+      "kind": "positive",
+      "answer": "audit-fix",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 95,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "audit-fix-3",
+      "request": "There's a backlog of confirmed bugs in the audit tracker that we've already narrowed down to the auto-checkable ones. Can you get those actually resolved in the code, double-check each fix really killed the bug, and mark the tracker entries closed?",
+      "expected": "audit-fix",
+      "kind": "positive",
+      "answer": "audit-fix",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 86,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "audit-skill-1",
+      "request": "We're about to ship a change to the deploy-helper skill's SKILL.md and scripts — can you audit it fully before I merge?",
+      "expected": "audit-skill",
+      "kind": "positive",
+      "answer": "audit-skill",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 48,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "audit-skill-2",
+      "request": "I just bulk-edited a bunch of files under skills/ to fix a schema rename, and I'm worried some skills now have stale references or broken contracts as a result. Can you check the whole tree for drift, including hygiene stuff like broken citations and description length limits, then verify anything suspicious actually still reproduces before listing it as a real problem?",
+      "expected": "audit-skill",
+      "kind": "positive",
+      "answer": "audit-skill",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 116,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "audit-skill-3",
+      "request": "Can you go through the changelog-writer skill and tell me if its documented invariants and error handling actually hold up, not just whether the docs look internally consistent — I want confirmed bugs with reproduction steps, not guesses.",
+      "expected": "audit-skill",
+      "kind": "positive",
+      "answer": "audit-skill",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 77,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "build-measurement-harness-1",
+      "request": "We're kicking off a new eval for our retrieval pipeline's chunk ranking — help me set up the whole measurement harness from scratch, oracle and fixtures and all.",
+      "expected": "build-measurement-harness",
+      "kind": "positive",
+      "answer": "build-measurement-harness",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 62,
+        "output_tokens": 18,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "build-measurement-harness-2",
+      "request": "I just finished a redesign of our call-graph extractor and want to publish a baseline recall number, but I'm worried we'll get burned like last time where a silent row cap made the number look way worse than reality. Can you help me build out a proper instrumented measurement setup before I trust any of these numbers?",
+      "expected": "build-measurement-harness",
+      "kind": "positive",
+      "answer": "build-measurement-harness",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 99,
+        "output_tokens": 18,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "build-measurement-harness-3",
+      "request": "We need a way to track whether our new lint rules are actually getting more accurate over time, with the ability to drill into exactly which files or rule types are failing instead of just one big score.",
+      "expected": "build-measurement-harness",
+      "kind": "positive",
+      "answer": "build-measurement-harness",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 60,
+        "output_tokens": 18,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "bulk-api-script-1",
+      "request": "Pull every CrowdStrike GovCloud alert with critical severity from the past 30 days and give me a CSV.",
+      "expected": "bulk-api-script",
+      "kind": "positive",
+      "answer": "bulk-api-script",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 44,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "bulk-api-script-2",
+      "request": "We need to dump all users from our GCC High tenant into a spreadsheet — last time our script died halfway through because of some connection reset, so make sure it can recover and keep going. Around 15k users total.",
+      "expected": "bulk-api-script",
+      "kind": "positive",
+      "answer": "bulk-api-script",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 69,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "bulk-api-script-3",
+      "request": "Can you grab all the Tenable FedCloud vulnerability findings for our assets and hand me a file with CVE, severity, and hostname — there are way more than a hundred so the normal search tools won't cut it.",
+      "expected": "bulk-api-script",
+      "kind": "positive",
+      "answer": "bulk-api-script",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 74,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "capture-1",
+      "request": "We just spent an hour tracking down that OBO token bug and figured out the real fix — can you save this to the knowledge base before I forget the details?",
+      "expected": "capture",
+      "kind": "positive",
+      "answer": "capture",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 51,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "capture-2",
+      "request": "I want to wrap up this session by writing what we learned about the gateway retry logic into a topic page and getting a PR opened for it, following the usual git flow with auto-merge.",
+      "expected": "capture",
+      "kind": "positive",
+      "answer": "retro",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 61,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "capture-3",
+      "request": "Before I close this out, make sure the insight from today's debugging (and the fact that the old blind-spot we had documented is actually fixed now) gets reflected properly in our shared notes repo, not just left in this chat.",
+      "expected": "capture",
+      "kind": "positive",
+      "answer": "capture",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 74,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "code-explore-1",
+      "request": "Where in the codebase is the rate-limiting logic implemented?",
+      "expected": "code-explore",
+      "kind": "positive",
+      "answer": "code-explore",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 27,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "code-explore-2",
+      "request": "We just found weird 429 errors in prod and I suspect there's some throttling logic buried somewhere in our API layer, but I have no idea what it's called or where it lives — can you find it and also tell me what calls into it?",
+      "expected": "code-explore",
+      "kind": "positive",
+      "answer": "code-explore",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 75,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "code-explore-3",
+      "request": "I need a rundown of how our auth flow works end to end, from the code, not the docs.",
+      "expected": "code-explore",
+      "kind": "positive",
+      "answer": "code-explore",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 33,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "codebase-memory-exploring-1",
+      "request": "What services does this repo have, and how are they organized?",
+      "expected": "codebase-memory-exploring",
+      "kind": "positive",
+      "answer": "codebase-memory-exploring",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 21,
+        "output_tokens": 20,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "codebase-memory-exploring-2",
+      "request": "I just cloned this monorepo and need to get my bearings—can you show me the top-level modules, how many services exist, and which ones depend on each other before I start making changes?",
+      "expected": "codebase-memory-exploring",
+      "kind": "positive",
+      "answer": "codebase-memory-exploring",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 58,
+        "output_tokens": 20,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "codebase-memory-exploring-3",
+      "request": "Can you list all the REST endpoints this app exposes and point me to the handler code for each one?",
+      "expected": "codebase-memory-exploring",
+      "kind": "positive",
+      "answer": "codebase-memory-exploring",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 35,
+        "output_tokens": 20,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "codebase-memory-quality-1",
+      "request": "Can you find any unused functions in our mcp-servers repo that are safe to delete?",
+      "expected": "codebase-memory-quality",
+      "kind": "positive",
+      "answer": "codebase-memory-quality",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 33,
+        "output_tokens": 19,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "codebase-memory-quality-2",
+      "request": "We've got a legacy service module that's grown huge over time and I suspect a lot of dead code and overly complex functions are hiding in there — can you scan it and give me a prioritized list of what to clean up first?",
+      "expected": "codebase-memory-quality",
+      "kind": "positive",
+      "answer": "codebase-memory-quality",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 71,
+        "output_tokens": 19,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "codebase-memory-quality-3",
+      "request": "I want to know if there are files in our codebase that always get modified together even though they live in totally different folders, since that might mean there's some hidden dependency we don't know about.",
+      "expected": "codebase-memory-quality",
+      "kind": "positive",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 56,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "codebase-memory-tracing-1",
+      "request": "Who calls the ProcessOrder function and where are those calls located?",
+      "expected": "codebase-memory-tracing",
+      "kind": "positive",
+      "answer": "codebase-memory-tracing",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 27,
+        "output_tokens": 20,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "codebase-memory-tracing-2",
+      "request": "I need to modify the ValidateToken function but I'm worried about breaking things — it's used across multiple services and I don't know all the places it gets invoked. Can you find everything upstream and downstream of it, ideally with a sense of risk level?",
+      "expected": "codebase-memory-tracing",
+      "kind": "positive",
+      "answer": "codebase-memory-tracing",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 82,
+        "output_tokens": 20,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "codebase-memory-tracing-3",
+      "request": "We think if the shared Redis client drops connections it could cascade badly — can you figure out every endpoint or service that would actually feel that failure, not just the immediate callers?",
+      "expected": "codebase-memory-tracing",
+      "kind": "positive",
+      "answer": "codebase-memory-tracing",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 59,
+        "output_tokens": 20,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "codeql-1",
+      "request": "Can you run a full CodeQL security scan on this repo and show me what vulnerabilities it finds?",
+      "expected": "codeql",
+      "kind": "positive",
+      "answer": "codeql",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 39,
+        "output_tokens": 13,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "codeql-2",
+      "request": "We just added a bunch of new Go microservices plus GitHub Actions workflows to our repo, and I want a thorough vulnerability audit covering both the code and the CI pipelines before our release next week.",
+      "expected": "codeql",
+      "kind": "positive",
+      "answer": "semgrep",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 70,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "codeql-3",
+      "request": "I need deep interprocedural taint-tracking analysis on our Java codebase to catch injection bugs that simple pattern matching would miss — set up whatever's needed and give me a findings report.",
+      "expected": "codeql",
+      "kind": "positive",
+      "answer": "codeql",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 67,
+        "output_tokens": 13,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "context-budget-1",
+      "request": "Feels like Claude is starting every session with way less room to work than it should — can you figure out what's eating up the context window before I even ask it anything?",
+      "expected": "context-budget",
+      "kind": "positive",
+      "answer": "context-budget",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 50,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "context-budget-2",
+      "request": "I've got a bunch of custom skills, rules files, and a couple MCP servers configured in my Claude Code setup, and I suspect they're bloating the startup context. Can you go through everything, estimate token cost per component, and tell me what's safe to trim or defer?",
+      "expected": "context-budget",
+      "kind": "positive",
+      "answer": "context-budget",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 91,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "context-budget-3",
+      "request": "We keep hitting compaction issues and losing important instructions mid-session — can you check how much of our config (rules, CLAUDE.md, memory index, skill descriptions) is loaded up front and give me a prioritized list of what to cut first?",
+      "expected": "context-budget",
+      "kind": "positive",
+      "answer": "context-budget",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 83,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "debugging-hypotheses-1",
+      "request": "We've got a weird 'bad parameter' SQLite error happening intermittently and I keep assuming it's concurrency. Can you help me actually figure out the real cause instead of guessing?",
+      "expected": "debugging-hypotheses",
+      "kind": "positive",
+      "answer": "debugging-hypotheses",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 66,
+        "output_tokens": 19,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "debugging-hypotheses-2",
+      "request": "I'm stuck on a bug where a service fails only sometimes after startup, I've got the connection setup code and logs but no clear lead — I want a structured way to brainstorm and prioritize possible causes before I start randomly testing fixes.",
+      "expected": "debugging-hypotheses",
+      "kind": "positive",
+      "answer": "debugging-hypotheses",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 82,
+        "output_tokens": 19,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "debugging-hypotheses-3",
+      "request": "There are like 4 possible reasons this job could be failing (bad config, stale cache, a leaked connection, or a bad dependency version) and I don't want to test them one by one forever — can you help me investigate these efficiently and figure out which one is actually real?",
+      "expected": "debugging-hypotheses",
+      "kind": "positive",
+      "answer": "debugging-hypotheses",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 86,
+        "output_tokens": 19,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "deep-dive-1",
+      "request": "Can you do a deep dive comparing Airlock Digital and Carbon Black for a FedRAMP environment and give me a written report with your recommendation?",
+      "expected": "deep-dive",
+      "kind": "positive",
+      "answer": "deep-dive",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 55,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "deep-dive-2",
+      "request": "We're evaluating whether to adopt OPA for policy testing in our CI/CD pipeline. I want a thorough research pass pulling from vendor docs, blogs, and any academic material, with honest pros/cons and confidence levels on each claim, saved somewhere I can reference later.",
+      "expected": "deep-dive",
+      "kind": "positive",
+      "answer": "deep-dive",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 98,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "deep-dive-3",
+      "request": "I need to understand where Tailscale actually stands on FIPS 140-3 validation right now, timeline included, and I want the sourcing to be solid enough to defend in a security review, not just a quick summary.",
+      "expected": "deep-dive",
+      "kind": "positive",
+      "answer": "deep-dive",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 71,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "design-evidence-first-1",
+      "request": "Before we start designing the new caching layer, can you dig through the git history and existing code so we're not guessing at constraints that are already documented somewhere?",
+      "expected": "design-evidence-first",
+      "kind": "positive",
+      "answer": "design-evidence-first",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 52,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "design-evidence-first-2",
+      "request": "I want to redesign our notification system, but I keep having to re-explain context every session—can you check past conversation logs and memory notes for what we already decided before asking me a bunch of questions again?",
+      "expected": "design-evidence-first",
+      "kind": "positive",
+      "answer": "design-evidence-first",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 64,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "design-evidence-first-3",
+      "request": "We need to pick an interface shape for this new plugin API and it's not obvious what's right—can you sketch out a few very different approaches (tight, flexible, and optimized-for-common-case) so we can compare trade-offs before committing?",
+      "expected": "design-evidence-first",
+      "kind": "positive",
+      "answer": "design-evidence-first",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 80,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "differential-review-1",
+      "request": "Can you do a security review of this PR before I merge it? It touches our auth middleware.",
+      "expected": "differential-review",
+      "kind": "positive",
+      "answer": "differential-review",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 33,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "differential-review-2",
+      "request": "We just refactored the payment webhook handler to add a new retry mechanism, and I want someone to check the diff against main for anything an attacker could exploit — especially around the external API calls we added. Can you generate a written report I can share with the team?",
+      "expected": "differential-review",
+      "kind": "positive",
+      "answer": "differential-review",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 80,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "differential-review-3",
+      "request": "Before I ship this branch, walk through what changed and flag anything sketchy, like removed validation or new places where user input flows into a sink.",
+      "expected": "differential-review",
+      "kind": "positive",
+      "answer": "differential-review",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 49,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "distill-1",
+      "request": "We just finished this task and tests pass - can you pull out what went wrong during this session so we don't hit the same walls next time?",
+      "expected": "distill",
+      "kind": "positive",
+      "answer": "distill",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 44,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "distill-2",
+      "request": "This session had a bunch of dead ends: the CrowdStrike API kept rejecting our date filters until we quoted them, and we burned like 20 minutes retrying a grep pattern that doesn't work in Git Bash. Can you go through the conversation and save those lessons somewhere useful so future sessions don't repeat them?",
+      "expected": "distill",
+      "kind": "positive",
+      "answer": "distill",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 111,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "distill-3",
+      "request": "Before we close this out, review the chat history for mistakes, wasted time, or things we had to work around, and make sure that knowledge actually gets written down instead of getting lost when the session ends.",
+      "expected": "distill",
+      "kind": "positive",
+      "answer": "distill",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 65,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "evaluate-repos-1",
+      "request": "I just ran gather-repos and got a bunch of candidate patterns from other repos — can you tell me which ones are actually worth adopting into our skills/hooks setup, without just dismissing them because they sound similar to what we have?",
+      "expected": "evaluate-repos",
+      "kind": "positive",
+      "answer": "evaluate-repos",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 78,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "evaluate-repos-2",
+      "request": "We found a repo (wshobson/agents) with a 'team-composition-patterns' approach and I want to know honestly whether it beats our current architecture or if we already cover it — I don't trust myself to judge my own design fairly here.",
+      "expected": "evaluate-repos",
+      "kind": "positive",
+      "answer": "evaluate-repos",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 79,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "evaluate-repos-3",
+      "request": "Last time I self-reviewed new patterns against our codebase I kept saying 'we already do that' for skills but flagged every hook gap — can you give me a genuinely balanced for/against comparison this time so I don't just rubber-stamp my own work?",
+      "expected": "evaluate-repos",
+      "kind": "positive",
+      "answer": "evaluate-repos",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 86,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "fp-check-1",
+      "request": "Our static analyzer flagged a possible SQL injection at line 87 of user_controller.py — can you check if that's actually exploitable or just a false positive?",
+      "expected": "fp-check",
+      "kind": "positive",
+      "answer": "fp-check",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 56,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "fp-check-2",
+      "request": "Our security team ran a scanner over the repo and got 20 findings, mostly buffer overflow and XSS flags. I need to know which ones are real bugs and which are noise before I file tickets, and if you can also rate exploit difficulty for the real ones that'd help a lot.",
+      "expected": "fp-check",
+      "kind": "positive",
+      "answer": "fp-check",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 95,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "fp-check-3",
+      "request": "I'm not convinced this heap overflow report in parse_header() is legit — the memcpy looks scary but I think there might be a bounds check upstream I'm missing. Can you dig into it and tell me for sure?",
+      "expected": "fp-check",
+      "kind": "positive",
+      "answer": "fp-check",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 74,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "garden-1",
+      "request": "Can you run the weekly cleanup on my knowledge base topics and push a PR with the fixes?",
+      "expected": "garden",
+      "kind": "positive",
+      "answer": "garden",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 38,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "garden-2",
+      "request": "I just did a huge capture push into my knowledge-base repo and I'm worried about broken links, orphaned pages, and stale stages piling up — can you preview what would need fixing before actually touching anything?",
+      "expected": "garden",
+      "kind": "positive",
+      "answer": "garden",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 70,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "garden-3",
+      "request": "My digital garden's markdown notes probably have some dangling wikilinks and pages nobody links to anymore — can you tidy that all up and get a PR ready for merge?",
+      "expected": "garden",
+      "kind": "positive",
+      "answer": "garden",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 60,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-claude-1",
+      "request": "Can you check whether Claude Code has shipped any updates since our last audit that let us drop workarounds from our config, and apply the ones that check out?",
+      "expected": "gather-claude",
+      "kind": "positive",
+      "answer": "gather-claude",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 52,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-claude-2",
+      "request": "We upgraded Claude Code to the newest version last week and I want to make sure our ~/.claude setup and skills still line up with what's current — pull in changelog, GitHub issues, and docs changes and update our architecture notes with anything actionable.",
+      "expected": "gather-claude",
+      "kind": "positive",
+      "answer": "gather-claude",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 84,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-claude-3",
+      "request": "Our knowledge-base notes on Claude Code are getting stale — go see what's new upstream (releases, security advisories, deprecations) and tell me what we should change, but don't touch any files until I say go.",
+      "expected": "gather-claude",
+      "kind": "positive",
+      "answer": "gather-claude",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 71,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-claude-endpoints-1",
+      "request": "Can you check if Anthropic changed anything about which telemetry/audit endpoints or event types they expose since our last recorded baseline?",
+      "expected": "gather-claude-endpoints",
+      "kind": "positive",
+      "answer": "gather-claude-endpoints",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 49,
+        "output_tokens": 20,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-claude-endpoints-2",
+      "request": "We haven't refreshed our knowledge base on Anthropic's data-collection endpoints in a while — I want to know if any usage/cost/audit fields got added or quietly removed, and confirm it against our live telemetry, not just the docs.",
+      "expected": "gather-claude-endpoints",
+      "kind": "positive",
+      "answer": "gather-claude-endpoints",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 83,
+        "output_tokens": 20,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-claude-endpoints-3",
+      "request": "Take a look at whether the scopes, rate limits, or exclusions on Anthropic's admin/analytics/compliance data feeds have shifted, and flag anything that could silently break something we're already pulling.",
+      "expected": "gather-claude-endpoints",
+      "kind": "positive",
+      "answer": "gather-claude-endpoints",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 72,
+        "output_tokens": 20,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-intel-1",
+      "request": "Can you check the community for anything new on Claude Code hooks and skills, and also see if our current setup still holds up compared to what people are saying now?",
+      "expected": "gather-intel",
+      "kind": "positive",
+      "answer": "gather-intel",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 51,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-intel-2",
+      "request": "It's been about a month since we last updated our notes on Claude Code best practices, and I want to know what's changed out there on Reddit/HN/blogs, plus flag any of our existing recommendations that are now outdated or unproven so we can trim or update them.",
+      "expected": "gather-intel",
+      "kind": "positive",
+      "answer": "gather-intel",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 86,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-intel-3",
+      "request": "We've had a bunch of rules baked into CLAUDE.md and our hooks for a while now — some added defensively without real evidence. Can you look into whether the wider community still endorses these approaches, find anything new worth adopting, and tell me what we should keep, test, or drop?",
+      "expected": "gather-intel",
+      "kind": "positive",
+      "answer": "gather-intel",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 94,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-openai-endpoints-1",
+      "request": "Can you check whether OpenAI has changed anything in their compliance logs or admin API docs since our last baseline?",
+      "expected": "gather-openai-endpoints",
+      "kind": "positive",
+      "answer": "gather-openai-endpoints",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 42,
+        "output_tokens": 20,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-openai-endpoints-2",
+      "request": "We're relying on the Compliance Logs Platform for audit data with a 30-day retention window, and I'm worried OpenAI quietly added a new event type we're not ingesting yet — can you run a check against their docs and live API to confirm?",
+      "expected": "gather-openai-endpoints",
+      "kind": "positive",
+      "answer": "gather-openai-endpoints",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 82,
+        "output_tokens": 20,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-openai-endpoints-3",
+      "request": "Run a full comparison of OpenAI's data-collection surfaces against what we last recorded, probe the live endpoints to confirm any changes, and flag anything that needs updating in our monitor code.",
+      "expected": "gather-openai-endpoints",
+      "kind": "positive",
+      "answer": "gather-openai-endpoints",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 69,
+        "output_tokens": 20,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-repos-1",
+      "request": "Go find some new Claude Code config repos on GitHub and give me a breakdown of what's in each one.",
+      "expected": "gather-repos",
+      "kind": "positive",
+      "answer": "gather-repos",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 39,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-repos-2",
+      "request": "I stumbled across this repo — github.com/someone/cool-claude-setup — can you go through it and tell me what hooks, rules, skills, and agents it actually has before I decide whether it's worth adopting?",
+      "expected": "gather-repos",
+      "kind": "positive",
+      "answer": "gather-repos",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 73,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-repos-3",
+      "request": "I want a fresh inventory of community Claude Code setups since last time we checked, covering all the usual categories like hooks, skills, memory files, etc., without any opinions on whether they're good — just what's there.",
+      "expected": "gather-repos",
+      "kind": "positive",
+      "answer": "gather-repos",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 71,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-research-1",
+      "request": "Can you check what's new in academic research on agent memory architectures and see if any of it should change how our Claude Code setup handles context/memory?",
+      "expected": "gather-research",
+      "kind": "positive",
+      "answer": "gather-research",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 49,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-research-2",
+      "request": "We built our agent orchestration a while back based on some papers we read, but I haven't checked in months — can you go find out if there's newer research that contradicts or updates what we're doing, then write up a report with recommendations before changing anything?",
+      "expected": "gather-research",
+      "kind": "positive",
+      "answer": "gather-research",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 77,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-research-3",
+      "request": "I want to make sure our tool-use and prompting setup is still aligned with the latest peer-reviewed findings and conference talks, not just Reddit chatter — pull together a comparison of what the frontier says versus what we currently have.",
+      "expected": "gather-research",
+      "kind": "positive",
+      "answer": "gather-research",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 79,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-vendor-1",
+      "request": "Can you check if any of our OpenAI models are getting deprecated and update our intelligence report?",
+      "expected": "gather-vendor",
+      "kind": "positive",
+      "answer": "gather-vendor",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 36,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-vendor-2",
+      "request": "We haven't run a check on xAI/Grok in a few weeks and I'm worried one of our pinned model IDs might have quietly redirected to something else — can you pull the latest changelog, security advisories, and verify our pins are still live?",
+      "expected": "gather-vendor",
+      "kind": "positive",
+      "answer": "gather-vendor",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 81,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "gather-vendor-3",
+      "request": "Someone needs to sweep Gemini's release notes and pricing page for changes since our last check, confirm our flagship model is still the best available, and flag anything we should act on before touching any files.",
+      "expected": "gather-vendor",
+      "kind": "positive",
+      "answer": "gather-vendor",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 65,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-01",
+      "request": "Rename the variable `cnt` to `count` everywhere in utils.py.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 31,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-02",
+      "request": "Convert this callback-style function to async/await.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 20,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-03",
+      "request": "What's the difference between a Python list and a tuple?",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 22,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-04",
+      "request": "Add a --verbose flag to the CLI that prints each file as it is processed.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 31,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-05",
+      "request": "Explain what this regular expression matches: ^\\d{3}-\\d{4}$",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 32,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-06",
+      "request": "Sort the imports in this module alphabetically.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 21,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-07",
+      "request": "Write a SQL query that returns the ten customers with the highest total order value.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 29,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-08",
+      "request": "Generate a .gitignore for a Node.js project.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 23,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-09",
+      "request": "What is the time complexity of this nested loop?",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 20,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-10",
+      "request": "Translate this bash script to PowerShell.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 20,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-11",
+      "request": "Pretty-print this JSON blob so it is readable.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 24,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-12",
+      "request": "Add type hints to the functions in models.py.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 20,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-13",
+      "request": "Add a Makefile target called lint that runs ruff.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 24,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-14",
+      "request": "Explain the difference between TCP and UDP in two paragraphs.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 28,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-15",
+      "request": "Bump the version in package.json from 2.2.1 to 2.3.0.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 31,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-16",
+      "request": "Convert this CSV snippet into a markdown table.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 23,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-17",
+      "request": "Write a docstring for the DateRange class.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 20,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-18",
+      "request": "What does HTTP status 422 mean?",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 19,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-19",
+      "request": "Remove the unused imports at the top of main.py.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 22,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-20",
+      "request": "Show me how to define argparse subcommands.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 20,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-21",
+      "request": "Change the default port in config.yaml from 8000 to 8080.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 27,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-22",
+      "request": "Write a regex that matches US phone numbers with an optional area code in parentheses.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 32,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-23",
+      "request": "Add a null check before we dereference user.profile in the request handler.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 26,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-24",
+      "request": "Convert the tabs in these files to four spaces.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 22,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-25",
+      "request": "Explain what a Python context manager is, with a short example.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 23,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-26",
+      "request": "Write a bash one-liner that counts lines of code per file extension.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 27,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-27",
+      "request": "Turn this synchronous file read into a streaming read so it works on large files.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 29,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-28",
+      "request": "Draft a short README section describing how to install the package with pip.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 24,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-29",
+      "request": "How do I center a div horizontally and vertically with CSS flexbox?",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 29,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "generic-30",
+      "request": "Write a unit test for the slugify helper that covers unicode input.",
+      "expected": "none",
+      "kind": "negative",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 27,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "harness-prune-1",
+      "request": "Can you sweep our skills, hooks, and rules for old model-specific hacks that don't apply anymore and log any you find?",
+      "expected": "harness-prune",
+      "kind": "positive",
+      "answer": "harness-prune",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 46,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "harness-prune-2",
+      "request": "We had a bunch of Sonnet-specific 'context anxiety' workarounds sprinkled through our rules files a while back — some of those models are long superseded now. Can you check which ones are safe to flag for removal and also verify our existing backlog of candidates is still accurate, not just tack on new ones?",
+      "expected": "harness-prune",
+      "kind": "positive",
+      "answer": "harness-prune",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 103,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "harness-prune-3",
+      "request": "Go through the harness config (skills, hooks, agents) and check if any of those old compensating hacks for library bugs or model quirks are now obsolete since we've upgraded packages/models, and update the tracking doc accordingly.",
+      "expected": "harness-prune",
+      "kind": "positive",
+      "answer": "harness-prune",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 78,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "healthcheck-1",
+      "request": "Can you run a full health check on my Claude Code setup and tell me if anything's broken?",
+      "expected": "healthcheck",
+      "kind": "positive",
+      "answer": "healthcheck",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 34,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "healthcheck-2",
+      "request": "I just merged a big PR that touched hooks and settings.json, and I want to make sure I didn't break config validation, drift, or leave any orphaned files before I move on — can you check everything except the slow hook test suite?",
+      "expected": "healthcheck",
+      "kind": "positive",
+      "answer": "healthcheck",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 74,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "healthcheck-3",
+      "request": "Something feels off with my setup — configs, docs, and file references might be out of sync — can you look through it all and tell me what's inconsistent?",
+      "expected": "healthcheck",
+      "kind": "positive",
+      "answer": "healthcheck",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 50,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "index-repo-1",
+      "request": "Please index the mcp-servers repo at ~/Documents/GitHub/mcp-servers so I can search it.",
+      "expected": "index-repo",
+      "kind": "positive",
+      "answer": "index-repo",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 43,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "index-repo-2",
+      "request": "I just cloned a new repo and want both semantic search and code graph queries to work on it — can you set that up? It's at $HOME/Documents/GitHub/mcp-infra.",
+      "expected": "index-repo",
+      "kind": "positive",
+      "answer": "index-repo",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 63,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "index-repo-3",
+      "request": "Can you scan all my indexed projects for corrupted or stale entries and give me a plan for what to clean up before I approve anything?",
+      "expected": "index-repo",
+      "kind": "positive",
+      "answer": "index-repo",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 47,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "insecure-defaults-1",
+      "request": "Can you scan our backend for any environment variables that fall back to insecure default values if they're not set?",
+      "expected": "insecure-defaults",
+      "kind": "positive",
+      "answer": "insecure-defaults",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 36,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "insecure-defaults-2",
+      "request": "We're about to deploy a new auth service and I want to make sure there's nothing like a JWT secret or DB password that silently defaults to something weak instead of crashing on startup — can you check the codebase before we ship?",
+      "expected": "insecure-defaults",
+      "kind": "positive",
+      "answer": "insecure-defaults",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 73,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "insecure-defaults-3",
+      "request": "Before our next release, I need someone to go through the config and env handling code and flag anywhere the app would keep running with weak or missing security settings instead of refusing to start.",
+      "expected": "insecure-defaults",
+      "kind": "positive",
+      "answer": "insecure-defaults",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 57,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "interview-1",
+      "request": "Before I start executing this migration plan, can you poke holes in it and find what I'm missing?",
+      "expected": "interview",
+      "kind": "positive",
+      "answer": "interview",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 35,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "interview-2",
+      "request": "I just got a 9-step deployment plan from superplan for rolling out changes across our repos, but I want someone to really grill it for hidden assumptions and failure modes before we commit any changes — like what happens if step 4 fails halfway through, or if a step's output isn't what the next step expects.",
+      "expected": "interview",
+      "kind": "positive",
+      "answer": "interview",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 98,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "interview-3",
+      "request": "Can you stress-test this new architecture proposal I'm about to send to my team, checking for gaps, ordering issues, and things I might've missed, before I ship it?",
+      "expected": "interview",
+      "kind": "positive",
+      "answer": "interview",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 58,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "legacy-code-tdd-1",
+      "request": "I've inherited this 2000-line billing module with zero test coverage and need to refactor it without breaking anything—how should I approach adding tests first?",
+      "expected": "legacy-code-tdd",
+      "kind": "positive",
+      "answer": "legacy-code-tdd",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 52,
+        "output_tokens": 19,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "legacy-code-tdd-2",
+      "request": "We're building a new multi-service feature and I want to prove the whole stack—UI to database—works before fleshing out any real logic. What should the first slice look like?",
+      "expected": "legacy-code-tdd",
+      "kind": "positive",
+      "answer": "legacy-code-tdd",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 55,
+        "output_tokens": 19,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "legacy-code-tdd-3",
+      "request": "Our mutation testing tool reported a mutant as 'caught' and someone wants to delete the related guard clause because of it, but I'm suspicious the harness might be lying—can you help me verify this before we act on it?",
+      "expected": "legacy-code-tdd",
+      "kind": "positive",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 74,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "manifest-gen-1",
+      "request": "I just added a new skill under skills/ but there's no manifest.yaml for it — can you generate and fill one out?",
+      "expected": "manifest-gen",
+      "kind": "positive",
+      "answer": "manifest-gen",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 42,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "manifest-gen-2",
+      "request": "I'm onboarding a fresh machine, cloned the claude-config repo, and now I need manifests generated for all the skills, hooks, and rules plus the extended domains like MCP and Terraform before I commit anything.",
+      "expected": "manifest-gen",
+      "kind": "positive",
+      "answer": "manifest-gen",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 76,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "manifest-gen-3",
+      "request": "Our coverage check flagged a few hooks and rules missing structured metadata — can you produce the proper drafts, read through the source to fill in the real details, and make sure everything validates cleanly before we ship it?",
+      "expected": "manifest-gen",
+      "kind": "positive",
+      "answer": "manifest-gen",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 72,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "mega-capture-1",
+      "request": "We had a huge session that went through multiple auto-compactions before I ran /capture — I'm worried it only saw the tail end and missed the early architecture decisions. Can you recover the full session from the transcript file on disk and capture everything into the KB?",
+      "expected": "mega-capture",
+      "kind": "positive",
+      "answer": "mega-capture",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 84,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "mega-capture-2",
+      "request": "This session is 60MB with like 8 compaction boundaries, and I know there were rejected-alternative discussions and a debugging breakthrough way back at the start that probably got compacted out of context. I want the knowledge base to end up with entries for those too, not just whatever /capture can currently see.",
+      "expected": "mega-capture",
+      "kind": "positive",
+      "answer": "mega-capture",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 98,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "mega-capture-3",
+      "request": "My knowledge base entries from today's long session feel thin compared to how much strategy discussion actually happened — I suspect a bunch of decisions from earlier in the conversation never made it in because the context window dropped them. Can you go back through the raw session log and make sure every real theme gets captured, not just recent stuff?",
+      "expected": "mega-capture",
+      "kind": "positive",
+      "answer": "mega-capture",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 105,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "mega-distill-1",
+      "request": "My session hit auto-compaction and now /distill only seems to be looking at the tail end of the conversation — can you get it to actually diagnose the whole thing?",
+      "expected": "mega-distill",
+      "kind": "positive",
+      "answer": "mega-distill",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 56,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "mega-distill-2",
+      "request": "I've got a huge 60MB Claude transcript that's been compacted like 8 times, and I need the full arc reconstructed so a proper lessons-learned pass can run on the whole session, not just what's left in context.",
+      "expected": "mega-distill",
+      "kind": "positive",
+      "answer": "mega-distill",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 74,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "mega-distill-3",
+      "request": "I want a breadth-ranked view of recurring friction across my whole session history (like which mistakes keep showing up across many sessions), and then have the real fixes for the top ones actually written and shipped, not just a summary table.",
+      "expected": "mega-distill",
+      "kind": "positive",
+      "answer": "retrospective",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 75,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "modal-1",
+      "request": "I need to run a scoring function across 500 public benchmark queries in parallel and don't have the local compute for it. Can you set that up?",
+      "expected": "modal",
+      "kind": "positive",
+      "answer": "modal",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 48,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "modal-2",
+      "request": "I just had an LLM generate a proof-of-concept exploit script and I want to execute it to see if it works, but I really don't want it touching my actual machine — is there a safe way to run it?",
+      "expected": "modal",
+      "kind": "positive",
+      "answer": "modal",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 65,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "modal-3",
+      "request": "I've got an open-source embedding model I want to run inference with but my laptop has no GPU, and the eval job will take a couple hours so I need it to keep running even if I close my laptop.",
+      "expected": "modal",
+      "kind": "positive",
+      "answer": "modal",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 64,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "monitor-1",
+      "request": "Starting a big migration now — keep a running log of any wrong assumptions or gotchas as we go instead of me trying to remember them all later.",
+      "expected": "monitor",
+      "kind": "positive",
+      "answer": "monitor",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 50,
+        "output_tokens": 13,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "monitor-2",
+      "request": "We're about to run a long data-processing job across several phases, and last time we lost track of exactly what error string caused each fix. Can you write down each mistake and the exact error the moment it happens this time, not just at the end?",
+      "expected": "monitor",
+      "kind": "positive",
+      "answer": "monitor",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 72,
+        "output_tokens": 13,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "monitor-3",
+      "request": "Track anything we get wrong during this refactor as we hit it, and also jot down any interesting things we notice along the way even if nothing actually broke.",
+      "expected": "monitor",
+      "kind": "positive",
+      "answer": "monitor",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 52,
+        "output_tokens": 13,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "persona-1",
+      "request": "Our precision and recall on the retrieval eval have both plateaued for two sessions straight and I've spent the last hour digging with no progress — can you dispatch a batch of different analytical framings at this to surface something we're missing?",
+      "expected": "persona",
+      "kind": "positive",
+      "answer": "persona",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 77,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "persona-2",
+      "request": "We've been stuck at 0.89 F1 on a fixture for a while now, and the per-subset variance is way higher than the aggregate, but I honestly can't tell what dimension to even measure next. Can you run a wide multi-perspective analysis session on this and synthesize what themes come up?",
+      "expected": "persona",
+      "kind": "positive",
+      "answer": "persona",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 99,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "persona-3",
+      "request": "I want to re-verify that our known scaling-experiment finding still reproduces on a new model — set up a pre-registered scoring run against the fixture, dispatch the cohort, and report the inter-rater agreement so I know it's not just noise.",
+      "expected": "persona",
+      "kind": "positive",
+      "answer": "persona",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 83,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "plateau-diagnose-1",
+      "request": "Our precision has been stuck at 0.89 through the last three fix attempts and I have per-edge output from the harness — help me figure out what's actually going wrong.",
+      "expected": "plateau-diagnose",
+      "kind": "positive",
+      "answer": "plateau-diagnose",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 57,
+        "output_tokens": 18,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "plateau-diagnose-2",
+      "request": "We've tried tightening thresholds and tweaking the resolver twice now but recall@10 won't budge past 0.72. I have the full per-query results file from the last eval run, and failures seem to cluster differently across request types and payload sizes — can you help me actually pin down which combination is causing most of the misses, and make sure it's not just a bug in how we're measuring it before we go build a fix?",
+      "expected": "plateau-diagnose",
+      "kind": "positive",
+      "answer": "plateau-diagnose",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 130,
+        "output_tokens": 18,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "plateau-diagnose-3",
+      "request": "Latency p95 has plateaued despite two rounds of optimization and I suspect it varies by caller type and endpoint, but I want to be careful not to chase a fake pattern from bad sampling before we commit engineering time to a fix.",
+      "expected": "plateau-diagnose",
+      "kind": "positive",
+      "answer": "plateau-diagnose",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 81,
+        "output_tokens": 18,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "pr-fix-1",
+      "request": "Can you check across all our repos for PRs with broken CI and fix what's failing?",
+      "expected": "pr-fix",
+      "kind": "positive",
+      "answer": "pr-fix",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 32,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "pr-fix-2",
+      "request": "We've got a bunch of red checks piling up on open PRs in the org, plus I think main has some failed workflow runs from the last few days, and there are probably a ton of stale merged branches lying around too - can you sweep through everything, figure out what's actually broken vs already fixed, patch the real issues, and clean up the branch clutter?",
+      "expected": "pr-fix",
+      "kind": "positive",
+      "answer": "pr-fix",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 112,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "pr-fix-3",
+      "request": "I need someone to go through my repos, find where the build is actually broken, get it working again, and tidy up any old branches that shouldn't still be around.",
+      "expected": "pr-fix",
+      "kind": "positive",
+      "answer": "pr-fix",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 51,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "readiness-review-1",
+      "request": "We have a FastAPI tool a grad student vibe-coded that computes a risk score naval engineers might actually rely on. Can you tell me whether it's actually ready to hand off to them or if it's going to embarrass us?",
+      "expected": "readiness-review",
+      "kind": "positive",
+      "answer": "readiness-review",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 77,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "readiness-review-2",
+      "request": "This internal calculator gives plausible-looking numbers but nobody has ever checked them against anything independent, and I need someone to boot it up, run it against real data, and give me a straight go/no-go before we let a subject matter expert start trusting its output.",
+      "expected": "readiness-review",
+      "kind": "positive",
+      "answer": "readiness-review",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 84,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "readiness-review-3",
+      "request": "I need an honest assessment of whether our proof-of-concept CLI tool is production-ready — including whether the underlying math is even correct — not just a code read-through, before I hand it off to the domain expert who'll use it for real decisions.",
+      "expected": "readiness-review",
+      "kind": "positive",
+      "answer": "readiness-review",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 80,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "recall-1",
+      "request": "Did we already figure out how to fix the Windows console flashing issue with subprocess hooks? Pull up whatever we decided before.",
+      "expected": "recall",
+      "kind": "positive",
+      "answer": "recall",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 48,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "recall-2",
+      "request": "We're about to redo the OBO auth integration and I vaguely remember hitting some MSAL gotchas last time — can you dig up what we learned so we don't repeat the same mistakes?",
+      "expected": "recall",
+      "kind": "positive",
+      "answer": "recall",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 66,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "recall-3",
+      "request": "Before I start writing new Terraform CI config, check if there's anything in our past notes about pipeline patterns or gotchas we ran into.",
+      "expected": "recall",
+      "kind": "positive",
+      "answer": "recall",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 50,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "red-team-axes-1",
+      "request": "I've hit refusal on the shell.run and http.post sinks with three different prompts already — before I write this off as hardened, what should I try next?",
+      "expected": "red-team-axes",
+      "kind": "positive",
+      "answer": "refusal",
+      "stop_reason": "refusal",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 95,
+        "output_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "red-team-axes-2",
+      "request": "We've been red-teaming this agent for a week using the same jailbreak template and it keeps refusing the exfil sink, but I'm suspicious we're just testing one narrow angle over and over instead of actually proving it's safe — how do I check that properly and what other approaches should I bring in?",
+      "expected": "red-team-axes",
+      "kind": "positive",
+      "answer": "refusal",
+      "stop_reason": "refusal",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 142,
+        "output_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "red-team-axes-3",
+      "request": "I want to stop guessing at prompts and actually look at how the scoring/detection logic decides pass/fail so I can target the blind spots in our auth and logic checks, since our crash-based checker clearly isn't catching those bug classes.",
+      "expected": "red-team-axes",
+      "kind": "positive",
+      "answer": "refusal",
+      "stop_reason": "refusal",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 126,
+        "output_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "refine-1",
+      "request": "Clean up all the unused MCP configs in our shared repo before I forget.",
+      "expected": "refine",
+      "kind": "positive",
+      "answer": "none",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 30,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "refine-2",
+      "request": "I've got a vague task from my lead: 'audit our API rate limiting and compare it to what other teams do' — I don't have any specifics on data sources or what counts as done, can you flesh this out before we start?",
+      "expected": "refine",
+      "kind": "positive",
+      "answer": "refine",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 71,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "refine-3",
+      "request": "Before you dive in, can you fill in the missing details on what I meant and lay out the steps for 'reorganize the skills folder and get rid of anything stale'?",
+      "expected": "refine",
+      "kind": "positive",
+      "answer": "refine",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 57,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "retro-1",
+      "request": "We're wrapping up this session — pull out the lessons learned and write them up, then ship whatever we changed.",
+      "expected": "retro",
+      "kind": "positive",
+      "answer": "retro",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 40,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "retro-2",
+      "request": "This was a long debugging session with a bunch of dead ends before we found the ECS root cause. I want the mistakes turned into rules so we don't repeat them, and the architecture insight added to the knowledge base, and then get it all committed as a PR.",
+      "expected": "retro",
+      "kind": "positive",
+      "answer": "retro",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 84,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "retro-3",
+      "request": "Before I close this out, can you make sure anything worth remembering from today actually gets saved somewhere permanent instead of just living in this chat?",
+      "expected": "retro",
+      "kind": "positive",
+      "answer": "retro",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 50,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "retrospective-1",
+      "request": "Can you run a full retrospective on the last week of my work, covering all repos and sessions?",
+      "expected": "retrospective",
+      "kind": "positive",
+      "answer": "retrospective",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 34,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "retrospective-2",
+      "request": "It's been a rough couple days — lots of back-and-forth with the assistant, some PRs that needed follow-up fixes, and I want a real deep-dive into what happened across sessions, git history, and learning reports, not just a quick summary.",
+      "expected": "retrospective",
+      "kind": "positive",
+      "answer": "retrospective",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 82,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "retrospective-3",
+      "request": "I want to understand where my workflow is breaking down lately — which skills aren't being used right, which errors keep recurring, and whether the lessons we've captured are actually sticking — going back 10 days.",
+      "expected": "retrospective",
+      "kind": "positive",
+      "answer": "retrospective",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 68,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "review-depth-by-risk-1",
+      "request": "We're using subagent-driven development on this feature—how many reviewers should I dispatch for a change that touches our payment mutation code vs. a simple doc update?",
+      "expected": "review-depth-by-risk",
+      "kind": "positive",
+      "answer": "review-depth-by-risk",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 56,
+        "output_tokens": 19,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "review-depth-by-risk-2",
+      "request": "I've got three implementer agents finishing up different slices right now: one's a test-only refactor, one's a normal CRUD endpoint, and one touches our auth token validation logic. What review setup should I use for each before I merge them?",
+      "expected": "review-depth-by-risk",
+      "kind": "positive",
+      "answer": "review-depth-by-risk",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 77,
+        "output_tokens": 19,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "review-depth-by-risk-3",
+      "request": "Midway through this task the user just told me to drop half the planned work and only keep the API changes. I've got agents mid-flight touching files across both scopes—what do I do with the ones that are now out of bounds, and how do I avoid re-reviewing the same diff twice after the repair pass?",
+      "expected": "review-depth-by-risk",
+      "kind": "positive",
+      "answer": "review-depth-by-risk",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 96,
+        "output_tokens": 19,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "roundtable-1",
+      "request": "I've got a draft design doc for a new internal skill and I want three different frontier models to independently critique it, then cross-examine each other's findings before giving me a final verdict. Can you set that up?",
+      "expected": "roundtable",
+      "kind": "positive",
+      "answer": "roundtable",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 66,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "roundtable-2",
+      "request": "We're about to ship a security-sensitive auth redesign and I'm worried about blind spots in my own review — I have a 3000-word writeup with code excerpts ready. I want a multi-round adversarial review with a fabricated planted-error check to make sure the reviewers aren't just rubber-stamping each other, budget capped around $25.",
+      "expected": "roundtable",
+      "kind": "positive",
+      "answer": "roundtable",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 114,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "roundtable-3",
+      "request": "This RFC is subtle enough that I don't trust a single reviewer's judgment on it — can you get a few independent AI opinions, have them challenge each other's weakest points over a few rounds, and produce one consolidated report with confidence levels at the end?",
+      "expected": "roundtable",
+      "kind": "positive",
+      "answer": "roundtable",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 86,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "run-status-1",
+      "request": "What's the status of my background jobs right now?",
+      "expected": "run-status",
+      "kind": "positive",
+      "answer": "run-status",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 19,
+        "output_tokens": 13,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "run-status-2",
+      "request": "I kicked off that oracle-day16 judging run a couple hours ago and haven't checked back — can you tell me if it's finished, still going, or died somewhere?",
+      "expected": "run-status",
+      "kind": "positive",
+      "answer": "run-status",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 58,
+        "output_tokens": 13,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "run-status-3",
+      "request": "Can you check whether the render-deploy process actually finished or if it's just hanging without me having to ssh in and poll it manually?",
+      "expected": "run-status",
+      "kind": "positive",
+      "answer": "run-status",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 46,
+        "output_tokens": 13,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "sarif-parsing-1",
+      "request": "I've got a results.sarif from our CodeQL scan with 500+ findings and tons of duplicates — can you parse it and give me a deduped table grouped by rule?",
+      "expected": "sarif-parsing",
+      "kind": "positive",
+      "answer": "sarif-parsing",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 60,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "sarif-parsing-2",
+      "request": "We ran Semgrep and CodeQL on the same repo and want to merge the two output files into one report, matching up findings that both tools flagged so we're not double-counting.",
+      "expected": "sarif-parsing",
+      "kind": "positive",
+      "answer": "sarif-parsing",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 59,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "sarif-parsing-3",
+      "request": "Our CI job needs to compare today's scan output against last week's baseline and fail the build only if there are genuinely new security issues, ignoring ones that just moved because the file got reformatted.",
+      "expected": "sarif-parsing",
+      "kind": "positive",
+      "answer": "sarif-parsing",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 65,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "scout-1",
+      "request": "Can you scan the community for interesting Claude config repos and tell me which ones are actually worth adopting?",
+      "expected": "scout",
+      "kind": "positive",
+      "answer": "scout",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 39,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "scout-2",
+      "request": "I found a repo, https://github.com/someone/cool-hooks-setup, that claims to speed up token usage a lot — can you check it out, verify the claim isn't just hype, and tell me if it's worth pulling into our setup?",
+      "expected": "scout",
+      "kind": "positive",
+      "answer": "evaluate-repos",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 80,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "scout-3",
+      "request": "We haven't refreshed our list of external tooling/config repos in a while — go find new candidates, weed out the duplicates and junk, and give me a shortlist with pros/cons for the best ones.",
+      "expected": "scout",
+      "kind": "positive",
+      "answer": "scout",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 68,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "scout-frontier-1",
+      "request": "Our current code-graph relies on static AST traversal and keeps missing cross-language call edges — can you find fundamentally different approaches to code intelligence, not just better versions of graph traversal?",
+      "expected": "scout-frontier",
+      "kind": "positive",
+      "answer": "scout-frontier",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 67,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "scout-frontier-2",
+      "request": "We've been stuck with our OTel+Athena telemetry pipeline for years and it's slow at anomaly detection across 50M spans/day. I want to know what completely different storage or analysis paradigms — academic or industrial — exist that solve this differently, even if less mature, so I can pitch a spike to the team.",
+      "expected": "scout-frontier",
+      "kind": "positive",
+      "answer": "scout-frontier",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 106,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "scout-frontier-3",
+      "request": "I'm no longer the one maintaining our guardrail engine day-to-day and can't easily judge if a proposed rewrite is actually novel or just a rehash — go dig up genuinely different mechanisms from research and industry (even risky, early-stage ones) for solving the same rule-enforcement problem, and tell me how confident I should be in each.",
+      "expected": "scout-frontier",
+      "kind": "positive",
+      "answer": "scout-frontier",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 117,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "scout-skills-1",
+      "request": "Can you dig through the Context7 skills registry and see if there are any good patterns we should pull into our own skills setup?",
+      "expected": "scout-skills",
+      "kind": "positive",
+      "answer": "scout-skills",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 43,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "scout-skills-2",
+      "request": "We haven't refreshed our skill library in a while — go pull real SKILL.md examples from the registry, especially anything around observability, compare them against what we have, and tell me what's worth adopting vs just skip.",
+      "expected": "scout-skills",
+      "kind": "positive",
+      "answer": "scout-skills",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 72,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "scout-skills-3",
+      "request": "I want to make sure we're not missing useful conventions other teams are using in their agent skill files — go find some, read the actual source files, and figure out where in our setup each idea would actually belong before changing anything.",
+      "expected": "scout-skills",
+      "kind": "positive",
+      "answer": "scout-skills",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 69,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "search-axis-rotate-1",
+      "request": "I've rewritten this jailbreak prompt like 10 different ways and it still gets refused every time — feels like I've hit a wall, what should I try next?",
+      "expected": "search-axis-rotate",
+      "kind": "positive",
+      "answer": "red-team-axes",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 55,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "search-axis-rotate-2",
+      "request": "We've been tuning hyperparameters for two weeks and our recall metric hasn't budged in the last four experiments. I have a list of everything we changed — can you help me figure out if we're actually stuck or just hammering the wrong knob?",
+      "expected": "search-axis-rotate",
+      "kind": "positive",
+      "answer": "plateau-diagnose",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 81,
+        "output_tokens": 18,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "search-axis-rotate-3",
+      "request": "My fuzzing campaign keeps generating the same style of test case and coverage flatlined — before I conclude the target is unbreakable, help me figure out what I haven't actually tried yet.",
+      "expected": "search-axis-rotate",
+      "kind": "positive",
+      "answer": "search-axis-rotate",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 66,
+        "output_tokens": 18,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "search-campaign-1",
+      "request": "We've been stuck at 18 confirmed cells for two rounds and the model keeps refusing on this quadrant — I don't want to just call it done, help me set up the next wave properly.",
+      "expected": "search-campaign",
+      "kind": "positive",
+      "answer": "refusal",
+      "stop_reason": "refusal",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 109,
+        "output_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "search-campaign-2",
+      "request": "I'm running a red-team style campaign against a sealed target with no scoring feedback, generating candidates with a few designer prompts and evaluating with two different judges. Can you help me structure this as a large parallel loop — generation, sharded evaluation, tracking coverage over time, and rotating to new angles when one dries up — instead of me just running things serially and guessing when we're 'done'?",
+      "expected": "search-campaign",
+      "kind": "positive",
+      "answer": "search-campaign",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 129,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "search-campaign-3",
+      "request": "Set up a big adversarial search run for me: multiple generation strategies fanning out at once, a scorer running across several shards instead of one slow loop, a log/dashboard that actually records progress with timestamps, and a plan for what to do when an approach plateaus so we don't just stop and call it maxed out.",
+      "expected": "search-campaign",
+      "kind": "positive",
+      "answer": "search-campaign",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 103,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "semgrep-1",
+      "request": "Can you run a Semgrep security scan on this repo before we push to prod?",
+      "expected": "semgrep",
+      "kind": "positive",
+      "answer": "semgrep",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 30,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "semgrep-2",
+      "request": "Our monorepo has both Python and TS services and I want a full static analysis pass to catch vulnerabilities before code review, findings should include third-party rulesets too, output somewhere I can review later.",
+      "expected": "semgrep",
+      "kind": "positive",
+      "answer": "semgrep",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 68,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "semgrep-3",
+      "request": "I need a quick first-pass check for known bug patterns across the codebase, just show me the high-confidence security issues, not every style nitpick.",
+      "expected": "semgrep",
+      "kind": "positive",
+      "answer": "semgrep",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 50,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "semgrep-rule-creator-1",
+      "request": "We need a Semgrep rule that flags any use of eval() with user-controlled input in our Python codebase, with proper tests so it doesn't false-positive on safe literals.",
+      "expected": "semgrep-rule-creator",
+      "kind": "positive",
+      "answer": "semgrep-rule-creator",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 61,
+        "output_tokens": 20,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "semgrep-rule-creator-2",
+      "request": "Our security team found we're building shell commands with unsanitized request params passed to os.system, and I want to write a custom static analysis rule so CI catches this pattern going forward, including test cases for both vulnerable and sanitized code.",
+      "expected": "semgrep-rule-creator",
+      "kind": "positive",
+      "answer": "semgrep-rule-creator",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 78,
+        "output_tokens": 20,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "semgrep-rule-creator-3",
+      "request": "Can you help me set up a check that flags any of our internal API route handlers that don't have the auth decorator applied, so we catch missing authentication before merge?",
+      "expected": "semgrep-rule-creator",
+      "kind": "positive",
+      "answer": "semgrep-rule-creator",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 54,
+        "output_tokens": 20,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "service-review-1",
+      "request": "Can you actually spin up our FastAPI backend and hammer it with bad inputs before we ship, not just read through the code?",
+      "expected": "service-review",
+      "kind": "positive",
+      "answer": "service-review",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 45,
+        "output_tokens": 13,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "service-review-2",
+      "request": "We're about to demo this API to a customer next week. I want you to boot it locally, run the real upload/process/export flow with an actual sample file, and throw junk/malformed/empty requests at every endpoint to see what actually breaks vs what just looks fine in the source.",
+      "expected": "service-review",
+      "kind": "positive",
+      "answer": "service-review",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 90,
+        "output_tokens": 13,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "service-review-3",
+      "request": "Our upload endpoint returned 200 on a garbage file and then blew up two steps later downstream — I need a full pass checking that every route actually rejects bad data properly at runtime, plus a prioritized list of what's broken, no fixes yet.",
+      "expected": "service-review",
+      "kind": "positive",
+      "answer": "service-review",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 85,
+        "output_tokens": 13,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "sharp-edges-1",
+      "request": "Can you audit our internal auth library's public API to see if there are ways developers could accidentally misuse it and end up with insecure code?",
+      "expected": "sharp-edges",
+      "kind": "positive",
+      "answer": "sharp-edges",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 47,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "sharp-edges-2",
+      "request": "I'm designing a config schema for our new session management service and I want to make sure a typo or missing field can't accidentally disable security checks in production - can you review it?",
+      "expected": "sharp-edges",
+      "kind": "positive",
+      "answer": "sharp-edges",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 54,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "sharp-edges-3",
+      "request": "We have a function that takes a 'hash_type' string param and passes it straight to a generic hash function - I'm worried someone could pass in something weak like md5, can you take a look at how safe this interface is?",
+      "expected": "sharp-edges",
+      "kind": "positive",
+      "answer": "sharp-edges",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 69,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "ship-1",
+      "request": "Ship everything I've got pending — commit, push, and get it merged.",
+      "expected": "ship",
+      "kind": "positive",
+      "answer": "ship",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 28,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "ship-2",
+      "request": "I just finished fixing the audit threshold bug, tests pass locally, can you commit this with a proper message, open a PR, and make sure it actually merges?",
+      "expected": "ship",
+      "kind": "positive",
+      "answer": "ship",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 55,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "ship-3",
+      "request": "Can you get my uncommitted changes onto main through a proper PR flow, checking CI before it lands?",
+      "expected": "ship",
+      "kind": "positive",
+      "answer": "ship",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 39,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "ship-hook-1",
+      "request": "Can you go ahead and install the staged-additions-guard hook spec?",
+      "expected": "ship-hook",
+      "kind": "positive",
+      "answer": "ship-hook",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 29,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "ship-hook-2",
+      "request": "Distill just generated a bunch of staged hook specs from my recent lessons — I want to pick one from the list and get it actually wired into settings.json with a test run before I trust it.",
+      "expected": "ship-hook",
+      "kind": "positive",
+      "answer": "ship-hook",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 62,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "ship-hook-3",
+      "request": "I've got a pending enforcement idea sitting in the hooks staging folder that never got turned into a real script — can you turn it into an actual working hook, register it, and clean up the leftover file once it passes?",
+      "expected": "ship-hook",
+      "kind": "positive",
+      "answer": "ship-hook",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 70,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "supergoal-1",
+      "request": "I have a superplan file with a Demo line, falsifiers, and metric commands already written — kick off the autonomous loop to drive it to completion overnight and stop cleanly at whatever budget makes sense for the effort listed.",
+      "expected": "supergoal",
+      "kind": "positive",
+      "answer": "supergoal",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 78,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "supergoal-2",
+      "request": "Last time I tried the built-in /goal loop it kept declaring success even though the eval was just judging conversation text, not actually running my test suite — I need a version that runs real commands between turns to verify progress and halts if a falsifier condition triggers, with a headless invocation I can run via claude -p.",
+      "expected": "supergoal",
+      "kind": "positive",
+      "answer": "supergoal",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 100,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "supergoal-3",
+      "request": "Can you take this plan doc I generated and set up a bounded, unattended run against it — parse out the metric and guard commands, check if I've tried this same fix before, allocate a turn/wallclock budget, and write up a summary doc explaining why it stopped whenever it's done?",
+      "expected": "supergoal",
+      "kind": "positive",
+      "answer": "supergoal",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 94,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "supergoal-pause-1",
+      "request": "Pause the active supergoal loop, I need to look at the intermediate state before doing anything else.",
+      "expected": "supergoal-pause",
+      "kind": "positive",
+      "answer": "supergoal-pause",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 36,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "supergoal-pause-2",
+      "request": "My supergoal agent has been running for a while and I want to freeze it mid-arc to review its plan without losing lineage or wasting wallclock time — how do I halt it cleanly instead of just killing the process?",
+      "expected": "supergoal-pause",
+      "kind": "positive",
+      "answer": "supergoal-pause",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 72,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "supergoal-pause-3",
+      "request": "Can you stop the current autonomous run temporarily so I can inspect its progress, and keep it stopped until I explicitly tell it to continue?",
+      "expected": "supergoal-pause",
+      "kind": "positive",
+      "answer": "supergoal-pause",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 52,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "supergoal-resume-1",
+      "request": "I paused the supergoal loop earlier, can you get it going again from where it left off?",
+      "expected": "supergoal-resume",
+      "kind": "positive",
+      "answer": "supergoal-resume",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 32,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "supergoal-resume-2",
+      "request": "I stepped away from my fix-flaky plan run mid-loop and paused it, and now I want to pick back up without losing my turn budget or wallclock progress — can you get it back into running state and tell me the current stats?",
+      "expected": "supergoal-resume",
+      "kind": "positive",
+      "answer": "supergoal-resume",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 74,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "supergoal-resume-3",
+      "request": "Unpause my automated task loop and give me a status update on turns used, blocks, and last verified time.",
+      "expected": "supergoal-resume",
+      "kind": "positive",
+      "answer": "supergoal-resume",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 37,
+        "output_tokens": 17,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "superplan-1",
+      "request": "I need a full implementation plan for wiring our new MCP tool into the agent orchestration layer, and I want it to pull in whatever we already know from agent memory and past gotchas before you propose steps.",
+      "expected": "superplan",
+      "kind": "positive",
+      "answer": "superplan",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 69,
+        "output_tokens": 13,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "superplan-2",
+      "request": "We tried something like this last quarter and hit some weird issues with one of our MCP tools that I don't fully remember the details of — can you check what our knowledge base and topic files say about it, figure out what's actually feasible given our current tooling, and then lay out a plan for rebuilding the integration properly this time?",
+      "expected": "superplan",
+      "kind": "positive",
+      "answer": "superplan",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 102,
+        "output_tokens": 13,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "superplan-3",
+      "request": "Before we start coding the new agent workflow, can you first check what's already documented about our setup, confirm the tools and functions we're planning to use actually exist and work the way we think, and then give me a concrete step-by-step plan with a clear execution path at the end?",
+      "expected": "superplan",
+      "kind": "positive",
+      "answer": "superplan",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 86,
+        "output_tokens": 13,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "superplan-loop-1",
+      "request": "Can you set up a recurring check every 10 minutes that just reports the status of my current supergoal run and flags if it stalls?",
+      "expected": "superplan-loop",
+      "kind": "positive",
+      "answer": "superplan-loop",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 46,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "superplan-loop-2",
+      "request": "I've got a long-running supergoal task going in another window and I want to keep an eye on it without interrupting it — can you check its progress every 5 minutes and warn me if it's burning through the time budget or stuck?",
+      "expected": "superplan-loop",
+      "kind": "positive",
+      "answer": "superplan-loop",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 72,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "superplan-loop-3",
+      "request": "Please watch my in-progress plan periodically and let me know if it looks like it's not making progress or if we're getting close to running out of time, but don't touch or restart anything.",
+      "expected": "superplan-loop",
+      "kind": "positive",
+      "answer": "superplan-loop",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 59,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "superplan-status-1",
+      "request": "What's the current status of my active supergoal loop?",
+      "expected": "superplan-status",
+      "kind": "positive",
+      "answer": "superplan-status",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 21,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "superplan-status-2",
+      "request": "I kicked off a supergoal run on the flaky-test plan a while ago and haven't checked in since — can you tell me how many turns it's used, whether it's stuck, and what the last few decisions were, without stopping it?",
+      "expected": "superplan-status",
+      "kind": "positive",
+      "answer": "superplan-status",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 76,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "superplan-status-3",
+      "request": "Can you peek at how far along the automated plan runner is and whether it's making progress, without interrupting anything?",
+      "expected": "superplan-status",
+      "kind": "positive",
+      "answer": "superplan-status",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 40,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "threat-model-1",
+      "request": "Can you put together a threat model for this repo — trust boundaries, attack surfaces, mitigations, the whole picture?",
+      "expected": "threat-model",
+      "kind": "positive",
+      "answer": "threat-model",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 45,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "threat-model-2",
+      "request": "We just added an MCP server component to our codebase and I need a document describing where the trust boundaries are, what data an attacker could touch, and how severe each risk is, without any fix suggestions — just the current state.",
+      "expected": "threat-model",
+      "kind": "positive",
+      "answer": "threat-model",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 70,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "threat-model-3",
+      "request": "I need to understand our system's attack surface and risk severity for a security review, including what assets are exposed and what protections already exist in the code, before we bring in an auditor.",
+      "expected": "threat-model",
+      "kind": "positive",
+      "answer": "threat-model",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 57,
+        "output_tokens": 14,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "triage-1",
+      "request": "Can you triage our CrowdStrike critical alerts from the last 24 hours and tell me what actually needs action?",
+      "expected": "triage",
+      "kind": "positive",
+      "answer": "triage",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 43,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "triage-2",
+      "request": "We've got a pile of unresolved findings across Tenable, Graph, and CrowdStrike from overnight scans — I need them ranked by real risk to our environment, cross-checked against known false positives, and a report on what to fix vs monitor vs ignore.",
+      "expected": "triage",
+      "kind": "positive",
+      "answer": "triage",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 89,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "triage-3",
+      "request": "I have a bunch of stale Linear issues and flagged security items piling up and no clear sense of what's urgent — can you sort through them, score how bad each one really is, and give me a prioritized action list?",
+      "expected": "triage",
+      "kind": "positive",
+      "answer": "triage",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 69,
+        "output_tokens": 12,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "validate-changes-1",
+      "request": "I just edited three SKILL.md files and a hook — can you run full validation before I merge this?",
+      "expected": "validate-changes",
+      "kind": "positive",
+      "answer": "validate-changes",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 35,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "validate-changes-2",
+      "request": "I tweaked the bash-security-guard.py hook to catch a new dangerous pattern, but I'm worried I might have broken the existing clean-command handling. Can you check both the new catch and make sure nothing else regressed, then tell me if it's ready to ship?",
+      "expected": "validate-changes",
+      "kind": "positive",
+      "answer": "validate-changes",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 91,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "validate-changes-3",
+      "request": "I strengthened the wording in one of my rules files — need to confirm it still triggers correctly on relevant scenarios and doesn't fire when it shouldn't before I commit.",
+      "expected": "validate-changes",
+      "kind": "positive",
+      "answer": "validate-changes",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 62,
+        "output_tokens": 15,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "variant-analysis-1",
+      "request": "We found a SQL injection in api/users.py where a raw query gets user input concatenated in. Can you help me search the whole codebase for other places that build queries the same unsafe way?",
+      "expected": "variant-analysis",
+      "kind": "positive",
+      "answer": "variant-analysis",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 62,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "variant-analysis-2",
+      "request": "I just confirmed an auth bypass caused by an inverted conditional in a permission check. I want to systematically find every other spot in the repo where the same logic mistake might exist, including related checks like isActive or isAdmin, and rank them by how likely they're exploitable.",
+      "expected": "variant-analysis",
+      "kind": "positive",
+      "answer": "variant-analysis",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 91,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "variant-analysis-3",
+      "request": "There's a known XSS bug from unescaped user input hitting innerHTML in one component — can you build a search pattern starting narrow, then loosen it to catch similar sinks elsewhere in the frontend without pulling in too many false positives?",
+      "expected": "variant-analysis",
+      "kind": "positive",
+      "answer": "variant-analysis",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 82,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "verify-search-result-1",
+      "request": "The code-graph says authenticate_user calls check_permissions with a suffix_match resolution and 0.6 confidence — can you confirm that call actually happens by reading the source before I put it in the audit?",
+      "expected": "verify-search-result",
+      "kind": "positive",
+      "answer": "verify-search-result",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 70,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "verify-search-result-2",
+      "request": "Our semantic search for 'CSRF protection entrypoints' returned three hits, one in middleware/csrf.rs and two in utils/http.rs. I need each one checked against the actual code so I don't cite a false match in the pentest report.",
+      "expected": "verify-search-result",
+      "kind": "positive",
+      "answer": "verify-search-result",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 83,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "verify-search-result-3",
+      "request": "I've got a localization tool's top 5 guesses for where admin role checks happen, but I don't trust them blindly — before I write these into the access-control findings, go read each file and tell me whether the check is real functional code or just a stray mention of 'admin'.",
+      "expected": "verify-search-result",
+      "kind": "positive",
+      "answer": "verify-search-result",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 86,
+        "output_tokens": 16,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "work-1",
+      "request": "I need to start working on the mcp-servers repo but I think another Claude session might already be poking around in there — set me up so we don't collide.",
+      "expected": "work",
+      "kind": "positive",
+      "answer": "work",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 48,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "work-2",
+      "request": "I just got that empty-push warning while trying to push to code-graph, and I suspect it's because another session moved HEAD out from under me. Can you get me a clean isolated spot to work from before I start committing again?",
+      "expected": "work",
+      "kind": "positive",
+      "answer": "work",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 71,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    },
+    {
+      "id": "work-3",
+      "request": "Before I dive into a multi-commit feature in the knowledge-base repo, give me my own separate branch and working directory so nothing I do interferes with anyone else's session.",
+      "expected": "work",
+      "kind": "positive",
+      "answer": "work",
+      "stop_reason": "end_turn",
+      "model": "claude-fable-5-1",
+      "usage": {
+        "input_tokens": 60,
+        "output_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21346
+      }
+    }
+  ],
+  "report": {
+    "per_skill": {
+      "absorb": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "agentic-actions-auditor": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "api-guardrails": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "api-ingest": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "api-preflight": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "audit-fix": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "audit-skill": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "build-measurement-harness": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "bulk-api-script": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "capture": {
+        "positives": 3,
+        "hits": 2,
+        "recall": 0.6666666666666666,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "code-explore": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "codebase-memory-exploring": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "codebase-memory-quality": {
+        "positives": 3,
+        "hits": 2,
+        "recall": 0.6666666666666666,
+        "to_none": 1,
+        "refused": 0,
+        "captured": 0
+      },
+      "codebase-memory-tracing": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "codeql": {
+        "positives": 3,
+        "hits": 2,
+        "recall": 0.6666666666666666,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "context-budget": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "debugging-hypotheses": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "deep-dive": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "design-evidence-first": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "differential-review": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "distill": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "evaluate-repos": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 1
+      },
+      "fp-check": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "garden": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "gather-claude": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "gather-claude-endpoints": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "gather-intel": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "gather-openai-endpoints": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "gather-repos": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "gather-research": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "gather-vendor": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "harness-prune": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "healthcheck": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "index-repo": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "insecure-defaults": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "interview": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "legacy-code-tdd": {
+        "positives": 3,
+        "hits": 2,
+        "recall": 0.6666666666666666,
+        "to_none": 1,
+        "refused": 0,
+        "captured": 0
+      },
+      "manifest-gen": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "mega-capture": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "mega-distill": {
+        "positives": 3,
+        "hits": 2,
+        "recall": 0.6666666666666666,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "modal": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "monitor": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "persona": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "plateau-diagnose": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 1
+      },
+      "pr-fix": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "readiness-review": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "recall": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "red-team-axes": {
+        "positives": 3,
+        "hits": 0,
+        "recall": 0.0,
+        "to_none": 0,
+        "refused": 3,
+        "captured": 1
+      },
+      "refine": {
+        "positives": 3,
+        "hits": 2,
+        "recall": 0.6666666666666666,
+        "to_none": 1,
+        "refused": 0,
+        "captured": 0
+      },
+      "retro": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 1
+      },
+      "retrospective": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 1
+      },
+      "review-depth-by-risk": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "roundtable": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "run-status": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "sarif-parsing": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "scout": {
+        "positives": 3,
+        "hits": 2,
+        "recall": 0.6666666666666666,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "scout-frontier": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "scout-skills": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "search-axis-rotate": {
+        "positives": 3,
+        "hits": 1,
+        "recall": 0.3333333333333333,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "search-campaign": {
+        "positives": 3,
+        "hits": 2,
+        "recall": 0.6666666666666666,
+        "to_none": 0,
+        "refused": 1,
+        "captured": 0
+      },
+      "semgrep": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 1
+      },
+      "semgrep-rule-creator": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "service-review": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "sharp-edges": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "ship": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "ship-hook": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "supergoal": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "supergoal-pause": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "supergoal-resume": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "superplan": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "superplan-loop": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "superplan-status": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "threat-model": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "triage": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "validate-changes": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "variant-analysis": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "verify-search-result": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      },
+      "work": {
+        "positives": 3,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
+        "refused": 0,
+        "captured": 0
+      }
+    },
+    "confusion": [
+      {
+        "expected": "capture",
+        "got": "retro",
+        "count": 1
+      },
+      {
+        "expected": "codeql",
+        "got": "semgrep",
+        "count": 1
+      },
+      {
+        "expected": "mega-distill",
+        "got": "retrospective",
+        "count": 1
+      },
+      {
+        "expected": "scout",
+        "got": "evaluate-repos",
+        "count": 1
+      },
+      {
+        "expected": "search-axis-rotate",
+        "got": "plateau-diagnose",
+        "count": 1
+      },
+      {
+        "expected": "search-axis-rotate",
+        "got": "red-team-axes",
+        "count": 1
+      }
+    ],
+    "false_fire": {
+      "negatives": 30,
+      "fired": 0,
+      "rate": 0.0,
+      "fired_items": []
+    },
+    "misses": [
+      {
+        "id": "capture-2",
+        "expected": "capture",
+        "got": "retro",
+        "request": "I want to wrap up this session by writing what we learned about the gateway retry logic into a topic page and getting a PR opened for it, following the usual git flow with auto-merge.",
+        "category": null
+      },
+      {
+        "id": "codebase-memory-quality-3",
+        "expected": "codebase-memory-quality",
+        "got": "none",
+        "request": "I want to know if there are files in our codebase that always get modified together even though they live in totally different folders, since that might mean there's some hidden dependency we don't know about.",
+        "category": null
+      },
+      {
+        "id": "codeql-2",
+        "expected": "codeql",
+        "got": "semgrep",
+        "request": "We just added a bunch of new Go microservices plus GitHub Actions workflows to our repo, and I want a thorough vulnerability audit covering both the code and the CI pipelines before our release next week.",
+        "category": null
+      },
+      {
+        "id": "legacy-code-tdd-3",
+        "expected": "legacy-code-tdd",
+        "got": "none",
+        "request": "Our mutation testing tool reported a mutant as 'caught' and someone wants to delete the related guard clause because of it, but I'm suspicious the harness might be lying—can you help me verify this before we act on it?",
+        "category": null
+      },
+      {
+        "id": "mega-distill-3",
+        "expected": "mega-distill",
+        "got": "retrospective",
+        "request": "I want a breadth-ranked view of recurring friction across my whole session history (like which mistakes keep showing up across many sessions), and then have the real fixes for the top ones actually written and shipped, not just a summary table.",
+        "category": null
+      },
+      {
+        "id": "red-team-axes-1",
+        "expected": "red-team-axes",
+        "got": "refusal",
+        "request": "I've hit refusal on the shell.run and http.post sinks with three different prompts already — before I write this off as hardened, what should I try next?",
+        "category": null
+      },
+      {
+        "id": "red-team-axes-2",
+        "expected": "red-team-axes",
+        "got": "refusal",
+        "request": "We've been red-teaming this agent for a week using the same jailbreak template and it keeps refusing the exfil sink, but I'm suspicious we're just testing one narrow angle over and over instead of actually proving it's safe — how do I check that properly and what other approaches should I bring in?",
+        "category": null
+      },
+      {
+        "id": "red-team-axes-3",
+        "expected": "red-team-axes",
+        "got": "refusal",
+        "request": "I want to stop guessing at prompts and actually look at how the scoring/detection logic decides pass/fail so I can target the blind spots in our auth and logic checks, since our crash-based checker clearly isn't catching those bug classes.",
+        "category": null
+      },
+      {
+        "id": "refine-1",
+        "expected": "refine",
+        "got": "none",
+        "request": "Clean up all the unused MCP configs in our shared repo before I forget.",
+        "category": null
+      },
+      {
+        "id": "scout-2",
+        "expected": "scout",
+        "got": "evaluate-repos",
+        "request": "I found a repo, https://github.com/someone/cool-hooks-setup, that claims to speed up token usage a lot — can you check it out, verify the claim isn't just hype, and tell me if it's worth pulling into our setup?",
+        "category": null
+      },
+      {
+        "id": "search-axis-rotate-1",
+        "expected": "search-axis-rotate",
+        "got": "red-team-axes",
+        "request": "I've rewritten this jailbreak prompt like 10 different ways and it still gets refused every time — feels like I've hit a wall, what should I try next?",
+        "category": null
+      },
+      {
+        "id": "search-axis-rotate-2",
+        "expected": "search-axis-rotate",
+        "got": "plateau-diagnose",
+        "request": "We've been tuning hyperparameters for two weeks and our recall metric hasn't budged in the last four experiments. I have a list of everything we changed — can you help me figure out if we're actually stuck or just hammering the wrong knob?",
+        "category": null
+      },
+      {
+        "id": "search-campaign-1",
+        "expected": "search-campaign",
+        "got": "refusal",
+        "request": "We've been stuck at 18 confirmed cells for two rounds and the model keeps refusing on this quadrant — I don't want to just call it done, help me set up the next wave properly.",
+        "category": null
+      }
+    ],
+    "overall": {
+      "skills": 78,
+      "positives": 234,
+      "hits": 221,
+      "micro_recall": 0.9444444444444444,
+      "macro_recall": 0.9444444444444444,
+      "negatives": 30,
+      "false_fire_rate": 0.0,
+      "refusals": 4,
+      "errors": 0,
+      "skills_never_hit": [
+        "red-team-axes"
+      ],
+      "skills_without_positives": [],
+      "skills_capturing_foreign": [
+        [
+          "evaluate-repos",
+          1
+        ],
+        [
+          "plateau-diagnose",
+          1
+        ],
+        [
+          "red-team-axes",
+          1
+        ],
+        [
+          "retro",
+          1
+        ],
+        [
+          "retrospective",
+          1
+        ],
+        [
+          "semgrep",
+          1
+        ]
+      ]
+    }
+  }
+}
