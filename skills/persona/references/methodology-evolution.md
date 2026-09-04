@@ -320,7 +320,8 @@ the full P0-P3 list and the v1+v2 META_SYNTHESIS docs.
   fixed in this pass.)
 - **Three sessions in a row, the contingency-table failure cell turned
   out to be an instrument bug** — promoted to a Tier-1 ambient rule
-  `~/.claude/rules/verify-instrument-before-fix.md`, distinct from
+  `~/.claude/rules/verify-instrument-before-fix.md` (folded into
+  `verify-effectiveness.md` on 2026-09-03), distinct from
   /plateau-diagnose's Step 6 so the discipline fires regardless of
   skill invocation.
 
@@ -338,7 +339,7 @@ the full P0-P3 list and the v1+v2 META_SYNTHESIS docs.
 | P3 #13 _parse_error skip | `scripts/dispatch.py` (rubric loop) | LLM-judge cache only skipped when judgment has rc1+ keys AND no `_parse_error` |
 | P3 #14 INDEX.md locking | `scripts/dispatch.py` (`update_index`) | Sidecar `O_CREAT\|O_EXCL` lock with 10s wait + 100ms backoff |
 | /plateau-diagnose Step 1 optional | `skills/plateau-diagnose/SKILL.md` | Step 1 marked OPTIONAL; recipe stands on Steps 2-6 alone |
-| Tier-1 verify-instrument rule | `~/.claude/rules/verify-instrument-before-fix.md` (new) | Fires regardless of /plateau-diagnose invocation |
+| Tier-1 verify-instrument rule | `~/.claude/rules/verify-effectiveness.md` (instrument-first gate; its own rule until 2026-09-03) | Fires regardless of /plateau-diagnose invocation |
 
 **Implication for skill — DEFERRED with documented runbooks**:
 
@@ -362,7 +363,7 @@ the full P0-P3 list and the v1+v2 META_SYNTHESIS docs.
 **Captured in**: `scripts/dispatch.py`, `scripts/parse_inventory.py`,
 `SKILL.md`, `references/meta-mode.md`,
 `~/.claude/skills/plateau-diagnose/SKILL.md`,
-`~/.claude/rules/verify-instrument-before-fix.md`, this entry,
+`~/.claude/rules/verify-effectiveness.md`, this entry,
 `references/_runbook-deferred.md` (new).
 
 ---

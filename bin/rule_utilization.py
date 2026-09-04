@@ -85,14 +85,10 @@ DETECTORS: dict[str, Detector] = {
 # Activity-scoped rules with no defensible action signature. Listed so the gap is
 # explicit rather than silently omitted.
 NO_DETECTOR = [
-    ("uncharted-vs-refuted", "claim assessment with sparse literature"),
-    ("best-in-class-for-cross-model", "cross-model validation task"),
     ("eval-shipping-discipline", "eval / judge work"),
     ("security-critical-search-verification", "security-critical search claim"),
-    ("verify-instrument-before-fix", "dominant-failure-cell analysis"),
     ("red-team-rubric-discipline", "red-team / severity assessment"),
     ("outcome-over-verification", "reporting an outcome"),
-    ("complete-the-whole-instruction", "multi-part instruction"),
     ("symmetric-evidentiary-burden", "audit / refutation"),
     ("compare-by-need", "comparison / worth-adopting"),
     ("reproduce-before-optimize", "empirical task w/ known reference"),

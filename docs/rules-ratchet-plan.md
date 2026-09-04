@@ -154,6 +154,26 @@ to review.
   Below the bar; handled in step 2/5 as a pointer, not here.
 - No rule bytes changed; no ledger row. The ledger records byte changes, not measurements.
 
+## Executed 2026-09-03 on `feat/rules-ratchet-step1`: the four whole-rule deletions
+
+| Deleted | B | Sentences no surviving rule stated, and where they went | Net ledger row |
+|---|---:|---|---:|
+| uncharted-vs-refuted | 8,255 | unqueried first-party surface is not UNCHARTED; absence claim needs every surface; world-vs-literature claims; out-of-era sources → symmetric-evidentiary-burden (+1,192) | −7,063 |
+| best-in-class-for-cross-model | 6,838 | every cross-model arm is its vendor's flagship; never downgrade silently; state model id and tier → eval-shipping-discipline rater gates (+739) and `_shared/model-runtime-policy.md` item 7 | −6,099 |
+| verify-instrument-before-fix | 4,661 | dominant-cell gate; comparable measurement; verify the verifier; code younger than the failure; UNKNOWN over proxy; gate plumbing → verify-effectiveness "Instruments and measurements" (+1,312) | −3,349 |
+| complete-the-whole-instruction | 3,856 | hardest part first, no silent "next", design docs before planning; named-artifact format contract → scope-discipline checks 1 and 6 (+743) | −3,113 |
+
+Ambient 198,971 → 179,347 B (−19,624); 33 rule files, 267,927 B. Requirers repointed:
+11 skill `requires_rules` entries and 2 skill `enforces` entries (uncharted → symmetric),
+`bin/rule_relocation_pilot.py` and `bin/rule_utilization.py` owner sets,
+`scripts/test_rule_relocation_pilot.py`, `hooks/judgment-rules.json`, and 39 prose
+pointers across 31 skill and reference files. Dated incident narratives and the roundtable
+gold fixture keep the old names as historical records. The manifest gap was closed:
+`worktree-enforcement.yaml` now lists `worktree-by-default`, so its edge derives.
+Oracle: 1,823 literals recorded before; after, every literal outside the four deleted
+files is present, and the deleted files' remainder was dropped file-by-file with the
+reasons above.
+
 ## Next eight, by expected bytes freed per unit of judgment
 
 1. **platform-constraints.md** 16,526 → ~3,500 — 78% dated narrative (12,934 B), 14 incidents anchors already exist, five hooks cover its guard, encoding and secret lines.

@@ -157,7 +157,7 @@ data cited, no falsifier.
 This rule pairs with:
   - `verify-effectiveness.md` (validate-to-improve checklist; bootstrap CI
     is the rigor under "thresholds/heuristics" question)
-  - `verify-instrument-before-fix.md` (verify the harness produces correct
+  - `verify-effectiveness.md` "Verify the instrument before fixing the subject" (verify the harness produces correct
     per-query data before trusting its CI)
   - `compare-by-need.md` (recommendation step requires evidence; bootstrap
     CI is the form that evidence takes for ranking metrics)

@@ -370,7 +370,7 @@ FAILURE stale_metric_cited_without_freshness_stamp:
 
 # ─── INTEGRATION WITH OTHER RULES ───
 
-- `verify-instrument-before-fix.md` — "baselines decay between authoring
+- `verify-effectiveness.md` ("Verify the instrument before fixing the subject"; its own rule until 2026-09-03) — "baselines decay between authoring
   and execution" is the parent failure mode. This rule is the
   grading-output-side specialization.
 - `red-team-rubric-discipline.md` — multi-mode artifacts need explicit

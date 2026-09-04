@@ -155,7 +155,6 @@ to `verify_skip.py`, and as routing-decision starting points.
 - `skills/debugging-hypotheses/SKILL.md` (companion to the installed `superpowers:systematic-debugging`)
 - `rules/diagnose-before-fix.md`
 - `rules/verify-before-assuming.md`
-- `rules/verify-instrument-before-fix.md`
 - `knowledge-base/topics/engineering-assessment-methodology.md`
 
 ### Observability / monitoring

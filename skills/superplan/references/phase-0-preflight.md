@@ -57,7 +57,7 @@ Required verification command per metric type:
 
 If today's measured value diverges from the cited value by **> 20% relative**, STOP and surface the divergence to the user before proceeding to Phase 1. Don't build a plan around a number that's no longer current.
 
-INCIDENT 2026-05-10 (3rd recurrence of "stale-baseline-in-plan"): the accuracy gap inventory (PR #279) cited 2026-05-08 measurements for HTTP_CALLS (17.6% precision → today the misresolution failure mode is gone, ~85%+ precision) and IMPLEMENTS (27% recall → today 980 edges with 94% precision). 3 of 13 inventory gaps were obsolete on day-one because the inventory inherited stale numbers without re-running. Phase G and Phase I both shipped REDUNDANT verdicts as a result. The `verify-instrument-before-fix.md` rule "plan_baselines_decay_between_authoring_and_execution" was added 2026-05-09 (PR #867) but as prose; this Phase 0 freshness check is the structural enforcement.
+INCIDENT 2026-05-10 (3rd recurrence of "stale-baseline-in-plan"): the accuracy gap inventory (PR #279) cited 2026-05-08 measurements for HTTP_CALLS (17.6% precision → today the misresolution failure mode is gone, ~85%+ precision) and IMPLEMENTS (27% recall → today 980 edges with 94% precision). 3 of 13 inventory gaps were obsolete on day-one because the inventory inherited stale numbers without re-running. Phase G and Phase I both shipped REDUNDANT verdicts as a result. The `verify-instrument-before-fix.md` rule (folded into `verify-effectiveness.md` 2026-09-03) "plan_baselines_decay_between_authoring_and_execution" was added 2026-05-09 (PR #867) but as prose; this Phase 0 freshness check is the structural enforcement.
 
 ---
 

@@ -147,6 +147,30 @@
       "rule": "validate-to-improve.md",
       "bytes": -5034,
       "reason": "Deleted with its incidents and rule-reference files. Required every passing validation to produce more work, which the control audit measured as fighting outcome-over-verification's stop condition. Negative ratchet."
+    },
+    {
+      "date": "2026-09-03",
+      "rule": "uncharted-vs-refuted.md",
+      "bytes": -7063,
+      "reason": "Deleted. Restated symmetric-evidentiary-burden.md's SUPPORTED/REFUTED/CONTESTED/UNCHARTED verdicts and absence-is-not-refutation (its own INTEGRATION section said the two pair); 2,485 B of GUARD blocks and 7 NO EXCEPTIONS, the most in the corpus, around one 2026-04-29 incident. The sentences no surviving rule stated -- an unqueried first-party surface is not UNCHARTED, an absence claim needs every surface, world-vs-literature claims, out-of-era sources -- moved into symmetric-evidentiary-burden.md (+1,192 B). docs/rules-ratchet-plan.md class DUP. Net negative so the freed budget cannot be silently re-spent."
+    },
+    {
+      "date": "2026-09-03",
+      "rule": "best-in-class-for-cross-model.md",
+      "bytes": -6099,
+      "reason": "Deleted. One directive (every cross-model arm is its vendor's flagship; never downgrade silently) under 1,357 B of GUARD blocks, a WHY block and a RELATION commentary -- older-model scaffolding, plan class SCAF. The directive is now one bullet in eval-shipping-discipline.md's oracle and rater gates (+739 B) and item 7 of skills/_shared/model-runtime-policy.md; its only requirer, gather-vendor, already required eval-shipping-discipline. Net negative ratchet."
+    },
+    {
+      "date": "2026-09-03",
+      "rule": "verify-instrument-before-fix.md",
+      "bytes": -3349,
+      "reason": "Deleted with its incidents and rule-reference files. Duplicated verify-effectiveness.md's instrument-qualification section and grading-discipline's controls; all four requirers already required verify-effectiveness. The dominant-cell gate, comparable-measurement gate, verify-the-verifier, code-younger-than-the-failure, UNKNOWN-over-proxy and gate-plumbing sentences moved into verify-effectiveness.md 'Instruments and measurements' (+1,312 B). Plan class DUP. Net negative ratchet."
+    },
+    {
+      "date": "2026-09-03",
+      "rule": "complete-the-whole-instruction.md",
+      "bytes": -3113,
+      "reason": "Deleted with its incidents and rule-reference files. Completion-discipline sibling of never-stop-early and validate-to-improve (deleted 2026-09-03): re-read-the-enumeration and restate-the-instruction gates a frontier model does not need and that outcome-over-verification.md already bounds; no skill required it. Its unstated content -- hardest part first with no silent 'next', design docs before planning, the named-artifact format contract -- moved into scope-discipline.md checks 1 and 6 (+743 B). Plan class DUP. Net negative ratchet."
     }
   ]
 }

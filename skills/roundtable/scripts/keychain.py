@@ -15,7 +15,7 @@ WHY THIS EXISTS (two defects it closes):
    `OPENAI_PLATFORM_API`. `jrh_harness.py` looked keys up BY ENV-VAR NAME, so
    its OpenAI lookup had been failing since that rename — and a failed key
    silently reduces a three-vendor panel to two, which is precisely the
-   decorrelation loss `rules/best-in-class-for-cross-model.md` exists to
+   decorrelation loss `rules/eval-shipping-discipline.md` exists to
    prevent. Consumers therefore carry an explicit candidate list.
 
 ADMIN items are deliberately absent from the candidate lists.

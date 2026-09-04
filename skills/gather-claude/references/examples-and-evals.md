@@ -7,7 +7,7 @@ calibration FIX applied + re-measured in the same session.**
 Pre-fix, the first-party framework caught more deprecations (refutation_recall 0.944 vs 0.833)
 but its over-conservative "UNCHARTED unless first-party-confirmed" rule over-rejected genuine
 current features (`effort:`/`/rewind`), regressing true_recall to 0.733 vs 0.933 (the `fix`
-finding). The fix — a calibration floor per `uncharted-vs-refuted.md` (SKILL.md Step 13) — eliminated
+finding). The fix — a calibration floor per `symmetric-evidentiary-burden.md` (SKILL.md Step 13) — eliminated
 the regression and flipped it to a lead: post-fix the framework is ≥ baseline on every axis
 (true_recall 0.933 vs 0.800, refutation_recall 0.889 vs 0.778, fabrication_resistance 1.0 intact,
 overall verdict_accuracy **0.933 vs 0.844, +0.089 primary**). Full before/after, the primary

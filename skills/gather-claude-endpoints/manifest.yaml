@@ -16,7 +16,7 @@ requires_topics: []
 requires_rules:
   - verify-effectiveness
   - verify-before-assuming
-  - uncharted-vs-refuted
+  - symmetric-evidentiary-burden
   - api-doc-lookup
   - grading-discipline
   - web-search-preference

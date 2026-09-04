@@ -34,7 +34,11 @@ INVARIANT proof_machinery_must_stay_smaller_than_the_production_change
 
 1. **Name the deliverable.** State the user's actual ask and what observable artifact or
    outcome completes it. Ask whether existing tooling can deliver it with reasonable
-   effort (normally under two hours).
+   effort (normally under two hours). For a multi-part ask, enumerate the parts, name
+   the hardest or foundational one first (usually the live end-to-end seam), and let no
+   part become "next" without the user's explicit choice; if evidence threatens the
+   premise, surface it before building further. Read source-of-truth design docs before
+   planning: docs are the intended target, code is the current state.
 2. **Use the smallest current path.** If existing tooling works, use it and record actual
    friction. If it cannot, build only the smallest task-specific helper that ships this
    deliverable. A generalized investment becomes a separate proposal only after three or
@@ -59,7 +63,11 @@ INVARIANT proof_machinery_must_stay_smaller_than_the_production_change
    option plan, restate the original choices and identify the one being implemented. Any
    new option menu must include the standing/agreed choice. Do not silently replace it or
    narrow an explicitly authorized feature because of your safety preference; surface the
-   concern and preserve the decision.
+   concern and preserve the decision. When the ask is to update or revise a named
+   artifact, the original is the format and interactivity contract, not just a data
+   source: diff the revision against the original's structure before claiming done,
+   because correct data in a new format is a violation (2026-08-24: three data-correct
+   rebuilds of the usage reports were rejected for exactly this).
 7. **Bound write targets.** Before a mutation loop, print every target and compare it
    literally with the user's scope, account, environment, and ownership words. Drop or
    obtain explicit authorization for production, cross-account, sibling, or other-team

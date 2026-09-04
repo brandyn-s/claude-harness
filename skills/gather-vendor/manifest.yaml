@@ -17,8 +17,7 @@ requires_tools:
 requires_topics: []
 requires_rules:
   - web-search-preference
-  - uncharted-vs-refuted
-  - best-in-class-for-cross-model
+  - symmetric-evidentiary-burden
   - eval-shipping-discipline
   - api-doc-lookup
 requires_skills: []
