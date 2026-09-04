@@ -156,6 +156,13 @@ asyncio.run(verify())
 
 Report: `"Regression: PASS/FAIL — {N} checks, {M} failures"`
 
+Bind that result to the tree it was measured on. The verdict expires the
+moment any tracked, staged, or untracked file changes:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/bin/verdict-state.py" record --plane tests --verdict pass   # or fail
+```
+
 ---
 
 ## Step 3: Effectiveness Testing
@@ -291,6 +298,12 @@ python3 "$VALIDATE_SKILL_ROOT/scripts/change_contract.py" verdict \
   --ab <PASS|FAIL|SKIPPED> \
   [--vendor-dependent --contract-status <VERIFIED|UNVERIFIED>]
 ```
+
+Before reporting `SHIP`, confirm the regression evidence still describes this
+tree: `python3 "${CLAUDE_PLUGIN_ROOT}/bin/verdict-state.py" check --plane tests` must
+exit 0 (`fresh: tests pass @ ...`). Non-zero means no recorded run, a recorded
+`fail`, or files changed since the run (it names them): re-run Step 2 on the
+current tree and record the new result. Never cite the earlier pass.
 
 If all phases pass and every applicable vendor contract is verified:
 `"Verdict: SHIP — all validation passed."`

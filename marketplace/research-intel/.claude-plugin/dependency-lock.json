@@ -3,6 +3,7 @@
     "bin/kb-dedup.py",
     "bin/kb-entry-budget.py",
     "bin/pr-merge-verified.py",
+    "bin/verdict-state.py",
     "bin/x-monitor.config.json",
     "bin/x-monitor.py",
     "scripts/_gather_repos_archive.py",

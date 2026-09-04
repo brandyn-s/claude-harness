@@ -1,7 +1,7 @@
 ---
 name: legacy-code-tdd
 description: "Companion to superpowers:test-driven-development for untested code and multi-layer features: characterization tests that pin current behavior before a change, a walking-skeleton first slice, and acceptance tests that run the literal documented invocation."
-when_to_use: 'Use with superpowers:test-driven-development when the code you are changing has no tests or under 80 percent coverage, when a feature spans several architectural layers, or when a deliverable has a user-facing surface (CLI flags, slash command, API endpoint, library export). Trigger phrases: "characterization test", "legacy code", "no tests here", "walking skeleton", "outside-in", "strangler fig". Do NOT use for greenfield code with a clear spec — plain red-green-refactor covers it.'
+when_to_use: 'Use with superpowers:test-driven-development when the code you are changing has no tests or under 80 percent coverage, when a feature spans several architectural layers, or when a deliverable has a user-facing surface (CLI flags, slash command, API endpoint, library export). Also when a mutation-testing result looks wrong (a mutant reported caught, a guard clause someone wants to delete) and the harness itself must be verified, or when an inherited module with no coverage must be refactored without breaking it. Trigger phrases: "characterization test", "legacy code", "no tests here", "zero test coverage", "refactor without breaking", "first slice", "prove the whole stack", "mutation testing", "is the harness lying", "walking skeleton", "outside-in", "strangler fig". Do NOT use for greenfield code with a clear spec — plain red-green-refactor covers it.'
 allowed-tools: Read Grep Glob Bash Write Edit
 ---
 

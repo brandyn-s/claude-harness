@@ -199,6 +199,12 @@ python3 bin/preflight-skill.py --only <key>   # re-run just the one that failed
 
 Fix any failure HERE, not after CI. Each failure that reaches CI costs a
 ~4-minute round-trip to learn something this answers in under a second.
+Then bind the result to the tree it ran on, so the push gate in Step 5 can tell
+whether that tree is still the one being shipped:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/bin/verdict-state.py" record --plane tests --verdict pass   # or fail
+```
 
 Do NOT hand-pick a subset of the gates. That is precisely the failure mode:
 - 2026-06-14 `/lab-review` #1276 — **3 CI cycles**; only `validate-skills` +
@@ -322,6 +328,13 @@ sensitive patterns above, skip this step entirely.
 
 Push the verified branch, create the PR, establish the CI enforcement state,
 then delegate merge behavior and remote-state recovery to the tested helper.
+
+**Test-evidence freshness gate.** A test result is evidence only for the tree it
+ran on. If this ship cites passing tests, `python3
+"${CLAUDE_PLUGIN_ROOT}/bin/verdict-state.py" check --plane tests` must exit 0 first.
+Non-zero means no recorded run, a recorded `fail`, or files changed since (it
+names them): re-run the tests on the current tree and `record` the result
+before pushing. Do not cite the earlier run.
 
 ```bash
 git push -u origin <branch>
@@ -466,6 +479,7 @@ Result: Auto-merge is durably armed; retro launches detached terminal verificati
 - No `--admin`, no `--no-verify`, no `git push --force` on main
 - Marketplace, secret-scan, and security-review decisions use the full
   outgoing payload/range rather than a staged-only view
+- A "tests passed" claim is backed by a fresh `verdict-state.py check --plane tests` at push time
 - Linear breadcrumb posted when repo is mapped; silent skip otherwise
 - Final report includes commit subject, PR URL, and verified remote state
 

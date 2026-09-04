@@ -1,7 +1,8 @@
 {
   "helpers": [
     "bin/ci-failure-superseded.py",
-    "bin/pr-merge-verified.py"
+    "bin/pr-merge-verified.py",
+    "bin/verdict-state.py"
   ],
   "packaged_skills": [
     "superplan",

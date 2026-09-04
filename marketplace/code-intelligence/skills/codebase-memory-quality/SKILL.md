@@ -2,7 +2,7 @@
 
 name: codebase-memory-quality
 description: "Find dead code, unused functions, and high-fan-out refactor candidates via the code graph."
-when_to_use: 'Use when asked to find dead code, unused functions, high fan-out nodes, refactor candidates, or run a code quality audit. Queries the code-graph knowledge graph for degree filtering and structural analysis. Trigger phrases: "dead code", "unused functions", "unreachable code", "high fan-out", "complex functions", "code quality audit", "functions nobody calls", "reduce codebase size", "refactor candidates", "cleanup candidates". Do NOT use for structural exploration (use /codebase-memory-exploring), reference lookups (see codebase-memory-exploring/references/code-graph-reference.md), or indexing (use /index-repo).'
+when_to_use: 'Use when asked to find dead code, unused functions, high fan-out nodes, refactor candidates, or run a code quality audit. Queries the code-graph knowledge graph for degree filtering and structural analysis. Also for co-change coupling: files that always change together across folders, hidden dependencies, or which unused functions are safe to delete. Trigger phrases: "dead code", "unused functions", "unreachable code", "high fan-out", "complex functions", "code quality audit", "functions nobody calls", "reduce codebase size", "files that change together", "hidden dependency", "safe to delete", "refactor candidates", "cleanup candidates". Do NOT use for structural exploration (use /codebase-memory-exploring), reference lookups (see codebase-memory-exploring/references/code-graph-reference.md), or indexing (use /index-repo).'
 effort: low
 model: sonnet
 argument-hint: '[query, e.g. "find dead code", "high fan-out functions"]'

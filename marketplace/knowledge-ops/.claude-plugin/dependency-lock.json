@@ -13,6 +13,7 @@
     "bin/transcript_ground_check.py",
     "bin/transcript_recurrence.py",
     "bin/transcript_reduce.py",
+    "bin/verdict-state.py",
     "bin/x-monitor.config.json",
     "bin/x-monitor.py",
     "scripts/_gather_repos_archive.py",
