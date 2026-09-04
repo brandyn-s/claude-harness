@@ -18,16 +18,26 @@ HOOK_NAME="$1"
 SCRIPT="$SCRIPT_DIR/$1"
 shift
 
-_start="${EPOCHREALTIME:-}"
+# Microsecond clock. bash >= 5 exposes EPOCHREALTIME; macOS ships bash 3.2, which
+# does not, so fall back to perl's Time::HiRes (always present on macOS, ~3 ms).
+# Without the fallback every fire row on macOS carried ms=null (fixed 2026-09-04).
+_now_us() {
+  if [ -n "${EPOCHREALTIME:-}" ]; then
+    printf '%s' "${EPOCHREALTIME/./}"
+  else
+    perl -MTime::HiRes=time -e 'printf("%d", time()*1000000)' 2>/dev/null || printf ''
+  fi
+}
+_start="$(_now_us)"
 
 _log_fire() {
   local code="$1" ts day ms="null"
   # Prefer printf's built-in time format (no subprocess; bash >= 4.2); fall back to date.
   { printf -v ts '%(%s)T' -1; } 2>/dev/null || ts="$(date +%s 2>/dev/null || echo 0)"
   { printf -v day '%(%Y%m%d)T' -1; } 2>/dev/null || day="$(date +%Y%m%d 2>/dev/null || echo unknown)"
-  if [ -n "$_start" ] && [ -n "${EPOCHREALTIME:-}" ]; then
-    # EPOCHREALTIME is seconds.microseconds; strip the dot for integer microseconds.
-    local s="${_start/./}" e="${EPOCHREALTIME/./}"
+  local e; e="$(_now_us)"
+  if [ -n "$_start" ] && [ -n "$e" ]; then
+    local s="$_start"
     ms=$(( (10#$e - 10#$s) / 1000 )) 2>/dev/null || ms="null"
   fi
   # Claude Code may launch hooks without HOME (#79509). Prefer the explicit

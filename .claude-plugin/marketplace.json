@@ -14,7 +14,7 @@
       "name": "safety-net",
       "source": "./marketplace/safety-net",
       "description": "Minimal deterministic safety hooks for Claude Code \u2014 Bash command safety, protected-config integrity, and MCP result-injection detection. Additional policy and observation hooks remain opt-in.",
-      "version": "1.1.34",
+      "version": "1.1.35",
       "license": "MIT",
       "repository": "https://github.com/brandyn-s/claude-harness",
       "keywords": [
