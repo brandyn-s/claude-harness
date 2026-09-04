@@ -17,10 +17,13 @@ CRITICAL/MUST/NEVER/ALWAYS; inline code spans and fenced code blocks; environmen
 variable names (ALL_CAPS_WITH_UNDERSCORES); file paths; URLs; numbers with units.
 Comparison is whitespace-insensitive so a reflow never reads as a loss.
 
-`--allow-drop FILE` is a JSON list of {"literal": ..., "reason": ...}; every entry
-needs a reason, because an unexplained drop is exactly the failure this exists to
-catch. `--also PATH` adds files or directories (rules/incidents/,
-docs/rule-reference/) in which a relocated literal still counts as preserved.
+`--allow-drop FILE` is a JSON list of {"literal": ..., "reason": ...} entries, or
+{"file": "<rule>.md", "reason": ...} to drop every remaining literal of a rule that
+is being deleted whole (verify first WITHOUT it, move the sentences that need a home,
+then record the remainder). Every entry needs a reason, because an unexplained drop
+is exactly the failure this exists to catch. `--also PATH` adds files or directories
+(rules/incidents/, docs/rule-reference/, skills/_shared/) in which a relocated
+literal still counts as preserved.
 
 Exit codes: 0 every literal preserved; 1 losses listed on stdout; 2 bad input.
 Stdlib only. Concept from claude-forge's harness-diet preservation_check.py (MIT).
@@ -146,34 +149,47 @@ def _corpus(rules_dir: Path, also: list[Path] | None) -> str:
 
 
 def verify(rules_dir: Path, manifest: dict, allow: dict[str, str] | None = None,
-           also: list[Path] | None = None) -> list[dict]:
-    """Return every manifest literal absent from the current rule set (and --also paths)."""
+           also: list[Path] | None = None, allow_files: dict[str, str] | None = None) -> list[dict]:
+    """Return every manifest literal absent from the current rule set (and --also paths).
+
+    `allow` silences named literals; `allow_files` silences every literal recorded
+    from a named rule file. Both are keyed to their reason. Dropped literals are
+    not returned; the CLI reports how many each entry covered.
+    """
     corpus = _corpus(rules_dir, also)
     allow = allow or {}
+    allow_files = allow_files or {}
     lost = []
     for name, kinds in manifest["rules"].items():
         for kind, values in kinds.items():
             for value in values:
-                if value in allow or value in corpus:
+                if value in corpus or value in allow or name in allow_files:
                     continue
                 lost.append({"file": name, "kind": kind, "literal": value})
     return lost
 
 
-def load_allow_drop(path: Path) -> dict[str, str]:
+def load_allow_drop(path: Path) -> tuple[dict[str, str], dict[str, str]]:
+    """Return ({literal: reason}, {file: reason}); every entry must carry a reason."""
     data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, list):
-        raise ValueError("allow-drop file must be a JSON list of {literal, reason}")
-    allow = {}
+        raise ValueError("allow-drop file must be a JSON list of {literal|file, reason}")
+    allow: dict[str, str] = {}
+    allow_files: dict[str, str] = {}
     for i, entry in enumerate(data):
-        literal = entry.get("literal") if isinstance(entry, dict) else None
-        reason = entry.get("reason") if isinstance(entry, dict) else None
-        if not isinstance(literal, str) or not literal.strip():
-            raise ValueError(f"allow-drop[{i}] has no literal")
+        if not isinstance(entry, dict):
+            raise ValueError(f"allow-drop[{i}] is not an object")
+        literal, file, reason = entry.get("literal"), entry.get("file"), entry.get("reason")
+        key = literal if isinstance(literal, str) and literal.strip() else file
+        if not isinstance(key, str) or not key.strip():
+            raise ValueError(f"allow-drop[{i}] names neither a literal nor a file")
         if not isinstance(reason, str) or not reason.strip():
-            raise ValueError(f"allow-drop[{i}] ({literal[:40]!r}) has no reason; every drop must say why")
-        allow[normalize(literal)] = reason
-    return allow
+            raise ValueError(f"allow-drop[{i}] ({key[:40]!r}) has no reason; every drop must say why")
+        if key is literal:
+            allow[normalize(literal)] = reason
+        else:
+            allow_files[file] = reason
+    return allow, allow_files
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -202,7 +218,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
-        allow = load_allow_drop(args.allow_drop) if args.allow_drop else {}
+        allow, allow_files = load_allow_drop(args.allow_drop) if args.allow_drop else ({}, {})
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
@@ -210,15 +226,22 @@ def main(argv: list[str] | None = None) -> int:
         print("error: manifest has no 'rules' map; produce it with `extract`", file=sys.stderr)
         return 2
 
-    lost = verify(args.rules, manifest, allow, args.also)
+    strict = verify(args.rules, manifest, also=args.also)      # what is really gone
+    lost = verify(args.rules, manifest, allow, args.also, allow_files)
     total = sum(len(v) for kinds in manifest["rules"].values() for v in kinds.values())
     for entry in lost:
         print(f"LOST [{entry['kind']}] {entry['file']}: {entry['literal']}")
-    used = {v for kinds in manifest["rules"].values() for vs in kinds.values() for v in vs if v in allow}
-    for literal in sorted(set(allow) - used):
-        print(f"note: allow-drop entry never matched a manifest literal: {literal[:80]}", file=sys.stderr)
-    print(f"preserved {total - len(lost)}/{total} literals; {len(lost)} lost"
-          + (f"; {len(used)} dropped with a reason" if used else ""))
+    dropped = [e for e in strict if e not in lost]
+    used_literals = {e["literal"] for e in dropped if e["literal"] in allow}
+    for literal in sorted(set(allow) - used_literals):
+        print(f"note: allow-drop literal never needed: {literal[:80]}", file=sys.stderr)
+    for name, reason in allow_files.items():
+        n = sum(1 for e in dropped if e["file"] == name and e["literal"] not in allow)
+        if n == 0 and name not in manifest["rules"]:
+            print(f"note: allow-drop file {name} is not in the manifest", file=sys.stderr)
+        print(f"dropped {n} literals from {name}: {reason}")
+    print(f"preserved {total - len(strict)}/{total} literals; {len(lost)} lost"
+          + (f"; {len(dropped)} dropped with a reason" if dropped else ""))
     return 1 if lost else 0
 
 

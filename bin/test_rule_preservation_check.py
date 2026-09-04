@@ -149,6 +149,29 @@ def test_allow_drop_silences_a_named_literal_but_requires_a_reason(tmp_path):
     assert "reason" in proc.stderr
 
 
+def test_file_level_allow_drop_covers_a_deleted_rule_and_reports_the_count(tmp_path):
+    rules = _write_rules(tmp_path, {"alpha.md": RULE_A, "beta.md": RULE_B})
+    manifest_path = tmp_path / "manifest.json"
+    _run("extract", "--rules", str(rules), "--out", str(manifest_path))
+    (rules / "beta.md").unlink()
+
+    proc = _run("verify", "--rules", str(rules), "--manifest", str(manifest_path))
+    assert proc.returncode == 1 and "beta.md" in proc.stdout
+
+    allow = tmp_path / "allow-drop.json"
+    allow.write_text(json.dumps([{"file": "beta.md", "reason": "deleted per plan step 3"}]),
+                     encoding="utf-8")
+    proc = _run("verify", "--rules", str(rules), "--manifest", str(manifest_path),
+                "--allow-drop", str(allow))
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "dropped 3 literals from beta.md: deleted per plan step 3" in proc.stdout
+    assert "LOST" not in proc.stdout
+
+    allow.write_text(json.dumps([{"file": "beta.md"}]), encoding="utf-8")
+    assert _run("verify", "--rules", str(rules), "--manifest", str(manifest_path),
+                "--allow-drop", str(allow)).returncode == 2
+
+
 def test_verify_counts_a_literal_relocated_to_an_also_path(tmp_path):
     rules = _write_rules(tmp_path, {"alpha.md": RULE_A, "beta.md": RULE_B})
     manifest = rpc.extract(rules)
