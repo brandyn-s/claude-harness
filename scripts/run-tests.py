@@ -18,6 +18,10 @@ Running one directory at a time satisfies both constraints, which is what the
 original CI did across ~20 separate steps. This discovers the directories instead
 of hard-coding them, so a new test directory is picked up automatically.
 
+Run it outside the Claude Code Bash sandbox: some hook tests write probe files
+under `hooks/`, open local sockets and call `ps`, which the sandbox denies, so a
+run inside it reports environment-caused failures.
+
 Exit status is non-zero if any directory fails, if any directory errors during
 collection, or if the whole run collected zero tests (a suite that silently
 collects nothing must not report success).
