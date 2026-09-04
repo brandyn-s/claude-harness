@@ -14,6 +14,24 @@ See `PROBLEM.md` for the full harness design (fixture, metrics, frozen baseline)
   `results.json`'s metrics without live API calls.
 - `runs/transcripts-<ts>.json` — gitignored raw per-run transcripts written by
   `run_live.py` (see `runs/.gitignore`); not committed.
+- `regrade.py` — OFFLINE re-grade (no API calls, no fetches) of a transcripts or
+  sample file with the current `grade.py`; writes a results-shaped
+  `runs/regrade-<date>.json` and optionally the compact sample. Never writes the
+  frozen `results.json`.
+- `runs/regrade-2026-09-03.json` + `runs/sample-records-2026-09-03.json` — the
+  2026-09-03 `claude-fable-5-1` rerun re-graded under the corrected oracle
+  (`docs/research-skills-root-cause.md` section 12).
+
+## Oracle revisions
+
+`fixture.json` carries a `_revisions` lineage. The frozen `results.json` was measured
+against fixture `6a017f97d139`; the 2026-09-03 revision marked
+`three-workers-sweetspot` `groundable: false` (its `grounding_terms` were the verbatim
+phrase from one repo that no arm ever cited: 0/11 supported records grounded across both
+runs). The CI freshness test accepts a `fixture_sha` anywhere in the lineage, and the
+reproducibility test compares the frozen sample to the frozen numbers except where the
+revision's `frozen_sample_regrade` documents the change (grounding_precision
+0.878/0.833 -> 1.0/1.0; the other four metrics are unchanged).
 
 ## Refreshing the committed sample after a live re-run
 

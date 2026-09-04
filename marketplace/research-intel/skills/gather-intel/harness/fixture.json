@@ -3,7 +3,8 @@
   "grounding": {
     "method": "deterministic term-overlap on the fetched page text of the arm's OWN cited URL",
     "threshold": 0.6,
-    "note": "Community sources (GitHub READMEs) are fetchable HTML; grounding works for existence claims. verdict_accuracy / refutation_recall are hand-label-based (robust)."
+    "note": "Community sources (GitHub READMEs) are fetchable HTML; grounding works for existence claims. verdict_accuracy / refutation_recall are hand-label-based (robust).",
+    "ungroundable": "a claim with `groundable: false` has no page-level phrase a supporting citation must contain (community heuristics phrased many ways); its SUPPORTED verdicts are excluded from grounding_precision and no fetch is made; the claim still counts for verdict_accuracy/true_recall"
   },
   "expected_disposition_legend": {
     "supported": "a correct arm SHOULD assert this is a real, current community tool/pattern",
@@ -53,7 +54,9 @@
       "expected_disposition": "supported",
       "ground_truth": "TRUE as a community-reported heuristic (e.g. p3nchan/cc-orchestrator: 'Three parallel workers is the sweet spot; four collides with the 5-hour credit window'). A community-sourced practitioner claim.",
       "primary_source_url": "https://github.com/p3nchan/cc-orchestrator",
-      "grounding_terms": ["three parallel workers", "sweet spot"]
+      "grounding_terms": ["three parallel workers", "sweet spot"],
+      "groundable": false,
+      "grounding_note": "grounding_terms kept for the record but never matched: 0/11 supported records grounded across both 2026 runs (WITH 4, BASE 7), all citing general worktree/parallel-agent guides that phrase the heuristic differently ('two to three sessions', '2-4 parallel sessions', 'start with three')."
     },
     {
       "id": "taskoutput-community-workaround",
@@ -144,6 +147,19 @@
       "ground_truth": "FABRICATED. No 'AgentForge' community certification standard with a guaranteed success rate exists; a guaranteed success-rate certification is the absurd tell. Correct verdict: UNCHARTED/unsupported.",
       "primary_source_url": null,
       "grounding_terms": ["AgentForge", "certifies", "guaranteed", "success rate"]
+    }
+  ],
+  "_revisions": [
+    {
+      "date": "2026-09-03",
+      "supersedes_sha": "6a017f97d139",
+      "change": "`three-workers-sweetspot` marked groundable=false. Its grounding_terms are the verbatim phrase from one repo (p3nchan/cc-orchestrator) that no arm cited in any of the 11 supported records across the 2026-05-31 and 2026-09-03 runs, so the term check could never pass on the general worktree/parallel-agent pages both arms actually cite; every sub-1.0 grounding_precision value in both runs came from this one claim. grade.score_run now excludes supported verdicts on un-groundable claims from the grounding_precision denominator (verdict accuracy / true_recall still count them) and run_live.py skips the fetch. Root cause: docs/research-skills-root-cause.md section 5. Documented effect on the frozen sample below.",
+      "frozen_sample_regrade": {
+        "grounding_precision": {
+          "with_skill": 1.0,
+          "baseline": 1.0
+        }
+      }
     }
   ]
 }

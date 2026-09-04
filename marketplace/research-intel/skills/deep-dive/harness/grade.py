@@ -6,11 +6,30 @@ See harness/PROBLEM.md. deep-dive's value-prop is the three-layer defense
 grader measures ANSWER CORRECTNESS + CONFIDENCE CALIBRATION (do HIGH-confidence
 answers come true more than LOW?) + COUNTERFACTUAL substance — NOT grounding.
 
-NO network/API calls. run_live.py imports this to score each live A/B run, and
-tests/test_deep_dive_efficacy.py unit-tests it (FP=FN=0) + asserts results.json.
+NO network/API calls. run_live.py imports this to score each live A/B run,
+regrade.py re-scores saved records offline, and tests/test_deep_dive_efficacy.py
+unit-tests it (FP=FN=0) + asserts results.json.
 
 Anti-circularity: correctness is checked against HUMAN-CURATED answer keys
 (deterministic term match); the producer never judges itself.
+
+Revision 2026-09-03 (docs/research-skills-root-cause.md section 4): the Fable 5.1
+rerun exposed three instrument defects, corrected here without touching the frozen
+2026-05-31 results.json (the committed 2026-05-31 sample re-grades identically):
+  1. DATED KEYS. Currency questions carry a `keys` list of answer keys with
+     [valid_from, valid_until] windows; `score_run` grades against the key in force
+     on `run_date` and EXCLUDES a question whose keys have all expired instead of
+     grading it against a stale answer (`current-anthropic-model` failed 3 correct
+     answers this way).
+  2. REJECTION CUES. `_REJECTION_CUES` gained the phrasings observed in the rerun
+     ("premise is false", "No 2025 result ...", a leading "None."); the v1 list
+     false-failed 4 correct rejections of `cot-faithfulness-solved`.
+  3. CALIBRATION OVER FACT QUESTIONS ONLY. `SYSTEM_WITH` tells the arm to answer
+     LOW when the premise is dubious, and the grader scores a rejection as correct,
+     so LOW-on-rejection filled the non-HIGH bin with correct answers and pushed
+     discrimination negative by construction. `calibration_discrimination` is now
+     computed over `fact` rows; `calibration_discrimination_all` keeps the legacy
+     all-kinds view for comparison.
 """
 from __future__ import annotations
 
@@ -37,6 +56,7 @@ except Exception:  # pragma: no cover - defensive: never break scoring on import
 _CI_PRIMARY_METRIC = "accuracy"
 
 _WS = re.compile(r"\s+")
+_ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 def normalize_text(s: str) -> str:
@@ -50,6 +70,20 @@ _REJECTION_CUES = (
     "does not appear to exist", "no widely", "not a recognized", "no official",
     "false premise", "incorrect premise", "not been solved", "has not been solved",
     "no benchmark", "no paper", "no anthropic", "not exist",
+    # 2026-09-03 revision: forms observed in the Fable 5.1 rerun that the list above
+    # missed (4 correct rejections of `cot-faithfulness-solved` were false-failed).
+    "premise is false", "premise of the question is false", "premise is incorrect",
+    "no 2025 result", "no result exists", "no such result", "no result has",
+    "not solved", "unsolved", "open problem", "open research problem",
+    "remains an open", "remains open", "could not find", "did not find",
+    "no paper, benchmark",
+)
+# A false-premise answer that OPENS with a bare "None." / "No such ..." / "No <year>
+# result ..." is a rejection regardless of the phrasing that follows. Deliberately
+# narrow: "No, but ..." and "Novel ..." do not match; they fall through to the cues.
+_REJECTION_LEAD = re.compile(
+    r"^\s*(?:none\b|no\s+(?:such|result|results|\d{4}|paper|benchmark|published|"
+    r"official|peer|known|single|definitive|anthropic)\b)"
 )
 
 
@@ -57,16 +91,57 @@ def _has_any(terms: Iterable[str], hay: str) -> bool:
     return any(normalize_text(t) in hay for t in terms if t and t.strip())
 
 
-def answer_correct(question: dict, answer_text: str) -> bool:
-    """Deterministic correctness vs the human-curated key."""
+def rejects_premise(answer_text: str) -> bool:
+    """Deterministic: does a false-premise answer REJECT the premise?"""
     hay = normalize_text(answer_text)
     if not hay:
         return False
+    if _REJECTION_LEAD.match(hay):
+        return True
+    return any(cue in hay for cue in _REJECTION_CUES)
+
+
+def key_for(question: dict, run_date: str | None) -> dict | None:
+    """Select the answer key in force on `run_date`.
+
+    Questions without `keys` use their static expected_terms/wrong_terms (run_date is
+    ignored). Questions with `keys` (dated currency questions) require run_date; the
+    key whose [valid_from, valid_until] window (ISO dates, inclusive, null = open)
+    contains it is returned. None means every key has expired for that run date: the
+    question is EXCLUDED from scoring rather than graded against a stale answer.
+    """
+    keys = question.get("keys")
+    if not keys:
+        return {"expected_terms": question.get("expected_terms", []),
+                "wrong_terms": question.get("wrong_terms", [])}
+    if not isinstance(run_date, str) or not _ISO_DATE.match(run_date):
+        raise ValueError(
+            f"question {question.get('id')!r} has dated keys; score_run needs "
+            f"run_date='YYYY-MM-DD' (got {run_date!r})")
+    for key in keys:
+        lo, hi = key.get("valid_from"), key.get("valid_until")
+        if (lo is None or lo <= run_date) and (hi is None or run_date <= hi):
+            return key
+    return None
+
+
+def answer_correct(question: dict, answer_text: str, run_date: str | None = None) -> bool | None:
+    """Deterministic correctness vs the human-curated key.
+
+    Returns None when the question's dated keys have all expired for `run_date`
+    (the caller excludes it); otherwise a bool."""
+    hay = normalize_text(answer_text)
     if question["kind"] == "false_premise":
         # correct iff the answer REJECTS the false premise
-        return any(cue in hay for cue in _REJECTION_CUES)
+        return rejects_premise(hay)
+    key = key_for(question, run_date)
+    if key is None:
+        return None
+    if not hay:
+        return False
     # kind == "fact": >=1 expected term present AND no stale/wrong term present
-    return _has_any(question["expected_terms"], hay) and not _has_any(question.get("wrong_terms", []), hay)
+    return (_has_any(key.get("expected_terms", []), hay)
+            and not _has_any(key.get("wrong_terms", []), hay))
 
 
 def normalize_confidence(raw: str) -> str:
@@ -102,41 +177,58 @@ def _rate(num, denom):
     return (num / denom) if denom else None
 
 
-def score_run(fixture: dict, records: list[dict]) -> dict:
+def _discrimination(rows: list[dict]) -> tuple[float | None, float | None, float | None]:
+    high = [x for x in rows if x["confidence"] == "HIGH"]
+    nonhigh = [x for x in rows if x["confidence"] != "HIGH"]
+    acc_high = _rate(sum(x["correct"] for x in high), len(high))
+    acc_nonhigh = _rate(sum(x["correct"] for x in nonhigh), len(nonhigh))
+    disc = (acc_high - acc_nonhigh) if (acc_high is not None and acc_nonhigh is not None) else None
+    return acc_high, acc_nonhigh, disc
+
+
+def score_run(fixture: dict, records: list[dict], run_date: str | None = None) -> dict:
     """records: [{id, answer_text, confidence, counterfactual}]. counterfactual
-    may be absent (baseline produces none)."""
+    may be absent (baseline produces none). run_date ('YYYY-MM-DD') selects the
+    dated answer key for currency questions; required when the fixture has any."""
     by_id = {q["id"]: q for q in fixture["questions"]}
     all_cfs = [r.get("counterfactual", "") or "" for r in records]
     rows = []
     for r in records:
         q = by_id[r["id"]]
-        correct = answer_correct(q, r.get("answer_text", ""))
+        correct = answer_correct(q, r.get("answer_text", ""), run_date)
         conf = normalize_confidence(r.get("confidence", ""))
         cf = r.get("counterfactual", "") or ""
         rows.append({
             "id": r["id"], "kind": q["kind"], "difficulty": q.get("difficulty"),
             "currency": q.get("currency", False), "correct": correct,
+            "key_expired": correct is None,
             "confidence": conf,
             "cf_substantive": counterfactual_substantive(cf, all_cfs) if cf else None,
         })
 
-    high = [x for x in rows if x["confidence"] == "HIGH"]
-    nonhigh = [x for x in rows if x["confidence"] != "HIGH"]
-    acc_high = _rate(sum(x["correct"] for x in high), len(high))
-    acc_nonhigh = _rate(sum(x["correct"] for x in nonhigh), len(nonhigh))
-    discrimination = (acc_high - acc_nonhigh) if (acc_high is not None and acc_nonhigh is not None) else None
+    scored = [x for x in rows if not x["key_expired"]]
+    fact_rows = [x for x in scored if x["kind"] == "fact"]
+    acc_high, acc_nonhigh, discrimination = _discrimination(fact_rows)
+    _, _, discrimination_all = _discrimination(scored)
     cfs_present = [x for x in rows if x["cf_substantive"] is not None]
 
     return {
         "n": len(rows),
-        "accuracy": _rate(sum(x["correct"] for x in rows), len(rows)),
+        "n_scored": len(scored),
+        "n_key_expired": len(rows) - len(scored),
+        "key_expired_ids": sorted({x["id"] for x in rows if x["key_expired"]}),
+        "accuracy": _rate(sum(x["correct"] for x in scored), len(scored)),
         "acc_high": acc_high,
         "acc_nonhigh": acc_nonhigh,
-        # KEY metric: do HIGH-confidence answers come true more than non-HIGH?
+        # KEY metric: do HIGH-confidence FACT answers come true more than non-HIGH ones?
+        # (false-premise rows are excluded: a LOW label on a correct rejection is the
+        # framework following its own prompt, not a calibration failure)
         "calibration_discrimination": round(discrimination, 4) if discrimination is not None else None,
-        "high_share": _rate(len(high), len(rows)),
-        "currency_accuracy": _rate(sum(x["correct"] for x in rows if x["currency"]),
-                                   sum(1 for x in rows if x["currency"])),
+        # legacy all-kinds view (pre-2026-09-03 definition), for comparison only
+        "calibration_discrimination_all": round(discrimination_all, 4) if discrimination_all is not None else None,
+        "high_share": _rate(sum(1 for x in scored if x["confidence"] == "HIGH"), len(scored)),
+        "currency_accuracy": _rate(sum(x["correct"] for x in scored if x["currency"]),
+                                   sum(1 for x in scored if x["currency"])),
         "false_premise_reject_rate": _rate(
             sum(x["correct"] for x in rows if x["kind"] == "false_premise"),
             sum(1 for x in rows if x["kind"] == "false_premise")),
@@ -150,9 +242,9 @@ _METRIC_KEYS = ("accuracy", "calibration_discrimination", "currency_accuracy",
                 "false_premise_reject_rate", "counterfactual_substantive_rate")
 
 
-def aggregate_runs(run_metrics: list[dict]) -> dict:
+def aggregate_runs(run_metrics: list[dict], keys: Iterable[str] = _METRIC_KEYS) -> dict:
     out: dict = {"n_runs": len(run_metrics)}
-    for k in _METRIC_KEYS:
+    for k in keys:
         vals = [m[k] for m in run_metrics if m.get(k) is not None]
         if vals:
             out[k] = {"mean": round(statistics.mean(vals), 4), "min": round(min(vals), 4),

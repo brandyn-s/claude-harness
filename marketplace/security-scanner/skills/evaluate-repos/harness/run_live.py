@@ -51,6 +51,11 @@ RUNTIME_OBSERVATIONS: list[dict] = []
 RUNTIME_LOCK = Lock()
 COST_RATIO = 3.0  # harness = 3 calls vs 1 (advocate + skeptic + synthesis)
 MAX_ERROR_RATE = 0.10  # abort threshold: failed-call decisions ("ERROR <type>") / total
+# PROBLEM.md section 4: N>=3, mean+spread. Below this the noise-aware fix/keep rules
+# degenerate (stdev of one run is 0, so the floor collapses to the flat 0.05 bar and a
+# single flipped decision fires a verdict). The 2026-09-03 rerun ran --runs 1 and did
+# exactly that (README.md); --allow-low-n is the explicit, receipt-recorded override.
+MIN_RUNS = 3
 
 ARCH = ("Our Claude Code architecture already has: ~90 skills (gather-*, deep-dive, triage, "
         "investigate, evaluate-repos, ship, etc.), PreToolUse/PostToolUse hooks, a large ambient "
@@ -252,6 +257,9 @@ def main(argv=None):
     ap.add_argument("--output", type=Path, required=True)
     ap.add_argument("--plan-only", action="store_true")
     ap.add_argument("--runs", type=int, default=8)
+    ap.add_argument("--allow-low-n", action="store_true",
+                    help=f"permit --runs below the harness minimum of {MIN_RUNS} for a smoke/diagnostic run; "
+                         "the receipt records low_n_override=true and the verdict is not citable")
     ap.add_argument("--max-tokens", type=int, default=MAX_TOKENS,
                     help="per-call output budget for BOTH arms (frozen baseline used 700)")
     ap.add_argument("--limit", type=int, default=None)
@@ -264,12 +272,17 @@ def main(argv=None):
         ap.error("--model must be an explicit Claude model id")
     if model in COVERED_MODELS and not args.approve_covered_model_retention:
         ap.error("Fable 5 and Mythos 5 require explicit approval of mandatory 30-day retention")
+    if args.runs < MIN_RUNS and not args.allow_low_n:
+        ap.error(f"--runs {args.runs} is below the harness minimum of {MIN_RUNS} (PROBLEM.md section 4: "
+                 "N>=3, mean+spread; one run cannot estimate the noise floor the fix/keep rules depend on) "
+                 "-- pass --allow-low-n for a smoke/diagnostic run whose verdict is not citable")
     output = args.output.expanduser().resolve()
     if output == FROZEN_RESULTS.resolve():
         ap.error("the frozen 2026-05-31 results.json is immutable")
     RUN_RECEIPT = {
         "mode": "historical_reproduction" if args.historical_reproduction else "current_model",
         "requested_model": model, "max_tokens": args.max_tokens, "qualification_status": "UNVERIFIED",
+        "n_runs": args.runs, "min_runs": MIN_RUNS, "low_n_override": args.runs < MIN_RUNS,
         "effective_model": "<unavailable>", "provider": "<unavailable>",
         "refusal_detected": "<unavailable>", "truncation_detected": "<unavailable>",
         "stop_outcomes": "<unavailable>",

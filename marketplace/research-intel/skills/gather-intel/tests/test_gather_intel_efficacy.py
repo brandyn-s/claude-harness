@@ -31,6 +31,8 @@ _spec.loader.exec_module(grade)
 # Honest MEASURED verdict, pinned (set from results.json after the full N>=3 run).
 EXPECTED_VERDICT = "trim"
 
+_FIXTURE = json.loads(FIXTURE.read_text(encoding="utf-8"))
+
 
 # ---------- 1. Prove the grader instrument (FP=FN=0) ----------
 
@@ -72,6 +74,120 @@ def test_normalize_verdict_handles_currency_vocab():
         assert grade.normalize_verdict(v) == "not_supported", v
 
 
+# ---------- 1b. 2026-09-03 oracle revision (docs/research-skills-root-cause.md section 5) ----------
+
+def test_ungroundable_claim_is_excluded_from_grounding_precision_but_still_scored():
+    fixture = {"claims": [
+        {"id": "A", "category": "true_primary", "expected_disposition": "supported",
+         "grounding_terms": ["alpha"]},
+        {"id": "H", "category": "true_primary", "expected_disposition": "supported",
+         "grounding_terms": ["verbatim phrase from one repo"], "groundable": False},
+        {"id": "F", "category": "fabricated", "expected_disposition": "not_supported",
+         "grounding_terms": ["fake"]},
+    ]}
+    recs = [{"id": "A", "raw_verdict": "SUPPORTED", "cited_urls": ["u"], "grounded": True},
+            # a SUPPORTED on the un-groundable heuristic: previously an ungrounded assertion
+            {"id": "H", "raw_verdict": "SUPPORTED", "cited_urls": ["u"], "grounded": False},
+            {"id": "F", "raw_verdict": "UNCHARTED", "cited_urls": [], "grounded": None}]
+    m = grade.score_run(fixture, recs)
+    assert m["grounding_precision"] == pytest.approx(1.0), "H is un-groundable: excluded from the denominator"
+    assert (m["n_supported"], m["n_supported_groundable"], m["n_grounded_supported"]) == (2, 1, 1)
+    assert m["true_recall"] == pytest.approx(1.0) and m["verdict_accuracy"] == pytest.approx(1.0), (
+        "H still counts on disposition")
+    row = next(r for r in m["rows"] if r["id"] == "H")
+    assert row["groundable"] is False and row["grounded"] is None
+    # a CONTESTED on the un-groundable claim is still a wrong disposition (true_recall drops)
+    recs2 = [recs[0], {"id": "H", "raw_verdict": "CONTESTED", "cited_urls": [], "grounded": None}, recs[2]]
+    m2 = grade.score_run(fixture, recs2)
+    assert m2["true_recall"] == pytest.approx(0.5) and m2["grounding_precision"] == pytest.approx(1.0)
+
+
+def test_three_workers_sweetspot_is_marked_ungroundable_with_lineage():
+    claim = next(c for c in _FIXTURE["claims"] if c["id"] == "three-workers-sweetspot")
+    assert claim["groundable"] is False
+    assert "0/11" in claim["grounding_note"], "the note records the evidence: never grounded in either run"
+    others = [c for c in _FIXTURE["claims"] if c["id"] != "three-workers-sweetspot"]
+    assert all(c.get("groundable", True) for c in others), "only the one fuzzy heuristic claim is un-groundable"
+    revisions = _FIXTURE["_revisions"]
+    assert revisions[0]["supersedes_sha"] == "6a017f97d139", "the frozen results.json was measured against 6a017f97d139"
+    assert revisions[0]["frozen_sample_regrade"] == {"grounding_precision": {"with_skill": 1.0, "baseline": 1.0}}
+
+
+def _fixture_lineage() -> set[str]:
+    """Current fixture sha plus every sha it is a documented revision of (`_revisions`)."""
+    return {sha256(FIXTURE.read_bytes()).hexdigest()[:12]} | {
+        r["supersedes_sha"] for r in _FIXTURE.get("_revisions", [])}
+
+
+def _expected_frozen_value(results: dict, arm: str, metric: str):
+    """What the committed 2026-05-31 sample must re-grade to under the CURRENT fixture:
+    the frozen results.json value, unless a documented `_revisions` entry records that
+    the oracle correction changes how the frozen sample grades on that metric."""
+    for rev in _FIXTURE.get("_revisions", []):
+        override = rev.get("frozen_sample_regrade", {}).get(metric, {})
+        if arm in override:
+            return override[arm]
+    return results["metrics"][arm][metric]["mean"]
+
+
+def _run_regrade(*args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run([sys.executable, str(HARNESS / "regrade.py"), *args],
+                          capture_output=True, text=True, timeout=120, check=False)
+
+
+def test_regrade_tool_reproduces_frozen_baseline_under_documented_revision(results, tmp_path):
+    """regrade.py (no API calls, no fetches) re-derives the frozen 2026-05-31 numbers from
+    the committed sample on every metric except the one the documented revision changes
+    (grounding_precision 0.878/0.833 -> 1.0/1.0: every sub-1.0 value was the un-groundable claim)."""
+    out = tmp_path / "regrade-frozen.json"
+    proc = _run_regrade("--records", str(HARNESS / "runs" / "sample-records-2026-05-31.json"),
+                        "--run-date", results["run_date"], "--model", results["model"], "--output", str(out))
+    assert proc.returncode == 0, proc.stderr
+    rg = json.loads(out.read_text(encoding="utf-8"))
+    for arm in ("with_skill", "baseline"):
+        for k in grade._METRIC_KEYS:
+            assert abs(rg["metrics"][arm][k]["mean"] - _expected_frozen_value(results, arm, k)) < 1e-9, f"{arm}.{k}"
+    assert rg["metrics"]["with_skill"]["grounding_precision"]["mean"] == pytest.approx(1.0)
+    assert rg["metrics"]["baseline"]["grounding_precision"]["mean"] == pytest.approx(1.0)
+    # with a zero grounding_precision delta the CI-aware rule (added after the freeze) says BLOCKED
+    assert rg["verdict"]["verdict"] == "BLOCKED ON MEASUREMENT"
+
+
+def test_regrade_refuses_to_overwrite_frozen_results(tmp_path):
+    proc = _run_regrade("--records", str(HARNESS / "runs" / "sample-records-2026-05-31.json"),
+                        "--run-date", "2026-05-31", "--model", "claude-opus-4-8", "--output", str(RESULTS))
+    assert proc.returncode == 2
+    assert "immutable" in proc.stderr
+
+
+REGRADE_2026_09_03 = HARNESS / "runs" / "regrade-2026-09-03.json"
+SAMPLE_2026_09_03 = HARNESS / "runs" / "sample-records-2026-09-03.json"
+
+
+def test_regrade_2026_09_03_is_reproducible_and_baseline_at_ceiling(tmp_path):
+    """The offline re-grade of the 2026-09-03 Fable 5.1 rerun (docs/research-skills-root-cause.md
+    section 12) re-derives from its committed compact sample. Under the corrected oracle the
+    grounding_precision delta that drove the live verdict is 0.0 and the baseline is at ceiling."""
+    committed = json.loads(REGRADE_2026_09_03.read_text(encoding="utf-8"))
+    assert committed["model"] == "claude-fable-5-1" and committed["run_date"] == "2026-09-03"
+    out = tmp_path / "regrade.json"
+    proc = _run_regrade("--records", str(SAMPLE_2026_09_03), "--run-date", committed["run_date"],
+                        "--model", committed["model"], "--output", str(out))
+    assert proc.returncode == 0, proc.stderr
+    rg = json.loads(out.read_text(encoding="utf-8"))
+    assert rg["verdict"]["verdict"] == committed["verdict"]["verdict"]
+    for arm in ("with_skill", "baseline"):
+        for k in grade._METRIC_KEYS:
+            assert abs(rg["metrics"][arm][k]["mean"] - committed["metrics"][arm][k]["mean"]) < 1e-9, f"{arm}.{k}"
+    m = committed["metrics"]
+    assert m["with_skill"]["grounding_precision"]["mean"] == pytest.approx(1.0)
+    assert m["baseline"]["grounding_precision"]["mean"] == pytest.approx(1.0)
+    assert committed["verdict"]["delta"] == pytest.approx(0.0)
+    assert m["baseline"]["verdict_accuracy"]["mean"] == pytest.approx(1.0), (
+        "the baseline is at ceiling on this fixture: the harness cannot separate the arms")
+    assert committed["regrade"]["fixture_sha"] == sha256(FIXTURE.read_bytes()).hexdigest()[:12]
+
+
 # ---------- 2. Pin the committed frozen baseline ----------
 
 @pytest.fixture(scope="module")
@@ -88,8 +204,13 @@ def test_results_protocol_met(results):
 
 
 def test_results_freshness_matches_fixture(results):
-    assert results["fixture_sha"] == sha256(FIXTURE.read_bytes()).hexdigest()[:12], (
-        "results.json measured against a different fixture.json — re-run run_live.py.")
+    """The frozen results were measured against fixture 6a017f97d139. An oracle correction
+    may revise fixture.json WITHOUT a live re-run (results.json is immutable) only if it
+    records the superseded sha in `_revisions` and documents any metric whose frozen-sample
+    re-grade it changes (test_results_reproducible_from_committed_sample)."""
+    assert results["fixture_sha"] in _fixture_lineage(), (
+        "results.json measured against a fixture.json that is not in the current fixture's "
+        "revision lineage — re-run run_live.py or record the revision in fixture.json `_revisions`.")
 
 
 def test_both_arms_have_all_metrics(results):
@@ -147,8 +268,10 @@ def test_results_reproducible_from_committed_sample(results):
             for run in sample["runs"]])
         for k in ("grounding_precision", "refutation_recall", "fabrication_resistance",
                   "true_recall", "verdict_accuracy"):
-            assert abs(agg[k]["mean"] - results["metrics"][arm][k]["mean"]) < 1e-9, (
-                f"{arm}.{k}: re-graded sample != committed results")
+            # frozen value, or the value a documented fixture revision says the frozen
+            # sample now grades to (2026-09-03: grounding_precision 1.0/1.0)
+            assert abs(agg[k]["mean"] - _expected_frozen_value(results, arm, k)) < 1e-9, (
+                f"{arm}.{k}: re-graded sample != committed results (or documented revision)")
 
 
 # ---------- 3. run_live.py error paths (key-free; no live API calls are made) ----------

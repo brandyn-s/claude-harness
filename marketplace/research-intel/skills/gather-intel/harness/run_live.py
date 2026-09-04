@@ -242,8 +242,12 @@ def _fetch_text(url: str) -> str:
 
 
 def _ground(claim_obj: dict, verdict_obj: dict) -> bool | None:
-    """Grounded iff a SUPPORTED verdict cites a URL whose fetched text passes the term check."""
+    """Grounded iff a SUPPORTED verdict cites a URL whose fetched text passes the term check.
+    None for not-SUPPORTED verdicts and for claims the fixture marks `groundable: false`
+    (no fetch: the oracle has no page-level phrase to check, so precision excludes them)."""
     if grade.normalize_verdict(verdict_obj["verdict"]) != "supported":
+        return None
+    if not claim_obj.get("groundable", True):
         return None
     for url in verdict_obj.get("cited_urls", []):
         if grade.grounding_passes(claim_obj["grounding_terms"], _fetch_text(url)):

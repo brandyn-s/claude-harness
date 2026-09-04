@@ -160,7 +160,7 @@ def _run_live_copy(tmp_path: Path, fixture_text: str) -> subprocess.CompletedPro
     env = {k: v for k, v in os.environ.items() if not k.upper().startswith("ANTHROPIC")}
     return subprocess.run([sys.executable, str(tmp_path / "run_live.py"),
                            "--historical-reproduction", "--output", str(tmp_path / "runs" / "test.json"),
-                           "--runs", "1",
+                           "--runs", "1", "--allow-low-n",  # smoke: below MIN_RUNS on purpose
                            "--workers", "2"], capture_output=True, env=env, timeout=120)
 
 
@@ -183,3 +183,43 @@ def test_run_live_all_errors_abort_without_results(tmp_path):
     assert "API calls failed" in out
     assert "Traceback" not in out
     assert (tmp_path / "results.json").read_bytes() == before
+
+
+# ---------- 4. --runs gate: the harness refuses N below its own minimum unless overridden ----------
+
+def _plan(tmp_path: Path, *extra: str) -> subprocess.CompletedProcess[str]:
+    env = {k: v for k, v in os.environ.items() if not k.upper().startswith("ANTHROPIC")}
+    return subprocess.run([sys.executable, str(HARNESS / "run_live.py"), "--model", "claude-opus-5",
+                           "--output", str(tmp_path / "plan.json"), "--plan-only", *extra],
+                          capture_output=True, text=True, env=env, timeout=60, check=False)
+
+
+def test_run_live_refuses_runs_below_minimum_without_override(tmp_path):
+    """The 2026-09-03 rerun used --runs 1 and its `fix` rested on ONE flipped decision
+    (docs/research-skills-root-cause.md section 8). N<3 must be an explicit choice."""
+    proc = _plan(tmp_path, "--runs", "1")
+    assert proc.returncode == 2, proc.stdout + proc.stderr
+    assert "below the harness minimum of 3" in proc.stderr
+    assert "--allow-low-n" in proc.stderr
+    assert not (tmp_path / "plan.json").exists()
+    proc2 = _plan(tmp_path, "--runs", "2")
+    assert proc2.returncode == 2
+
+
+def test_run_live_allow_low_n_is_recorded_in_the_receipt(tmp_path):
+    low = _plan(tmp_path, "--runs", "1", "--allow-low-n")
+    assert low.returncode == 0, low.stdout + low.stderr
+    receipt = json.loads(low.stdout)
+    assert receipt["n_runs"] == 1 and receipt["min_runs"] == 3
+    assert receipt["low_n_override"] is True
+    ok = _plan(tmp_path, "--runs", "3")
+    assert ok.returncode == 0, ok.stdout + ok.stderr
+    assert json.loads(ok.stdout)["low_n_override"] is False
+    default = _plan(tmp_path)
+    assert default.returncode == 0 and json.loads(default.stdout)["low_n_override"] is False
+
+
+def test_harness_readme_documents_the_minimum_n():
+    text = (HARNESS / "README.md").read_text(encoding="utf-8")
+    assert "--runs 1" in text and "--allow-low-n" in text
+    assert "minimum" in text.lower() and "2026-09-03" in text
