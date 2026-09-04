@@ -1,0 +1,17 @@
+id: precompact-priorities
+type: hook
+event: PreCompact
+matcher: ""
+if_condition: null
+action_type: injector
+description: "Prints a static fidelity checklist that Claude Code appends to the compaction summarizer's prompt as Additional Instructions (unanswered questions, root causes vs ruled-out hypotheses, exact ids and numbers, subagent reports, A-vs-B decisions)."
+enforces: []
+blocks_patterns: []
+injects: "compaction-priorities checklist via PreCompact stdout -> summarizer Additional Instructions"
+modifies: null
+depends_on_files: []
+depends_on_env: []
+exit_codes:
+  "0": "always; the hook never blocks compaction"
+output_format: text
+incidents: []

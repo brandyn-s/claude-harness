@@ -75,6 +75,7 @@ Representative hooks:
 | `bash-tail-buffering-guard.py` | PreToolUse(Bash) | `producer \| tail` shapes that hide output |
 | `memory-write-guard.py` | PreToolUse(Write) | oversized memory entries |
 | `session-start.py` | SessionStart | (composes startup context) |
+| `precompact-priorities.py` | PreCompact | (appends a fidelity checklist to the compaction summarizer's prompt; measured in `skills/_shared/compaction-eval/`) |
 
 Hooks are wired in `settings.json` — see `settings.example.json`. Default and
 load-bearing hooks have direct behavior tests in `hooks/test-hooks/`; every
