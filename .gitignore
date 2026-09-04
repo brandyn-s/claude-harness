@@ -9,6 +9,8 @@
 
 # --- never commit: local runtime state ---
 settings.local.json
+# /audit-architecture server->topic aliases: environment-specific by design
+audit-architecture/aliases.json
 .claude/verdicts.json
 .env
 .credentials.json
