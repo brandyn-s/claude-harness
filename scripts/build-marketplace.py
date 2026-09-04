@@ -973,6 +973,68 @@ def _copy_helper_assets(plugin_dir: Path, helpers) -> int:
     return copied
 
 
+# Model contracts. scripts/model_contracts.py and contracts/model-capabilities.json
+# are read at RUN time by the persona and roundtable skills: persona's
+# scripts/model_runtime.py resolves parents[3]/contracts/model-capabilities.json
+# for alias resolution and current-id validation, and both skills' packaged
+# tests import scripts.model_contracts. A bundle that ships such a skill without
+# them fails alias resolution fast and lets an exact id through unvalidated. So
+# whenever a packaged skill .py names either, both ship at their source-relative
+# paths -- the same self-containment rule that makes safety-net ship
+# hooks/_environment_catalog.py beside the hooks that import it.
+MODEL_CONTRACT_FILES = (
+    "scripts/model_contracts.py",
+    "contracts/model-capabilities.json",
+)
+_MODEL_CONTRACT_RE = re.compile(r"\bmodel_contracts\b|model-capabilities\.json")
+
+
+def _model_contract_consumers(plugin_dir: Path) -> list[Path]:
+    """Packaged skill .py files that import model_contracts or name the contract."""
+    skills_dir = plugin_dir / "skills"
+    if not skills_dir.is_dir():
+        return []
+    return sorted(
+        path
+        for path in skills_dir.rglob("*.py")
+        if _MODEL_CONTRACT_RE.search(path.read_text(encoding="utf-8", errors="ignore"))
+    )
+
+
+def _copy_model_contracts(plugin_dir: Path) -> list[str]:
+    """Ship MODEL_CONTRACT_FILES when a packaged skill reads them; return what shipped."""
+    if not _model_contract_consumers(plugin_dir):
+        return []
+    shipped = []
+    for rel in MODEL_CONTRACT_FILES:
+        source = CLAUDE_DIR / rel
+        _assert_source_contained(source, CLAUDE_DIR, label="model contract")
+        destination = plugin_dir / rel
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
+        shipped.append(rel)
+    return shipped
+
+
+def check_model_contract_containment() -> list:
+    """Return [(plugin, consumer, problem)] where a built plugin packages a skill
+    that reads the model contracts but lacks a current copy of either file."""
+    problems = []
+    for plugin_def in PLUGINS:
+        plugin_dir = MARKETPLACE_DIR / plugin_def["name"]
+        consumers = _model_contract_consumers(plugin_dir)
+        if not consumers:
+            continue
+        consumer = consumers[0].relative_to(plugin_dir).as_posix()
+        for rel in MODEL_CONTRACT_FILES:
+            shipped = plugin_dir / rel
+            if not shipped.is_file():
+                problems.append((plugin_def["name"], consumer, f"missing {rel}"))
+            elif shipped.read_bytes() != (CLAUDE_DIR / rel).read_bytes():
+                problems.append((plugin_def["name"], consumer, f"stale {rel}"))
+    return problems
+
+
 _PYTHON_EXPANDUSER_SKILL_RE = re.compile(
     r"os\.path\.expanduser\(\s*([\"'])~/\.claude/skills/([^\"']+)\1\s*\)"
 )
@@ -1146,6 +1208,8 @@ def _assemble_plugin(plugin_def: dict, plugin_dir: Path) -> int:
 
     copied += _copy_shared_assets(plugin_dir, shared_sources)
     copied += _copy_helper_assets(plugin_dir, helper_sources)
+    model_contracts = _copy_model_contracts(plugin_dir)
+    copied += len(model_contracts)
 
     # The dependency lock is both review evidence and a deterministic test
     # surface. It contains source-relative names only, never host/runtime state.
@@ -1163,6 +1227,8 @@ def _assemble_plugin(plugin_def: dict, plugin_dir: Path) -> int:
             for kind, source in helper_sources
         ],
     }
+    if model_contracts:
+        dependency_lock["model_contracts"] = model_contracts
     (manifest_dir / "dependency-lock.json").write_text(
         json.dumps(dependency_lock, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -1808,6 +1874,17 @@ def _validate_built_marketplace() -> None:
             )
         raise MarketplaceValidationError("hook import containment failed")
     print("Hook import self-containment: OK")
+
+    contract_problems = check_model_contract_containment()
+    if contract_problems:
+        sys.stderr.write(
+            f"\nERROR: {len(contract_problems)} model-contract problem(s): a "
+            "packaged skill reads the model contracts the plugin does not ship:\n"
+        )
+        for plugin, consumer, problem in contract_problems:
+            sys.stderr.write(f"  [{plugin}] {consumer}: {problem}\n")
+        raise MarketplaceValidationError("model contract containment failed")
+    print("Model contract self-containment: OK")
 
 
 def _remove_transaction_path(path: Path) -> None:
