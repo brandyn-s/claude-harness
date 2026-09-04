@@ -25,6 +25,11 @@ STEP_5 Use exact verdicts:
 - UNCHARTED: bounded search found no adequate evidence either way.
 - SUPPORTED: multiple independent recent sources confirm.
 Document queries, dates, and sources scanned for negative/uncharted conclusions.
+Sources that exist only out of domain or era leave the claim UNCHARTED for this domain;
+cite them as adjacent prior work. A claim about the world ("LLMs cannot do X") and a
+claim about the literature ("no published study measures X") carry different
+evidentiary requirements; say which one you are making. UNCHARTED is generative: name
+the experiment or measurement that would settle it.
 STEP_6 If refuting two or more points, run `/interview` adversarially against the draft
 before presenting it.
 
@@ -34,6 +39,17 @@ before presenting it.
 - Before claiming "the system does/does not X," enumerate every instance of that role.
   One of N instances is preliminary evidence with explicit scope.
 - Proposal-source weakness reduces confidence; it does not refute the underlying claim.
+
+# An unqueried first-party surface is not UNCHARTED
+UNCHARTED is a verdict about the LITERATURE after a documented search, never a label for
+a fact you did not look up. When a first-party surface can answer the question (GraphQL
+introspection, an OpenAPI or JSON schema, a live read of the setting, vendor docs not yet
+fetched, source you can grep), query it FIRST and tag only what remains; a load-bearing
+UNCONFIRMED handed to the user is a work item, not a caveat to ship. An ABSENCE claim
+needs every relevant surface, not the first one: "there is no API for X" was asserted
+twice from query fields and types alone, and only the third pass checked mutations
+(0/361) — which is what made 0/361 mutations + 0/1,144 types + 0/161 root queries
+citable where either of the first two alone was partial.
 
 # Instrument provenance and coverage
 Before citing a count/log/metric about a subject, identify who authored the emitting

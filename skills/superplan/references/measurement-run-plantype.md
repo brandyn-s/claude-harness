@@ -67,8 +67,7 @@ Method (do this at AUTHORING time, not as an add-on):
    search — FRESHNESS-CONSTRAINED: **≤6 months, frontier-systems prioritized**. An LLM-behavior
    assumption about a 2026 model class CANNOT be validated by pre-LLM citations
    (`gather-research/references/citation-domain-freshness.md`).
-3. **TAG each** SUPPORTED / REFUTED / CONTESTED / UNCHARTED (`rules/uncharted-vs-refuted.md`,
-   `rules/symmetric-evidentiary-burden.md` — a refutation needs the same source bar as the claim).
+3. **TAG each** SUPPORTED / REFUTED / CONTESTED / UNCHARTED (`rules/symmetric-evidentiary-burden.md` — a refutation needs the same source bar as the claim).
    REFUTED → REDESIGN before execution. UNCHARTED → proceed but flag it; absence of a test is not
    refutation.
 4. The surviving design carries a **`## Research basis`** section citing the sources (this run's

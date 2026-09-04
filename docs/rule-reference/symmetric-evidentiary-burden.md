@@ -37,7 +37,7 @@ STEP_4 for LLM-behavior claims about specific model classes (Opus 4.5+,
 STEP_5 distinguish four verdict categories explicitly:
          REFUTED — multiple independent recent sources contradict the claim
          CONTESTED — evidence on both sides; document both
-         UNCHARTED — no published evidence either way (see uncharted-vs-refuted.md)
+         UNCHARTED — no published evidence either way (the rule's UNCHARTED sections)
          SUPPORTED — multiple independent recent sources confirm
        Single-source "refutations" go in CONTESTED with the source noted as
        preliminary.

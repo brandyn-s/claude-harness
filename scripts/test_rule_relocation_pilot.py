@@ -66,11 +66,8 @@ def test_known_positive_output_grounding_scope_names_its_owner_skills():
 
 
 @pytest.mark.parametrize("rule", [
-    "uncharted-vs-refuted",
-    "best-in-class-for-cross-model",
     "eval-shipping-discipline",
     "security-critical-search-verification",
-    "verify-instrument-before-fix",
     "red-team-rubric-discipline",
     "symmetric-evidentiary-burden",
     "compare-by-need",

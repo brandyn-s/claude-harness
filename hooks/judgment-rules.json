@@ -10,7 +10,7 @@
       "id": "prove-the-instrument",
       "breadth_pct": 40,
       "triggers": ["accuracy", "is it clean", "no findings", "is it complete", "is it benign", "consensus", "sentiment", "is the scan complete", "comprehensive", "did we catch", "is that all", "how reliable", "is it correct", "verify the number", "is it actually clean"],
-      "reminder": "PROVE THE INSTRUMENT (recurs in ~40% of large sessions): before publishing any measured/audited number or 'clean/complete/benign' verdict, validate the instrument — confirm the cursor/page is exhausted (one page is never 'complete'), confirm no field was silently dropped or capped, and for perception/consensus questions require >=2 independent instruments reconciled by ID. A number from an unvalidated tool is indistinguishable from a correct one. (verify-effectiveness.md / verify-instrument-before-fix.md)"
+      "reminder": "PROVE THE INSTRUMENT (recurs in ~40% of large sessions): before publishing any measured/audited number or 'clean/complete/benign' verdict, validate the instrument — confirm the cursor/page is exhausted (one page is never 'complete'), confirm no field was silently dropped or capped, and for perception/consensus questions require >=2 independent instruments reconciled by ID. A number from an unvalidated tool is indistinguishable from a correct one. (verify-effectiveness.md)"
     },
     {
       "id": "plumbing-not-outcome",

@@ -202,6 +202,24 @@ revocation. The documented kill switch said rotation "invalidates every
 outstanding token at once", so an operator following it during a leak would have
 believed 914 users' tokens were dead while every one still worked.
 
+### Verify the instrument before fixing the subject
+
+When one contingency-table cell holds 30% or more of the failure mass, sample 3-5 of
+its edges, open the cited source for each, and classify REAL, INSTRUMENT, or UNCLEAR
+before designing any fix: 3 of 5 INSTRUMENT means fix the harness and re-run; 3 of 5
+REAL means fix the system; mixed means split the cell. Before claiming "+X pp", prove
+baseline and treatment used the same instrument version, oracle rules, sampling
+defaults, and index; re-baseline after any instrument change, and re-run a baseline
+older than 24 hours. For an alarm whose metric a verifier you wrote produces, verify
+the verifier first — its input artifact exists with the expected units, its logic
+re-run by hand agrees, and the producer finished before it ran; while the producer is
+unfinished emit INCONCLUSIVE and no metric. Code younger than the failure cannot be
+its cause. If the authoritative instrument is unavailable the verdict is UNKNOWN; a
+reachable proxy is context after that, never the headline. When a gate reports a
+failure or an implausibly clean pass, check its own call plumbing first — argument
+shape, `rc=$?` captured before any `$(...)` on the same line, and zsh's unsplit
+variables — because a mis-called gate is an instrumentation error, not a finding.
+
 ## A clean source-vs-data diff is not exoneration — diff against the DEPLOYED code
 
 REQUIRED: for a failing data-vs-code contract, download and read the DEPLOYED artifact

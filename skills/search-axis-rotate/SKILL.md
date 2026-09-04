@@ -50,7 +50,7 @@ Pick the lowest-cost untried axis and run its cheap instrument (table above). **
 ### Step 5 — TESTED-refuted vs UNTESTED-uncharted (the honesty gate)
 Before claiming any axis is a "wall", classify it:
 - **TESTED-REFUTED** — measured to refusal across the class (e.g. 8 distinct mechanisms all refused + a direct probe). A real wall; document it as a finding and stop rotating on it.
-- **UNTESTED-UNCHARTED** — an axis/lever not yet exercised. NOT a wall. Rotate to it. Absence of a result in your search is a property of the search, not the world (`[[uncharted-vs-refuted]]`).
+- **UNTESTED-UNCHARTED** — an axis/lever not yet exercised. NOT a wall. Rotate to it. Absence of a result in your search is a property of the search, not the world (`[[symmetric-evidentiary-burden]]`).
 
 FORBIDDEN: declaring a ceiling/frontier from a plateau. Enumerate the untried axes instead (`[[feedback_no-ceiling-assumptions]]`).
 
@@ -80,6 +80,6 @@ FORBIDDEN: declaring a ceiling/frontier from a plateau. Enumerate the untried ax
 
 ## References
 - `[[break-plateau-by-axis-rotation]]` (memory) — the axis taxonomy + discipline this skill operationalizes.
-- The measurement-axis rule cluster: `verify-effectiveness.md`, `verify-instrument-before-fix.md`, `diagnose-before-fix.md`, `reproduce-before-optimize.md`, `uncharted-vs-refuted.md`, `verify-before-assuming.md`.
+- The measurement-axis rule cluster: `verify-effectiveness.md`, `diagnose-before-fix.md`, `reproduce-before-optimize.md`, `symmetric-evidentiary-burden.md`, `verify-before-assuming.md`.
 - `/plateau-diagnose` — the measurement axis as a full metric-cell recipe.
 - `/red-team-axes` — the axes instantiated for adversarial targets via the harness.

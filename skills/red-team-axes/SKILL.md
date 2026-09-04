@@ -81,4 +81,4 @@ Real findings are the operator's call to route (Linear / message) — the harnes
 - `/search-axis-rotate` — the general parent; this is its adversarial specialization.
 - `~/Documents/GitHub/harness` — `HANDOFF.md`, `README.md`, `generators/`, `oracles/`, `intake/`.
 - `[[break-plateau-by-axis-rotation]]` (memory) + `absorb-frontier-red-team.md` (M5 decorrelation).
-- Measurement rules: `verify-effectiveness.md`, `verify-instrument-before-fix.md`, `uncharted-vs-refuted.md`.
+- Measurement rules: `verify-effectiveness.md`, `symmetric-evidentiary-burden.md`.

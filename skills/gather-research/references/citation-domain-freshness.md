@@ -13,7 +13,7 @@ Asymmetric application — strict on supporting evidence, lax on counter-evidenc
 - **DO NOT cite Becattini 2019 to refute LLM analogical-reasoning claims** — pre-LLM human-engineering-design study. Use Lewis-Mitchell 2024 / Qin et al. ACL 2025 / Salvi 2026 / Padmakumar 2025 / Yang ICML 2025 instead.
 - **DO NOT cite Lewis-Mitchell 2024 to refute Opus 4.7 behavior** — tested GPT-3, GPT-3.5, GPT-4. Wrong model class.
 - **DO NOT cite Sciencedirect 2013 TRIZ review to refute 2026 LLM+TRIZ tooling** — pre-LLM era.
-- **DO NOT treat "I haven't searched this" as "no research exists"** — see uncharted-vs-refuted.md.
+- **DO NOT treat "I haven't searched this" as "no research exists"** — see symmetric-evidentiary-burden.md.
 - **Multi-source convergence still requires source-domain match** — three pre-LLM papers don't refute an LLM-era claim, even if they all agree.
 
 ## Domain dimensions to check
@@ -60,7 +60,7 @@ For each source cited as primary evidence in a finding (whether supporting or co
 - Single PRIMARY + multiple ADJACENT = CONTESTED, not REFUTED. Document the freshness/domain mismatch in the finding.
 
 **STEP 5**: When PRIMARY sources are absent:
-- Tag the claim UNCHARTED (see uncharted-vs-refuted.md).
+- Tag the claim UNCHARTED (see symmetric-evidentiary-burden.md).
 - Document the search you ran (queries, date range, sources scanned).
 - DO NOT use ADJACENT or OFF-DOMAIN sources to fill the gap and claim REFUTED.
 
@@ -123,6 +123,6 @@ These are real failure cases the rule was created to prevent. Each shows the ori
 ## Related rules and references
 
 - `~/.claude/rules/symmetric-evidentiary-burden.md` — refutations need same source bar as claims
-- `~/.claude/rules/uncharted-vs-refuted.md` — when PRIMARY sources are absent, tag UNCHARTED not REFUTED
+- `~/.claude/rules/symmetric-evidentiary-burden.md` — when PRIMARY sources are absent, tag UNCHARTED not REFUTED
 - `references/research-evaluation-framework.md` — the broader rigor/evidence/applicability scoring
 - `references/search-waves.md` — query construction for finding PRIMARY sources

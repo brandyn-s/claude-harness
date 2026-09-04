@@ -302,7 +302,7 @@ For every finding:
 3. **Prefer the API reference over the prose guide** where they disagree — finding
    #1 in this KB exists because the reference carried 3 actor types the guide
    omitted. When they differ, record both and say which you trust.
-4. Currency calibration per `rules/uncharted-vs-refuted.md`: a bounded search
+4. Currency calibration per `rules/symmetric-evidentiary-burden.md`: a bounded search
    finding nothing is a property of the search. `UNCHARTED` is a valid verdict;
    fabricated refutation is not.
 

@@ -89,7 +89,7 @@ GUARD pattern="we've hit the ceiling" or "this is the reachable frontier" or "di
   is the exact 2026-07-24 user correction ("Stop immediately assuming that you are reaching a
   ceiling or reachable frontier at the slightest inconvenience. In fact, I never want you to
   assume that") — the fortnight's most-repeated frustration, corrected ~4x across 3 sessions.
-  UNCHARTED (see uncharted-vs-refuted.md), not a wall, is the honest tag when the experiment
+  UNCHARTED (see symmetric-evidentiary-burden.md), not a wall, is the honest tag when the experiment
   hasn't been run. NO EXCEPTIONS on an empirical task with an unreproduced reference.
 
 # ─── FAILURE MODES ───

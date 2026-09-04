@@ -622,7 +622,7 @@ and the originating near-miss (Finding #2 conflating `settings.json` vs
 
 **Currency calibration — do not over-reject current features (measured fix):**
 when judging a feature/flag/command NONEXISTENT or stale, apply
-`uncharted-vs-refuted.md` — absence of a first-party hit in a *bounded* search
+`symmetric-evidentiary-burden.md` — absence of a first-party hit in a *bounded* search
 is a property of the search, not evidence of absence. If multiple independent
 credible sources describe the SPECIFIC feature and no first-party source
 contradicts it, classify it CURRENT at lower confidence; reserve NONEXISTENT for

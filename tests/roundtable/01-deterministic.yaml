@@ -17,7 +17,7 @@ must_happen:
 
 deterministic:
   # --- Cross-model validity is the skill's entire reason to exist: three DIFFERENT
-  # vendors, not three Claude models. best-in-class-for-cross-model.md makes this a
+  # vendors, not three Claude models. eval-shipping-discipline.md makes this a
   # standing rule, so a drift to same-family jurors silently voids the result.
   - body_contains:
       - "Grok"

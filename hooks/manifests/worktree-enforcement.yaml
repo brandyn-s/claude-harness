@@ -8,6 +8,7 @@ description: "Enforces worktree isolation for protected repo edits -- blocks wri
 enforces:
   - git-hygiene
   - subagent-verification
+  - worktree-by-default
 blocks_patterns:
   - writes_to_protected_repo_outside_worktree
 injects: null

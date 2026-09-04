@@ -11,7 +11,6 @@ requires_tools:
   - "Edit"
 requires_topics: []  # See SKILL.md References for optional user-local context files (not required).
 requires_rules:
-  - verify-instrument-before-fix
   - verify-effectiveness
 requires_skills:
   - persona

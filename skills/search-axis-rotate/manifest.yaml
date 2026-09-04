@@ -11,9 +11,8 @@ requires_tools:
   - "AskUserQuestion"
 requires_topics: []
 requires_rules:
-  - uncharted-vs-refuted
+  - symmetric-evidentiary-burden
   - verify-effectiveness
-  - verify-instrument-before-fix
   - reproduce-before-optimize
   - diagnose-before-fix
   - verify-before-assuming
@@ -47,7 +46,7 @@ invocation:
   effort: medium
 
 enforces:
-  - uncharted-vs-refuted
+  - symmetric-evidentiary-burden
   - reproduce-before-optimize
 
 incidents:

@@ -25,7 +25,7 @@ requires_topics:
   - knowledge-asymmetric-collaboration.md
 requires_rules:
   - output-grounding
-  - uncharted-vs-refuted
+  - symmetric-evidentiary-burden
 requires_skills:
   - deep-dive
   - gather-intel

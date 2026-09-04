@@ -59,6 +59,15 @@ name that axis in the decision record.
 - An LLM-rater count is provider-dependent. Compare the ratio/set under the
   same rater, confirm a load-bearing direction with a second rater from a
   different provider, and mechanically ground the finding set.
+- Every arm of a cross-model validation, second-rater, or panel comparison is its
+  vendor's flagship, generally-available reasoning model. Vendor diversity buys
+  independence, not validity: a disagreement between a strong and a mid-tier judge
+  cannot distinguish a noisy grouping from a weaker judge (2026-06-29: Sonnet 87% vs
+  Nova Pro 26%, κ=0.10, shipped as "rater-dependent"). Probe each arm's reachability
+  with one cheap call first; if a flagship is blocked, substitute another vendor's
+  flagship or surface the block and ask — never run a mid-tier arm and present the
+  result as cross-model. State each arm's exact model id and tier in the output. Only
+  a measured A/B tie on this task's metric licenses a smaller model.
 - A carried-forward artifact is not an oracle until it passes a
   self-consistency check. Separate copied rows from computed rows and score the
   computed subset. If self-consistency fails, use a small hand-verified

@@ -10,9 +10,8 @@ requires_tools:
   - "Bash"
 requires_topics: []
 requires_rules:
-  - uncharted-vs-refuted
+  - symmetric-evidentiary-burden
   - verify-effectiveness
-  - verify-instrument-before-fix
 requires_skills:
   - search-axis-rotate
 requires_auth: []
@@ -47,7 +46,7 @@ compatibility:
       fallback: "Run the axes manually using the generator/oracle concepts if the harness repo is absent."
 
 enforces:
-  - uncharted-vs-refuted
+  - symmetric-evidentiary-burden
   - verify-effectiveness
 
 incidents:

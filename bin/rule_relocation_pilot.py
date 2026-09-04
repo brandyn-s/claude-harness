@@ -163,16 +163,6 @@ CANDIDATES = [
     # SCOPE-NOT-SKILL-BOUND. If one ever verdicts SAFE, either its @scope was
     # narrowed deliberately or the guard regressed -- check before relocating.
     Candidate(
-        rule="uncharted-vs-refuted",
-        owner_skills={"gather-claude-endpoints", "gather-openai-endpoints", "gather-vendor", "red-team-axes", "scout-frontier", "search-axis-rotate", "software-security-review"},
-        note="named by requires_rules in 7 skill(s), but @scope is a TASK TYPE -- expected to refuse",
-    ),
-    Candidate(
-        rule="best-in-class-for-cross-model",
-        owner_skills={"gather-vendor", "software-security-review"},
-        note="named by requires_rules in 2 skill(s), but @scope is a TASK TYPE -- expected to refuse",
-    ),
-    Candidate(
         rule="eval-shipping-discipline",
         owner_skills={"build-measurement-harness", "gather-vendor", "search-campaign"},
         note="named by requires_rules in 3 skill(s), but @scope is a TASK TYPE -- expected to refuse",
@@ -181,11 +171,6 @@ CANDIDATES = [
         rule="security-critical-search-verification",
         owner_skills={"verify-search-result"},
         note="named by requires_rules in 1 skill(s), but @scope is a TASK TYPE -- expected to refuse",
-    ),
-    Candidate(
-        rule="verify-instrument-before-fix",
-        owner_skills={"build-measurement-harness", "plateau-diagnose", "red-team-axes", "search-axis-rotate"},
-        note="named by requires_rules in 4 skill(s), but @scope is a TASK TYPE -- expected to refuse",
     ),
     Candidate(
         rule="red-team-rubric-discipline",

@@ -90,7 +90,7 @@ overall verdict_accuracy slightly WORSE. Verdict: **`fix`** (specific fixable me
 deprecation value worth preserving).
 
 ### 5b. THE FIX (commit `cd68b0b`)
-Relaxed SUPPORTED/UNCHARTED per `uncharted-vs-refuted.md`: absence of a first-party hit in a
+Relaxed SUPPORTED/UNCHARTED per `symmetric-evidentiary-burden.md`: absence of a first-party hit in a
 *bounded* search is a property of the search, not the world. Strongly-corroborated current
 features (multiple independent credible sources, no first-party contradiction) → SUPPORTED at
 lower confidence; UNCHARTED reserved for features with NO credible attestation anywhere (a single
