@@ -125,7 +125,11 @@ def main() -> int:
         # of the code under test, but it IS worth surfacing: a directory of tests
         # that collects zero is usually a broken import, not an empty directory.
         if returncode == 5:
+            # Every directory here was selected BECAUSE it holds test_*.py files, so
+            # zero collected means discovery is broken (bad import, renamed prefix):
+            # a failure, not a quiet EMPTY row (zero-discovery guard, 2026-09-03).
             status = "EMPTY"
+            bad.append((rel, returncode, out + "\n\nZERO-DISCOVERY: this directory collected no tests"))
         elif returncode == 124:
             status = "TIME"
             bad.append((rel, returncode, out))

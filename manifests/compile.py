@@ -332,6 +332,12 @@ def compile_graph(
         print(f"Loaded {total} manifests: {skills} skills, {hooks} hooks, {rules} rules")
 
     struct_issues = validate(components, root)
+    if total == 0:
+        struct_issues.append(
+            "  ZERO_MANIFESTS: no manifests were discovered under "
+            f"{root} — discovery is broken (wrong --root or a renamed directory), "
+            "so nothing was validated"
+        )
     sem_issues = validate_semantic(root, components)
 
     if struct_issues:
@@ -390,6 +396,80 @@ def compile_graph(
     return len(issues)
 
 
+def self_test(root: Path) -> int:
+    """Prove every detector still fires by seeding one defect each into a scratch copy.
+
+    A checker whose pattern silently stopped matching reports a clean repo forever;
+    this is the guard against that (pattern: trailofbits/skills validator --self-test).
+    Returns 0 when every detector fired, 1 otherwise. Prints one line per detector.
+    """
+    import contextlib
+    import io
+    import shutil
+    import tempfile
+
+    def _copy_tree(src: Path, dst: Path):
+        dst.mkdir(parents=True, exist_ok=True)
+        for base, pattern in (("skills", "*/manifest.yaml"), ("skills", "*/SKILL.md"), ("skills/_shared", "*.md"),
+                              ("hooks/manifests", "*.yaml"), ("hooks", "*.py"), ("rules", "*.md"),
+                              ("rules/manifests", "*.yaml")):
+            for f in (src / base).glob(pattern):
+                if f.is_file():
+                    target = dst / f.relative_to(src)
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(f, target)
+        for name in ("settings.json", "settings.example.json"):
+            if (src / name).exists():
+                shutil.copy2(src / name, dst / name)
+
+    def _issues(scratch: Path) -> str:
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            compile_graph(scratch, check_only=True, quiet=True, no_reindex=True, strict_semantic=True)
+        return buf.getvalue()
+
+    def _first(scratch: Path, kind: str, pattern: str) -> Path:
+        cands = sorted((scratch / kind).glob(pattern))
+        if not cands:
+            raise RuntimeError(f"self-test needs at least one {kind}/{pattern} to mutate")
+        return cands[0]
+
+    results = {}
+    with tempfile.TemporaryDirectory(prefix="compile-selftest-") as tmp:
+        base = Path(tmp)
+        scratch = base / "dangling"; _copy_tree(root, scratch)          # DANGLING
+        m = _first(scratch, "hooks/manifests", "*.yaml")
+        m.write_text(m.read_text(encoding="utf-8") + "\nenforces:\n  - no-such-rule-selftest\n", encoding="utf-8")
+        results["DANGLING"] = "DANGLING" in _issues(scratch)
+        scratch = base / "placeholder"; _copy_tree(root, scratch)       # PLACEHOLDER
+        m = _first(scratch, "hooks/manifests", "*.yaml")
+        text = m.read_text(encoding="utf-8")
+        text = re.sub(r"(?m)^event:.*$", "event: TODO_EVENT", text) if re.search(r"(?m)^event:", text) else text + "\nevent: TODO_EVENT\n"
+        m.write_text(text, encoding="utf-8")
+        results["PLACEHOLDER"] = "PLACEHOLDER" in _issues(scratch)
+        scratch = base / "missing"; _copy_tree(root, scratch)           # MISSING_SOURCE
+        _first(scratch, "skills", "*/SKILL.md").unlink()
+        results["MISSING_SOURCE"] = "MISSING_SOURCE" in _issues(scratch)
+        scratch = base / "drift"; _copy_tree(root, scratch)             # DRIFT
+        skill_md = _first(scratch, "skills", "*/SKILL.md")
+        skill_md.write_text(skill_md.read_text(encoding="utf-8") + "\n\nUse mcp__selftest_server__probe here.\n", encoding="utf-8")
+        results["DRIFT"] = "DRIFT" in _issues(scratch)
+        scratch = base / "empty"                                        # ZERO_MANIFESTS
+        for d in ("skills", "hooks/manifests", "rules/manifests"):
+            (scratch / d).mkdir(parents=True)
+        (scratch / "settings.json").write_text('{"hooks": {}}', encoding="utf-8")
+        results["ZERO_MANIFESTS"] = "ZERO_MANIFESTS" in _issues(scratch)
+
+    failed = [k for k, fired in results.items() if not fired]
+    for k, fired in results.items():
+        print(f"  {k}: {'fired' if fired else 'SILENT'}")
+    if failed:
+        print(f"SELF-TEST FAILED: detector(s) did not fire on a seeded defect: {', '.join(failed)}")
+        return 1
+    print("Self-test: OK (every detector fired on its seeded defect)")
+    return 0
+
+
 def _default_root() -> Path:
     """Pick the most sensible default root.
 
@@ -423,11 +503,15 @@ def main():
     )
     parser.add_argument("--no-reindex", action="store_true", help="Skip the code-search reindex notification.")
     parser.add_argument("--quiet", action="store_true", help="Suppress success output; only print on issues.")
+    parser.add_argument("--self-test", action="store_true",
+                        help="Seed one defect per detector into a scratch copy and require each to fire.")
     args = parser.parse_args()
 
     if not args.root.exists():
         print(f"ERROR: root does not exist: {args.root}", file=sys.stderr)
         sys.exit(2)
+    if args.self_test:
+        sys.exit(self_test(args.root))
 
     issue_count = compile_graph(
         args.root,

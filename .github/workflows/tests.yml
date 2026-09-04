@@ -39,6 +39,8 @@ jobs:
       # dangling manifest references accumulated with nothing complaining.
       - name: Validate the manifest graph
         run: python3 manifests/compile.py --root . --check --strict-semantic --no-reindex
+      - name: Prove the manifest validator's detectors still fire
+        run: python3 manifests/compile.py --self-test --root .
 
       - name: Validate hook and test target paths
         run: python3 scripts/validate-hook-paths.py
