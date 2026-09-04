@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for reconcile_observed.py — the live-data reconciliation leg.
+"""Tests for reconcile_observed.py — the probe leg and the observed-inventory leg.
 
 The load-bearing assertions here are the SAFETY ones, because this is the only
 script in the skill that makes authenticated calls to a production API:
@@ -15,16 +15,20 @@ script in the skill that makes authenticated calls to a production API:
     false-negative machine: it makes a healthy surface look like a gap.
   * A missing key MUST report SKIPPED_NO_KEY, never "unreachable" — conflating an
     instrument gap with a finding is the failure this whole skill exists to
-    prevent.
-  * An Athena failure MUST raise, never return []. An empty observed set would
-    mark every documented fact DOC_ONLY and hide every UNDOCUMENTED one, i.e. a
-    query failure would render as perfect reconciliation.
+    prevent. Every leg skipped is an instrument problem (exit 2), not coverage.
+  * The observed leg reads a plain JSON inventory and nothing else: no cloud
+    SDK, no CLI shell-out, no credentials. A missing or malformed inventory is a
+    clear exit-2 error — never a traceback, and never an EMPTY observed set,
+    which would mark every documented fact DOC_ONLY and hide every UNDOCUMENTED
+    one, i.e. render an input failure as perfect reconciliation.
 
-stdlib only; no AWS and no network are touched.
+stdlib only; no credentials and no network are touched.
 """
 
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 import sys
 import tempfile
@@ -34,6 +38,7 @@ from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
+import diff_channels as dc_mod  # module-swapped to the shared engine
 import reconcile_observed as R
 
 
@@ -46,6 +51,25 @@ def _kb(baselines: dict[str, list[str]]) -> Path:
         (b / f"{key}.json").write_text(
             json.dumps({"values": sorted(values), "captured": "2026-07-01"}), encoding="utf-8")
     return d
+
+
+def _baseline(kb: Path, key: str) -> dict:
+    return json.loads((kb / "reference" / "claude-data-channels" / "baselines"
+                       / f"{key}.json").read_text(encoding="utf-8"))
+
+
+def _inventory(kb: Path, data) -> Path:
+    p = kb / "observed.json"
+    p.write_text(json.dumps(data), encoding="utf-8")
+    return p
+
+
+def _run(argv: list[str]) -> tuple[int, str, str]:
+    """main() with stdout/stderr captured — the CLI is the contract under test."""
+    out, err = io.StringIO(), io.StringIO()
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        rc = R.main(argv)
+    return rc, out.getvalue(), err.getvalue()
 
 
 class ProbeSafetyTests(unittest.TestCase):
@@ -127,7 +151,7 @@ class ClassificationTests(unittest.TestCase):
 
     def test_engagement_probe_respects_the_freshness_floor(self):
         """Engagement endpoints refuse a window newer than ~3 days; asking for
-        today 400s forever (mcp-infra #718 looped 12x/hour for four days)."""
+        today 400s forever (a poller once looped 12x/hour for four days)."""
         import datetime
         p = R.probe_params_for("/v1/organizations/analytics/skills")
         asked = datetime.date.fromisoformat(p["date"])
@@ -152,13 +176,45 @@ class MissingKeyTests(unittest.TestCase):
         self.assertEqual(R.KEY_SERVICES["compliance"], "ANTHROPIC_COMPLIANCE_API_KEY")
         self.assertEqual(R.KEY_SERVICES["admin"], "ANTHROPIC_ADMIN_API_KEY")
 
+    def test_keychain_absent_on_a_non_macos_host_reads_as_no_key(self):
+        """No `security` binary is the same instrument gap as no item: SKIPPED,
+        never a crash and never 'unreachable'."""
+        with mock.patch.object(R.subprocess, "run", side_effect=OSError("no security")):
+            self.assertIsNone(R.keychain("ANTHROPIC_ADMIN_API_KEY"))
+
+    def test_every_probe_leg_skipped_is_an_instrument_problem(self):
+        """A --probe run with no keys at all measured nothing. Exit 2 (instrument),
+        never 0 — a green run that probed nothing is the coverage-theater case."""
+        kb = _kb({"analytics-endpoint-paths": ["/v1/organizations/analytics/skills"]})
+        with mock.patch.object(R, "keychain", return_value=None), \
+             mock.patch.object(dc_mod, "code_freshness", return_value=("FRESH", "")):
+            rc, _out, err = _run(["--kb", str(kb), "--probe"])
+        self.assertEqual(rc, 2)
+        self.assertIn("instrument", err.lower())
+
+    def test_one_probed_leg_is_not_an_instrument_gap(self):
+        """Partial keys are a normal state: probe what can be probed, report the
+        rest SKIPPED, exit 0."""
+        kb = _kb({"analytics-endpoint-paths": ["/v1/organizations/analytics/skills"]})
+
+        def only_admin(service):
+            return "k" if service == R.KEY_SERVICES["admin"] else None
+
+        with mock.patch.object(R, "keychain", side_effect=only_admin), \
+             mock.patch.object(R, "probe_endpoint", return_value=(200, "200")), \
+             mock.patch.object(dc_mod, "code_freshness", return_value=("FRESH", "")):
+            rc, out, _err = _run(["--kb", str(kb), "--probe"])
+        self.assertEqual(rc, 0)
+        self.assertIn("[PROBED] admin-endpoint-paths", out)
+        self.assertIn("[SKIPPED] analytics-endpoint-paths", out)
+
 
 class ReconcileTests(unittest.TestCase):
-    def test_live_but_undocumented_is_flagged(self):
+    def test_observed_but_undocumented_is_flagged(self):
         """Fixtures use the REAL naming conventions of each side: the baseline holds
-        fully-qualified `claude_code.x` (as the docs write it) while Athena's
-        event_name column holds the bare suffix. A bare-name baseline fixture would
-        pass while hiding the normalization the live run actually needs."""
+        fully-qualified `claude_code.x` (as the docs write it) while a flattened
+        OTel export commonly holds the bare suffix. A bare-name baseline fixture
+        would pass while hiding the normalization a real inventory needs."""
         kb = _kb({"otel-events": ["claude_code.api_error", "claude_code.tool_result"]})
         rec = R.reconcile(kb, {"otel-events": ["api_error", "tool_result",
                                                "subagent_completed"]})
@@ -168,11 +224,11 @@ class ReconcileTests(unittest.TestCase):
 
     def test_naming_convention_mismatch_is_not_reported_as_drift(self):
         """THE regression this normalizer exists for. Docs write
-        `claude_code.api_error`; Athena stores `api_error`. Without normalization
-        the reconciler reported ALL 25 observed events as UNDOCUMENTED and would
-        have written 25 duplicate bare-name rows into the baseline plus a permanent
-        false DRIFT — caught only because 25 implausibly equalled the whole
-        observed set."""
+        `claude_code.api_error`; a flattened export stores `api_error`. Without
+        normalization the reconciler reported ALL 25 observed events as
+        UNDOCUMENTED and would have written 25 duplicate bare-name rows into the
+        baseline plus a permanent false DRIFT — caught only because 25
+        implausibly equalled the whole observed set."""
         kb = _kb({"otel-events": ["claude_code.api_error", "claude_code.tool"]})
         rec = R.reconcile(kb, {"otel-events": ["api_error", "tool"]})
         self.assertEqual(rec["otel-events"]["status"], R.RECONCILED)
@@ -190,21 +246,29 @@ class ReconcileTests(unittest.TestCase):
         self.assertEqual(R.normalize("activity-types", ["claude_file_uploaded"]),
                          ["claude_file_uploaded"])
 
-    def test_documented_but_unobserved_is_NOT_flagged_as_a_gap(self):
-        """DOC_ONLY is informational. Treating it as a gap inflates every
-        coverage denominator — 412 documented activity types vs 139 we emit."""
+    def test_documented_but_unobserved_is_DOC_ONLY_not_a_gap(self):
+        """DOC_ONLY is its own informational status (as in the OpenAI sibling), and
+        it is NOT a gap: treating it as one inflates every coverage denominator —
+        412 documented activity types vs 139 an org actually emits."""
         kb = _kb({"activity-types": ["x", "y", "z"]})
         rec = R.reconcile(kb, {"activity-types": ["x"]})
-        self.assertEqual(rec["activity-types"]["status"], R.RECONCILED)
+        self.assertEqual(rec["activity-types"]["status"], R.DOC_ONLY)
         self.assertEqual(rec["activity-types"]["doc_only_count"], 2)
+        self.assertEqual(rec["activity-types"]["undocumented"], [])
 
-    def test_exit_code_is_nonzero_only_when_undocumented_exists(self):
-        kb = _kb({"otel-events": ["claude_code.a"]})
-        obs = kb / "obs.json"
-        obs.write_text(json.dumps({"otel-events": ["a"]}), encoding="utf-8")
-        self.assertEqual(R.main(["--kb", str(kb), "--observed", str(obs)]), 0)
-        obs.write_text(json.dumps({"otel-events": ["a", "new"]}), encoding="utf-8")
-        self.assertEqual(R.main(["--kb", str(kb), "--observed", str(obs)]), 1)
+    def test_exact_match_is_RECONCILED(self):
+        kb = _kb({"activity-types": ["x", "y"]})
+        rec = R.reconcile(kb, {"activity-types": ["y", "x"]})
+        self.assertEqual(rec["activity-types"]["status"], R.RECONCILED)
+        self.assertEqual(rec["activity-types"]["doc_only_count"], 0)
+
+    def test_undocumented_outranks_doc_only(self):
+        """A fact-set can be both under- and over-documented; the actionable
+        half (detector blind) names the status."""
+        kb = _kb({"activity-types": ["x", "y"]})
+        rec = R.reconcile(kb, {"activity-types": ["x", "new"]})
+        self.assertEqual(rec["activity-types"]["status"], R.UNDOCUMENTED)
+        self.assertEqual(rec["activity-types"]["doc_only_count"], 1)
 
     def test_missing_baseline_is_NO_BASELINE_not_all_undocumented(self):
         kb = _kb({})
@@ -212,56 +276,14 @@ class ReconcileTests(unittest.TestCase):
         self.assertEqual(rec["otel-events"]["status"], R.NO_BASELINE)
 
 
-class AthenaFailureTests(unittest.TestCase):
-    def test_query_failure_raises_rather_than_returning_empty(self):
-        """An empty observed set would mark everything DOC_ONLY and hide every
-        UNDOCUMENTED value — a failed query rendering as perfect reconciliation."""
-        with mock.patch.object(R, "_aws", return_value=(1, "", "AccessDenied")):
-            with self.assertRaises(RuntimeError):
-                R.athena_query("SELECT 1", "p")
-
-    def test_paginator_is_bounded(self):
-        src = Path(R.__file__).read_text(encoding="utf-8")
-        self.assertIn("refusing to loop", src,
-                      "an unbounded paginator can spin forever on a bad NextToken")
-
+class BaselineWriterTests(unittest.TestCase):
     def test_update_baseline_records_provenance(self):
         kb = _kb({"otel-events": ["a"]})
-        R.write_baseline(kb, "otel-events", ["a", "b"], "2026-07-28", "live-observed")
-        d = json.loads((kb / "reference" / "claude-data-channels" / "baselines"
-                        / "otel-events.json").read_text(encoding="utf-8"))
+        R.write_baseline(kb, "otel-events", ["a", "b"], "2026-07-28", "observed")
+        d = _baseline(kb, "otel-events")
         self.assertEqual(d["values"], ["a", "b"])
-        self.assertEqual(d["observed_source"], "live-observed",
-                         "a value learned from OUR telemetry is not a vendor claim")
-
-
-class ObservedQueryHygieneTests(unittest.TestCase):
-    """Every observed query must be PARTITION-SCOPED and its values IDENTIFIER-SHAPED.
-
-    Measured 2026-08-02, both halves on the first real execution of this leg:
-
-    1. The `cc-analytics-fields` query referenced a `record` column that does not
-       exist -> COLUMN_NOT_FOUND, which is why the whole Athena leg had never run.
-    2. Unscoped, `SELECT DISTINCT event_name FROM claude_code_events` returned
-       **12,431** values against a 29-value baseline -- not event names but LOG
-       CONTENT ("AbsLogFile : C:\\Users\\...\\zenserver.log"), because
-       otel-flat-views.tf COALESCEs event.name down to body.stringvalue and old
-       records carried no event.name. With a partition predicate over the same 15
-       days: **198** values, zero containing a space. The contamination is entirely
-       HISTORICAL -- an unscoped query is not a more complete census, it is a
-       dirtier one -- and `--update-baseline` would have written all 12,431 in.
-
-    That is the mirror of the phantom-REMOVAL bug in diff_channels.py: same root
-    shape (comparing sets assembled from different populations), opposite sign.
-    """
-
-    def test_every_observed_query_is_partition_scoped(self):
-        for key, sql in R.OBSERVED_SCHEMA.items():
-            with self.subTest(key=key):
-                self.assertIn("year*10000", sql,
-                              "an unscoped DISTINCT scans all history: dirtier AND "
-                              "more expensive on a lake billing ~$5k/21d")
-                self.assertIn(str(R.OBSERVED_FLOOR_YMD), sql)
+        self.assertEqual(d["observed_source"], "observed",
+                         "a value learned from observed data is not a vendor claim")
 
     def test_a_newly_added_value_gets_PER_VALUE_provenance(self):
         """A value added to `values` but absent from `observed_values` is reported
@@ -271,12 +293,11 @@ class ObservedQueryHygieneTests(unittest.TestCase):
         kb = _kb({"activity-types": ["already_documented"]})
         R.write_baseline(kb, "activity-types",
                          ["already_documented", "brand_new_observed"],
-                         "2026-08-02", "docs + live-observed reconciliation")
-        d = json.loads((kb / "reference" / "claude-data-channels" / "baselines"
-                        / "activity-types.json").read_text(encoding="utf-8"))
+                         "2026-08-02", "docs + observed-inventory reconciliation")
+        d = _baseline(kb, "activity-types")
         self.assertIn("brand_new_observed", d["values"])
         self.assertIn("brand_new_observed", d["observed_values"],
-                      "a telemetry-learned value MUST be held out of the docs diff")
+                      "an observed-only value MUST be held out of the docs diff")
         self.assertNotIn("already_documented", d["observed_values"],
                          "a value the docs already carried stays docs-sourced")
 
@@ -285,26 +306,19 @@ class ObservedQueryHygieneTests(unittest.TestCase):
         kb = _kb({"activity-types": ["a", "b"]})
         R.write_baseline(kb, "activity-types", ["a", "b"], "2026-08-02", "src",
                          newly_observed=["b", "gone"])
-        d = json.loads((kb / "reference" / "claude-data-channels" / "baselines"
-                        / "activity-types.json").read_text(encoding="utf-8"))
-        self.assertEqual(d["observed_values"], ["b"])
+        self.assertEqual(_baseline(kb, "activity-types")["observed_values"], ["b"])
 
-    def test_the_otel_query_is_scoped_to_ONE_service(self):
-        """`claude_code_events` carries FIVE services with different event
-        vocabularies. Unscoped, the reconciler reported 169 UNDOCUMENTED events —
-        all of them Claude DESKTOP's — and NORMALIZERS would have prefixed each with
-        `claude_code.` before writing them into a baseline scoped to Claude CODE's
-        doc page. Measured 2026-08-02: desktop 169 distinct, code 25."""
-        self.assertIn("service_name = 'claude-code'", R.OBSERVED_SCHEMA["otel-events"])
 
-    def test_no_observed_query_references_a_nonexistent_record_column(self):
-        """The exact defect that made this leg fail on its first real run."""
-        for key, sql in R.OBSERVED_SCHEMA.items():
-            with self.subTest(key=key):
-                self.assertNotIn("map_keys(record)", sql)
+class ObservedInventoryHygieneTests(unittest.TestCase):
+    """An inventory is produced OUTSIDE this script, from whatever holds the
+    deployment's data. Anything that is not identifier-shaped is log content or a
+    formatting artefact, not a fact — and writing one into a baseline creates a
+    permanent phantom every future diff must carry. Measured 2026-08-02 on a
+    flattened OTel export: an unscoped distinct-name census returned 12,431
+    "events", most of them log lines."""
 
     def test_log_content_is_rejected_as_a_fact(self):
-        """These are REAL values the unscoped query returned."""
+        """These are REAL values such a census returned."""
         for bad in ("  AbsLogFile            : C:\\Users\\x\\zenserver.log",
                     "  AsioVersion           : 1.38.0",
                     "  ChildId               : Zen_20208_Startup",
@@ -312,271 +326,160 @@ class ObservedQueryHygieneTests(unittest.TestCase):
             with self.subTest(value=bad[:30]):
                 self.assertFalse(R.looks_like_identifier(bad))
 
+    def test_non_string_json_values_are_not_identifiers(self):
+        """A generic JSON inventory can carry nulls or numbers; neither is a fact."""
+        for bad in (None, 3, 1.5, ["a"], {"a": 1}):
+            with self.subTest(value=repr(bad)):
+                self.assertFalse(R.looks_like_identifier(bad))
+
     def test_real_identifiers_survive_the_filter(self):
         """The negative control: without it, a filter rejecting EVERYTHING would
         pass the test above and silently empty the observed set."""
         for good in ("claude_code.user_prompt", "api_refusal", "claude_file_uploaded",
-                     "claude_code.subagent_completed", "role_assignment_granted"):
+                     "claude_code.subagent_completed", "role_assignment_granted",
+                     "/v1/organizations/analytics/skills"):
             with self.subTest(value=good):
                 self.assertTrue(R.looks_like_identifier(good))
 
-    def test_json_key_set_walks_arbitrary_depth(self):
-        """Real shapes measured from code_analytics: core_metrics nests one level,
-        model_breakdown is an ARRAY of objects. A SQL-side unnest has to commit to
-        a depth; this must not."""
-        keys = R.json_key_set([
-            '{"num_sessions":0,"lines_of_code":{"added":37,"removed":5}}',
-            '[{"model":"opus","estimated_cost":{"amount":1,"currency":"USD"}}]',
-        ])
-        for expected in ("num_sessions", "lines_of_code", "added", "removed",
-                         "model", "estimated_cost", "amount", "currency"):
-            self.assertIn(expected, keys)
-
-    def test_json_key_set_flags_a_malformed_blob_rather_than_dropping_it(self):
-        self.assertIn("__MALFORMED__", R.json_key_set(['{"a":1}', "not json"]))
-        self.assertNotIn("__MALFORMED__", R.json_key_set(['{"a":1}', "", None]))
-
-    def test_header_row_is_derived_from_the_query_not_an_allowlist(self):
-        """A hand-maintained allowlist silently keeps a NEW query's header as a
-        DATA value, which then reads as a live observed fact."""
-        self.assertEqual(R._selected_column_name("SELECT DISTINCT type FROM activities"), "type")
-        self.assertEqual(
-            R._selected_column_name("SELECT core_metrics FROM code_analytics WHERE x"),
-            "core_metrics")
-        self.assertIsNone(
-            R._selected_column_name("SELECT json_extract_scalar(actor,'$.t') FROM activities"),
-            "an unparseable SELECT must fall back, never guess")
-
-
-class AthenaTimeoutBudgetTests(unittest.TestCase):
-    """Run 5: the shipped 240 s budget made the whole leg unrunnable — the
-    otel-events query scans 228 GB and SUCCEEDED at ~460 s, so main() returned 2
-    before reaching the diff. A fixed budget on a growing table is a time bomb."""
-
-    def test_default_budget_exceeds_the_measured_runtime(self):
-        # 460 s measured 2026-08-11; require real headroom, not a hair's breadth.
-        self.assertGreaterEqual(R.DEFAULT_ATHENA_TIMEOUT_S, 600)
-
-    def test_athena_query_default_is_the_named_constant_not_a_literal(self):
-        import inspect
-
-        sig = inspect.signature(R.athena_query)
-        self.assertEqual(sig.parameters["timeout_s"].default, R.DEFAULT_ATHENA_TIMEOUT_S)
-
-    def test_collect_observed_threads_the_budget_to_the_batch(self):
-        """A partially-threaded timeout leaves some leg on the old default,
-        so the run still dies — just later and more confusingly."""
-        seen = []
-
-        def fake(sqls, profile, timeout_s=R.DEFAULT_ATHENA_TIMEOUT_S):
-            seen.append(timeout_s)
-            return {k: ["{}"] for k in sqls}
-
-        with mock.patch.object(R, "athena_query_many", fake):
-            R.collect_observed("p", 777)
-        self.assertTrue(seen, "no batch was issued")
-        self.assertEqual(set(seen), {777},
-                         f"some call site kept a different budget: {sorted(set(seen))}")
-
-    def test_collect_observed_issues_ONE_concurrent_batch(self):
-        """The wall-clock win: all scans must go in a single athena_query_many
-        call (start all, then poll), not N serial athena_query calls. Run 6
-        measured the serial form as the run's dominant cost (~3-8 min/query)."""
-        batches = []
-
-        def fake_many(sqls, profile, timeout_s=R.DEFAULT_ATHENA_TIMEOUT_S):
-            batches.append(dict(sqls))
-            return {k: ["{}"] for k in sqls}
-
-        with mock.patch.object(R, "athena_query_many", fake_many), \
-             mock.patch.object(R, "athena_query",
-                               side_effect=AssertionError("serial call issued")):
-            R.collect_observed("p")
-        self.assertEqual(len(batches), 1, "expected exactly one concurrent batch")
-        # The batch must contain every schema query AND the extra JSON-blob columns.
-        for key in R.OBSERVED_SCHEMA:
-            self.assertIn(key, batches[0])
-        for key, extra in R.FLATTEN_JSON_KEYS.items():
-            for col in extra[1:]:
-                self.assertIn(f"{key}::{col}", batches[0])
-
-    def test_poll_all_starts_everything_before_polling(self):
-        """start-query-execution for EVERY query must precede the first
-        get-query-execution, or the batch degenerates back to serial."""
-        calls = []
-
-        def fake_aws(args, profile):
-            calls.append(args[1])
-            if args[1] == "start-query-execution":
-                return 0, json.dumps({"QueryExecutionId": f"q{len(calls)}"}), ""
-            if args[1] == "get-query-execution":
-                return 0, json.dumps(
-                    {"QueryExecution": {"Status": {"State": "SUCCEEDED"}}}), ""
-            return 0, json.dumps({"ResultSet": {"Rows": []}}), ""
-
-        with mock.patch.object(R, "_aws", fake_aws), \
-             mock.patch.object(R.time, "sleep"):
-            R.athena_query_many({"a": "SELECT x FROM t", "b": "SELECT y FROM t"}, "p")
-        first_poll = calls.index("get-query-execution")
-        self.assertEqual(calls[:first_poll].count("start-query-execution"), 2,
-                         "second query was not started before polling began")
-
-    def test_poll_all_deadline_names_every_still_running_query(self):
-        def fake_aws(args, profile):
-            if args[1] == "get-query-execution":
-                return 0, json.dumps(
-                    {"QueryExecution": {"Status": {"State": "RUNNING"}}}), ""
-            return 0, "{}", ""
-
-        with mock.patch.object(R, "_aws", fake_aws), \
-             mock.patch.object(R.time, "sleep"), \
-             mock.patch.object(R.time, "monotonic", side_effect=[0, 1, 2, 999]):
-            with self.assertRaises(RuntimeError) as cm:
-                R.athena_poll_all({"slow-one": "qid123"}, "p", timeout_s=10)
-        msg = str(cm.exception)
-        self.assertIn("qid123", msg, "the still-running qid must be pollable by hand")
-        self.assertIn("STILL RUNNING", msg.upper().replace("MAY STILL BE RUNNING",
-                                                           "STILL RUNNING"))
-
-
-class WatchChecksTests(unittest.TestCase):
-    """--watch: the previously hand-run Watching-table lake checks (run 6).
-
-    Run 6's hand versions guessed two column names and used the vendor's
-    prefixed event names against a lake that stores bare names — three wasted
-    Athena round-trips. The canned queries pin the measured contract."""
-
-    def test_watch_queries_use_bare_event_names(self):
-        """The lake stores `retention_sweep`, not `claude_code.retention_sweep`
-        (the flat view strips the prefix; NORMALIZERS re-adds it only for the
-        baseline comparison). A prefixed name here returns a false zero."""
-        q = R.watch_queries()
-        self.assertIn("event_name = 'retention_sweep'", q["retention-sweep"])
-        self.assertNotIn("claude_code.retention_sweep", q["retention-sweep"])
-
-    def test_watch_queries_are_partition_scoped(self):
-        for key, sql in R.watch_queries().items():
-            with self.subTest(key=key):
-                self.assertIn("year*10000", sql)
-
-    def test_desktop_rename_alarms_and_appearances_do_not(self):
-        kb = _kb({R.DESKTOP_BASELINE_KEY: ["lam_a", "lam_b"]})
-        with mock.patch.object(R, "athena_query_many", return_value={
-            "desktop-vocabulary": ["lam_a", "lam_new1", "lam_new2"],  # lam_b GONE
-            "credential-pair": [],
-            "retention-sweep": [],
-        }):
-            report, alarm = R.run_watch(kb, "p")
-        self.assertTrue(alarm)
-        self.assertEqual(report["desktop-vocabulary"]["missing_baselined"], ["lam_b"])
-        self.assertEqual(report["desktop-vocabulary"]["unbaselined_count"], 2,
-                         "appearances are REPORTED for reading, never auto-alarmed")
-
-    def test_credential_pair_threshold_crossing_alarms(self):
-        kb = _kb({R.DESKTOP_BASELINE_KEY: ["lam_a"]})
-        with mock.patch.object(R, "athena_query_many", return_value={
-            "desktop-vocabulary": ["lam_a"],
-            "credential-pair": ["custom3p_credential_heal|150|3"],
-            "retention-sweep": [],
-        }):
-            report, alarm = R.run_watch(kb, "p")
-        self.assertTrue(alarm)
-        self.assertTrue(report["credential-pair"]["custom3p_credential_heal"]["crossed"])
-
-    def test_credential_pair_below_threshold_is_quiet(self):
-        kb = _kb({R.DESKTOP_BASELINE_KEY: ["lam_a"]})
-        with mock.patch.object(R, "athena_query_many", return_value={
-            "desktop-vocabulary": ["lam_a"],
-            "credential-pair": ["custom3p_credential_heal|5|5"],
-            "retention-sweep": [],
-        }):
-            _report, alarm = R.run_watch(kb, "p")
-        self.assertFalse(alarm)
-
-    def test_unknown_sweep_skip_reason_alarms_known_ones_do_not(self):
-        kb = _kb({R.DESKTOP_BASELINE_KEY: ["lam_a"]})
-        rows = ["-|30|true|6295|499",
-                "user_source_disabled|30|true|14|6",
-                "settings_invalid_key_set|30|true|1|1"]   # the #41458 signature
-        with mock.patch.object(R, "athena_query_many", return_value={
-            "desktop-vocabulary": ["lam_a"],
-            "credential-pair": [],
-            "retention-sweep": rows,
-        }):
-            report, alarm = R.run_watch(kb, "p")
-        self.assertTrue(alarm)
-        flags = {s["skip_reason"]: s["unknown_reason"] for s in report["retention-sweep"]}
-        self.assertFalse(flags["-"])
-        self.assertFalse(flags["user_source_disabled"])
-        self.assertTrue(flags["settings_invalid_key_set"])
-
-    def test_fleet_norm_used_default_true_does_NOT_alarm(self):
-        """Finding #23's correction: used_default='true' + period_days=30 is the
-        fleet norm (256/264 rows, 64/66 people). Alarming on it would have pinned
-        a shared metric to ALARM and muted a real control failure beside it."""
-        kb = _kb({R.DESKTOP_BASELINE_KEY: ["lam_a"]})
-        with mock.patch.object(R, "athena_query_many", return_value={
-            "desktop-vocabulary": ["lam_a"],
-            "credential-pair": [],
-            "retention-sweep": ["-|30|true|6295|499"],
-        }):
-            _report, alarm = R.run_watch(kb, "p")
-        self.assertFalse(alarm)
-
-
-class ObservedInputOutputTests(unittest.TestCase):
-    def test_missing_observed_input_is_a_clear_error_not_a_traceback(self):
-        """Run 6 passed --observed with a nonexistent path (assuming it was a
-        SAVE path) and got a raw FileNotFoundError traceback."""
-        import contextlib
-        import io
-
-        kb = _kb({})
-        err = io.StringIO()
-        with contextlib.redirect_stderr(err):
-            rc = R.main(["--kb", str(kb), "--observed", str(kb / "nope.json")])
-        self.assertEqual(rc, 2)
-        self.assertIn("--save-observed", err.getvalue(),
-                      "the error must name the flag that produces the input")
-
-    def test_save_observed_round_trips_through_observed(self):
-        import diff_channels as dc_mod
-
+    def test_junk_is_dropped_counted_and_never_baselined(self):
+        """Dropped values are COUNTED on stderr, never silently filtered — a silent
+        filter makes the observed set quietly partial, the failure this whole
+        reconciliation exists to prevent wearing the opposite hat."""
         kb = _kb({"otel-events": ["claude_code.a"]})
-        saved = kb / "obs.json"
-        batch_result = {k: (["a"] if k == "otel-events" else ["{}"])
-                        for k in list(R.OBSERVED_SCHEMA)
-                        + ["cc-analytics-fields::tool_actions",
-                           "cc-analytics-fields::model_breakdown"]}
-        with mock.patch.object(R, "athena_query_many", return_value=batch_result), \
-             mock.patch.object(dc_mod, "code_freshness",
-                               return_value=("FRESH", "")):
-            rc = R.main(["--kb", str(kb), "--save-observed", str(saved)])
-        self.assertTrue(saved.exists(), "inventory was not saved")
-        rc2 = R.main(["--kb", str(kb), "--observed", str(saved)])
-        self.assertEqual(rc, rc2, "offline re-diff disagreed with the live run")
+        inv = _inventory(kb, {"otel-events": ["a", "  AbsLogFile : C:\\x\\zen.log", None]})
+        rc, _out, err = _run(["--kb", str(kb), "--observed", str(inv), "--update-baseline"])
+        self.assertEqual(rc, 0, "junk must not read as UNDOCUMENTED")
+        self.assertIn("dropped 2", err)
+        self.assertEqual(_baseline(kb, "otel-events")["values"], ["claude_code.a"],
+                         "a non-identifier reached a baseline")
 
-    def test_live_collection_runs_the_code_freshness_gate(self):
-        """The gate exists because run 6 executed 143-commit-stale code; a live
-        collection with STALE code must refuse (offline --observed is exempt)."""
-        import diff_channels as dc_mod
 
+class ObservedInputTests(unittest.TestCase):
+    def test_nothing_to_do_without_a_leg_is_an_instrument_problem(self):
+        kb = _kb({})
+        rc, _out, err = _run(["--kb", str(kb)])
+        self.assertEqual(rc, 2)
+        self.assertIn("--observed", err)
+        self.assertIn("--probe", err)
+
+    def test_missing_observed_input_is_a_clear_error_not_a_traceback(self):
+        """Run 6 passed --observed with a nonexistent path and got a raw
+        FileNotFoundError traceback. The error must say what the file IS."""
+        kb = _kb({})
+        rc, _out, err = _run(["--kb", str(kb), "--observed", str(kb / "nope.json")])
+        self.assertEqual(rc, 2)
+        self.assertIn("does not exist", err)
+        self.assertIn("baseline-key", err, "the error must describe the expected shape")
+
+    def test_observed_must_be_an_object_of_lists(self):
+        kb = _kb({"otel-events": ["claude_code.a"]})
+        for bad in (["a", "b"], {"otel-events": "a"}, {"otel-events": {"a": 1}}, "x", 3):
+            with self.subTest(shape=json.dumps(bad)):
+                rc, _out, err = _run(["--kb", str(kb), "--observed",
+                                      str(_inventory(kb, bad))])
+                self.assertEqual(rc, 2)
+                self.assertIn("baseline-key", err)
+
+    def test_invalid_json_is_a_clear_error(self):
+        kb = _kb({})
+        p = kb / "broken.json"
+        p.write_text("{not json", encoding="utf-8")
+        rc, _out, err = _run(["--kb", str(kb), "--observed", str(p)])
+        self.assertEqual(rc, 2)
+        self.assertIn("not valid JSON", err)
+
+    def test_exit_code_is_nonzero_only_when_undocumented_exists(self):
+        kb = _kb({"otel-events": ["claude_code.a", "claude_code.b"]})
+        inv = _inventory(kb, {"otel-events": ["a"]})
+        self.assertEqual(_run(["--kb", str(kb), "--observed", str(inv)])[0], 0,
+                         "DOC_ONLY is informational, not a failure")
+        inv = _inventory(kb, {"otel-events": ["a", "new"]})
+        self.assertEqual(_run(["--kb", str(kb), "--observed", str(inv)])[0], 1)
+
+    def test_no_baseline_is_reported_not_failed(self):
+        kb = _kb({})
+        inv = _inventory(kb, {"otel-events": ["a"]})
+        rc, out, _err = _run(["--kb", str(kb), "--observed", str(inv)])
+        self.assertEqual(rc, 0)
+        self.assertIn("[NO_BASELINE] otel-events", out)
+
+    def test_update_baseline_merges_with_provenance_and_is_idempotent(self):
+        """The merge writes the NORMALISED value with per-value provenance, and a
+        re-run without --update-baseline must then exit 0 — a non-idempotent
+        refresh is a detector bug in a drift costume."""
+        kb = _kb({"otel-events": ["claude_code.a"]})
+        inv = _inventory(kb, {"otel-events": ["a", "new"]})
+        rc, out, _err = _run(["--kb", str(kb), "--observed", str(inv),
+                              "--update-baseline", "--run-date", "2026-09-04"])
+        self.assertEqual(rc, 0, "a merged UNDOCUMENTED value is resolved, not failed")
+        self.assertIn("baseline updated: otel-events", out)
+        d = _baseline(kb, "otel-events")
+        self.assertEqual(d["values"], ["claude_code.a", "claude_code.new"])
+        self.assertEqual(d["observed_values"], ["claude_code.new"])
+        self.assertTrue(d["observed_source"])
+        self.assertEqual(d["captured"], "2026-09-04")
+        self.assertEqual(_run(["--kb", str(kb), "--observed", str(inv)])[0], 0)
+
+    def test_json_output_carries_both_legs(self):
+        kb = _kb({"otel-events": ["claude_code.a"]})
+        inv = _inventory(kb, {"otel-events": ["a"]})
+        out_json = kb / "result.json"
+        with mock.patch.object(R, "keychain", return_value="k"), \
+             mock.patch.object(R, "probe_endpoint", return_value=(200, "200")), \
+             mock.patch.object(dc_mod, "code_freshness", return_value=("FRESH", "")):
+            rc, _out, _err = _run(["--kb", str(kb), "--probe", "--observed", str(inv),
+                                   "--json", str(out_json)])
+        self.assertEqual(rc, 0)
+        result = json.loads(out_json.read_text(encoding="utf-8"))
+        self.assertEqual(set(result), {"probes", "reconciliation"})
+        self.assertEqual(result["reconciliation"]["otel-events"]["status"], R.RECONCILED)
+        self.assertIn("admin-endpoint-paths", result["probes"])
+
+    def test_probe_leg_runs_the_code_freshness_gate(self):
+        """The gate exists because run 6 executed 143-commit-stale code and
+        reproduced a bug already fixed upstream. The probe leg is the live
+        instrument, so STALE code refuses it (exit 2)."""
         kb = _kb({})
         with mock.patch.object(dc_mod, "code_freshness",
-                               return_value=("STALE", "n commits behind")):
-            rc = R.main(["--kb", str(kb)])
+                               return_value=("STALE", "n commits behind")), \
+             mock.patch.object(R, "keychain", return_value="k"):
+            rc, _out, err = _run(["--kb", str(kb), "--probe"])
         self.assertEqual(rc, 2)
+        self.assertIn("CODE_STALE", err)
 
-    def test_cli_exposes_a_timeout_override(self):
+    def test_observed_leg_is_exempt_from_the_code_freshness_gate(self):
+        """An offline re-diff of a saved inventory touches no instrument that
+        staleness can corrupt beyond the diff itself."""
+        kb = _kb({"otel-events": ["claude_code.a"]})
+        inv = _inventory(kb, {"otel-events": ["a"]})
+        with mock.patch.object(dc_mod, "code_freshness",
+                               return_value=("STALE", "n commits behind")):
+            rc, _out, _err = _run(["--kb", str(kb), "--observed", str(inv)])
+        self.assertEqual(rc, 0)
+
+
+class NoDataStoreSurfaceTests(unittest.TestCase):
+    """The observed leg is a file contract. Nothing in this script may query,
+    configure, or depend on a particular data store — that is what keeps it
+    runnable and testable anywhere."""
+
+    def test_cli_has_no_data_store_flags(self):
         import argparse
-        import contextlib
-        import io
-
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf), contextlib.suppress(SystemExit):
             with contextlib.suppress(argparse.ArgumentError):
                 R.main(["--help"])
-        self.assertIn("--timeout", buf.getvalue())
+        text = buf.getvalue()
+        for present in ("--probe", "--observed", "--update-baseline", "--json"):
+            self.assertIn(present, text)
+        for gone in ("--profile", "--timeout", "--watch", "--save-observed", "--probe-only"):
+            self.assertNotIn(gone, text)
+
+    def test_module_has_no_cloud_sdk_or_cli_dependency(self):
+        src = Path(R.__file__).read_text(encoding="utf-8").lower()
+        for token in ("boto3", "botocore", '"aws"', "athena", "workgroup", "query-execution"):
+            self.assertNotIn(token, src)
+        self.assertNotIn("subprocess.run([\"aws\"", src)
 
 
 if __name__ == "__main__":
