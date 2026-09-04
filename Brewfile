@@ -14,7 +14,7 @@ brew "uv"          # uv-managed MCP servers
 # Per-need — uncomment what this machine actually uses:
 # brew "semgrep"      # /semgrep skill
 # brew "awscli"       # prefer boto3 scripts per platform-constraints, but the CLI is handy
-# cask "powershell"   # pwsh — only if running Intune/STIG .ps1 work from templates/
+# cask "powershell"   # pwsh — only if this machine runs Windows .ps1 work
 # cask "orbstack"     # Docker runtime for local Fargate image work — lighter than Docker
 #                     # Desktop; remember --platform linux/amd64 (see platform-constraints
 #                     # ON docker_image_build_for_ecs_fargate_from_apple_silicon)

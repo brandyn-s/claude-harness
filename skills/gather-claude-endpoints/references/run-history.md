@@ -82,24 +82,6 @@ them Admin, Analytics, or Compliance.
 is intact verbatim. (c) `docs/llms.txt` returns **9 bytes** without redirects
 (reads as "no such pages exist") and 56,941 with `curl -L`.
 
-## Narrow greps manufacture false gaps (2026-07-28, four times in one session)
-
-| What was grepped | Where it actually was |
-|---|---|
-| `compliance_poller.py` for `/settings` | `anthropic_audit_v2/compliance.py:248` |
-| `lambda/*.py` for `organizations/analytics` | `anthropic_audit_v2/analytics.py:44` |
-
-- Five Analytics endpoints called "never probed by us" were live at
-  `anthropic_audit_v2/analytics.py:44`; a Compliance key inventory called
-  "uncollected" was not only ingested but graded by an always-on credential guard
-  emitting a CloudWatch alarm metric — stronger than the change proposed.
-- A new actor type was graded HIGH for "breaking a SIEM rule keyed on 6 types".
-  No closed actor enum existed anywhere — `actor` is a string column read with
-  `json_extract_scalar`. Correct severity was LOW.
-- The first run shipped two findings whose impact halves were inferred (one HIGH
-  that should have been LOW, one that should have been REJECT); `API probe`,
-  `Code probe`, and `Severity basis` became required fields.
-
 ## A DEFER trigger that watched the wrong system (2026-08-08)
 
 Finding #4 asserted "OTel traces are a live signal we have **never enabled**" and
