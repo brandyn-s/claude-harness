@@ -461,38 +461,20 @@ this note when it closes COMPLETED and a local re-probe matches real grep.
 **Desktop-3P deprecation wave — HARD CUT-OFF 2026-10-07 12:00 PT (v1.40609.0, 2026-08-27)**:
 the Desktop-3P configuration changelog opened a dated deprecation set; after the cut-off each
 old form stops working, not merely warns. In-app warnings start 2026-09-10 and
-`disableConfigDeprecationWarnings` (new in the same release) HIDES them — do not set it on the
-fleet. **RESOLVED for us on both fleets 2026-08-30**: `enduserAttribution` → `endUserAttribution`
-("after the cut-off the key reads `false` and end-user attribution stays off", i.e. a silent loss
-of OTel `enduser.id`). Jamf profile **190** patched via `PUT /JSSResource/osxconfigurationprofiles/id/190`
-(HTTP 201, read-back verified, single-byte case change at payload offset 1657); a `search_configuration`
-sweep over 370 items found no other Jamf object carrying the key. Intune deviceHealthScript
-**"Anthropic Claude Desktop GovCloud"** (`11111111-1111-1111-1111-111111111111`) patched to script
-history **v8** (Intune upload counter 8→9, HTTP 200, read-back verified). **The Intune fix is NOT a
-bare rename** — Windows registry value-name lookup and PowerShell `$obj.PSObject.Properties[$name]`
-are both case-INSENSITIVE, and the detect script applies `-cne` to VALUES only, so renaming the
-expected-table key alone would leave detection reporting COMPLIANT while the on-device value name
-stayed `enduserAttribution` forever (`New-ItemProperty -Force` updates the case-insensitively
-matched value and preserves its original casing). v8 therefore also adds a case-SENSITIVE
-`-ccontains` name check to detect (forcing one remediation pass) and a
-`Remove-ItemProperty … -ErrorAction SilentlyContinue` before the remediate write loop. Both scripts
-parse-clean under `pwsh 7.6.5` `[Parser]::ParseFile` with a known-negative control. **NOT affected
-(verified in the live payloads, not assumed)**: `otlpHeaders`/`otlpResourceAttributes` are already
-in the JSON-object form the deprecation requires, `inferenceCredentialKind` is already `interactive`,
-and profile 190 carries no `managedMcpServers`/`authorityHost`/`isDxt*`/`ask-session`/
-`trustBootstrapLocalExec`/`inferenceGatewayHeaders`. Still open in the wave for anyone adding those
-keys later: `managedMcpServers` entry-shape changes (`scopes`→`scope`, drop `transport:"builtin"`
-and `source`, `authorityHost`→`azureCloud:"us-gov-high"` for GCC High) — an unrewritten entry makes
-that connector unavailable after the cut-off.
-
-**UNRECONCILED FLEET DRIFT found while doing the above (2026-08-30, NOT changed)**: both Intune
-Desktop scripts carried the comment "byte-identical to Jamf fleet profile 190" and that is FALSE —
-`inferenceModels` pins **Opus 4.8 / Sonnet 4.5** on the Windows GovCloud fleet while Jamf 190 runs
-**Opus 5 / Sonnet 5 with `prefer1m`**. The comment was corrected in v8 to state the divergence
-rather than assert parity; the VALUES were deliberately left alone (a fleet model change is a
-separate decision with cost and availability implications). The "23-key parity" claim recorded at
-the 2026-07-23 entry above should be read as 22 static keys + 1 dynamically-built
-`otlpResourceAttributes` on Windows, and as no longer holding for `inferenceModels`.
+`disableConfigDeprecationWarnings` (new in the same release) HIDES them — do not set it.
+`enduserAttribution` → `endUserAttribution` ("after the cut-off the key reads `false` and
+end-user attribution stays off", i.e. a silent loss of OTel `enduser.id`). **On Windows the rename
+is NOT a bare rename** — registry value-name lookup and PowerShell `$obj.PSObject.Properties[$name]`
+are both case-INSENSITIVE, so a case-insensitive check reports the new name present while the
+on-device value name stays `enduserAttribution` forever (`New-ItemProperty -Force` updates the
+case-insensitively matched value and preserves its original casing); check the name
+case-SENSITIVELY (`-ccontains`) and `Remove-ItemProperty` the old name before writing the new one.
+The wave also touches `otlpHeaders`/`otlpResourceAttributes` (the JSON-object form is the one the
+deprecation requires), `inferenceCredentialKind` (`interactive` satisfies it), and the
+`managedMcpServers`/`authorityHost`/`isDxt*`/`ask-session`/`trustBootstrapLocalExec`/`inferenceGatewayHeaders`
+keys; for anyone adding those keys later: `managedMcpServers` entry-shape changes (`scopes`→`scope`,
+drop `transport:"builtin"` and `source`, `authorityHost`→`azureCloud:"us-gov-high"` for GCC High) — an
+unrewritten entry makes that connector unavailable after the cut-off.
 
 **v2.1.241→v2.1.251 free wins (NEW_FEATURE_AUTO — already on the installed version)**:
 - **Grep and Glob now apply `Read(...)` deny rules to files reached through a symlinked search
