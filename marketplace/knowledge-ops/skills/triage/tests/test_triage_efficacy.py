@@ -126,9 +126,57 @@ def test_run_live_keyless_total_failure_exits_2_and_preserves_baseline(tmp_path)
            if k not in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL")}
     proc = subprocess.run([sys.executable, str(work / "run_live.py"),
                            "--historical-reproduction", "--output", str(work / "runs" / "keyless.json"),
-                           "--runs", "1"],
+                           "--runs", "1", "--acknowledge-retired-fixture"],
                           capture_output=True, env=env, timeout=120)
     stderr = proc.stderr.decode("utf-8", errors="replace")
     assert proc.returncode == 2, f"expected exit 2, got {proc.returncode}; stderr: {stderr}"
     assert "error:" in stderr and "Traceback" not in stderr
+    assert "pass --acknowledge-retired-fixture" not in stderr, "the acknowledged run must get past the fixture gate"
     assert (work / "results.json").read_bytes() == baseline, "committed baseline was overwritten"
+
+
+# ---------- retired fixture (2026-09-04): a real run needs an explicit acknowledgement ----------
+
+def _keyless_run(tmp_path, *args: str):
+    import os
+    import shutil
+    import subprocess
+    import sys
+
+    work = tmp_path / "harness"
+    shutil.copytree(HARNESS, work)
+    env = {k: v for k, v in os.environ.items()
+           if k not in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL")}
+    proc = subprocess.run([sys.executable, str(work / "run_live.py"), *args],
+                          capture_output=True, text=True, env=env, timeout=120)
+    return work, proc
+
+
+def test_run_live_refuses_retired_fixture_without_acknowledgement(tmp_path):
+    """docs/research-skills-root-cause.md section 7: N=3 of a 12-item ranking cannot resolve the
+    arm delta. A real run prints the notice, refuses, and writes nothing."""
+    work, proc = _keyless_run(tmp_path, "--historical-reproduction",
+                              "--output", str(tmp_path / "harness" / "runs" / "refused.json"), "--runs", "1")
+    assert proc.returncode == 2, proc.stderr
+    assert "RETIRED (2026-09-04)" in proc.stderr
+    assert "--acknowledge-retired-fixture" in proc.stderr and "Traceback" not in proc.stderr
+    assert not (work / "runs" / "refused.json").exists()
+    assert (work / "results.json").read_bytes() == (HARNESS / "results.json").read_bytes()
+
+
+def test_plan_only_reports_fixture_status_without_acknowledgement(tmp_path):
+    _, proc = _keyless_run(tmp_path, "--historical-reproduction",
+                           "--output", str(tmp_path / "plan.json"), "--plan-only")
+    assert proc.returncode == 0, proc.stderr
+    receipt = json.loads(proc.stdout)
+    assert receipt["fixture_status"] == "retired"
+    assert receipt["fixture_status_since"] == "2026-09-04"
+    assert receipt["retired_fixture_acknowledged"] is False
+    assert not (tmp_path / "plan.json").exists()
+
+
+def test_harness_docs_record_the_retirement():
+    for name in ("README.md", "PROBLEM.md"):
+        text = (HARNESS / name).read_text(encoding="utf-8")
+        assert "Retired at this fixture (2026-09-04)" in text, name
+        assert "research-skills-root-cause.md" in text and "--acknowledge-retired-fixture" in text, name

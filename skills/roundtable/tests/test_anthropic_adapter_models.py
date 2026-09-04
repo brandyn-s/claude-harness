@@ -3,6 +3,14 @@
 import importlib.util
 from pathlib import Path
 
+from scripts import model_contracts as ids
+
+# Ids come from contracts/model-capabilities.json, never from literals. The adapter's
+# default arm is the current flagship (Fable, a Covered Model); the others are the
+# current models a run can be configured with or switched to by the provider.
+FLAGSHIP, OPUS, SONNET, MYTHOS = (ids.model_id(t) for t in ("fable", "opus", "sonnet", "mythos"))
+SUPERSEDED = ids.superseded_ids()[0]  # not in SUPPORTED_MODELS: rejected before any network call
+
 ADAPTER_PATH = (
     Path(__file__).resolve().parent.parent
     / "scripts"
@@ -23,11 +31,11 @@ def test_default_model_is_current_and_runtime_configurable(monkeypatch):
     adapter = _load_adapter()
 
     monkeypatch.delenv("ROUNDTABLE_ANTHROPIC_MODEL", raising=False)
-    assert adapter.DEFAULT_MODEL == "claude-fable-5"
-    assert adapter.resolve_model() == "claude-fable-5"
+    assert adapter.DEFAULT_MODEL == FLAGSHIP
+    assert adapter.resolve_model() == FLAGSHIP
 
-    monkeypatch.setenv("ROUNDTABLE_ANTHROPIC_MODEL", "claude-sonnet-5")
-    assert adapter.resolve_model() == "claude-sonnet-5"
+    monkeypatch.setenv("ROUNDTABLE_ANTHROPIC_MODEL", SONNET)
+    assert adapter.resolve_model() == SONNET
 
 
 def test_effort_defaults_high_and_is_sent_explicitly(monkeypatch):
@@ -39,7 +47,7 @@ def test_effort_defaults_high_and_is_sent_explicitly(monkeypatch):
         return {
             "response": {
                 "content": [{"type": "text", "text": "ok"}],
-                "model": "claude-fable-5",
+                "model": FLAGSHIP,
                 "stop_reason": "end_turn",
                 "usage": {"input_tokens": 1, "output_tokens": 1},
             },
@@ -55,9 +63,9 @@ def test_effort_defaults_high_and_is_sent_explicitly(monkeypatch):
     assert result["ok"] is True
     assert captured["payload"]["output_config"] == {"effort": "high"}
     assert result["runtime_receipt"] == {
-        "requested_model": "claude-fable-5",
+        "requested_model": FLAGSHIP,
         "requested_model_source": "request_configuration",
-        "effective_model": "claude-fable-5",
+        "effective_model": FLAGSHIP,
         "effective_model_source": "response_metadata",
         "provider": "anthropic",
         "effort": "high",
@@ -73,14 +81,14 @@ def test_context_class_requires_an_explicit_runtime_observation():
     adapter = _load_adapter()
 
     unobserved = adapter.runtime_receipt(
-        requested_model="claude-opus-5",
-        effective_model="claude-opus-5",
+        requested_model=OPUS,
+        effective_model=OPUS,
         effort="high",
         stop_reason="end_turn",
     )
     observed = adapter.runtime_receipt(
-        requested_model="claude-opus-5",
-        effective_model="claude-opus-5",
+        requested_model=OPUS,
+        effective_model=OPUS,
         effort="high",
         stop_reason="end_turn",
         context_class="observed-1m",
@@ -99,7 +107,7 @@ def test_explicit_effort_receipt_overrides_later_ambient_value(monkeypatch):
         return {
             "response": {
                 "content": [{"type": "text", "text": "ok"}],
-                "model": "claude-fable-5",
+                "model": FLAGSHIP,
                 "stop_reason": "end_turn",
                 "usage": {"input_tokens": 1, "output_tokens": 1},
             },
@@ -129,7 +137,7 @@ def test_max_tokens_headroom_tracks_model_and_effort(monkeypatch):
     assert adapter.recommended_max_tokens("prereg") == 64_000
 
     # A non-covered model at high effort keeps the base workload budgets.
-    monkeypatch.setenv("ROUNDTABLE_ANTHROPIC_MODEL", "claude-opus-5")
+    monkeypatch.setenv("ROUNDTABLE_ANTHROPIC_MODEL", OPUS)
     assert adapter.recommended_max_tokens("main") == 16_000
     assert adapter.recommended_max_tokens("jrh") == 16_000
 
@@ -145,7 +153,7 @@ def test_http_200_refusal_is_a_typed_failure(monkeypatch):
         return {
             "response": {
                 "content": [],
-                "model": "claude-fable-5",
+                "model": FLAGSHIP,
                 "stop_reason": "refusal",
                 "stop_details": {
                     "type": "refusal",
@@ -167,7 +175,7 @@ def test_http_200_refusal_is_a_typed_failure(monkeypatch):
     assert result["stop_reason"] == "refusal"
     assert result["stop_details"]["category"] == "cyber"
     assert result["runtime_receipt"]["refusal"] is True
-    assert result["runtime_receipt"]["effective_model"] == "claude-fable-5"
+    assert result["runtime_receipt"]["effective_model"] == FLAGSHIP
 
 
 def test_max_tokens_is_incomplete_not_a_success(monkeypatch):
@@ -177,7 +185,7 @@ def test_max_tokens_is_incomplete_not_a_success(monkeypatch):
         return {
             "response": {
                 "content": [{"type": "text", "text": "partial assessment"}],
-                "model": "claude-fable-5",
+                "model": FLAGSHIP,
                 "stop_reason": "max_tokens",
                 "usage": {"input_tokens": 5, "output_tokens": 4000},
             },
@@ -202,7 +210,7 @@ def test_context_window_limit_is_incomplete_not_a_success(monkeypatch):
         return {
             "response": {
                 "content": [{"type": "text", "text": "partial assessment"}],
-                "model": "claude-fable-5",
+                "model": FLAGSHIP,
                 "stop_reason": "model_context_window_exceeded",
                 "usage": {"input_tokens": 999_000, "output_tokens": 1_000},
             },
@@ -226,7 +234,7 @@ def test_covered_models_need_no_retention_env_gate(monkeypatch):
     adapter = _load_adapter()
 
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
-    monkeypatch.setenv("ROUNDTABLE_ANTHROPIC_MODEL", "claude-mythos-5")
+    monkeypatch.setenv("ROUNDTABLE_ANTHROPIC_MODEL", MYTHOS)
     monkeypatch.delenv(
         "ROUNDTABLE_COVERED_MODEL_RETENTION_APPROVED", raising=False
     )
@@ -236,7 +244,7 @@ def test_covered_models_need_no_retention_env_gate(monkeypatch):
         lambda **_kwargs: {
             "response": {
                 "content": [{"type": "text", "text": "ok"}],
-                "model": "claude-mythos-5",
+                "model": MYTHOS,
                 "stop_reason": "end_turn",
                 "usage": {"input_tokens": 1, "output_tokens": 1},
             },
@@ -247,7 +255,7 @@ def test_covered_models_need_no_retention_env_gate(monkeypatch):
     result = adapter.call("review this")
 
     assert result["ok"] is True
-    assert result["model"] == "claude-mythos-5"
+    assert result["model"] == MYTHOS
 
 
 def test_unsupported_model_fails_before_network(monkeypatch):
@@ -257,14 +265,14 @@ def test_unsupported_model_fails_before_network(monkeypatch):
         raise AssertionError("network should not be called for invalid configuration")
 
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
-    monkeypatch.setenv("ROUNDTABLE_ANTHROPIC_MODEL", "claude-opus-4-8")
+    monkeypatch.setenv("ROUNDTABLE_ANTHROPIC_MODEL", SUPERSEDED)
     monkeypatch.setattr(adapter, "http_post_json", should_not_call)
 
     result = adapter.call("review this")
 
     assert result["ok"] is False
     assert result["error_type"] == "configuration"
-    assert result["requested_model"] == "claude-opus-4-8"
+    assert result["requested_model"] == SUPERSEDED
     assert result["runtime_receipt"]["effective_model"] == "<unavailable>"
     assert result["runtime_receipt"]["context_class"] == "<unavailable>"
     assert result["runtime_receipt"]["fallback"] == "<unavailable>"
@@ -321,7 +329,7 @@ def test_no_text_failure_records_observed_model_and_non_refusal(monkeypatch):
         lambda **_kwargs: {
             "response": {
                 "content": [],
-                "model": "claude-fable-5",
+                "model": FLAGSHIP,
                 "stop_reason": "end_turn",
                 "usage": {"input_tokens": 1, "output_tokens": 0},
             },
@@ -332,7 +340,7 @@ def test_no_text_failure_records_observed_model_and_non_refusal(monkeypatch):
     result = adapter.call("review this")
 
     assert result["ok"] is False
-    assert result["runtime_receipt"]["effective_model"] == "claude-fable-5"
+    assert result["runtime_receipt"]["effective_model"] == FLAGSHIP
     assert result["runtime_receipt"]["refusal"] is False
 
 
@@ -346,7 +354,7 @@ def test_provider_model_switch_is_typed_not_an_unqualified_success(monkeypatch):
         lambda **_kwargs: {
             "response": {
                 "content": [{"type": "text", "text": "fallback answer"}],
-                "model": "claude-sonnet-5",
+                "model": SONNET,
                 "stop_reason": "end_turn",
                 "usage": {"input_tokens": 1, "output_tokens": 1},
             },
@@ -354,9 +362,9 @@ def test_provider_model_switch_is_typed_not_an_unqualified_success(monkeypatch):
         },
     )
 
-    result = adapter.call("review this", model="claude-opus-5")
+    result = adapter.call("review this", model=OPUS)
 
     assert result["ok"] is False
     assert result["error_type"] == "model_switch"
     assert result["runtime_receipt"]["fallback"] is True
-    assert result["runtime_receipt"]["effective_model"] == "claude-sonnet-5"
+    assert result["runtime_receipt"]["effective_model"] == SONNET

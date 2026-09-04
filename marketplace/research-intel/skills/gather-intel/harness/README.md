@@ -59,3 +59,12 @@ revision's `frozen_sample_regrade` documents the change (grounding_precision
 4. If the verdict changed, update `EXPECTED_VERDICT` in
    `tests/test_gather_intel_efficacy.py` and the frozen-baseline table in
    `PROBLEM.md` / `SKILL.md`.
+
+## Retired at this fixture (2026-09-04)
+
+The A/B is retired at the current fixture: the baseline is at ceiling on Fable 5.1 and,
+under the corrected oracle, the arms are identical on the primary metric
+(`docs/research-skills-root-cause.md` §5, §12.2; `PROBLEM.md` §9). `run_live.py` prints
+the notice and refuses a real run unless `--acknowledge-retired-fixture` is passed;
+`--plan-only` needs no acknowledgement and its receipt reports `fixture_status: retired`.
+The refresh procedure above stays valid for the day a discriminating fixture exists.

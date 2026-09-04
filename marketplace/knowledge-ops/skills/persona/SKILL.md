@@ -166,7 +166,7 @@ synthesizes convergent themes, writes analysis to a new run dir.
 
 **Rubric — verify scaling-experiment claim across new model**:
 ```
-/persona --mode rubric --model claude-haiku-4-5 \
+/persona --mode rubric --model haiku \
     --slug 2026-05-25-haiku-rerun \
     --fixture path/to/fixture.yaml
 ```

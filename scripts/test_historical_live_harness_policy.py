@@ -74,9 +74,22 @@ class _Messages:
         return response
 
 
+class _Models:
+    def list(self, **kwargs):
+        # deep-dive snapshots the vendor model list at run start (the currency key
+        # derives from it); two release dates keep grade.catalog_key deterministic.
+        return [
+            SimpleNamespace(id="claude-fake-9-1", display_name="Claude Fake 9.1",
+                            created_at="2026-08-01T00:00:00Z"),
+            SimpleNamespace(id="claude-fake-9", display_name="Claude Fake 9",
+                            created_at="2026-06-01T00:00:00Z"),
+        ]
+
+
 class Anthropic:
     def __init__(self, *args, **kwargs):
         self.messages = _Messages()
+        self.models = _Models()
 '''
 
 

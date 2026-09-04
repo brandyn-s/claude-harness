@@ -102,16 +102,45 @@ except ImportError:
 # This avoids turning one model generation's controls into a global ban for older
 # models or unrelated APIs. Prose can document a failure mode without tripping E1;
 # code examples that pair an exact covered model ID with an incompatible control
-# still fail.
-RESTRICTED_API_MODEL_IDS = frozenset({
-    "claude-opus-4-7",
-    "claude-opus-4-8",
-    "claude-fable-5",
-    "claude-mythos-5",
-    "claude-opus-5",
-    "claude-sonnet-5",
-})
-ALWAYS_THINKING_MODEL_IDS = frozenset({"claude-fable-5", "claude-mythos-5"})
+# still fail. The per-model facts come from contracts/model-capabilities.json (the
+# same source skills/api-guardrails renders), never from a table kept here.
+MODEL_CAPABILITIES_CONTRACT = Path(__file__).resolve().parent.parent / "contracts" / "model-capabilities.json"
+_CAPABILITIES = json.loads(MODEL_CAPABILITIES_CONTRACT.read_text(encoding="utf-8"))
+_MODEL_ROWS = {row["id"]: row for row in _CAPABILITIES["models"] + _CAPABILITIES["superseded"]}
+EFFORT_LEVELS = tuple(_CAPABILITIES["effort_levels"])
+# Models that reject non-default sampling, manual budget_tokens thinking and an
+# assistant prefill; the contract states each separately, so derive each separately.
+SAMPLING_REJECTED_MODEL_IDS = frozenset(
+    m for m, row in _MODEL_ROWS.items() if row["sampling"] == "rejected")
+MANUAL_THINKING_REJECTED_MODEL_IDS = frozenset(
+    m for m, row in _MODEL_ROWS.items() if not row["thinking"]["manual_budget_tokens"])
+PREFILL_REJECTED_MODEL_IDS = frozenset(
+    m for m, row in _MODEL_ROWS.items() if not row["assistant_prefill"])
+RESTRICTED_API_MODEL_IDS = (
+    SAMPLING_REJECTED_MODEL_IDS | MANUAL_THINKING_REJECTED_MODEL_IDS | PREFILL_REJECTED_MODEL_IDS)
+ALWAYS_THINKING_MODEL_IDS = frozenset(
+    m for m, row in _MODEL_ROWS.items() if row["thinking"]["adaptive"] == "always_on")
+# model id -> highest effort at which `thinking: {"type": "disabled"}` is accepted.
+DISABLED_THINKING_EFFORT_CAP = {
+    m: row["thinking"]["disable"]["max_effort"]
+    for m, row in _MODEL_ROWS.items()
+    if row["thinking"]["disable"]["allowed"] and row["thinking"]["disable"]["max_effort"]
+}
+
+
+def _model_display(model: str) -> str:
+    return _MODEL_ROWS[model]["display_name"]
+
+
+def _efforts_above(cap: str) -> tuple[str, ...]:
+    return EFFORT_LEVELS[EFFORT_LEVELS.index(cap) + 1:]
+
+
+def _disabled_thinking_cap_hit(model: str) -> str:
+    above = _efforts_above(DISABLED_THINKING_EFFORT_CAP[model])
+    return f"disabled thinking with {'/'.join(above)} effort on {_model_display(model)}"
+
+
 FENCED_CODE_RE = re.compile(r"```[^\n]*\n(.*?)```", re.DOTALL)
 SAMPLING_CONTROL_RE = re.compile(
     r"[\"']?(?:temperature|top_p|top_k)[\"']?\s*[=:]",
@@ -128,10 +157,13 @@ DISABLED_THINKING_RE = re.compile(
     r"[\"']?type[\"']?\s*[=:]\s*[\"']disabled[\"']",
     re.IGNORECASE,
 )
-XHIGH_OR_MAX_EFFORT_RE = re.compile(
-    r"[\"']?effort[\"']?\s*[=:]\s*[\"'](?:xhigh|max)[\"']",
-    re.IGNORECASE,
-)
+
+def _effort_above_cap_re(cap: str) -> re.Pattern[str]:
+    above = "|".join(re.escape(level) for level in _efforts_above(cap))
+    return re.compile(rf"[\"']?effort[\"']?\s*[=:]\s*[\"'](?:{above})[\"']", re.IGNORECASE)
+
+
+EFFORT_ABOVE_CAP_RE = {model: _effort_above_cap_re(cap) for model, cap in DISABLED_THINKING_EFFORT_CAP.items()}
 
 
 _UNRESOLVED = object()
@@ -205,11 +237,10 @@ def _request_conflicts(model: object, params: dict[str, object]) -> set[str]:
 
     hits: set[str] = set()
     if any(name in params for name in ("temperature", "top_p", "top_k")):
-        hits.add(
-            "sampling parameters on a restricted Claude model"
-            if exact_restricted
-            else "sampling parameters with unresolved Anthropic model"
-        )
+        if unresolved_model:
+            hits.add("sampling parameters with unresolved Anthropic model")
+        elif model in SAMPLING_REJECTED_MODEL_IDS:
+            hits.add("sampling parameters on a restricted Claude model")
 
     thinking = params.get("thinking", _UNRESOLVED)
     manual_thinking = "thinking_budget" in params or "budget_tokens" in params
@@ -224,11 +255,10 @@ def _request_conflicts(model: object, params: dict[str, object]) -> set[str]:
         hits.add("unresolved thinking configuration on an Anthropic request")
 
     if manual_thinking:
-        hits.add(
-            "manual extended thinking on a restricted Claude model"
-            if exact_restricted
-            else "manual extended thinking with unresolved Anthropic model"
-        )
+        if unresolved_model:
+            hits.add("manual extended thinking with unresolved Anthropic model")
+        elif model in MANUAL_THINKING_REJECTED_MODEL_IDS:
+            hits.add("manual extended thinking on a restricted Claude model")
 
     messages = params.get("messages")
     assistant_prefill = (
@@ -238,23 +268,22 @@ def _request_conflicts(model: object, params: dict[str, object]) -> set[str]:
         and messages[-1].get("role") == "assistant"
     )
     if assistant_prefill:
-        hits.add(
-            "assistant-message prefill on a restricted Claude model"
-            if exact_restricted
-            else "assistant-message prefill with unresolved Anthropic model"
-        )
+        if unresolved_model:
+            hits.add("assistant-message prefill with unresolved Anthropic model")
+        elif model in PREFILL_REJECTED_MODEL_IDS:
+            hits.add("assistant-message prefill on a restricted Claude model")
 
     if disabled_thinking:
         if model in ALWAYS_THINKING_MODEL_IDS:
-            display = str(model).removeprefix("claude-").replace("-", " ").title()
-            hits.add(f"disabled thinking on Claude {display}")
+            hits.add(f"disabled thinking on {_model_display(model)}")
         elif unresolved_model:
             hits.add("disabled thinking with unresolved Anthropic model")
 
     output_config = params.get("output_config")
     effort = output_config.get("effort") if isinstance(output_config, dict) else None
-    if model == "claude-opus-5" and disabled_thinking and effort in {"xhigh", "max"}:
-        hits.add("disabled thinking with xhigh/max effort on Claude Opus 5")
+    cap = DISABLED_THINKING_EFFORT_CAP.get(model) if isinstance(model, str) else None
+    if cap and disabled_thinking and effort in _efforts_above(cap):
+        hits.add(_disabled_thinking_cap_hit(model))
     return hits
 
 
@@ -386,20 +415,16 @@ def _model_api_incompatibilities(body: str) -> list[str]:
         models = {model for model in RESTRICTED_API_MODEL_IDS if model in block}
         if not models:
             continue
-        if SAMPLING_CONTROL_RE.search(block):
+        if models & SAMPLING_REJECTED_MODEL_IDS and SAMPLING_CONTROL_RE.search(block):
             hits.add("sampling parameters on a restricted Claude model")
-        if MANUAL_THINKING_RE.search(block):
+        if models & MANUAL_THINKING_REJECTED_MODEL_IDS and MANUAL_THINKING_RE.search(block):
             hits.add("manual extended thinking on a restricted Claude model")
         for model in models & ALWAYS_THINKING_MODEL_IDS:
             if DISABLED_THINKING_RE.search(block):
-                display = model.removeprefix("claude-").replace("-", " ").title()
-                hits.add(f"disabled thinking on Claude {display}")
-        if (
-            "claude-opus-5" in models
-            and DISABLED_THINKING_RE.search(block)
-            and XHIGH_OR_MAX_EFFORT_RE.search(block)
-        ):
-            hits.add("disabled thinking with xhigh/max effort on Claude Opus 5")
+                hits.add(f"disabled thinking on {_model_display(model)}")
+        for model in models & DISABLED_THINKING_EFFORT_CAP.keys():
+            if DISABLED_THINKING_RE.search(block) and EFFORT_ABOVE_CAP_RE[model].search(block):
+                hits.add(_disabled_thinking_cap_hit(model))
     return sorted(hits)
 
 

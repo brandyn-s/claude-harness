@@ -9,6 +9,8 @@ effort: high
 metadata:
   author: example-security-engineering
   version: "2.0"
+  body-cap: exempt
+  body-cap-reason: "PERIODIC: an architecture audit producing dated findings snapshots, hidden from model routing"
 allowed-tools: Agent AskUserQuestion Bash Edit Glob Grep Read Write
 ---
 

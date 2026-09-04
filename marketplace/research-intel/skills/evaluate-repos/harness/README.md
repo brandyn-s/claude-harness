@@ -35,3 +35,11 @@ smoke or diagnostic run; the plan receipt and the written results then carry
 The framework arm is an LLM auto-synthesis of the advocate/skeptic arguments. The skill as
 shipped forbids that (`SKILL.md` Rules: the human is the decider), so this harness measures
 a proxy, not the skill; `PROBLEM.md` section 6 records the boundary.
+
+## Retired at this fixture (2026-09-04)
+
+Because of that caveat the decision A/B is retired at the current fixture
+(`docs/research-skills-root-cause.md` §8; `PROBLEM.md` §9). `run_live.py` prints the
+notice and refuses a real run unless `--acknowledge-retired-fixture` is passed;
+`--plan-only` needs no acknowledgement and its receipt reports `fixture_status: retired`.
+Reopening means changing the measured unit to the advocate/skeptic arguments themselves.

@@ -288,11 +288,12 @@ def test_run_live_malformed_fixture_clean_error(tmp_path):
     (h / "fixture.json").write_text("{bad", encoding="utf-8")
     p = subprocess.run([sys.executable, str(h / "run_live.py"),
                         "--historical-reproduction", "--output", str(h / "runs" / "malformed.json"),
-                        "--runs", "1", "--limit", "1"],
+                        "--runs", "1", "--limit", "1", "--acknowledge-retired-fixture"],
                        capture_output=True, text=True, timeout=120)
     assert p.returncode == 2
     assert "error:" in p.stderr
     assert "Traceback" not in p.stderr
+    assert "pass --acknowledge-retired-fixture" not in p.stderr, "the acknowledged run must get past the fixture gate"
 
 
 def test_run_live_all_call_errors_exits_nonzero_and_keeps_results(tmp_path):
@@ -303,10 +304,51 @@ def test_run_live_all_call_errors_exits_nonzero_and_keeps_results(tmp_path):
         env.pop(k, None)  # keyless: every task CALL_ERRORs at client construction (no network)
     p = subprocess.run([sys.executable, str(h / "run_live.py"),
                         "--historical-reproduction", "--output", str(h / "runs" / "keyless.json"),
-                        "--runs", "1"],
+                        "--runs", "1", "--acknowledge-retired-fixture"],
                        capture_output=True, text=True, env=env, timeout=120)
     assert p.returncode == 2
     assert "error:" in p.stderr
     assert "Traceback" not in p.stderr
+    assert "pass --acknowledge-retired-fixture" not in p.stderr, "the acknowledged run must get past the fixture gate"
     assert (h / "results.json").read_bytes() == before, (
         "an all-CALL_ERROR run must not overwrite the committed results.json")
+
+
+# ---------- 4. Retired fixture (2026-09-04): a real run needs an explicit acknowledgement ----------
+
+def test_run_live_refuses_retired_fixture_without_acknowledgement(tmp_path):
+    """docs/research-skills-root-cause.md sections 5 and 12.2: the baseline is at ceiling and the
+    corrected oracle shows identical arms. A real run prints the notice, refuses, writes nothing."""
+    h = _harness_copy(tmp_path)
+    before = (h / "results.json").read_bytes()
+    env = dict(os.environ)
+    for k in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN"):
+        env.pop(k, None)
+    p = subprocess.run([sys.executable, str(h / "run_live.py"),
+                        "--historical-reproduction", "--output", str(h / "runs" / "refused.json"),
+                        "--runs", "1"],
+                       capture_output=True, text=True, env=env, timeout=120)
+    assert p.returncode == 2, p.stderr
+    assert "RETIRED (2026-09-04)" in p.stderr
+    assert "--acknowledge-retired-fixture" in p.stderr and "Traceback" not in p.stderr
+    assert not (h / "runs" / "refused.json").exists()
+    assert (h / "results.json").read_bytes() == before
+
+
+def test_plan_only_reports_fixture_status_without_acknowledgement(tmp_path):
+    p = subprocess.run([sys.executable, str(HARNESS / "run_live.py"),
+                        "--historical-reproduction", "--output", str(tmp_path / "plan.json"), "--plan-only"],
+                       capture_output=True, text=True, timeout=60)
+    assert p.returncode == 0, p.stderr
+    receipt = json.loads(p.stdout)
+    assert receipt["fixture_status"] == "retired"
+    assert receipt["fixture_status_since"] == "2026-09-04"
+    assert receipt["retired_fixture_acknowledged"] is False
+    assert not (tmp_path / "plan.json").exists()
+
+
+def test_harness_docs_record_the_retirement():
+    for name in ("README.md", "PROBLEM.md"):
+        text = (HARNESS / name).read_text(encoding="utf-8")
+        assert "Retired at this fixture (2026-09-04)" in text, name
+        assert "research-skills-root-cause.md" in text and "--acknowledge-retired-fixture" in text, name

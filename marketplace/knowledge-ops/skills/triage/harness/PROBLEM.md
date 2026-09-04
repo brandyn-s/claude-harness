@@ -75,3 +75,20 @@ model, fixture_sha, run_date, n_runs.
 
 ## 8. Provenance
 Keys: `ANTHROPIC_API_KEY` only. Cost: 2 arms × n_runs calls (~6 at N=3).
+
+## 9. Retired at this fixture (2026-09-04)
+
+This A/B is retired at the current fixture. `run_live.py` prints a notice and refuses a
+real run without `--acknowledge-retired-fixture`; `--plan-only` keeps working and the
+receipt carries `fixture_status: retired`.
+
+Reason (`docs/research-skills-root-cause.md` §7): N=3 runs of a 12-item ranking cannot
+resolve the arm delta — paired Spearman deltas +0.007 / −0.070 / 0.0, with the framework
+arm's run-to-run spread (0.051) larger than the arm difference (0.021), and the one
+framework loss traceable to the worked example in `SYSTEM_WITH` anchoring a demotion.
+Correlation groups were identical across arms in all 12 records. What was A/B'd is a
+two-sentence severity prompt, not the 14-article constitution.
+
+Unchanged: the frozen 2026-05-31 baseline, its committed sample, and the CI gate. Reopen
+only with the worked example removed from `SYSTEM_WITH` and N ≥ 10 (2 calls per run, no
+search), and state in `SKILL.md` that the prompt, not the constitution, is what is measured.

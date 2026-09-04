@@ -14,6 +14,8 @@ allowed-tools: ["Agent", "Bash", "Read", "Write", "Glob", "Grep", "mcp__tavily__
 metadata:
   author: example-security-engineering
   version: "2.1"
+  body-cap: exempt
+  body-cap-reason: "PERIODIC: an explicit-invocation research report, hidden from model routing; each run is independent"
 compatibility:
   # Requires Tavily, Exa, and Firecrawl MCP servers for multi-source research with discrepancy flagging. X/Twitter via bin/x-monitor.py (xAI Agent Tools API; the xai MCP X-search tools were retired/not on macOS). arXiv via firecrawl site:arxiv.org or exa web_search_exa (arxiv MCP not on macOS).
   requires:

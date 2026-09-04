@@ -8,6 +8,8 @@ effort: high
 metadata:
   author: example-security-engineering
   version: "1.0"
+  body-cap: exempt
+  body-cap-reason: "PERIODIC: an upstream-sync report run every few weeks (since-last-run window, Watching table); no workflow skill or hook chains into it"
 compatibility:
   # Requires gh CLI and web-search MCP (Tavily or Firecrawl) for upstream Claude Code monitoring.
   requires:
