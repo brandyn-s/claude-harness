@@ -10,6 +10,7 @@ separate friction notes)."""
 import importlib.util
 import json
 import os
+import subprocess
 import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -17,8 +18,6 @@ BIN = os.path.abspath(os.path.join(HERE, "..", "..", "bin", "transcript_meta.py"
 spec = importlib.util.spec_from_file_location("transcript_meta", BIN)
 tm = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(tm)
-
-import subprocess
 
 
 def _run(prep, final, threshold, out):

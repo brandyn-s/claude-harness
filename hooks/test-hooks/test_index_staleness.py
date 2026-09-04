@@ -21,7 +21,7 @@ from pathlib import Path
 HOOKS_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(HOOKS_DIR))
 
-from session_start_modules import index_staleness as mod
+from session_start_modules import index_staleness as mod  # noqa: E402 -- resolves via the sys.path insert above
 
 
 def _git_env(commit_ts: int):

@@ -20,9 +20,9 @@ import argparse
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
-from pathlib import Path
 
 HOME = Path.home()
 CLAUDE_DIR = HOME / ".claude"

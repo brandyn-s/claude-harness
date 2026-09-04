@@ -24,7 +24,7 @@ import pytest
 HOOKS = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(HOOKS))
 
-from session_start_modules.repo_sync import (
+from session_start_modules.repo_sync import (  # noqa: E402 -- resolves via the sys.path insert above
     _TRANSIENT_DIRT,
     _branch_work_is_upstream,
     _content_dirty_paths,

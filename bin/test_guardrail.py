@@ -19,8 +19,8 @@ from pathlib import Path
 BIN = Path(__file__).resolve().parent
 sys.path.insert(0, str(BIN))
 
-import guardrail_corpus as gc
-import guardrail_report as gr
+import guardrail_corpus as gc  # noqa: E402 -- resolves via the sys.path insert above
+import guardrail_report as gr  # noqa: E402 -- resolves via the sys.path insert above
 
 # ---- fragment-assembled secret-shaped values (no literal secret in source) ----
 GH_TOKEN = "gh" + "p_" + "A0B1C2D3E4F5G6H7I8J9K"          # gh[pousr]_[A-Za-z0-9]{20,}

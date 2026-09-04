@@ -8,7 +8,7 @@ import pytest
 HOOKS_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(HOOKS_DIR))
 
-import rule_context_budget as budget
+import rule_context_budget as budget  # noqa: E402 -- resolves via the sys.path insert above
 
 
 def _write(path: Path, text: str) -> Path:

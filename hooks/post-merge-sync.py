@@ -40,7 +40,7 @@ except ImportError:
 
 # Atomic write helper
 sys.path.insert(0, os.path.join(os.path.expanduser("~"), ".claude", "hooks"))
-from atomic_write import atomic_write
+from atomic_write import atomic_write  # noqa: E402 -- resolves via the sys.path insert above
 
 # ── PIP-COMPILE WINDOWS PACKAGE STRIPPING ────────────────────────────
 

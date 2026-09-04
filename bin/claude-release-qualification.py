@@ -31,7 +31,7 @@ SCRIPTS_DIR = Path(__file__).resolve().parents[1] / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-from hook_exec_form import (
+from hook_exec_form import (  # noqa: E402 -- resolves via the sys.path insert above
     configured_hook_embeds_dispatcher,
     configured_hook_is_malformed,
     configured_hook_script,

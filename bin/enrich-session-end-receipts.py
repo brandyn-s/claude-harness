@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "hooks"))
-from atomic_write import atomic_write
+from atomic_write import atomic_write  # noqa: E402 -- resolves via the sys.path insert above
 
 MODEL_REFUSAL_SUBTYPES = {
     "model_refusal_fallback",

@@ -1,4 +1,7 @@
 """Tests for subagent-start-context.py (SubagentStart)."""
+import json
+from pathlib import Path
+
 from conftest import run_hook
 
 HOOK = "subagent-start-context.py"
@@ -32,8 +35,6 @@ def test_empty_input():
 # the DELIVERY of the child-side reporting contract, relocated out of ambient
 # rules/ on 2026-08-26 (-7,015 B) and now the hook's responsibility.
 # ---------------------------------------------------------------------------
-import json
-from pathlib import Path
 
 CONTRACT_MARKER = "SUBAGENT REPORTING CONTRACT"
 BUDGET_NOTICE = "NOT DELIVERED"

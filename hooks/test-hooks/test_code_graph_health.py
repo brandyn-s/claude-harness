@@ -20,7 +20,7 @@ from pathlib import Path
 HOOKS_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(HOOKS_DIR))
 
-from session_start_modules import code_graph_health as mod
+from session_start_modules import code_graph_health as mod  # noqa: E402 -- resolves via the sys.path insert above
 
 
 class _Result:

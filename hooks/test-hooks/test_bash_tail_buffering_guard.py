@@ -13,6 +13,10 @@ filter). The ACTION changed:
 Allow (exit 0, no output) when not a buffering pipe. Non-Bash passes through.
 """
 import json
+import os as _os
+import shutil as _shutil
+
+import pytest as _pytest
 
 from conftest import make_bash_input, make_write_input, run_hook
 
@@ -281,11 +285,6 @@ def test_audit_log_records_autofix_and_block_in_production(tmp_path):
 # had TIMED OUT in the merge queue (that script exits 2 on timeout, 0 only on
 # MERGED). The guard rewrote and approved it as "buffering-safe" while the exit
 # code still lied.
-
-import os as _os
-import shutil as _shutil
-
-import pytest as _pytest
 
 # The rewrite is a POSIX shell script ($? capture, /tmp paths). The two tests
 # that EXECUTE it need a real POSIX shell; the string-assertion test below is

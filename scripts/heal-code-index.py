@@ -52,10 +52,10 @@ HOOKS_DIR = Path(__file__).resolve().parent.parent / "hooks"
 if str(HOOKS_DIR) not in sys.path:
     sys.path.insert(0, str(HOOKS_DIR))
 
-from session_start_modules import index_staleness as ist
+from session_start_modules import index_staleness as ist  # noqa: E402 -- resolves via the sys.path insert above
 # Shared, CI-hardened liveness probe -- a hand-rolled os.kill(pid, 0) is
 # wrong on Windows (see index_autoheal).
-from session_start_modules.concurrent_session import _pid_alive
+from session_start_modules.concurrent_session import _pid_alive  # noqa: E402 -- resolves via the sys.path insert above
 
 CACHE_DIR = Path.home() / ".cache" / "codebase-memory-mcp"
 LOCK_PATH = CACHE_DIR / ".autoheal.lock"

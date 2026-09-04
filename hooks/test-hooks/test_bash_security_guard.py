@@ -9,6 +9,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest as _pytest
+
 from conftest import make_bash_input, run_hook, windows_only
 
 HOOK = "bash-security-guard.py"
@@ -1902,8 +1904,6 @@ def test_forbidden_org_guard_is_configured_not_hardcoded():
 # ── catastrophic-layer bypass closure, 2026-09-03 comparison review ──
 # Two independent code reviews (cc-safety-net and codex-claude-code-config
 # comparisons) found the same untested forms slipping past the always-on layer.
-
-import pytest as _pytest
 
 
 @_pytest.mark.parametrize("command", [
