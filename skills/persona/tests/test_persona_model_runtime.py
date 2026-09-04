@@ -632,7 +632,7 @@ def test_operational_docs_and_templates_use_current_runtime_contract():
     assert "Current operational default" in rubric_mode
     assert "Historical cost baseline" in rubric_mode
     for superseded in SUPERSEDED:
-        assert superseded not in active_code
+        assert not ids.names(active_code, superseded)
 
 
 def test_provider_errors_are_typed_and_keep_unobserved_runtime_unavailable():

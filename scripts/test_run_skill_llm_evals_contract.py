@@ -152,7 +152,7 @@ def test_active_tier2_evals_do_not_pin_superseded_opus_models():
         if "l3-activation-study" in path.parts:
             continue
         text = path.read_text(encoding="utf-8")
-        if any(f"model: {superseded}" in text for superseded in ids.superseded_ids()):
+        if any(ids.names(text, f"model: {superseded}") for superseded in ids.superseded_ids()):
             offenders.append(path.relative_to(REPO).as_posix())
 
     assert offenders == []

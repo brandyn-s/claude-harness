@@ -9,6 +9,7 @@ from here instead of repeating literals that go stale at every model rollover.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -59,3 +60,15 @@ def model_id(tier: str) -> str:
 
 def display_name(tier: str) -> str:
     return model(tier)["display_name"]
+
+
+def names(text: str, model_name: str) -> bool:
+    """Whether `text` names `model_name` (an id or a display name) as a whole token.
+
+    A plain substring test cannot tell `claude-fable-5` from `claude-fable-5-1`, or
+    `Fable 5` from `Fable 5.1`, so every mention of a successor would read as a
+    mention of the model it superseded. `us.anthropic.claude-fable-5[1m]` and
+    `claude-fable-5.` (end of sentence) still count as naming the model.
+    """
+    pattern = rf"(?<![\w-]){re.escape(model_name)}(?![\w-])(?!\.\d)"
+    return re.search(pattern, text) is not None

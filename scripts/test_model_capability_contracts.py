@@ -85,7 +85,18 @@ def test_api_guardrails_names_current_models_and_runtime_outcomes():
 
     assert "Chain-of-thought verification" not in text
     for model_id in ids.superseded_ids():
-        assert model_id not in text, "superseded models are frozen evidence, not current guidance"
+        assert not ids.names(text, model_id), "superseded models are frozen evidence, not current guidance"
+
+
+def test_names_matches_whole_model_tokens_only():
+    """The superseded-id checks below must not fire on a successor that extends the id."""
+    assert not ids.names("pin claude-fable-5-1 here", "claude-fable-5")
+    assert not ids.names("Claude Fable 5.1 replaces it", "Fable 5")
+    assert ids.names("pin claude-fable-5 here", "claude-fable-5")
+    assert ids.names("ends with claude-fable-5.", "claude-fable-5")
+    assert ids.names("us.anthropic.claude-fable-5[1m]", "claude-fable-5")
+    assert ids.names("Fable 5 has thinking always on", "Fable 5")
+    assert not ids.names("claude-opus-4-80", "claude-opus-4-8")
 
 
 def test_validator_reads_its_model_facts_from_the_contract():
@@ -99,7 +110,9 @@ def test_validator_reads_its_model_facts_from_the_contract():
         if m["sampling"] == "rejected" or not m["assistant_prefill"]
         or not m["thinking"]["manual_budget_tokens"]
     }
-    assert validator.ALWAYS_THINKING_MODEL_IDS == {m["id"] for m in ALWAYS_THINKING}
+    assert validator.ALWAYS_THINKING_MODEL_IDS == {
+        m["id"] for m in rows if m["thinking"]["adaptive"] == "always_on"
+    }
     assert validator.DISABLED_THINKING_EFFORT_CAP == {
         m["id"]: m["thinking"]["disable"]["max_effort"]
         for m in rows if m["thinking"]["disable"]["allowed"] and m["thinking"]["disable"]["max_effort"]
@@ -322,8 +335,8 @@ def test_roundtable_active_contract_is_current_and_historical_evidence_is_labele
 
     for active in (skill, manifest, harness, synthesize, judge_runner):
         for row in SUPERSEDED:
-            assert row["id"] not in active
-            assert row["display_name"].removeprefix("Claude ") not in active
+            assert not ids.names(active, row["id"])
+            assert not ids.names(active, row["display_name"].removeprefix("Claude "))
         assert "grok-4.20" not in active
         assert "gpt-5.5-pro" not in active
 
