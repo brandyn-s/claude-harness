@@ -79,3 +79,22 @@ def test_write_then_check_round_trip_with_zero_servers(tmp_path, monkeypatch):
     assert text.startswith("# head\n\n") and text.endswith("\n\ntail\n")
     assert "stale hand-written inventory" not in text
     assert "No MCP servers are registered" in text
+
+
+def test_committed_block_is_the_neutral_zero_server_rendering():
+    """The repo ships the zero-server rendering, never a host's inventory.
+
+    `--write` is a per-host action; its output on a machine with servers is
+    that machine's catalog and must not be committed. Pinning the committed
+    block to `render([])` turns such a commit into a failing test instead of
+    a silent re-introduction of the inventory this test file exists to keep out.
+    """
+    mod = _load_generator()
+    doc = (REPO / "skills" / "audit-architecture" / "references" / "probe-targets.md").read_text(encoding="utf-8")
+    start = doc.index(mod.BEGIN)
+    end = doc.index(mod.END) + len(mod.END)
+
+    committed = "\n".join(line.rstrip() for line in doc[start:end].splitlines())
+    neutral = "\n".join(line.rstrip() for line in mod.render([]).splitlines())
+
+    assert committed == neutral, "probe-targets.md carries a host inventory; run the generator only locally"
