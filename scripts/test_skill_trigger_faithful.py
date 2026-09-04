@@ -142,6 +142,32 @@ def test_build_command_carries_the_isolation_flags():
         stf.build_command("claude", "--not-a-request", "m", 2, 1.0)
 
 
+def test_build_command_default_mode_omits_the_flag_and_allowlists_tools():
+    cmd = stf.build_command("claude", "Scan this repo", "claude-fable-5-1", 2, 3.0, permission_mode="default",
+                            allowed_tools=stf.DEFAULT_ALLOWED_TOOLS, permission_prompts="none")
+    assert "--permission-mode" not in cmd, "2.1.260 has no `default` choice; the default mode is the absence of the flag"
+    assert cmd[cmd.index("--allowedTools") + 1] == stf.DEFAULT_ALLOWED_TOOLS
+    assert cmd[cmd.index("--permission-prompts") + 1] == "none"
+    assert "Skill" in stf.DEFAULT_ALLOWED_TOOLS.split(",") and "Bash(git status:*)" in stf.DEFAULT_ALLOWED_TOOLS
+    for flag in ("--setting-sources project", "--no-session-persistence", "--strict-mcp-config", "--include-hook-events"):
+        assert flag in " ".join(cmd), flag
+    plan = stf.build_command("claude", "Scan this repo", "claude-fable-5-1", 2, 3.0)
+    assert plan[plan.index("--permission-mode") + 1] == "plan" and "--allowedTools" not in plan
+    with pytest.raises(ValueError):
+        stf.build_command("claude", "x", "m", 2, 1.0, permission_mode="yolo")
+
+
+def test_parse_stream_records_denied_tool_names():
+    lines = _synthetic_stream({"skill": "capture"})
+    result = json.loads(lines[-1])
+    result["permission_denials"] = [{"tool_name": "Bash", "tool_use_id": "t9", "tool_input": {"command": "rg x"}},
+                                    {"tool_name": "Edit", "tool_use_id": "t10", "tool_input": {}}]
+    lines[-1] = json.dumps(result)
+    parsed = stf.parse_stream(lines)
+    assert parsed["result"]["permission_denials"] == 2
+    assert parsed["result"]["permission_denied_tools"] == ["Bash", "Edit"]
+
+
 def test_subprocess_env_removes_api_credentials_only():
     env = stf.subprocess_env({"ANTHROPIC_API_KEY": "sk-secret", "ANTHROPIC_AUTH_TOKEN": "t", "PATH": "/bin", "HOME": "/h"})
     assert "ANTHROPIC_API_KEY" not in env and "ANTHROPIC_AUTH_TOKEN" not in env
@@ -204,16 +230,41 @@ def test_dry_run_prints_the_plan_and_executes_nothing(eval_inputs, tmp_path, mon
     assert not (tmp_path / "proj").exists(), "dry-run must not create the project directory"
 
 
+def test_dry_run_can_reuse_an_earlier_runs_sample(eval_inputs, tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(stf.subprocess, "run", lambda *a, **k: (_ for _ in ()).throw(AssertionError("no subprocess")))
+    earlier = tmp_path / "faithful-earlier.json"
+    earlier.write_text(json.dumps({"sample": {"weakest": ["beta"], "strong": ["gamma"], "rule": "old rule"}}),
+                       encoding="utf-8")
+    base = ["--skills-dir", str(eval_inputs["skills"]), "run", "--dry-run", "--project", str(tmp_path / "proj"),
+            "--sample-from", str(eval_inputs["results"]), "--corpus", str(eval_inputs["corpus"]),
+            "--claude-bin", "/nonexistent/claude"]
+    assert stf.main(base + ["--reuse-sample", str(earlier)]) == 0
+    plan = json.loads(capsys.readouterr().out)
+    assert plan["sample"]["weakest"] == ["beta"] and plan["sample"]["strong"] == ["gamma"]
+    assert plan["sample"]["reused_from"] == "faithful-earlier.json" and "old rule" in plan["sample"]["rule"]
+    assert [r["id"] for r in plan["runs"]] == ["beta-1", "beta-2", "beta-3", "gamma-1", "gamma-2", "gamma-3"]
+    # a reused skill that is no longer model-visible voids the comparison
+    earlier.write_text(json.dumps({"sample": {"weakest": ["hidden"], "strong": ["gamma"], "rule": "r"}}), encoding="utf-8")
+    assert stf.main(base + ["--reuse-sample", str(earlier)]) == 2
+
+
 def test_setup_project_symlinks_every_visible_skill_and_prunes_stale_links(eval_inputs, tmp_path):
     project = tmp_path / "proj"
     visible = [{"name": n} for n in eval_inputs["names"]]
     (project / ".claude" / "skills").mkdir(parents=True)
     (project / ".claude" / "skills" / "stale").symlink_to(eval_inputs["skills"] / "alpha", target_is_directory=True)
+    # A real project's own skills must survive: a directory and a symlink pointing elsewhere.
+    (project / ".claude" / "skills" / "library-skills").mkdir()
+    (project / ".agents" / "skills" / "fastapi").mkdir(parents=True)
+    (project / ".claude" / "skills" / "fastapi").symlink_to(project / ".agents" / "skills" / "fastapi",
+                                                            target_is_directory=True)
     info = stf.setup_project(project, visible, eval_inputs["skills"])
     assert info["skills_linked"] == 4 and info["stale_links_removed"] == ["stale"]
+    assert info["project_own_skills"] == ["fastapi", "library-skills"]
+    assert (project / ".claude" / "skills" / "fastapi").is_symlink() and (project / ".claude" / "skills" / "library-skills").is_dir()
     assert (project / ".claude" / "skills" / "beta" / "SKILL.md").read_text(encoding="utf-8").startswith("---")
     assert not (project / ".claude" / "skills" / "hidden").exists()
-    assert info["settings_json_present"] is False and info["claude_md_present"] is False
+    assert info["settings_json_present"] is False and info["claude_md_present"] is False and info["git_repo"] is False
     again = stf.setup_project(project, visible, eval_inputs["skills"])
     assert again["skills_linked"] == 4 and again["stale_links_removed"] == []
 

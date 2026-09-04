@@ -16,8 +16,14 @@ Faithfulness and isolation:
     and skills are NOT loaded (the stream is checked for hook events: must be 0);
     `--strict-mcp-config` so no MCP server is started; `--no-session-persistence`
     so nothing is written under ~/.claude/projects.
-  * Plan mode and `--max-turns N` bound each run; the Skill tool_use, if any, is
-    in the first assistant turn.
+  * `--max-turns N` bounds each run; the Skill tool_use, if any, is in the first
+    assistant turn. Two permission modes are supported: `--permission-mode plan`
+    (the 2026-09-04 run; the model is told to investigate before acting) and
+    `--permission-mode default` (no flag is passed, the CLI's own default; pair
+    it with `--allowed-tools` for the read-only tools the model may use without
+    a prompt and `--permission-prompts none` so anything else is denied instead
+    of waiting). `--reuse-sample earlier.json` pins the skills of an earlier run
+    so two modes compare identical requests; `--resume` re-parses saved streams.
   * ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN are removed from the child's
     environment: these runs bill the owner's Claude Code subscription, and the
     key can neither be used nor leaked. The stream's `total_cost_usd` is the
@@ -137,14 +143,31 @@ def claude_version(claude_bin: str) -> str:
     return out.strip().splitlines()[-1] if out.strip() else "unknown"
 
 
-def build_command(claude_bin: str, request: str, model: str, max_turns: int, budget_usd: float) -> list[str]:
+PERMISSION_MODES = ("default", "plan", "acceptEdits", "manual", "dontAsk", "auto")
+DEFAULT_PERMISSION_MODE = "plan"
+# The 2026-09-04 plan-mode run showed 20 of 22 misses going straight to Bash. The
+# default-mode variant lets the model act (read-only tools allow-listed) instead of
+# planning, so a miss there is a real "did not reach for the skill", not a plan-mode
+# artifact. Headless runs cannot answer prompts: anything outside the allow-list is
+# denied automatically (--permission-prompts none) and the denials are recorded.
+DEFAULT_ALLOWED_TOOLS = "Read,Grep,Glob,Bash(ls:*),Bash(cat:*),Bash(git status:*),Skill"
+
+
+def build_command(claude_bin: str, request: str, model: str, max_turns: int, budget_usd: float,
+                  permission_mode: str = DEFAULT_PERMISSION_MODE, allowed_tools: str | None = None,
+                  permission_prompts: str | None = None) -> list[str]:
     if request.startswith("-"):
         raise ValueError("request must not start with '-' (it would parse as an option)")
-    return [
+    if permission_mode not in PERMISSION_MODES:
+        raise ValueError(f"permission_mode must be one of {PERMISSION_MODES}")
+    cmd = [
         claude_bin, "-p", request,
         "--output-format", "stream-json", "--verbose",
         "--max-turns", str(max_turns),
-        "--permission-mode", "plan",
+    ]
+    if permission_mode != "default":      # `default` is the CLI's own default: no flag (2.1.260 has no such choice)
+        cmd += ["--permission-mode", permission_mode]
+    cmd += [
         "--setting-sources", "project",
         "--no-session-persistence",
         "--strict-mcp-config",
@@ -152,6 +175,11 @@ def build_command(claude_bin: str, request: str, model: str, max_turns: int, bud
         "--model", model,
         "--max-budget-usd", f"{budget_usd:.2f}",
     ]
+    if allowed_tools:
+        cmd += ["--allowedTools", allowed_tools]
+    if permission_prompts:
+        cmd += ["--permission-prompts", permission_prompts]
+    return cmd
 
 
 def subprocess_env(base: dict | None = None) -> dict:
@@ -221,7 +249,9 @@ def parse_stream(lines) -> dict:
         elif kind == "result":
             rec["result"] = {k: event.get(k) for k in ("subtype", "is_error", "num_turns", "duration_ms",
                                                           "total_cost_usd", "stop_reason")}
+            denials = [d for d in (event.get("permission_denials") or []) if isinstance(d, dict)]
             rec["result"]["permission_denials"] = len(event.get("permission_denials") or [])
+            rec["result"]["permission_denied_tools"] = [str(d.get("tool_name") or "?") for d in denials]
     return rec
 
 
@@ -239,11 +269,22 @@ def setup_project(project: Path, visible: list[dict], skills_dir: Path = SKILLS_
     skills_root = project / ".claude" / "skills"
     skills_root.mkdir(parents=True, exist_ok=True)
     wanted = {s["name"] for s in visible}
-    linked, removed = [], []
+    harness_root = skills_dir.resolve()
+    linked, removed, project_own = [], [], []
     for entry in list(skills_root.iterdir()):
-        if entry.name not in wanted and entry.is_symlink():
+        if entry.name in wanted:
+            continue
+        # Prune only links WE made (they point into the harness skills dir). A real project's own
+        # skills -- directories or symlinks elsewhere -- stay: they are part of the realistic table.
+        try:
+            ours = entry.is_symlink() and entry.resolve().is_relative_to(harness_root)
+        except OSError:
+            ours = False
+        if ours:
             entry.unlink()
             removed.append(entry.name)
+        else:
+            project_own.append(entry.name)
     for skill in visible:
         link = skills_root / skill["name"]
         target = (skills_dir / skill["name"]).resolve()
@@ -257,8 +298,10 @@ def setup_project(project: Path, visible: list[dict], skills_dir: Path = SKILLS_
         link.symlink_to(target, target_is_directory=True)
         linked.append(skill["name"])
     return {"project": str(project), "skills_linked": len(linked), "stale_links_removed": removed,
+            "project_own_skills": sorted(project_own),
             "settings_json_present": (project / ".claude" / "settings.json").exists(),
-            "claude_md_present": (project / "CLAUDE.md").exists()}
+            "claude_md_present": (project / "CLAUDE.md").exists(),
+            "git_repo": (project / ".git").exists()}
 
 
 # --------------------------------------------------------------------------- runs
@@ -388,11 +431,27 @@ def cmd_run(args) -> int:
         log("error: --sample-from has no report.per_skill; run `skill-description-eval.py report` on it first")
         return 2
     sample = select_sample(per_skill, visible_names, args.weakest, args.strong, source=Path(args.sample_from).name)
+    if args.reuse_sample:
+        # Same skills as an earlier faithful run, so two permission modes are compared on identical
+        # requests even after the model-visible set has changed (the automatic strong picks move
+        # when skills are hidden). Every reused skill must still be visible, or the comparison is void.
+        earlier = json.loads(Path(args.reuse_sample).read_text(encoding="utf-8"))
+        reused = earlier["sample"]
+        hidden_now = [n for n in reused["weakest"] + reused["strong"] if n not in visible_names]
+        if hidden_now:
+            log(f"error: reused sample names skills no longer visible to the model: {hidden_now}")
+            return 2
+        sample = {"weakest": list(reused["weakest"]), "strong": list(reused["strong"]),
+                  "excluded_not_visible": sorted(n for n in per_skill if n not in visible_names),
+                  "rule": f"same sample as {Path(args.reuse_sample).name} ({reused['rule']})",
+                  "reused_from": Path(args.reuse_sample).name}
     corpus = json.loads(Path(args.corpus).read_text(encoding="utf-8"))
     items = plan_items(corpus, sample)[:args.max_runs]
     claude_bin = args.claude_bin or shutil.which("claude") or "claude"
-    commands = {i["id"]: build_command(claude_bin, i["request"], args.model, args.max_turns, args.budget_usd)
-                for i in items}
+    command_opts = dict(permission_mode=args.permission_mode, allowed_tools=args.allowed_tools,
+                        permission_prompts=args.permission_prompts)
+    commands = {i["id"]: build_command(claude_bin, i["request"], args.model, args.max_turns, args.budget_usd,
+                                       **command_opts) for i in items}
 
     log(f"sample: weakest={sample['weakest']} strong={sample['strong']} "
         f"excluded(hidden)={sample['excluded_not_visible']}")
@@ -440,7 +499,8 @@ def cmd_run(args) -> int:
                 status = "HIT " if record["triggered"] else ("FAIL" if record["failed"] else "miss")
                 log(f"  {status} {record['id']:<32} skill_calls={record['skill_calls']} "
                     f"turns={(record['result'] or {}).get('num_turns')} subtype={(record['result'] or {}).get('subtype')} "
-                    f"hooks={record['hook_events']} {record['elapsed_s']}s")
+                    f"hooks={record['hook_events']} denied={(record['result'] or {}).get('permission_denied_tools')} "
+                    f"{record['elapsed_s']}s")
                 if record["failed"]:
                     log(f"       stderr: {record['stderr_tail'][-300:]!r}")
         for record in sorted(batch_records, key=lambda r: r["id"]):
@@ -461,8 +521,13 @@ def cmd_run(args) -> int:
             "finished_at": finished.isoformat(timespec="seconds"),
             "claude_version": version, "claude_bin": redact_home(claude_bin), "model": args.model,
             "max_turns": args.max_turns,
-            "permission_mode": "plan", "setting_sources": "project", "project": str(project), "setup": setup,
-            "argv_template": build_command("claude", "<request>", args.model, args.max_turns, args.budget_usd),
+            "permission_mode": args.permission_mode, "allowed_tools": args.allowed_tools,
+            "permission_prompts": args.permission_prompts,
+            "permission_mode_reported": sorted({(r["init"] or {}).get("permissionMode") or "?" for r in runs if r["init"]}),
+            "permission_denials_total": sum((r["result"] or {}).get("permission_denials") or 0 for r in runs),
+            "setting_sources": "project", "project": str(project), "setup": setup,
+            "argv_template": build_command("claude", "<request>", args.model, args.max_turns, args.budget_usd,
+                                           **command_opts),
             "env_removed": list(SECRET_ENV), "sample_rule": sample["rule"], "corpus": str(args.corpus),
             "sample_from": str(args.sample_from), "proxies": [{"label": p["label"], "path": p["path"],
                                                                "effort": p["results"]["meta"].get("effort")}
@@ -510,8 +575,19 @@ def main(argv: list[str] | None = None) -> int:
                    help="proxy results to compare against, repeatable; the last one anchors item agreement")
     p.add_argument("--weakest", type=int, default=5)
     p.add_argument("--strong", type=int, default=5)
+    p.add_argument("--reuse-sample", default=None, metavar="FAITHFUL",
+                   help="take the weakest/strong skill lists from an earlier faithful-*.json instead of re-selecting, "
+                        "so two runs compare identical requests")
     p.add_argument("--max-runs", type=int, default=DEFAULT_MAX_RUNS)
     p.add_argument("--max-turns", type=int, default=DEFAULT_MAX_TURNS)
+    p.add_argument("--permission-mode", choices=PERMISSION_MODES, default=DEFAULT_PERMISSION_MODE,
+                   help="`plan` (the 2026-09-04 run) or `default` (no --permission-mode flag: the CLI's own default "
+                        "mode, so the model may act; pair with --allowed-tools and --permission-prompts none)")
+    p.add_argument("--allowed-tools", default=None, metavar="LIST",
+                   help=f"passed to `--allowedTools`; e.g. {DEFAULT_ALLOWED_TOOLS!r}")
+    p.add_argument("--permission-prompts", choices=("host", "none"), default=None,
+                   help="passed to `--permission-prompts`; `none` denies anything outside the allow-list instead of "
+                        "waiting for an answer nobody can give")
     p.add_argument("--model", default=DEFAULT_MODEL)
     p.add_argument("--budget-usd", type=float, default=DEFAULT_BUDGET_USD, help="per-run --max-budget-usd")
     p.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_S, help="per-run wall clock (s)")
