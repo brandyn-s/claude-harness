@@ -1,7 +1,7 @@
 {
   "name": "code-intelligence",
   "description": "Codebase exploration, analysis, API docs, and debugging \u2014 semantic search, structural graph queries, call chain tracing, dead code detection, Rust hierarchical documentation, MCP server diagnostics, API doc ingestion, and MCP forge (build/audit/deploy).",
-  "version": "1.1.17",
+  "version": "1.1.18",
   "author": {
     "name": "Brandyn Schult",
     "url": "https://github.com/brandyn-s"

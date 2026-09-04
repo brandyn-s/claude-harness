@@ -3,7 +3,10 @@
 name: gather-research
 description: "Track the AI-agent research frontier (papers, talks, frameworks) and map it to our architecture."
 when_to_use: Use when wanting to stay current on the research frontier for AI agent architecture. Searches academic papers, conference talks, research blogs, and framework developments (arXiv preprints via Exa, NeurIPS/ICML/ICLR/ACL proceedings, Anthropic/Google DeepMind/Meta FAIR research blogs), then maps findings to this Claude Code architecture for research-backed improvements. Academic paper search runs through Exa with category filtering (arXiv MCP not required). Do NOT use for Claude Code-specific intelligence (use /gather-claude), community pattern gathering (use /gather-intel), or internal repo evaluation (use /evaluate-repos).
-disable-model-invocation: false
+# 2026-09-04: hidden from model routing. Paired A/Bs on Opus 4.8 (2026-05-31) and Fable 5.1
+# (2026-09-03) measured no lift over a plain model with web search, and the harnesses never ran
+# the full skill; see docs/research-skills-root-cause.md. Explicit /<name> invocation still works.
+disable-model-invocation: true
 argument-hint: "[optional focus area, e.g. 'agent memory', 'tool use', 'MCP patterns']"
 effort: high
 metadata:
