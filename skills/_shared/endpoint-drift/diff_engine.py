@@ -25,8 +25,9 @@ documented failure mode -- see verify-effectiveness.md):
   FETCH_FAILED     transient/network                               -> retry, not signal
 
 PROVENANCE: this tool asks ONE source (the docs), but a baseline may hold values
-learned from a SECOND source -- our own telemetry, merged by reconcile_observed.py
-(Step 2c), which stamps `observed_source` and lists them in `observed_values`.
+learned from a SECOND source -- an observed inventory of what the deployment
+actually emits, merged by reconcile_observed.py --observed (Step 2c), which
+stamps `observed_source` and lists them in `observed_values`.
 
 An observed-only value is BY DEFINITION absent from the docs, so comparing it
 against a docs-only extraction reports it REMOVED on EVERY run, forever. Measured
@@ -34,10 +35,10 @@ against a docs-only extraction reports it REMOVED on EVERY run, forever. Measure
 run 3, all of them values run 2's reconciliation had deliberately added.
 
 That is worse than noise -- it INVERTS the alarm. Both affected fact-sets back
-live detectors with CLOSED-SET predicates (otel_channel_detect.py:125,
-activity_signal_detect.py:64), so a real vendor rename BREAKS them; and the
-differ had already spent its REMOVED signal claiming they were gone. 25 phantom
-rows per run also train the reader to dismiss REMOVED, the class graded HIGHEST.
+live detectors with CLOSED-SET predicates downstream, so a real vendor rename
+BREAKS them; and the differ had already spent its REMOVED signal claiming they
+were gone. 25 phantom rows per run also train the reader to dismiss REMOVED,
+the class graded HIGHEST.
 
 So values are partitioned by provenance before diffing:
   docs-sourced   -> diffed normally (added/removed are real signal)
@@ -45,7 +46,7 @@ So values are partitioned by provenance before diffing:
                     flagged only on a state CHANGE: it appeared in the docs
                     (vendor documented it -- promote to docs-sourced), or it
                     stopped being observed (that is reconcile_observed.py's job
-                    to detect, since only Athena can see it).
+                    to detect, since only an observed inventory can see it).
 
 Usage:
   diff_channels.py --kb <kb-dir> [--channel KEY ...] [--update-baseline]
@@ -256,7 +257,7 @@ def extract(body: str, ex: Extractor) -> ExtractResult:
 BASELINE_SUBDIR = "claude-data-channels"
 REPORT_TITLE = "CLAUDE DATA-CHANNEL DRIFT REPORT"
 # Rendered under OBSERVED_ONLY; registries override with their own reconcile pointer.
-OBSERVED_HINT = "not drift; re-verify these via reconcile_observed.py (Athena leg)"
+OBSERVED_HINT = "not drift; re-verify these via reconcile_observed.py --observed <inventory>"
 
 
 def baseline_path(kb: Path, key: str) -> Path:
@@ -682,11 +683,11 @@ def code_freshness(code_dir: Path | None = None) -> tuple[str, str]:
 
     WHY — measured 2026-08-22 (run 6). baseline_freshness() guards the KB tree;
     nothing guarded the code. The live ~/.claude checkout was 143 commits behind
-    origin/main, so run 6 initially executed run-5-era scripts: the Athena leg
-    died on the exact 240 s budget PR #1960 had already fixed, and the differ
-    ran WITHOUT the baseline-freshness gate at all. A skill that self-hardens
-    each run silently sheds those fixes when the runtime tree lags — finding
-    #27's mechanism, one layer up.
+    origin/main, so run 6 initially executed run-5-era scripts: the live
+    reconcile leg died on the exact poll-budget bug PR #1960 had already fixed,
+    and the differ ran WITHOUT the baseline-freshness gate at all. A skill that
+    self-hardens each run silently sheds those fixes when the runtime tree lags
+    — finding #27's mechanism, one layer up.
 
     Statuses mirror baseline_freshness, with one deliberate difference: UNKNOWN
     here WARNS and proceeds instead of refusing. The baseline gate protects

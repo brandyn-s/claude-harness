@@ -43,7 +43,7 @@ from spec_types import ChannelSpec, Extractor, ProseTrigger  # noqa: E402
 # ~/Documents/knowledge-base/reference/<KB_SUBDIR>/baselines/.
 KB_SUBDIR = "openai-data-channels"
 REPORT_TITLE = "OPENAI DATA-CHANNEL DRIFT REPORT"
-# Rendered under OBSERVED_ONLY rows instead of the Anthropic Athena pointer.
+# Rendered under OBSERVED_ONLY rows instead of the Anthropic sibling's pointer.
 OBSERVED_HINT = ("not drift; re-verify these via reconcile_openai_observed.py "
                  "--probe (live keyed GETs)")
 
