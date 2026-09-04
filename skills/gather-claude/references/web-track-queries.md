@@ -131,9 +131,9 @@ firecrawl_scrape(url="https://support.claude.com/en/articles/12138966-release-no
 ```
 # 5. Claude Desktop 3P (managed/enterprise desktop) — config-key changelog + M365 connector
 #    (added 2026-07-16; Mintlify on claude.com/docs — firecrawl_scrape per web-search-preference)
-#    We run this surface in production: Jamf profiles "Claude 3P"/"Claude 3P Development Pilot"
-#    (com.anthropic.claudefordesktop) on Bedrock GovCloud, incl. the built-in M365 local
-#    connector (server:"microsoft365", azureCloud:"us-gov-high") against the GCC High tenant.
+#    Relevant if you deploy this surface through an MDM — example: Jamf or Intune profiles for
+#    com.anthropic.claudefordesktop on a Bedrock or other third-party lane, optionally with the
+#    built-in M365 local connector (server:"microsoft365", azureCloud set for your tenant).
 firecrawl_scrape(url="https://claude.com/docs/third-party/claude-desktop/configuration-changelog", onlyMainContent=true)
 firecrawl_scrape(url="https://claude.com/docs/third-party/claude-desktop/connectors-m365", onlyMainContent=true)
 ```
@@ -144,7 +144,7 @@ For item 5, flag specifically:
 - **M365 connector tool-catalog changes** — new write tools (we watch for Outlook
   mail-folder create/move, Teams posting), scope-list changes, `toolPolicy` semantics
   (send-tools ask-floor), and GCC High/DoD (`us-gov-high`/`us-gov-dod`) notes.
-- **Default flips** (e.g. `isDesktopExtensionEnabled` true→false, 2026-07-07) — our deployed
+- **Default flips** (e.g. `isDesktopExtensionEnabled` true→false, 2026-07-07) — deployed
   profiles inherit new-key defaults silently; diff any new key against the deployed plists.
 
 ## Step 9: Gap Fill (only if needed)
