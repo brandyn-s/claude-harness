@@ -485,3 +485,23 @@ def test_install_sh_skills_agents_and_memory_are_recorded_and_reinstall_flat(tmp
     assert "CONFLICT" not in second.stdout
     assert "NEW" not in second.stdout.replace(".harness-new", ""), second.stdout
 
+
+@pytestmark_bash
+def test_install_sh_refuses_the_dispatcher_set_when_one_hook_is_missing(tmp_path: Path) -> None:
+    """The dispatcher runs six sibling hooks in-process, so the starter kit copies
+    all seven as one set: an incomplete checkout aborts before anything is written
+    and names the missing file, instead of shipping a dispatcher that cannot run."""
+    checkout = _scratch_checkout(tmp_path)
+    (checkout / "hooks" / "zsh-dialect-guard.py").unlink()
+    home = tmp_path / "home"
+    home.mkdir()
+
+    # skip the settings profile, take the starter core
+    result = _install(checkout, home, "n\ny\n")
+
+    assert result.returncode != 0
+    assert "hooks/zsh-dialect-guard.py" in result.stdout + result.stderr, result.stdout + result.stderr
+    assert list((home / ".claude" / "hooks").iterdir()) == [], "nothing from the set may land"
+    assert not (home / ".claude" / MANIFEST).exists()
+    settings = json.loads((home / ".claude" / "settings.json").read_text(encoding="utf-8"))
+    assert "hooks" not in settings

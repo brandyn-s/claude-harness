@@ -111,6 +111,20 @@ install_files() {
         || { err "Copy aborted; see the error above."; exit 1; }
 }
 
+# hooks/bash-pretooluse-dispatcher.py runs these six hooks in one process, so
+# every path that wires it copies all seven as one set (a missing file aborts
+# the copy). scripts/test_install_menus.py pins this list to the dispatcher's
+# GUARDS table.
+DISPATCHER_HOOKS=(
+    bash-pretooluse-dispatcher.py
+    bash-security-guard.py
+    destructive-ops-guard.py
+    git-destructive-checkout-guard.py
+    bash-tail-buffering-guard.py
+    zsh-dialect-guard.py
+    poll-loop-nudge.py
+)
+
 # ── Component installers ──────────────────────────────────────────────
 
 install_rules() {
@@ -242,14 +256,14 @@ install_hooks() {
     local hook_dirs=()
     local hook_configs=()
     case "$choice" in
-        1) hooks=(bash-security-guard.py config-guard.py result-injection-guard.py)
+        1) hooks=("${DISPATCHER_HOOKS[@]}" config-guard.py result-injection-guard.py protected-repos.json)
            hook_configs=(
-               'PreToolUse|Bash|bash-security-guard.py|30'
+               'PreToolUse|Bash|PowerShell|bash-pretooluse-dispatcher.py|30'
                'PreToolUse|Write|Edit|config-guard.py|30'
                'PostToolUse|mcp__.*|result-injection-guard.py|30'
            ) ;;
-        2) hooks=(loop-detector.py result-injection-guard.py bash-security-guard.py
-                  destructive-ops-guard.py bash-error-classifier.py
+        2) hooks=(loop-detector.py result-injection-guard.py "${DISPATCHER_HOOKS[@]}"
+                  bash-error-classifier.py
                   config-guard.py memory-write-guard.py worktree-enforcement.py
                   rule-size-guard.py rule_context_budget.py home-scratch-guard.py
                   write-edit-dispatcher.py block-partial-read.py search-path-guard.py
@@ -266,8 +280,7 @@ install_hooks() {
            # with settings.json; bin/test_drift_blocking_timeouts.py enforces it.
            hook_configs=(
                'ConfigChange|user_settings|project_settings|local_settings|config-change-validate.py|30'
-               'PreToolUse|Bash|bash-security-guard.py|30'
-               'PreToolUse|Bash|PowerShell|destructive-ops-guard.py|30'
+               'PreToolUse|Bash|PowerShell|bash-pretooluse-dispatcher.py|30'
                'PreToolUse|Glob|Grep|search-path-guard.py|30'
                'PreToolUse|Write|Edit|write-edit-dispatcher.py|30'
                'PreToolUse|Read|block-partial-read.py|30'
@@ -287,7 +300,11 @@ install_hooks() {
                if ask_yn "  Install $name?"; then
                    hooks+=("$name")
                fi
-           done ;;
+           done
+           # The dispatcher runs six sibling hooks in-process: picking it selects them.
+           if [[ " ${hooks[*]} " == *" bash-pretooluse-dispatcher.py "* ]]; then
+               hooks+=("${DISPATCHER_HOOKS[@]}")
+           fi ;;
         *) info "Skipping hooks"; return ;;
     esac
 
@@ -296,8 +313,9 @@ install_hooks() {
     for hook_dir in "${hook_dirs[@]}"; do files+=("hooks/$hook_dir"); done
     # Always ship shared hook libraries + the run-hook launcher (the committed
     # settings.json / settings.example.json invoke hooks through run-hook), and
-    # keep it executable.
-    for shared in run-hook atomic_write.py hook_input.py git_lock.py bash_policy_tables.py; do
+    # keep it executable. manifest_metrics is imported by bash-security-guard,
+    # bash-tail-buffering-guard and zsh-dialect-guard.
+    for shared in run-hook atomic_write.py hook_input.py git_lock.py bash_policy_tables.py manifest_metrics.py; do
         files+=("hooks/$shared")
     done
     install_files "${files[@]}"
@@ -450,7 +468,7 @@ if ask_yn "Install the recommended fresh-laptop core? (2 rules + 3 deterministic
         manifest_metrics.py
         protected-repos.json
         bash_policy_tables.py
-        bash-security-guard.py
+        "${DISPATCHER_HOOKS[@]}"
         config-guard.py
         result-injection-guard.py
     )
@@ -484,14 +502,14 @@ if ask_yn "Install the recommended fresh-laptop core? (2 rules + 3 deterministic
     chmod +x "$CLAUDE_DIR/hooks/run-hook"
 
     if (( operator_selected )); then
-        ok "Fresh-laptop core + operator layer installed (3 rules + 6 hooks)"
+        ok "Fresh-laptop core + operator layer installed (3 rules + 6 hook registrations)"
     else
-        ok "Fresh-laptop core installed (2 rules + 3 hooks + 5 support files)"
+        ok "Fresh-laptop core installed (2 rules + 3 hook registrations)"
     fi
     fi  # idempotency guard
 
     hook_configs=(
-        'PreToolUse|Bash|bash-security-guard.py|30'
+        'PreToolUse|Bash|PowerShell|bash-pretooluse-dispatcher.py|30'
         'PreToolUse|Write|Edit|config-guard.py|30'
         'PostToolUse|mcp__.*|result-injection-guard.py|30'
     )

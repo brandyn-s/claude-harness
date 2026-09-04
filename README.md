@@ -37,7 +37,9 @@ portable core installs one ambient rule, one path-scoped rule, and three
 deterministic hooks:
 
 - `outcome-over-verification.md` and `claude-md-quality.md`
-- catastrophic Bash safety, config integrity, and MCP result-injection guards
+- Bash command safety (`bash-pretooluse-dispatcher.py`, which runs the two Bash
+  guards and four advisories in one process), config integrity, and MCP
+  result-injection guards
 - `acceptEdits` plus sandbox-auto-approved Bash; sandbox escapes require review
 - project MCP auto-activation disabled
 
