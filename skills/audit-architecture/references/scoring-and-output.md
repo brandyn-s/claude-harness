@@ -44,7 +44,7 @@ Per-finding format:
 ### Coverage Matrix
 | MCP Server | Agent | Routing | PreToolUse | Topic | Memory | CLAUDE.md | Connect | CPU |
 |---|---|---|---|---|---|---|---|---|
-| remote-crowdstrike | security-ops | YES | YES | Populated | 3 entries | YES | OK | OK |
+| example-server | example-agent | YES | YES | Populated | 3 entries | YES | OK | OK |
 ...
 
 ### Findings (ranked by impact, top 10)

@@ -13,7 +13,8 @@ as a flat JSON object {"server-name": "topic-alias"}. Pinned here:
   2. a missing file yields no aliases at all
   3. a malformed file fails loudly with its path (CLI exit 2, the existing
      config-parse-failure code) while an otherwise clean config exits 0
-  4. discovery.py itself names none of the former inventory
+  4. the shipped skill content (SKILL.md, context, references) names none of
+     the former inventory
 
 Re-run:
     pytest skills/audit-architecture/tests/test_audit_architecture_aliases.py -q
@@ -142,7 +143,20 @@ def test_cli_exits_2_and_names_the_malformed_alias_file(tmp_path):
     assert any(str(path) in e for e in json.loads(broken.stdout)["errors"])
 
 
-def test_discovery_names_none_of_the_former_inventory():
-    text = DISCOVERY.read_text(encoding="utf-8")
+# Everything the marketplace bundle ships for this skill. Tests and fixtures are
+# excluded on purpose: a fixture may use a generic vendor word; an inventory it
+# is not.
+SHIPPED = [
+    SKILL / "SKILL.md",
+    SKILL / "audit-context.md",
+    SKILL / "audit-suppress.yaml",
+    SKILL / "manifest.yaml",
+    *sorted(p for p in (SKILL / "references").iterdir() if p.is_file()),
+]
+
+
+@pytest.mark.parametrize("path", SHIPPED, ids=lambda p: p.relative_to(SKILL).as_posix())
+def test_shipped_skill_content_names_none_of_the_former_inventory(path):
+    text = path.read_text(encoding="utf-8")
     hits = sorted({m.group(0).lower() for m in FORMER_INVENTORY.finditer(text)})
-    assert not hits, f"discovery.py still names the former inventory: {hits}"
+    assert not hits, f"{path.relative_to(SKILL)} still names the former inventory: {hits}"
