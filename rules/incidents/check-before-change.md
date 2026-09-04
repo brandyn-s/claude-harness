@@ -918,7 +918,7 @@ FAILURE paths — so ZERO such objects exist when the lane works. Measured post-
 ContentKindsStale = 2 hourly on a healthy lane until reverted. Replacement is
 `AWS/Lambda Invocations`, AWS-emitted and not empty-by-construction.
 INVERSE of the "control reports SUCCESS while doing nothing" family (five instances,
-agent-memory/topics/claude-monitoring.md 2026-07-26/27): this reports FAILURE while
+the monitoring topic notes, 2026-07-26/27): this reports FAILURE while
 doing everything right. Same root — the control's signal was never checked against
 the healthy state.
 ```

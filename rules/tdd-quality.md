@@ -138,7 +138,7 @@ The platform-specific gotchas that recur here stay ambient below.
     `os.environ.setdefault("REPORT_S3_PREFIX", "test")` ran BEFORE a sibling
     suite (alphabetical import order under `discover`), pinning the module
     global `Q.PREFIX="test"` for the WHOLE run — so the sibling's hardcoded
-    `otel-detection-reports/...` fixture keys silently stopped matching and
+    detection-report fixture keys silently stopped matching and
     ~30 of its tests failed. Each suite passed ALONE; only `discover` (the
     real CI condition) surfaced it. Two fixes, both needed: (a) the preamble
     sets the REAL prefix the other suites expect (not a private "test"
@@ -176,7 +176,7 @@ The platform-specific gotchas that recur here stay ambient below.
     later-collected `test_*.py` importing the same module sees the stub, not the
     real function. Alphabetical collection order decides the victim:
     `test_daily_abuse_wiring.py` (d) set
-    `otel_session_review.fetch_session_events = lambda day:` (signature lacks
+    `<module>.fetch_session_events = lambda day:` (signature lacks
     `since_ts`) and never restored it, so `test_fetch_session_events_shard.py`
     (f) saw 0 sharded queries + a `since_ts` TypeError — 3 failures that turned
     `unit-tests` red on main and blocked EVERY open PR. Each file passed ALONE
@@ -267,8 +267,8 @@ The platform-specific gotchas that recur here stay ambient below.
 
     INCIDENT 2026-07-27 (mcp-infra #714): a new `test_admin_usage_cost.py`
     stubbed `boto3.client` to return `None`. It passed alone, and broke **13
-    tests** in `test_anthropic_audit_v2.py` under `python -m unittest discover`
-    — because `test_ad*` sorts before `test_an*`, so the weaker stub won the
+    tests** in the audit bundle's test module under `python -m unittest discover`
+    — because `test_ad*` sorts before that module, so the weaker stub won the
     `sys.modules` race over that file's Mock-returning `_DummyClient`. Same
     moral as item 13: **run `discover`, not the new file alone**, before
     declaring a multi-file test change green.
@@ -348,7 +348,7 @@ The platform-specific gotchas that recur here stay ambient below.
     space of column alignment**. The skipped mutation was the projection-drift
     assertion — the single test the change's correctness rested on. Re-derived via
     `grep -n`, it CAUGHT. Same moral as mcp-infra's
-    `check_otel_carrier_alignment.py` ("a SKIP is not a PASS"; "0 misaligned of 0
+    carrier-alignment check script ("a SKIP is not a PASS"; "0 misaligned of 0
     found prints as PASS"), reached from the mutation-harness side instead of the
     fleet-census side. Filed here rather than in the sibling because
     `tdd-mutation-testing.md` sits at 35,555 B — past WARN with ~2.4 KB to BLOCK

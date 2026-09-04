@@ -162,10 +162,10 @@ red baseline everything fails. **Assert a GREEN baseline before reading any
 verdict**, and treat a batch whose baseline was never checked as unrun.
 ```
 
-## 2026-07-31-08-01-mcp-infra-otel-gold-flatte
+## 2026-07-31-08-01-gold-flatten-import-time-binding
 
 ```text
-INCIDENT 2026-07-31/08-01 (mcp-infra otel gold-flatten): running the new file FIRST failed 5
+INCIDENT 2026-07-31/08-01 (gold-table flatten job): running the new file FIRST failed 5
 tests in `test_gold_schema_drift.py`; running it LAST passed all 24 — caught only because two
 orderings happened to be tried. Root cause: `SOURCE_VIEW`/`GOLD_TABLE` bind at import time, so
 whichever file imports first binds them for both. Separately

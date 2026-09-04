@@ -370,7 +370,7 @@ as "item 20 §4" still resolves.
     siblings in at least two orderings, not just isolation. After fixing one leaked
     monkeypatch/module-global, grep sibling test files for the same unrestored pattern.
 
-    Full: incidents#2026-07-31-08-01-mcp-infra-otel-gold-flatte
+    Full: incidents#2026-07-31-08-01-gold-flatten-import-time-binding
 
 29. **"Monotone by construction" in the immediate return value does not imply monotone or safe in
     the downstream property that actually matters.** A fix can be correctly monotone for the
