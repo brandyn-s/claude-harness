@@ -50,19 +50,23 @@ success even when the HTTP status is 200.
 
 ### Current model capability matrix
 
-| Model | Thinking | Effort | Retention and refusal notes |
-|---|---|---|---|
-| Claude Fable 5 (`claude-fable-5`) | Adaptive thinking is always on. `thinking: {"type": "disabled"}` and manual `enabled`/`budget_tokens` requests return 400. | `low`, `medium`, `high` (default), `xhigh`, `max` | Requires 30-day data retention and is unavailable under ZDR. Handle classifier refusals and qualify fallback behavior. Priority Tier is supported. |
-| Claude Mythos 5 (`claude-mythos-5`) | Shares Fable 5's always-on adaptive-thinking contract; disabled or manual-budget thinking requests return 400. | `low`, `medium`, `high` (default), `xhigh`, `max` | Limited Project Glasswing availability. Requires 30-day data retention and is unavailable under ZDR. It has no Fable safety classifiers and no Priority Tier. |
-| Claude Opus 5 (`claude-opus-5`) | Adaptive thinking is on by default. Thinking may be disabled at `low` through `high`; disabled + `xhigh`/`max` returns 400. Manual `enabled`/`budget_tokens` returns 400. | `low`, `medium`, `high` (default), `xhigh`, `max` | Web fetch and Priority Tier are unavailable. Handle classifier refusals and qualify fallback behavior. Re-run effort sweeps rather than inheriting earlier-model settings. |
-| Claude Sonnet 5 (`claude-sonnet-5`) | Adaptive thinking is on by default and may be disabled at any supported effort. Manual `enabled`/`budget_tokens` returns 400. | `low`, `medium`, `high` (default), `xhigh`, `max` | Web fetch is available; Priority Tier is unavailable. Handle cyber-safeguard refusals. Re-count tokens and re-test truncation because it uses a different tokenizer from Sonnet 4.6. |
-| Claude Haiku 4.5 (`claude-haiku-4-5`) | Manual extended thinking is supported but adaptive thinking is not. Sampling supports `temperature` or `top_p` one at a time. | Effort is unavailable. | Current low-latency, high-volume, cost-sensitive option. It has a 200k context window and up to 64k output tokens; do not apply Claude 5 request restrictions to it. |
+<!-- model-capabilities:begin -->
+<!-- Generated from contracts/model-capabilities.json by bin/render-model-capabilities.py; edit the contract, then run it with --write. -->
+Rows verified 2026-08-08 against the primary sources above; `contracts/model-capabilities.json` is the source of record.
 
-For the four Claude 5 models above:
+| Model | Thinking | Effort | Request restrictions | Retention and refusal notes |
+|---|---|---|---|---|
+| Claude Fable 5 (`claude-fable-5`) | Adaptive thinking is always on; `thinking: {"type": "disabled"}` returns 400. Manual `enabled`/`budget_tokens` returns 400. | `low`, `medium`, `high` (default), `xhigh`, `max` | Non-default `temperature`/`top_p`/`top_k` return 400. Assistant-message prefill returns 400. | Covered Model: requires 30-day data retention and is unavailable under ZDR. Handle classifier refusals and qualify fallback behavior. Priority Tier is supported. |
+| Claude Mythos 5 (`claude-mythos-5`) | Adaptive thinking is always on; `thinking: {"type": "disabled"}` returns 400. Manual `enabled`/`budget_tokens` returns 400. | `low`, `medium`, `high` (default), `xhigh`, `max` | Non-default `temperature`/`top_p`/`top_k` return 400. Assistant-message prefill returns 400. | Limited Project Glasswing availability. Covered Model: requires 30-day data retention and is unavailable under ZDR. It has no Fable safety classifiers. Priority Tier is unavailable. |
+| Claude Opus 5 (`claude-opus-5`) | Adaptive thinking is on by default. Thinking may be disabled at `low` through `high`; disabled + `xhigh`/`max` returns 400. Manual `enabled`/`budget_tokens` returns 400. | `low`, `medium`, `high` (default), `xhigh`, `max` | Non-default `temperature`/`top_p`/`top_k` return 400. Assistant-message prefill returns 400. | Handle classifier refusals and qualify fallback behavior. Web fetch is unavailable. Priority Tier is unavailable. Re-run effort sweeps rather than inheriting earlier-model settings. |
+| Claude Sonnet 5 (`claude-sonnet-5`) | Adaptive thinking is on by default and may be disabled at any supported effort. Manual `enabled`/`budget_tokens` returns 400. | `low`, `medium`, `high` (default), `xhigh`, `max` | Non-default `temperature`/`top_p`/`top_k` return 400. Assistant-message prefill returns 400. | Handle cyber-safeguard refusals. Web fetch is available. Priority Tier is unavailable. Re-count tokens and re-test truncation because it uses a different tokenizer from Sonnet 4.6. |
+| Claude Haiku 4.5 (`claude-haiku-4-5`) | Adaptive thinking is not supported. Manual extended thinking (`enabled` + `budget_tokens`) is supported. | Effort is unavailable. | `temperature` or `top_p` may be set, one at a time. Assistant-message prefill is accepted. | 200k context window; up to 64k output tokens. Current low-latency, high-volume, cost-sensitive option. Do not apply Claude 5 request restrictions to it. |
+<!-- model-capabilities:end -->
 
-- Omit non-default `temperature`, `top_p`, and `top_k`; they return 400.
-- Remove assistant-message prefills; a final `assistant` message returns 400.
-  Use structured outputs, `output_config.format`, or system instructions.
+For the Claude 5 rows above:
+
+- Where an assistant-message prefill used to steer the output shape, use
+  structured outputs (`output_config.format`) or system instructions instead.
 - Use `output_config={"effort": "..."}` to tune total response work. Effort
   affects text, thinking, and tool use; it is a behavioral signal, not a token
   budget.
