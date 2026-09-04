@@ -57,8 +57,14 @@ python3 bin/fresh_laptop_doctor.py                 # every line PASS
 ```
 
 The profile merge unions with your existing `permissions.allow`, so the
-curated read-only allow list survives. Then add the network allowlist the
-sandbox needs, or every network command will fall back to a prompt:
+curated read-only allow list survives. Re-running `bash install.sh` later
+upgrades the starter rules and hooks you never edited and keeps the ones you
+did; a conflict leaves the new version beside yours as `<name>.harness-new` and
+the run ends with a `CONFLICT` line naming it. The record is
+`~/.claude/.harness-install-state.json`; to take the repo version deliberately,
+run `scripts/install-profile.py --install <path> --apply --force`. Then add the
+network allowlist the sandbox needs, or every network command will fall back to
+a prompt:
 
 ```bash
 python3 - <<'PY'

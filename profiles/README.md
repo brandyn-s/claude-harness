@@ -72,3 +72,11 @@ Profile objects merge recursively. The permission rule lists (`allow`, `deny`,
 survive the merge; other profile-owned lists replace the existing value. Before
 this, applying the fresh profile over a curated `settings.json` silently cut a
 34-entry allow list to 3.
+
+Files the installer copies (the starter rules and hooks) are recorded with their
+sha256 in `~/.claude/.harness-install-state.json`, so a re-run upgrades copies
+you never touched, keeps the ones you edited (reported as `MODIFIED-BY-USER`),
+and on a conflict keeps yours and writes the new version beside it as
+`<name>.harness-new`. The same classification is available per file --
+`python3 scripts/install-profile.py --target ~/.claude/settings.json --install
+rules/operator-discipline.md --apply` -- and `--force` overwrites regardless.

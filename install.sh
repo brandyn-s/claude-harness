@@ -484,17 +484,19 @@ if ask_yn "Install the recommended fresh-laptop core? (2 rules + 3 deterministic
     for f in "${starter_files[@]}"; do
         [[ -f "$CLAUDE_DIR/$f" ]] && existing+=("$f")
     done
-    if (( ${#existing[@]} )) && ! ask_yn "Starter files already exist (${#existing[@]} of ${#starter_files[@]} found, e.g. ${existing[0]}). Overwrite with repo versions?" "n"; then
+    if (( ${#existing[@]} )) && ! ask_yn "Starter files already exist (${#existing[@]} of ${#starter_files[@]} found, e.g. ${existing[0]}). Upgrade them? Files you edited are kept; a conflict leaves the new version beside yours as .harness-new" "n"; then
         warn "Skipping starter kit copy (existing files kept)."
     else
 
-    for rule in "${starter_rules[@]}"; do
-        cp "$SCRIPT_DIR/rules/$rule" "$CLAUDE_DIR/rules/$rule"
-    done
-
-    for hook in "${starter_hooks[@]}"; do
-        cp "$SCRIPT_DIR/hooks/$hook" "$CLAUDE_DIR/hooks/$hook"
-    done
+    # Classified copy through the tested installer. Every file it writes is
+    # recorded with its sha256 in $CLAUDE_DIR/.harness-install-state.json, so
+    # the next run upgrades untouched copies, keeps your edits, and writes a
+    # conflicting upstream version beside yours as <name>.harness-new --
+    # instead of overwriting everything or nothing.
+    install_args=()
+    for f in "${starter_files[@]}"; do install_args+=(--install "$f"); done
+    "$PYTHON_CMD" "$SCRIPT_DIR/scripts/install-profile.py" \
+        --target "$CLAUDE_DIR/settings.json" --apply "${install_args[@]}"
     chmod +x "$CLAUDE_DIR/hooks/run-hook"
 
     if (( operator_selected )); then
