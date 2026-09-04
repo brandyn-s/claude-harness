@@ -12,7 +12,7 @@ allowed-tools: Agent Bash Edit Read Grep Write AskUserQuestion
 
 ## audit-skill
 
-Audit one skill (or all of them) against the test-battery captured during the 2026-05-24 supergoal/superplan debugging session. Three phases: a mechanical lint first (cheap, deterministic), then agent-driven scenario checks (interpretation needed), then oracle re-gating before any finding is actioned.
+Audit one skill (or all of them) against a fixed test-battery. Three phases: a mechanical lint first (cheap, deterministic), then agent-driven scenario checks (interpretation needed), then oracle re-gating before any finding is actioned.
 
 The categories are stable; the per-skill scenarios are constructed by the agent from the skill's own contents.
 
@@ -47,11 +47,8 @@ audit-skill is the reference implementation of the eight-component harness patte
 >
 > Stopping after Phase 1 misses semantic drift, aspirational features,
 > and invariants-with-no-enforcement (see "Known limitations of Phase 1"
-> below). Stopping after Phase 2 ships stale/hallucinated findings
-> to fix tasks — the May 2026 retro documented "fix-batch agents
-> 'fixed' 3 bugs that didn't exist because no one re-verified the
-> findings before acting." Phase 3 closes that gap. All three phases
-> are required for the audit to be complete.
+> below). Stopping after Phase 2 ships stale/hallucinated findings to fix
+> tasks (`references/run-history.md`). Phase 3 closes that gap.
 
 ### Phase 1: Mechanical lint (always)
 
@@ -59,9 +56,9 @@ audit-skill is the reference implementation of the eight-component harness patte
 ~/.claude/bin/audit-skill.py <skill-name>
 ```
 
-Reports H1 (phantom citations), H2 (orphan references), H4 (cross-skill citation broken), H5 (backtick-wrapped doc-citation preceded by a read-verb that doesn't resolve against skill / skills / repo — catches the class of broken citation that H1/H4 miss because they only see the references/ shape), D3a (missing script paths), D3b (non-canonical path prefixes), D3c (dead-code scripts), C1 (POSIX-only Python imports without fallback), C2 (POSIX-only paths in bash docs), C3 (.sh-only scripts dir), C4 (literal `$HOME` strings in Python source), C5 (file-I/O without `encoding='utf-8'` — cp1252 crash class), C6 (argparse `help=` with unescaped `%X` — `--help` TypeError), C7 (script with `__main__` + `sys.argv` but no `--help` short-circuit), C8 (BSD-vs-GNU shell divergence in `*.sh` — `sed -i` without backup arg, `date -d`, `xargs -r`), C9 (`/tmp/` literal in Python source — POSIX-only path; use `tempfile.gettempdir()`), C10 (bare `subprocess.run(['bash', ...])` without resolving via `_resolve_bash` helper — Windows resolves `bash` to the WSL launcher), M1 (argument-hint/manifest drift), M2 (dead MCP tool declarations), M3 (`manifest.yaml` ships with `# TODO` scaffold placeholders), M4 (SKILL.md `allowed-tools` and manifest `requires_tools` should agree modulo wildcards — info severity; `requires_tools` feeds topic auto-loading, not runtime tool gating — caught the ~12-skill `AskUserQuestion` consistency class surfaced by the 2026-05-28 corpus audit, plus ~125 more sites across the corpus), T1 (phantom MCP tool references), B1 (scripts ship without tests/), B2 (hook ships without a corresponding `hooks/test-hooks/test_<name>.py`; repo-wide check), P1 (unresolved template placeholders — see `known-tools.yaml` for the catalog), Q1 (SKILL.md exceeds 5000-word limit), Q2 (description exceeds 1024-char Claude Code limit), Q3 (description missing WHEN / Do NOT use for sections), S1 (audit-suppress.yaml entry past its `expires:` date — it no longer suppresses, so the underlying finding fires again; remove it or extend after re-confirming), S2 (orphaned suppression — matches no finding the mechanical checks produced this run; scoped to the script's own codes since suppress files also carry /audit-fix agent-campaign codes the script can't observe). These are structural — no execution needed.
+Reports H1 (phantom citations), H2 (orphan references), H4 (cross-skill citation broken), H5 (backtick-wrapped doc-citation preceded by a read-verb that doesn't resolve against skill / skills / repo — catches the class of broken citation that H1/H4 miss because they only see the references/ shape), D3a (missing script paths), D3b (non-canonical path prefixes), D3c (dead-code scripts), C1 (POSIX-only Python imports without fallback), C2 (POSIX-only paths in bash docs), C3 (.sh-only scripts dir), C4 (literal `$HOME` strings in Python source), C5 (file-I/O without `encoding='utf-8'` — cp1252 crash class), C6 (argparse `help=` with unescaped `%X` — `--help` TypeError), C7 (script with `__main__` + `sys.argv` but no `--help` short-circuit), C8 (BSD-vs-GNU shell divergence in `*.sh` — `sed -i` without backup arg, `date -d`, `xargs -r`), C9 (`/tmp/` literal in Python source — POSIX-only path; use `tempfile.gettempdir()`), C10 (bare `subprocess.run(['bash', ...])` without resolving via `_resolve_bash` helper — Windows resolves `bash` to the WSL launcher), M1 (argument-hint/manifest drift), M2 (dead MCP tool declarations), M3 (`manifest.yaml` ships with `# TODO` scaffold placeholders), M4 (SKILL.md `allowed-tools` and manifest `requires_tools` should agree modulo wildcards — info severity; `requires_tools` feeds topic auto-loading, not runtime tool gating), T1 (phantom MCP tool references), B1 (scripts ship without tests/), B2 (hook ships without a corresponding `hooks/test-hooks/test_<name>.py`; repo-wide check), P1 (unresolved template placeholders — see `known-tools.yaml` for the catalog), Q1 (SKILL.md exceeds 5000-word limit), Q2 (description exceeds 1024-char Claude Code limit), Q3 (description missing WHEN / Do NOT use for sections), S1 (audit-suppress.yaml entry past its `expires:` date — it no longer suppresses, so the underlying finding fires again; remove it or extend after re-confirming), S2 (orphaned suppression — matches no finding the mechanical checks produced this run; scoped to the script's own codes since suppress files also carry /audit-fix agent-campaign codes the script can't observe). These are structural — no execution needed.
 
-Under `--all`, an additional **repo-wide** pass runs C5/C6/C7/C9/C10 against `bin/*.py`, `hooks/*.py` (non-test), `manifests/*.py`, `scripts/*.py`, and root-level `*.py` — plus C8 against every shipped `*.sh` (excluding vendored / generated trees and the audit-skill fixture *.sh files) — plus B2 (every `hooks/<name>.py` must have a matching `hooks/test-hooks/test_<name>.py`). Findings appear under the synthetic skill name `__repo__`. This closes the historical scope gap that let PR #977's 5 sites in `bin/audit-skill.py` ship — the per-skill audit only scans the skill's own `scripts/+references/`, so anything outside the skills tree was uncovered.
+Under `--all`, an additional **repo-wide** pass runs C5/C6/C7/C9/C10 against `bin/*.py`, `hooks/*.py` (non-test), `manifests/*.py`, `scripts/*.py`, and root-level `*.py` — plus C8 against every shipped `*.sh` (excluding vendored / generated trees and the audit-skill fixture *.sh files) — plus B2 (every `hooks/<name>.py` must have a matching `hooks/test-hooks/test_<name>.py`). Findings appear under the synthetic skill name `__repo__` (the per-skill audit only scans the skill's own `scripts/` + `references/`, so anything outside the skills tree needs this pass).
 
 T1 reads `known-tools.yaml` in this skill's directory: any reference to a name in `known_phantom` is flagged as drift. Pass `--strict-tools` to additionally flag references not in `known_real` (off by default — the registry is incomplete and would false-positive on per-user MCP configs).
 
@@ -176,7 +173,7 @@ Flag any raw traceback in stderr or silent success on bad input.
 
 **D2. Schema-vs-consumer alignment.** If a script writes a state file, list every field it writes. List every field every consumer reads. Flag any consumer-required field not written, and any field written but never read (with lower severity).
 
-**D4. References describe current code.** For each `references/X.md`, identify what code/contract it describes. Read both. Flag stale field names, retired mechanisms, paths that no longer exist, contradictions with the actual code. (This is where supergoal's `verification-hook.md` had material drift in the 2026-05-24 session.)
+**D4. References describe current code.** For each `references/X.md`, identify what code/contract it describes. Read both. Flag stale field names, retired mechanisms, paths that no longer exist, contradictions with the actual code.
 
 #### E. External-artifact claim verification
 
@@ -211,15 +208,9 @@ claims scattered across files this skill doesn't own. Label findings
 the claim — usually NOT this skill's own files) or `[behavior-fix]` only
 if the skill's OWN SKILL.md misrepresents its own behavior.
 
-(Added 2026-07-03: this category closed a real gap found by hand — a rule
-claimed `/pr-fix` cleaned up worktree directories it never touched, a KB
-topic's frontmatter claimed `/garden` owned a backlog file `/harness-prune`
-had taken over three weeks earlier, and a KB entry claimed a skill
-[`/system-health`] was shipped when it never existed in git history — all
-three survived because nothing checked a skill against claims made about
-it OUTSIDE the skill's own directory. D4 only covers a skill's own
-`references/*.md`; "cross-skill behavioral coupling" only covers
-skill-to-skill claims. E1 is the rule/KB-to-skill direction.)
+(E1 is the rule/KB-to-skill direction: D4 only covers a skill's own
+`references/*.md`, and "cross-skill behavioral coupling" only covers
+skill-to-skill claims. The gaps it closed: `references/run-history.md`.)
 
 #### F. Real-data integration
 
@@ -278,14 +269,10 @@ same reason A3/E1/F2/F3 have none: what "the documented steps actually
 ran, in order, with the claimed effect" means can't be checked without
 executing and watching.
 
-(Added 2026-07-03: closed a gap none of the other categories catch —
-running `healthcheck` live surfaced a test-hermeticity bug and a stale
-Check-8 target path; `audit-rules`, `audit-architecture`, `pull-repos`,
-`pr-fix`, and `ship-hook` each surfaced comparable live-only findings
-the same way, across 13 PRs merged 2026-07-03. None of A1/F2/F3/G1
-invoke the skill's full workflow against a real target — they test
-extracted pieces of it. I1 is "run it for real"; E1 is "claims made
-about it elsewhere are accurate" — two different drift directions.)
+(None of A1/F2/F3/G1 invoke the skill's full workflow against a real
+target — they test extracted pieces of it. I1 is "run it for real"; E1 is
+"claims made about it elsewhere are accurate" — two different drift
+directions. The live-only findings that motivated it: `references/run-history.md`.)
 
 ### Phase 2.5: Backfill + contract-check (before oracle gating)
 
@@ -305,10 +292,8 @@ reproducers and demotes the label of remaining manual findings to
 `unverified` per the Phase 2 contract. `contract-check` then asserts
 the two-way pairing: `type: manual` ⟺ `label: unverified`.
 
-The backfill is operationally important: in the May 2026 campaign,
-100% of Phase 2 findings shipped with `type: manual` paired with
-`doc-fix`/`behavior-fix` labels — a contract violation that made
-Layer A's gate decorative. The backfill closes that gap.
+Without the backfill, Layer A's gate is decorative
+(`references/run-history.md`).
 
 ### Phase 3: Oracle gating (always)
 
@@ -382,21 +367,13 @@ drops STALE ones, and emits a worklist containing only findings that
 still fire (STILL-FIRES + MANUAL + ERROR). The fix-batch then
 dispatches against `worklist.yaml`, not the raw tracker.
 
-**Why this matters.** Empirical data from the May 2026 fix campaign:
-when 8 fix-batches were dispatched against the raw
-`AUDIT-TRACKERS/05-phase2-findings.md` tracker without a pre-action
-gate, **13 of 34 attempted fixes (38%) were against findings that had
-already been resolved by parallel work**. Fix-agents redid work,
-consuming budget and confusing the change record. Running
-`act-on` immediately before each batch drops that rate close to zero.
-
-Root cause analysis: a static markdown tracker is a snapshot, not
-live state. Between Phase 2 discovery and Phase 4 action, the tree
-moves. Parallel fix-batches resolve each other's findings as
-side-effects. The oracle is the only authoritative answer to "does
-this bug still exist?" — and `act-on` is its mandatory invocation
-point before every action. See `_shared/oracle/ROOT-CAUSE-ANALYSIS.md` for
-the full diagnosis.
+**Why this matters.** A static markdown tracker is a snapshot, not live
+state: between Phase 2 discovery and Phase 4 action the tree moves, and
+parallel fix-batches resolve each other's findings as side-effects (38% of
+one campaign's attempted fixes targeted already-resolved findings —
+`references/run-history.md`). The oracle is the only authoritative answer to
+"does this bug still exist?", and `act-on` is its mandatory invocation point
+before every action. Full diagnosis: `_shared/oracle/ROOT-CAUSE-ANALYSIS.md`.
 
 ### Phase 4: Report
 
@@ -428,10 +405,7 @@ Each report row carries:
 - **Action**: needs-fix / needs-human-judgement / info
 
 Findings with closed triage statuses (FIXED, STALE, FALSE_POSITIVE,
-DEFER) are excluded from the report — they're not actionable. The
-hand-rolled prose-assembly that this subcommand replaces was the
-source of the "report drifted from worklist" pattern called out in
-the 2026-05-27 self-assessment.
+DEFER) are excluded from the report — they're not actionable.
 
 ## Skipping vs flagging
 
@@ -470,17 +444,13 @@ Fields:
 
 Without a `target`, `path`, or `line`, the suppression applies to all findings of that code in this skill. Add discriminators when you want to suppress at one specific call site, not the whole skill.
 
-## Ground truth: `audit-context.md`
-
-`skills/audit-skill/audit-context.md` documents repo-wide facts the audit agent should treat as authoritative — which env vars are actually set, which MCP tool names are real, which paths resolve at deployment. Read it before Phase 2 so you don't false-flag patterns that are fine in this environment.
-
 ## Adding a new check
 
 When adding a new check to `~/.claude/bin/audit-skill.py`, read `references/new-check-checklist.md` first. It pins the contract every check must satisfy (severity tier, path+line in Finding, suppression key, fixture trigger, docstring entry, SKILL.md prose mention) and the §0 "verify the existing mechanism first" preamble.
 
 ## Discipline-to-implementation mapping
 
-`references/discipline-implementation.md` maps each lesson in `agent-memory/topics/engineering-philosophy.md` "Audit + dev-tooling discipline" to its current implementation status (test, code, or doc). Use it as the quarterly hygiene check — untracked lessons signal discipline drifting back to folklore.
+`references/discipline-implementation.md` maps each audit and dev-tooling discipline lesson to its current implementation status (test, code, or doc). Use it as the quarterly hygiene check — untracked lessons signal discipline drifting back to folklore.
 
 ## Composition with other tools
 
@@ -492,12 +462,12 @@ When adding a new check to `~/.claude/bin/audit-skill.py`, read `references/new-
 
 **Example 1 — Auditing a freshly-written skill before merge**
 ```
-User: /audit-skill skills/new-thing/SKILL.md
+User: /audit-skill new-thing
 1. Phase 1 mechanical lint:
-   - H1 OK (frontmatter parses)
-   - C3 FIRES: description 1,210 chars (>1024 Anthropic limit)
-   - M1 OK (allowed-tools declared)
-   - T1 OK (trigger phrases present)
+   - H1 OK (no phantom citations)
+   - Q2 FIRES: description 1,210 chars (>1024 Claude Code limit)
+   - M1 OK (argument-hint matches manifest)
+   - T1 OK (no phantom MCP tool references)
 2. Phase 2 agent checks:
    - A1 OK (no hardcoded literal commands)
    - A3 FIRES: Phase 2 invariant "always reads ground-truth file first"
@@ -505,16 +475,6 @@ User: /audit-skill skills/new-thing/SKILL.md
 3. Phase 3 oracle gating: 2 STILL-FIRES findings; emit worklist.yaml
    with reproducers ready for /audit-fix.
 Result: Worklist with 2 findings; user runs /audit-fix or addresses manually.
-```
-
-**Example 2 — Re-auditing after a fix (sub-graph mode)**
-```
-User: /audit-skill skills/new-thing/SKILL.md --since-worklist 2026-05-27-worklist.yaml
-1. Phase 1 lint runs only checks flagged in prior worklist.
-2. Phase 3 oracle re-verifies the 2 reproducers from the worklist.
-   - C3 now OK (description trimmed to 980 chars)
-   - A3 STILL FIRES (invariant test not yet added)
-Result: 1 finding cleared, 1 remaining; worklist updated in place.
 ```
 
 ## Success Criteria
