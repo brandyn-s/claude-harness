@@ -1,6 +1,10 @@
 ---
 name: red-team-axes
 description: "Break a HARDENED target by rotating ATTACK axes, driven by the harness red-team platform (generator + oracle portfolios). Use when adversarial attempts refuse and a fresh attack angle is needed — trigger phrases: 'target refuses', 'attacks not landing', 'nothing cracks', 'red-team plateau', 'hardened target', 'new attack angle', 'find more attack surface'. Maps the six search axes onto the harness generators (bare-ctf / triage-rank / multi-agent / variant-seeded) and oracles (reproducer / fp-check / property / tiered), and enforces tested-refuted vs untested before calling a sink hardened. Do NOT use for non-adversarial search (use /search-axis-rotate), a single already-known vuln, or a target with no measurement/oracle available."
+# 2026-09-04 description eval: every request that should route here was refused by the
+# model's classifier before routing (3/3), so the description cannot fire; the skill is
+# reachable only as an explicit /red-team-axes invocation. Hidden from the model listing.
+disable-model-invocation: true
 argument-hint: "<target> <sinks/predicates that refuse>"
 metadata:
   author: example-security-engineering
