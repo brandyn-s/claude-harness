@@ -9,6 +9,7 @@
 
 # --- never commit: local runtime state ---
 settings.local.json
+.claude/verdicts.json
 .env
 .credentials.json
 *.bak
