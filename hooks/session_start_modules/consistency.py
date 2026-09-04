@@ -9,6 +9,8 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
+from _environment_catalog import load_section
+
 CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
 
 CLAUDE_DIR = Path.home() / ".claude"
@@ -423,45 +425,14 @@ def check_13_untrusted_repo_config():
 
 
 
+# The MCP servers this environment expects to see configured (global and
+# project mcpServers in .claude.json plus .mcp.json): the `expected_servers`
+# section of the environment catalog (hooks/_environment_catalog.py). An
+# empty list disables the never-configured summary below; the per-machine
+# disappeared-server CRITICAL needs no list at all.
 EXPECTED_MCP_SERVERS = {
-    # Global mcpServers in .claude.json
-    "arxiv-mcp-server",
-    "ashby",
-    "aws-athena",
-    "azure-automation",
-    "claude-compliance",
-    "claude_platform",
-    "code-graph",
-    "code-search",
-    "context7-docs",
-    "exa",
-    "hologram",
-    "lucid-admin",
-    "memory-search",
-    "netcloud",
-    "remote-tailscale",
-    "slack-user",
-    "websets",
-    # Project mcpServers in .claude.json
-    "lucid-mcp",
-    "prowler",
-    "ramp",
-    "remote-airlock",
-    "remote-ashby",
-    "remote-confluence",
-    "remote-crowdstrike",
-    "remote-lever",
-    "remote-msgraph",
-    "remote-tenable",
-    "security-remix",
-    # .mcp.json (project-scoped, includes OAuth-managed)
-    "awslabs.billing-cost-management-mcp-server",
-    "compliance-access-framework",
-    "firecrawl",
-    "linear-server",
-    "mailbox-mcp",
-    "tavily",
-    "xai",
+    name for name in load_section("expected_servers")
+    if isinstance(name, str) and name.strip()
 }
 
 
@@ -527,8 +498,8 @@ def check_14_mcp_server_inventory():
             f"configured on this machine (new machine or in-progress "
             f"migration): {', '.join(never_seen[:6])}"
             f"{', …' if len(never_seen) > 6 else ''}. Informational — port "
-            f"them when ready (EXPECTED_MCP_SERVERS in consistency.py is the "
-            f"reference list). Shown once; re-reports only when this set "
+            f"them when ready (`expected_servers` in the environment catalog "
+            f"is the reference list). Shown once; re-reports only when this set "
             f"changes (delete {NEVER_CONFIGURED_STATE.name} to re-show)."
         )
     if never_seen != prev_reported:
