@@ -1,0 +1,97 @@
+{
+  "_comment": "Illustrative environment catalog with placeholder names, every section in use. Copy it to ~/.claude/environment-catalog.json and replace the placeholders with your MCP servers, topic files and repos. The loader is hooks/_environment_catalog.py; the shipped empty default is contracts/environment-catalog.json.",
+  "schema_version": 1,
+  "security_write_confirm": {
+    "servers": {
+      "mcp__edr-server__": {
+        "label": "EDR",
+        "write_indicators": ["contain", "uncontain", "update", "create", "delete", "set", "assign", "close", "block", "approve", "deny"]
+      },
+      "mcp__vuln-scanner__": {
+        "label": "Vulnerability Scanner",
+        "write_indicators": ["launch", "create", "update", "delete", "modify", "scan", "schedule", "pause", "resume", "stop"]
+      },
+      "mcp__itsm__": {
+        "label": "ITSM",
+        "write_indicators": ["create", "update", "delete", "assign", "close", "resolve"]
+      },
+      "mcp__directory__": {
+        "label": "Directory",
+        "write_indicators": ["mutate", "create", "update", "delete", "patch", "add", "remove", "set", "assign", "revoke"]
+      }
+    },
+    "operation_rules": [
+      {
+        "_comment": "A hosted connector whose server id changes per install: match the operation name, not the prefix.",
+        "label": "Chat",
+        "op_prefix": "chat_",
+        "write_indicators": ["send", "post", "delete", "update", "schedule", "set_channel"]
+      },
+      {
+        "label": "Tracker",
+        "op_names": ["save_issue", "save_comment", "delete_comment", "save_project"],
+        "write_indicators": ["save_", "delete_"]
+      }
+    ],
+    "wrapper_tools": {
+      "mcp__directory__call_tool": {
+        "_comment": "The real operation rides in tool_input['name']; classify that, with the Directory server's indicators.",
+        "label": "Directory",
+        "write_indicators_from": ["mcp__directory__"],
+        "inner_op_keys": ["name", "tool", "tool_name", "operation"]
+      },
+      "mcp__security-hub__execute_tool": {
+        "label": "Security Hub",
+        "write_indicators_from": ["mcp__edr-server__", "mcp__vuln-scanner__", "mcp__directory__"]
+      }
+    }
+  },
+  "topic_routes": {
+    "by_tool_prefix": {
+      "mcp__edr-server__": "edr.md",
+      "mcp__vuln-scanner__": "vuln-scanner.md",
+      "mcp__itsm__": "itsm.md",
+      "mcp__directory__": "directory.md",
+      "mcp__chat__": "chat.md"
+    },
+    "by_keyword": {
+      "edr": "edr.md",
+      "scanner": "vuln-scanner.md",
+      "ticket": "itsm.md",
+      "directory": "directory.md",
+      "terraform": "infrastructure.md",
+      "docker": "infrastructure.md",
+      "skill": "architecture.md",
+      "hook": "architecture.md"
+    }
+  },
+  "failure_patterns": {
+    "servers": {
+      "edrserver": "edr-patterns.md",
+      "vulnscanner": "vuln-scanner-patterns.md",
+      "itsm": "itsm-patterns.md",
+      "directory": "directory-patterns.md",
+      "github": "github-patterns.md"
+    },
+    "hints": {
+      "LIMIT": "The finance connector's SQL returns at most ~100 rows; use LIMIT/OFFSET or GROUP BY"
+    }
+  },
+  "agent_dispatch": {
+    "auth_mcp_keywords": ["edr-server", "vuln-scanner", "itsm", "directory_request", "directory_mutate", "security-hub"],
+    "protected_repo_paths": ["code/platform-tooling", "code/infra", "documents/knowledge-base", ".claude"]
+  },
+  "expected_servers": [
+    "edr-server", "vuln-scanner", "itsm", "directory", "chat", "tracker", "security-hub",
+    "tavily", "firecrawl", "memory-search"
+  ],
+  "repo_paths": {
+    "claude-settings": {"path": "~/.claude", "session_sync": true},
+    "knowledge-base": {"path": "~/Documents/knowledge-base", "session_sync": true},
+    "platform-tooling": "~/code/platform-tooling",
+    "infra": {"path": "~/code/infra", "session_sync": false}
+  },
+  "session_start": {
+    "config_repo": {"label": "claude-settings", "path": "~/.claude"}
+  }
+}

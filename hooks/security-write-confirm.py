@@ -1,22 +1,31 @@
-"""PreToolUse hook: require user confirmation before security write operations.
+"""PreToolUse hook: surface MCP write operations against security-sensitive servers.
 
-Enforces the security-confirmations rule by detecting MCP write tool calls
-to security-sensitive servers (CrowdStrike, Tenable, Airlock, MS Graph, Slack,
-Linear, Tailscale, Confluence, Lever, NetCloud, Ramp) and injecting a
-confirmation prompt.
+Enforces the security-confirmations rule by detecting MCP write tool calls to
+the servers the ENVIRONMENT CATALOG lists as security-sensitive (an EDR, a
+vulnerability scanner, a directory service, chat, ticketing, network gear:
+whatever the operator names in the `security_write_confirm` section of
+contracts/environment-catalog.json / ~/.claude/environment-catalog.json, loaded
+through hooks/_environment_catalog.py) and injecting an advisory. The hook
+itself names no server: with an empty section every call passes through.
 
-Detects writes by matching tool names against known write patterns. Read-only
-tools (list, get, search, query, describe) pass through without confirmation.
+Detects writes by matching operation names against each server's write
+indicators. Read-only tools (list, get, search, query, describe) pass through
+without an advisory.
 
-Server identification:
-  - Stable-named servers (remote-*, msgraph, slack-user, linear-server) match
-    by the mcp__<server>__ prefix.
-  - Slack and Linear also connect under unstable, install-specific server ids
-    (e.g. GUID prefixes). Hardcoding those ids silently stops matching when the
-    server reconnects, so they are ALSO identified by operation name
-    (slack_* for Slack; specific tool names for Linear) regardless of prefix.
-    The settings.json matcher is therefore broad (mcp__.*) and this hook is the
-    source of truth for which calls warrant confirmation.
+Server identification (all three shapes come from the catalog):
+  - `servers`: stable-named servers match by the mcp__<server>__ prefix and
+    carry a label plus a write-indicator list.
+  - `operation_rules`: hosted connectors that connect under unstable,
+    install-specific server ids (e.g. GUID prefixes). Hardcoding those ids
+    silently stops matching when the server reconnects, so they are identified
+    by OPERATION NAME (an `op_prefix` such as `chat_`, or explicit `op_names`)
+    regardless of prefix. The settings.json matcher is therefore broad
+    (mcp__.*) and this hook is the source of truth for which calls warrant an
+    advisory.
+  - `wrapper_tools`: generic envelopes (`mcp__<server>__call_tool`) whose real
+    operation rides in tool_input["name"]; classified on the INNER operation.
+  A rule may spell out `write_indicators` or borrow them from listed servers
+  with `write_indicators_from`.
 
 DECISION CONTRACT (ADVISORY ONLY — reverted 2026-07-31 at operator request)
   This hook prints a top-level advisory and exits 0:
@@ -30,7 +39,7 @@ DECISION CONTRACT (ADVISORY ONLY — reverted 2026-07-31 at operator request)
 
   KNOWN CONSEQUENCE — this is the pre-2026-07-26 behaviour that audit finding H1
   measured as unenforceable: in the reviewed 14-day window all 24 recognized
-  Slack/Linear writes received the warning and all 24 executed. The hook is a
+  chat/tracker writes received the warning and all 24 executed. The hook is a
   DETECTION and LOGGING surface, not a consent gate. Do not cite it as evidence
   that a human approved a specific write.
 
@@ -46,7 +55,7 @@ DECISION CONTRACT (ADVISORY ONLY — reverted 2026-07-31 at operator request)
   a human approved this specific target. With this revert, nothing does.
 
 CLASSIFICATION (H6 + unclassifiable operations) — detection retained, gate removed
-  * Generic wrapper envelopes (e.g. `mcp__msgraph__call_tool`, whose real
+  * Generic wrapper envelopes (e.g. `mcp__<server>__call_tool`, whose real
     operation rides in tool_input["name"]) are normalized to the INNER operation
     before classification. Classifying the outer name saw "call_tool", matched
     neither a read nor a write verb, and silently allowed.
@@ -60,115 +69,77 @@ Exit codes:
 """
 
 import json
+import os
 import re
 import sys
 
-SLACK_WRITE_INDICATORS = [
-    "send_message", "send", "add_message", "post",
-    "update_message", "delete_message",
-    "set_channel_topic", "set_channel_purpose",
-    "add_reaction", "schedule_message", "create_canvas", "update_canvas",
-]
-# Tailscale: DNS/ACL/key/invite mutations affect the whole mesh VPN.
-TAILSCALE_WRITE_INDICATORS = [
-    "set_", "update_", "create_", "delete_", "accept_", "resend_",
-    "revoke", "rotate", "authorize", "expire",
-]
-# Confluence (FedRAMP): page mutations.
-CONFLUENCE_WRITE_INDICATORS = ["create", "update", "delete"]
-# Lever sunset 2026-07-24 — LEVER_WRITE_INDICATORS + prefix entries removed org-wide.
-# NetCloud (VendorRouter): account/router/group/config/alert-rule CRUD.
-NETCLOUD_WRITE_INDICATORS = ["create_", "update_", "delete_", "reboot"]
-# Ramp (hosted connector, unstable server id — matched by operation name,
-# same pattern as Slack). Ramp-side financial mutations only; the local
-# SQL-cache tools (load_*, clear_table, execute_query) are not Ramp writes.
-RAMP_OP_PREFIX = "ramp_"
-RAMP_WRITE_INDICATORS = [
-    "edit_", "approve", "lock_or_unlock", "activate", "repayment",
-    "match_user",
-]
-LINEAR_WRITE_INDICATORS = [
-    "save_issue", "save_status_update", "save_comment", "save_project",
-    "save_milestone", "save_customer", "save_customer_need", "save_initiative",
-    "save_document",
-    "create_issue_label", "create_attachment", "create_record_comment",
-    "delete_attachment", "delete_comment", "delete_customer",
-    "delete_customer_need", "delete_status_update",
-    # legacy aliases:
-    "create_issue", "update_issue",
-]
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _environment_catalog import load_section
+
+# Where a wrapper envelope carries its inner operation name, unless the catalog
+# entry says otherwise.
+DEFAULT_INNER_OP_KEYS = ("name", "tool", "tool_name", "operation")
+
+
+def _indicators(spec, servers):
+    """A rule's write indicators: its own list plus those of any servers it
+    borrows from (`write_indicators_from`), de-duplicated in order."""
+    raw = list(spec.get("write_indicators") or [])
+    for prefix in spec.get("write_indicators_from") or []:
+        raw.extend((servers.get(prefix) or {}).get("write_indicators") or [])
+    seen, out = set(), []
+    for indicator in raw:
+        if isinstance(indicator, str) and indicator and indicator not in seen:
+            seen.add(indicator)
+            out.append(indicator)
+    return out
+
+
+def load_rules(section=None):
+    """Build the classification tables from the catalog's `security_write_confirm`.
+
+    Returns (write_patterns, prefix_labels, operation_rules, wrapper_tools):
+      write_patterns  {mcp__<server>__: [indicators]}   stable-named servers
+      prefix_labels   {mcp__<server>__: label}
+      operation_rules [{label, op_prefix, op_names, indicators}]  in catalog order
+      wrapper_tools   {outer tool name: (label, [indicators], inner-op arg keys)}
+    Malformed entries are skipped; an empty section yields empty tables.
+    """
+    if section is None:
+        section = load_section("security_write_confirm")
+    servers = {
+        prefix: spec for prefix, spec in (section.get("servers") or {}).items()
+        if isinstance(spec, dict)
+    }
+    write_patterns, labels = {}, {}
+    for prefix, spec in servers.items():
+        write_patterns[prefix] = _indicators(spec, servers)
+        labels[prefix] = str(spec.get("label") or prefix)
+    operation_rules = []
+    for spec in section.get("operation_rules") or []:
+        if not isinstance(spec, dict):
+            continue
+        operation_rules.append({
+            "label": str(spec.get("label") or "MCP server"),
+            "op_prefix": str(spec.get("op_prefix") or ""),
+            "op_names": {n for n in (spec.get("op_names") or []) if isinstance(n, str)},
+            "indicators": _indicators(spec, servers),
+        })
+    wrapper_tools = {}
+    for tool, spec in (section.get("wrapper_tools") or {}).items():
+        if not isinstance(spec, dict):
+            continue
+        keys = tuple(k for k in (spec.get("inner_op_keys") or []) if isinstance(k, str))
+        wrapper_tools[tool] = (
+            str(spec.get("label") or tool),
+            _indicators(spec, servers),
+            keys or DEFAULT_INNER_OP_KEYS,
+        )
+    return write_patterns, labels, operation_rules, wrapper_tools
+
 
 # Stable-named security servers: matched by mcp__<server>__ prefix.
-WRITE_PATTERNS = {
-    "mcp__remote-crowdstrike__": [
-        "assign", "close", "update", "create", "delete", "contain",
-        "uncontain", "hide", "suppress", "add", "remove", "set",
-        "block", "approve", "deny", "modify", "edit", "patch",
-    ],
-    "mcp__remote-airlock__": [
-        "block", "approve", "deny", "add", "remove", "update",
-        "create", "delete", "modify", "set",
-    ],
-    "mcp__remote-tenable__": [
-        "launch", "create", "update", "delete", "modify",
-        "scan", "schedule", "pause", "resume", "stop",
-    ],
-    "mcp__remote-msgraph__": [
-        "mutate", "create", "update", "delete", "patch",
-        "add", "remove", "set", "assign", "revoke",
-    ],
-    "mcp__msgraph__": [
-        "mutate", "create", "update", "delete", "patch",
-        "add", "remove", "set", "assign", "revoke",
-    ],
-    "mcp__slack-user__": SLACK_WRITE_INDICATORS,
-    "mcp__linear-server__": LINEAR_WRITE_INDICATORS,
-    # B12/F2 tier completion (2026-06-10): mutation surfaces verified from
-    # mcp-servers source before adding (prowler was verified scan/read-only
-    # and is deliberately absent). Indicators use underscore forms where a
-    # bare verb could substring-match a read tool (lever's
-    # get_archive_reasons vs archive_candidate).
-    "mcp__remote-tailscale__": TAILSCALE_WRITE_INDICATORS,
-    "mcp__tailscale__": TAILSCALE_WRITE_INDICATORS,
-    "mcp__remote-confluence__": CONFLUENCE_WRITE_INDICATORS,
-    "mcp__confluence__": CONFLUENCE_WRITE_INDICATORS,
-    "mcp__netcloud__": NETCLOUD_WRITE_INDICATORS,
-    # Provisioning writes (invite-to-workspace / provision skills): adding a
-    # member to an M365 group, creating channels/spaces, linking IdP groups.
-    "mcp__compliance-access-framework__": [
-        "create", "invite", "link", "sync", "assign", "add",
-        "register", "provision", "remove", "update",
-    ],
-}
-
-PREFIX_LABELS = {
-    "mcp__remote-crowdstrike__": "CrowdStrike",
-    "mcp__remote-airlock__": "Airlock",
-    "mcp__remote-tenable__": "Tenable",
-    "mcp__remote-msgraph__": "MS Graph",
-    "mcp__msgraph__": "MS Graph",
-    "mcp__slack-user__": "Slack",
-    "mcp__linear-server__": "Linear",
-    "mcp__remote-tailscale__": "Tailscale",
-    "mcp__tailscale__": "Tailscale",
-    "mcp__remote-confluence__": "Confluence",
-    "mcp__confluence__": "Confluence",
-    "mcp__netcloud__": "NetCloud",
-    "mcp__compliance-access-framework__": "Access Framework",
-}
-
-# Server-id-agnostic identification for Slack/Linear (which connect under
-# install-specific ids). Slack tools are `slack_*`; Linear write tools have
-# these specific names. Matched regardless of the mcp__<server>__ prefix so a
-# reconnect under a new id can't silently bypass the confirmation gate.
-SLACK_OP_PREFIX = "slack_"
-LINEAR_WRITE_TOOLS = {
-    "save_issue", "save_status_update", "save_comment", "save_project",
-    "save_milestone", "save_customer", "save_customer_need", "save_initiative",
-    "save_document", "create_issue_label", "create_attachment",
-    "create_record_comment", "delete_attachment", "delete_comment",
-    "delete_customer", "delete_customer_need", "delete_status_update",
-}
+WRITE_PATTERNS, PREFIX_LABELS, OPERATION_RULES, WRAPPER_TOOLS = load_rules()
 
 # Read-only patterns — these always pass through even if they match a write prefix.
 #
@@ -197,47 +168,15 @@ READ_ONLY_PATTERNS = re.compile(
 # Generic wrapper envelopes (H6).
 #
 # Some security-sensitive servers expose a GENERIC outer tool and carry the real
-# operation in the arguments -- e.g. `mcp__msgraph__call_tool` with the actual
+# operation in the arguments -- e.g. `mcp__<server>__call_tool` with the actual
 # operation in tool_input["name"]. Classifying on the OUTER name alone sees
 # "call_tool", finds neither a write verb nor a read verb, and silently allows.
-# All 12 MS Graph calls in the reviewed window used this shape; the observed inner
-# operations were reads, so this is demonstrated REACHABILITY, not an observed
-# unauthorized write.
+# All 12 directory-server calls in the reviewed window used this shape; the
+# observed inner operations were reads, so this is demonstrated REACHABILITY,
+# not an observed unauthorized write.
 #
-# Map: outer tool name -> (server label, write indicators, inner-name arg keys).
+# WRAPPER_TOOLS: outer tool name -> (server label, write indicators, inner-name arg keys).
 # --------------------------------------------------------------------------
-WRAPPER_TOOLS = {
-    "mcp__msgraph__call_tool": (
-        "MS Graph",
-        WRITE_PATTERNS["mcp__msgraph__"],
-        ("name", "tool", "tool_name", "operation"),
-    ),
-    "mcp__remote-msgraph__call_tool": (
-        "MS Graph",
-        WRITE_PATTERNS["mcp__remote-msgraph__"],
-        ("name", "tool", "tool_name", "operation"),
-    ),
-    "mcp__tenable__call_tool": (
-        "Tenable",
-        WRITE_PATTERNS["mcp__remote-tenable__"],
-        ("name", "tool", "tool_name", "operation"),
-    ),
-    "mcp__airlock__call_tool": (
-        "Airlock",
-        WRITE_PATTERNS["mcp__remote-airlock__"],
-        ("name", "tool", "tool_name", "operation"),
-    ),
-    "mcp__security-remix__execute_tool": (
-        "Security Remix",
-        sorted(
-            set(WRITE_PATTERNS["mcp__remote-crowdstrike__"])
-            | set(WRITE_PATTERNS["mcp__remote-airlock__"])
-            | set(WRITE_PATTERNS["mcp__remote-tenable__"])
-            | set(WRITE_PATTERNS["mcp__msgraph__"])
-        ),
-        ("name", "tool", "tool_name", "operation"),
-    ),
-}
 
 
 def resolve_wrapper(tool_name, tool_input):
@@ -267,8 +206,8 @@ def resolve_security_tool(tool_name):
     """Return (server_label, write_indicators, operation) for a security-
     sensitive MCP tool, else (None, None, None).
 
-    Stable-named servers match by prefix. Slack/Linear match by operation name
-    regardless of the (unstable) server id — split mcp__<server>__<operation>.
+    Stable-named servers match by prefix. Operation rules match by operation
+    name regardless of the (unstable) server id — split mcp__<server>__<operation>.
     """
     for prefix, indicators in WRITE_PATTERNS.items():
         if tool_name.startswith(prefix):
@@ -276,12 +215,10 @@ def resolve_security_tool(tool_name):
     parts = tool_name.split("__", 2)
     if len(parts) == 3 and parts[0] == "mcp":
         operation = parts[2]
-        if operation.startswith(SLACK_OP_PREFIX):
-            return "Slack", SLACK_WRITE_INDICATORS, operation
-        if operation.startswith(RAMP_OP_PREFIX):
-            return "Ramp", RAMP_WRITE_INDICATORS, operation
-        if operation in LINEAR_WRITE_TOOLS:
-            return "Linear", LINEAR_WRITE_INDICATORS, operation
+        for rule in OPERATION_RULES:
+            if (rule["op_prefix"] and operation.startswith(rule["op_prefix"])) \
+                    or operation in rule["op_names"]:
+                return rule["label"], rule["indicators"], operation
     return None, None, None
 
 
@@ -326,7 +263,7 @@ def main():
     tool_input = data.get("tool_input") or data.get("input") or {}
 
     # --- H6: normalize a generic wrapper envelope BEFORE classifying. -------
-    # Classifying the OUTER name of `mcp__msgraph__call_tool` finds neither a
+    # Classifying the OUTER name of `mcp__<server>__call_tool` finds neither a
     # write nor a read verb and silently allows, while the real mutation rides in
     # tool_input["name"].
     wrap_label, wrap_indicators, inner_op, unresolved = resolve_wrapper(tool_name, tool_input)
@@ -416,7 +353,7 @@ def main():
     # This prints a warning and exits 0. It does NOT prompt and does NOT block, so
     # under this host's `auto` default the write proceeds on the classifier's own
     # judgement. Audit finding H1 measured this exact shape as unenforceable: all
-    # 24 recognized Slack/Linear writes in the reviewed window were warned and all
+    # 24 recognized chat/tracker writes in the reviewed window were warned and all
     # 24 executed.
     #
     # Treat the output of this hook as DETECTION + AUDIT LOG, never as proof of

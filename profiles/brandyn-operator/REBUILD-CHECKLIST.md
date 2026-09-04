@@ -49,6 +49,20 @@ bash install.sh
 python3 bin/fresh_laptop_doctor.py                 # every line PASS
 ```
 
+With the operator layer selected, `install.sh` also seeds
+`~/.claude/environment-catalog.json` from `contracts/environment-catalog.json`
+when that file is absent; an existing copy is never overwritten. This file is
+where the advisory hooks read the environment they act on: MCP server prefixes
+and write labels (`security-write-confirm`), topic routes (`auto-topic-loader`,
+`subagent-stop`), failure-pattern files (`post-failure-guide`), authenticated-MCP
+keywords and protected repo paths (`pre-agent-dispatch`), expected servers
+(`session_start_modules/consistency`), repo paths (`repo_sync`,
+`index_staleness`) and the config repo `session-start` watches. The shipped
+default leaves every section empty, so those hooks are no-ops until you fill it
+in; the shape is `contracts/environment-catalog.example.json`. Copy your private
+values in (the 2026-09-04 catalog commit installed them on this workstation;
+carry that file across, it is not in any repo).
+
 The profile merge unions with your existing `permissions.allow`, so the
 curated read-only allow list survives. Re-running `bash install.sh` later
 upgrades the starter rules and hooks you never edited and keeps the ones you

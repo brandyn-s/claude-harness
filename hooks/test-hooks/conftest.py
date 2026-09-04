@@ -51,6 +51,15 @@ os.environ["CLAUDE_BASH_POLICY_PACKS"] = "all"
 # The org guard is configuration (review 2026-09-03); the guard tests keep the
 # historical fixture org so their block/allow assertions are unchanged.
 os.environ["CLAUDE_FORBIDDEN_GITHUB_ORGS"] = "example-technologies"  # assigned for the same reason
+# The environment catalog (2026-09-04): hooks read MCP server names, topic
+# routes, failure-pattern files and repo paths from a JSON catalog instead of
+# hard-coding them (hooks/_environment_catalog.py). The suite points the
+# override at a fixture carrying the names the tests assert, so the assertions
+# stay unchanged and this machine's ~/.claude/environment-catalog.json never
+# leaks into a run. Assigned, not setdefault, for the same reason as the packs.
+os.environ["CLAUDE_ENVIRONMENT_CATALOG"] = str(
+    Path(__file__).resolve().parent / "fixtures" / "environment-catalog.json"
+)
 
 windows_only = pytest.mark.skipif(
     platform.system() != "Windows",

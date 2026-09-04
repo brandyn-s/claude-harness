@@ -1,6 +1,6 @@
-"""Detect and delete bogus code-search project entries at SessionStart.
+"""Detect and delete bogus semantic-search project entries at SessionStart.
 
-The code-search MCP server registers a project from its working directory
+The semantic-search MCP server registers a project from its working directory
 on startup. When the server's CWD is the user's home directory, root, or
 a system directory, this creates a "project" entry that will trigger
 endless full-index attempts of huge unindexable trees (~/.cache,
@@ -15,7 +15,7 @@ consume the server's reindex slot.
 
 INCIDENT 2026-05-13: you_8bbeb258 entry created with
 project_path=C:\\Users\\you. Across 8 hours, 4 zombie
-code-search server processes accumulated, each stuck trying to full-index
+search-server processes accumulated, each stuck trying to full-index
 the entire home directory. Every parallel search call returned
 -32001:user-cancel because the server was busy. /mcp reconnect spawned
 new servers that immediately re-created the same entry from CWD.
@@ -38,8 +38,8 @@ def _forbidden_paths() -> tuple[set[Path], set[Path]]:
     """Return (exact_match_only, scope_anywhere) sets of forbidden paths.
 
     `exact_match_only` — project_path must EQUAL one of these to be
-        rejected. Children are fine (~/Documents/GitHub/foo is a legit
-        project even though its parent ~/ is in this set).
+        rejected. Children are fine (~/code/foo is a legit project even
+        though its parent ~/ is in this set).
     `scope_anywhere` — project_path EQUAL OR INSIDE any of these is
         rejected. Used for system dirs and cache dirs where any subpath
         is a wrong project root.
@@ -147,7 +147,7 @@ def _delete_project(proj_dir: Path) -> tuple[bool, str | None]:
 
 
 def cleanup_stale_projects() -> list[str]:
-    """Scan and delete bogus code-search project entries.
+    """Scan and delete bogus semantic-search project entries.
 
     Returns list of warning messages for the SessionStart summary.
     Empty list if nothing found.
@@ -161,13 +161,13 @@ def cleanup_stale_projects() -> list[str]:
         ok, err = _delete_project(proj_dir)
         if ok:
             messages.append(
-                f"code-search: deleted bogus project entry {proj_dir.name} "
+                f"semantic-search registry: deleted bogus project entry {proj_dir.name} "
                 f"(project_path={project_path!r} - home/root/system dir, "
                 f"would block reindex)"
             )
         else:
             messages.append(
-                f"code-search: tried to delete bogus project entry "
+                f"semantic-search registry: tried to delete bogus project entry "
                 f"{proj_dir.name} (project_path={project_path!r}) but failed: "
                 f"{err}. Likely a running MCP holds the file lock - restart "
                 f"Claude Code or run /mcp."

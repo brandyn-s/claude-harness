@@ -11,6 +11,7 @@ injects: session_context
 modifies: null
 depends_on_files:
   - hooks/session_start_modules/*.py
+  - contracts/environment-catalog.json
 depends_on_env: []
 exit_codes:
   "0": "Session initialized"

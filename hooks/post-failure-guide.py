@@ -1,16 +1,26 @@
 """PostToolUseFailure hook: non-blocking diagnostic guidance on tool failures.
 
-Reads the failed tool call from stdin, emits a short diagnostic hint as a
-non-blocking systemMessage. Does NOT stop continuation.
+Reads the failed tool call from stdin, emits a short diagnostic hint as
+additionalContext. Does NOT stop continuation.
+
+Environment-specific knowledge comes from the `failure_patterns` section of the
+environment catalog (hooks/_environment_catalog.py): `servers` maps an MCP
+server token to its <name>-patterns.md file under the project memory dir, and
+`hints` adds error-keyword -> fix entries that are checked BEFORE the built-in
+generic ones below. With an empty section the hook still emits the generic
+guidance; it just cannot point at a pattern file.
 
 Exit codes:
-  0 = continue (with optional systemMessage)
+  0 = continue (with optional additionalContext)
 """
 import json
 import os
 import re
 import sys
 from pathlib import Path
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _environment_catalog import load_section
 
 
 def _resolve_project_dir() -> Path:
@@ -31,14 +41,13 @@ def _resolve_project_dir() -> Path:
 
 PATTERN_DIR = _resolve_project_dir() / "memory"
 
-# Common failure patterns and their fixes
-PATTERNS = {
+# Failure patterns that hold for any Claude Code host, and their fixes.
+BUILTIN_PATTERNS = {
     "MaxFileReadTokenExceeded": "Use offset/limit params to paginate",
     "timeout": "Check MCP server connectivity first",
     "encoding": "Write to file first, then execute (not inline)",
     "SyntaxError": "Write to .py/.ps1 file first, don't inline complex code",
     "None": "Guard against None responses (some APIs return None instead of [])",
-    "LIMIT": "Ramp SQL has ~100-row limit, use LIMIT/OFFSET or GROUP BY",
     "not yet populated": "Table load not complete, retry after delay",
     "Access denied": "Sub-agents can't auth to remote MCPs - run in main session",
     "404": "Check endpoint path; for GitHub private repos use gh CLI not MCP",
@@ -48,28 +57,36 @@ PATTERNS = {
     "inline-python-guard": "Write the same code to a .py file with the Write tool, then run: python script.py",
 }
 
-# Map MCP server prefix to pattern file name
-SERVER_TO_PATTERN = {
-    "crowdstrike": "crowdstrike-patterns.md",
-    "tenable": "tenable-patterns.md",
-    "airlock": "airlock-patterns.md",
-    "msgraph": "msgraph-patterns.md",
-    "confluence": "confluence-fedramp-patterns.md",
-    "tailscale": "tailscale-patterns.md",
-    "slack": "slack-patterns.md",
-    "ramp": "ramp-patterns.md",
-    "linear": "linear-server-patterns.md",
-    "tavily": "tavily-patterns.md",
-    "github": "github-patterns.md",
-    "playwright": "playwright-patterns.md",
-    "prowler": "prowler-patterns.md",
-    "litellm": "litellm-patterns.md",
-}
+
+def load_patterns(section=None):
+    """Return (PATTERNS, SERVER_TO_PATTERN) from the catalog plus the built-ins.
+
+    The operator's hints come first so an environment-specific keyword wins over
+    a generic one that also matches; a built-in keyword the operator redefines
+    takes the operator's text.
+    """
+    if section is None:
+        section = load_section("failure_patterns")
+    patterns = {
+        str(k): str(v) for k, v in (section.get("hints") or {}).items()
+        if isinstance(k, str) and isinstance(v, str) and k
+    }
+    for keyword, fix in BUILTIN_PATTERNS.items():
+        patterns.setdefault(keyword, fix)
+    server_to_pattern = {
+        str(k): str(v) for k, v in (section.get("servers") or {}).items()
+        if isinstance(k, str) and isinstance(v, str) and k and v
+    }
+    return patterns, server_to_pattern
+
+
+# Error keyword -> likely fix, and MCP server token -> pattern file name.
+PATTERNS, SERVER_TO_PATTERN = load_patterns()
 
 
 def detect_pattern_file(tool_name):
     """Find the pattern file for a given MCP tool name."""
-    # Extract server name from tool_name like mcp__remote-crowdstrike__falcon_search
+    # Extract server name from tool_name like mcp__remote-edr__search_hosts
     match = re.match(r"mcp__(?:remote-)?(\w+)__", tool_name)
     if not match:
         return None

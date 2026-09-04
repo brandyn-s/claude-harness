@@ -379,7 +379,19 @@ def test_every_route_names_a_registered_mcp_server():
     Skips VISIBLY when the CLI is unavailable — a reported skip, never a bare
     `return`, which is the vacuous-pass trap that let 12 rule tests in this very
     file report green for two months after their source dir was deleted.
+
+    Since the routes moved into the environment catalog, the suite pins
+    CLAUDE_ENVIRONMENT_CATALOG to the test FIXTURE (conftest). Comparing the
+    fixture's routes with THIS machine's `claude mcp list` is meaningless: the
+    fixture describes no real host. So this is an opt-in liveness check of the
+    machine's own catalog: run with CLAUDE_TOPIC_ROUTE_LIVENESS=1 and the module
+    is loaded with the fixture override removed, i.e. against the local catalog
+    the installed hook actually reads. Without the opt-in it skips, visibly.
     """
+    if os.environ.get("CLAUDE_TOPIC_ROUTE_LIVENESS") != "1":
+        pytest.skip("routes under test come from the fixture catalog; set "
+                    "CLAUDE_TOPIC_ROUTE_LIVENESS=1 to check this machine's catalog "
+                    "against its live MCP servers")
     if not shutil.which("claude"):
         pytest.skip("claude CLI unavailable — cannot enumerate live servers")
     try:
@@ -397,7 +409,13 @@ def test_every_route_names_a_registered_mcp_server():
     spec = importlib.util.spec_from_file_location(
         "atl_live", LOADER_PATH)
     atl = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(atl)
+    # Load against the machine's own catalog, not the suite's fixture override.
+    fixture_override = os.environ.pop("CLAUDE_ENVIRONMENT_CATALOG", None)
+    try:
+        spec.loader.exec_module(atl)
+    finally:
+        if fixture_override is not None:
+            os.environ["CLAUDE_ENVIRONMENT_CATALOG"] = fixture_override
 
     dead = [pref for pref in atl.STATIC_MAP
             if pref[len("mcp__"):].rstrip("_") not in live]

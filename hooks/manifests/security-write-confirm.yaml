@@ -12,7 +12,8 @@ enforces:
 blocks_patterns: []
 injects: "advisory systemMessage naming the classified operation and a bounded parameter preview"
 modifies: null
-depends_on_files: []
+depends_on_files:
+  - contracts/environment-catalog.json
 depends_on_env: []
 exit_codes:
   "0": "allow (recognized writes may receive an advisory; no permissionDecision is emitted)"

@@ -18,6 +18,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _environment_catalog import load_section
+
 GRAPH_PATH = Path.home() / ".claude" / "manifests" / "graph.json"
 
 # ── PHASE F: per-subagent git-worktree isolation (OPT-IN) ───────────────
@@ -50,14 +53,23 @@ MAX_PARALLEL_SUBAGENT_WORKTREES = 8
 _WORKTREES_ROOT = Path.home() / ".claude" / "worktrees"
 _SUBAGENT_CLAIM_DIR = Path.home() / ".claude" / "state" / "subagent-worktree-claims"
 
+# Both lists below are ENVIRONMENT DATA from the catalog's `agent_dispatch`
+# section (hooks/_environment_catalog.py): which remote MCPs need auth, and
+# which repos are protected, are facts about the operator's setup, not about
+# this hook. Empty lists leave the corresponding check inert.
+_AGENT_DISPATCH = load_section("agent_dispatch")
+
 # Fallback keyword regex — used when graph.json unavailable or prompt
-# doesn't match any manifested skill name
+# doesn't match any manifested skill name. Whole-word, case-insensitive match
+# on the catalog's `auth_mcp_keywords`; None when none are configured.
+_AUTH_TERMS = [
+    t.strip() for t in (_AGENT_DISPATCH.get("auth_mcp_keywords") or [])
+    if isinstance(t, str) and t.strip()
+]
 AUTH_MCP_KEYWORDS = re.compile(
-    r"\b(crowdstrike|falcon|tenable|airlock|msgraph|graph_request|graph_mutate|"
-    r"remote-tenable|remote-crowdstrike|remote-airlock|"
-    r"security-remix)\b",
+    r"\b(" + "|".join(re.escape(t) for t in _AUTH_TERMS) + r")\b",
     re.IGNORECASE,
-)
+) if _AUTH_TERMS else None
 
 # Module-level cache
 _graph = None
@@ -180,21 +192,20 @@ def check_file_overlap(prompt):
     return None
 
 # ── WORKTREE ISOLATION ENFORCEMENT ─────────────────────────────────────
-# Protected repos that require worktree isolation for subagent writes.
-# Matches repo paths mentioned in agent prompts against known protected repos.
+# Protected repos that require worktree isolation for subagent writes: the
+# lowercase path fragments in the catalog's `protected_repo_paths` (e.g.
+# "code/my-tooling", ".claude"), matched against repo paths mentioned in
+# agent prompts. Slashes are normalised so a Windows path still matches.
 
 PROTECTED_REPO_PATHS = [
-    "documents/github/mcp-servers",
-    "documents/github/mcp-infra",
-    "documents/github/code-search",
-    "documents/github/code-graph",
-    "documents/knowledge-base",
-    ".claude",  # claude-config
+    p.strip().lower().replace("\\", "/")
+    for p in (_AGENT_DISPATCH.get("protected_repo_paths") or [])
+    if isinstance(p, str) and p.strip()
 ]
 
 # Gitignored RUNTIME paths under ~/.claude that are NOT repo content. A prompt
 # that only references these (session transcripts, saved tool results, runtime
-# state) is not a claude-config write — masking them prevents the false
+# state) is not a config-repo write — masking them prevents the false
 # positive where a read-only transcript-mining agent that writes its OUTPUT
 # elsewhere (e.g. /tmp) gets blocked on the ".claude" substring match.
 # Measured 2026-08-16: a weekly-update transcript miner reading
@@ -483,7 +494,8 @@ def main():
             pass  # fail-open: telemetry only
     else:
         # Fallback: keyword regex for prompts that don't match a skill name
-        matches = AUTH_MCP_KEYWORDS.findall(prompt)
+        # (inert when the catalog names no authenticated MCPs).
+        matches = AUTH_MCP_KEYWORDS.findall(prompt) if AUTH_MCP_KEYWORDS else []
         if matches:
             unique = sorted({m.lower() for m in matches})
             try:

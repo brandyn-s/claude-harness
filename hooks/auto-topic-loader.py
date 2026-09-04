@@ -4,10 +4,13 @@ Maps MCP server names to topic files. On a call to a matching server, injects
 the topic via additionalContext so the caller gets the relevant domain context
 without it sitting in the ambient system prompt.
 
-Manifest-derived routing (2026-04-15) was REMOVED 2026-07-29; STATIC_MAP is the
-only source of routes — see `_build_server_to_topic_map` for why. A declared
-topic that does not resolve on disk is SKIPPED rather than minted as a route —
-see `_first_resolvable_topic`.
+The routes are ENVIRONMENT DATA: STATIC_MAP is read from the `topic_routes.
+by_tool_prefix` section of the environment catalog (hooks/_environment_catalog.py;
+contracts/environment-catalog.json ships it empty, so the hook is a no-op until
+the operator fills it in). Manifest-derived routing (2026-04-15) was REMOVED
+2026-07-29; the catalog map is the only source of routes — see
+`_build_server_to_topic_map` for why. A declared topic that does not resolve on
+disk is SKIPPED rather than minted as a route — see `_first_resolvable_topic`.
 
 DELIVERY CAP — the binding constraint on every topic this hook injects.
 Per the hooks reference (code.claude.com/docs/en/hooks, verified 2026-07-29):
@@ -22,8 +25,9 @@ delivered whole; security.md (13,460B) stubbed.
 
 RETRIEVAL (2026-09-04). Whole-file injection could only ever deliver a topic
 that fit. From 2026-08-15 an over-budget topic produced a NOT DELIVERED pointer
-and no content — msgraph.md (24,170 chars) and linear.md (10,256) delivered
-nothing on every call, and 43 of the 98 corpus topics (44%) are over the cap.
+and no content — the two largest routed topics (24,170 and 10,256 chars)
+delivered nothing on every call, and 43 of the 98 corpus topics (44%) are over
+the cap.
 Now a topic at or under TOPIC_BUDGET_CHARS is injected whole. A larger one is
 split on markdown headings (`split_sections`) and the payload is the SUMMARY
 (a `Summary` section if present, else the title plus the first section with a
@@ -52,6 +56,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _environment_catalog import load_section
+
 TOPICS_DIR = Path.home() / ".claude" / "agent-memory" / "topics"
 SESSION_MARKER_DIR = Path.home() / ".claude" / "session-env"
 GRAPH_PATH = Path.home() / ".claude" / "manifests" / "graph.json"
@@ -70,60 +77,42 @@ INJECTION_BUDGET_CHARS = 9_550
 # gap to INJECTION_BUDGET_CHARS.
 TOPIC_BUDGET_CHARS = 8_000
 
-# The curated server→topic map. Since the manifest derivation was removed
-# (see _build_server_to_topic_map), this is the ONLY source of routes.
+# The curated server→topic map: the `topic_routes.by_tool_prefix` section of the
+# environment catalog. Since the manifest derivation was removed (see
+# _build_server_to_topic_map), this is the ONLY source of routes. Topic files
+# are environment content (agent-memory/topics/ ships empty), so the routes to
+# them are environment data too; with an empty section no server has domain
+# context and the hook is a no-op.
 #
-# REPOINTED 2026-07-29 against the live `claude mcp list` surface. 10 of the
-# previous 17 entries named a server that is not registered on this host, so
-# those routes could never fire — and a route that cannot fire is
-# indistinguishable from "this server has no domain context". Five curated
-# SECURITY topics (crowdstrike, airlock, tenable, confluence, tailscale) were
-# unreachable, i.e. the domain context for our most-used security tools never
-# loaded.
+# LESSONS THE CATALOG EDITOR INHERITS (learned on the 2026-07-29 repoint
+# against the live `claude mcp list` surface):
 #
-# Root cause is the same one PR #1785 documented 25 minutes earlier from the
-# other direction: the gateway servers dropped their `remote-` prefix during the
-# macOS migration, and every consumer wired by STRING MATCH failed SILENTLY.
-# #1785 repointed skills/ and manifests; this hook was missed, which is exactly
-# the `check-before-change.md` MCP-consolidation drift class (grep EVERY
-# consumer, including hook internals).
+# * A prefix must name a REGISTERED server. 10 of the then 17 entries named a
+#   server that was not registered on this host, so those routes could never
+#   fire — and a route that cannot fire is indistinguishable from "this server
+#   has no domain context". Five curated security topics were unreachable, i.e.
+#   the domain context for the most-used security tools never loaded. Root
+#   cause was the same one PR #1785 documented 25 minutes earlier from the
+#   other direction: the gateway servers dropped their `remote-` prefix during
+#   the macOS migration, and every consumer wired by STRING MATCH failed
+#   SILENTLY. #1785 repointed skills/ and manifests; this hook was missed, which
+#   is exactly the `check-before-change.md` MCP-consolidation drift class (grep
+#   EVERY consumer, including hook internals).
+#   `test_no_route_resolves_to_a_missing_file` catches a missing TOPIC; it
+#   cannot catch a missing SERVER, because that only fails at runtime by never
+#   firing. Retire the route when the server leaves; keep the topic file (it is
+#   still readable and still accurate; only the auto-injection trigger is gone).
 #
-# VERIFY BEFORE EDITING: a prefix here must match a server in `claude mcp list`.
-# `test_no_route_resolves_to_a_missing_file` catches a missing TOPIC; it cannot
-# catch a missing SERVER, because that only fails at runtime by never firing.
+# * Route to a file that fits the budget. A route to a 25,914-char topic (2.7x
+#   the delivery budget) injected NOTHING on every call until retrieval landed
+#   (see RETRIEVAL above); a hub file is the right target for a 43 KB corpus.
+#   A missing route costs real rediscovery: on 2026-08-29 a new runbook shipped
+#   into an ALREADY-DOCUMENTED trap because the map lacked that server's
+#   prefix — 2 of that night's 3 rediscovered gotchas were on file.
 STATIC_MAP = {
-    # Gateway servers — post-migration names (no `remote-` prefix).
-    "mcp__crowdstrike__": "crowdstrike.md",
-    "mcp__tenable__": "tenable.md",
-    "mcp__airlock__": "airlock.md",
-    "mcp__msgraph__": "msgraph.md",
-    "mcp__confluence__": "confluence.md",
-    "mcp__tailscale__": "tailscale.md",
-    "mcp__security-remix__": "security.md",
-    "mcp__slack-user__": "slack.md",
-    # Local stdio servers.
-    "mcp__linear-server__": "linear.md",
-    # Hub file, not the 43KB full topic (over the 10K delivery cap). Added
-    # 2026-08-29 after a new runbook shipped into the ALREADY-DOCUMENTED
-    # Python2 autoSync trap: the topic never injected because this map lacked
-    # the prefix — 2 of that night's 3 rediscovered gotchas were on file.
-    "mcp__azure-automation__": "azure-automation-hub.md",
-    # Was "infrastructure.md" (25,914 chars): 2.7x the delivery budget, so this
-    # route injected NOTHING on every netcloud call. netcloud.md fits the budget
-    # and is the subject-matched topic. Ported from claude-config d6f1eddf.
-    "mcp__netcloud__": "netcloud.md",
-    "mcp__hologram__": "hologram.md",
-    # B12/F3 tier decision (2026-06-10): 44 skill references and no topic was
-    # the clearest routing gap in the B7 reachability computation.
-    "mcp__firecrawl__": "firecrawl.md",
-    # RETIRED 2026-07-29 — server not registered on this host, so the route
-    # could never fire. Restore the line if the server returns:
-    #   "mcp__ramp__": "ramp.md",                    (Ramp MCP not migrated)
-    #   "mcp__prowler__": "security.md",             (prowler not migrated)
-    #   "mcp__lucid-mcp__": "lucid-admin.md",        (lucid not migrated)
-    #   "mcp__context7-docs__": "context7-docs.md",  (context7 not migrated)
-    # Their topic files are KEPT — they are still readable and still accurate;
-    # only the auto-injection trigger is gone.
+    str(prefix): str(topic)
+    for prefix, topic in (load_section("topic_routes").get("by_tool_prefix") or {}).items()
+    if isinstance(prefix, str) and isinstance(topic, str) and prefix and topic
 }
 
 # Module-level cache
@@ -203,10 +192,10 @@ def _build_server_to_topic_map():
     dead rather than wrong.
 
     Fixing those two made the arbitrary routes LIVE, which is how the category
-    error surfaced. STATIC_MAP is hand-curated, correct, and the only source
-    now: 17 routes, each a deliberate server→topic pairing. Adding a server
-    means adding one line there — explicit beats automatic when the automation
-    has no way to be right.
+    error surfaced. STATIC_MAP (the catalog's `topic_routes.by_tool_prefix`) is
+    hand-curated and the only source now: each entry a deliberate server→topic
+    pairing. Adding a server means adding one line to the catalog — explicit
+    beats automatic when the automation has no way to be right.
 
     (`_first_resolvable_topic` and `_server_prefix` are retained: the audit
     scripts use them, and they document the two traps for whoever revives
@@ -496,7 +485,7 @@ def main():
     # repairing it would have made things worse. Kept as a comment, not code,
     # because the reasoning is the useful part:
     #
-    # The lever was real: "rule files placed in ~/.claude/agent-memory/rules/
+    # The mechanism was real: "rule files placed in ~/.claude/agent-memory/rules/
     # load on first matching tool call rather than ambient at session start.
     # This recovers ~22K tokens of always-loaded context." Then #1011
     # ("memory audit cleanup — empty agent-memory/rules legacy dir") deleted
@@ -513,7 +502,7 @@ def main():
     # Repointing would spend tokens to deliver a truncated copy of something
     # already present. Removal is the fix.
     #
-    # To REVIVE the lever properly, the rules must first stop being ambient
+    # To REVIVE the mechanism properly, the rules must first stop being ambient
     # (that is the token saving), and each must fit under the delivery budget
     # after the label+envelope overhead. Both are prerequisites, not details.
     #

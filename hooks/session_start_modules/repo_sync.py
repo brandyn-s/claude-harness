@@ -8,6 +8,10 @@ from pathlib import Path
 
 from .concurrent_session import has_concurrent_sessions
 
+# The environment catalog lives beside the hooks, one level up from this package.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from _environment_catalog import load_section, repo_entries
+
 CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
 CLAUDE_CONFIG_PATH = Path.home() / ".claude"
 LAST_CHECKPOINT_ARTIFACT = CLAUDE_CONFIG_PATH / ".last-auto-checkpoint.json"
@@ -222,7 +226,7 @@ def _branch_work_is_upstream(_git, branch: str) -> bool:
     `-` for a commit whose content is already upstream, `+` for one that is not.
 
     Measured 2026-08-06 on the real merged branch `docs/ssr-batch-diagnostics`
-    (landed as claude-config #1905):
+    (landed as the config repo's #1905):
         merge-base --is-ancestor <branch> origin/main  -> FALSE  (the trap)
         git cherry origin/main <branch>                -> "- 4532a7a3"  (merged)
 
@@ -264,8 +268,8 @@ def _prune_gone_branches(_git) -> int:
     Squash-merge via `gh pr merge --auto --squash --delete-branch` deletes the
     remote branch but leaves the local clone tracking a now-gone upstream.
     `git fetch --prune` marks them `[gone]`; this function deletes the locals.
-    Without it, repos accumulate hundreds of stale branches: code-graph 164,
-    code-search 107, mcp-servers 98 at 2026-05-06 /pr-fix audit.
+    Without it, repos accumulate hundreds of stale branches: three tracked
+    repos held 164, 107 and 98 at the 2026-05-06 /pr-fix audit.
 
     CORRECTED 2026-08-05: this docstring used to claim `--prune` was "already
     run via the rebase below". It was NOT -- both fetch paths (this module's
@@ -277,8 +281,8 @@ def _prune_gone_branches(_git) -> int:
     `git fetch -q --prune` in their setup. Both fetch sites now pass `--prune`.
     Measured cost of the gap: 9 clones simultaneously unsyncable on 2026-08-05,
     each reporting a hard "fetch failed: couldn't find remote ref", plus
-    hundreds of accumulated stale locals (claude-knowledge-base ~85,
-    claude-config ~21).
+    hundreds of accumulated stale locals (the knowledge base ~85, the config
+    repo ~21).
 
     SAFETY CHANGED 2026-07-26 (audit finding H3). This used to run `git branch -D`
     on every `[gone]` branch, justified by "gone-upstream means GitHub already
@@ -868,25 +872,20 @@ def sync_tracked_repos(self_session_id: str | None = None):
             "Call _sync_one_repo(<explicit path>) to exercise the sync logic."
         ]
 
-    # Default: only sync the two hot-path repos (~/.claude and knowledge-base)
-    # where /capture, /garden, /distill, and session-start-hook writes land
-    # automatically. The other three (mcp-servers, mcp-infra, code-search)
-    # are sync-on-demand: rebase before manual work, not at every session
-    # start. Override with CLAUDE_SYNC_ALL_REPOS=1 to restore the wider set.
-    if os.environ.get("CLAUDE_SYNC_ALL_REPOS") == "1":
-        repos = [
-            Path.home() / ".claude",
-            Path.home() / "Documents" / "knowledge-base",
-            Path.home() / "Documents" / "GitHub" / "mcp-servers",
-            Path.home() / "Documents" / "GitHub" / "mcp-infra",
-            Path.home() / "Documents" / "GitHub" / "code-search",
-        ]
-    else:
-        repos = [
-            Path.home() / ".claude",
-            Path.home() / "Documents" / "knowledge-base",
-        ]
+    # Which repos: the environment catalog's `repo_paths` (hooks/
+    # _environment_catalog.py). Default: only the hot-path repos the operator
+    # marked `session_sync` (the config checkout and the knowledge base, where
+    # /capture, /garden, /distill and session-start-hook writes land
+    # automatically). The rest are sync-on-demand: rebase before manual work,
+    # not at every session start. CLAUDE_SYNC_ALL_REPOS=1 syncs every listed
+    # repo. No repos configured -> nothing to do.
+    entries = repo_entries(load_section("repo_paths"))
+    if os.environ.get("CLAUDE_SYNC_ALL_REPOS") != "1":
+        entries = [e for e in entries if e["session_sync"]]
+    repos = [e["path"] for e in entries]
     warnings: list[str] = []
+    if not repos:
+        return warnings
     with ThreadPoolExecutor(max_workers=len(repos)) as executor:
         futures = [executor.submit(_sync_one_repo, r, self_session_id) for r in repos]
         for fut in futures:

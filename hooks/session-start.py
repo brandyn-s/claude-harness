@@ -15,6 +15,7 @@ from pathlib import Path
 # Add hooks dir to path for module imports
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from _environment_catalog import expand_path, load_section
 from session_start_modules.auto_prune import run_auto_prune
 from session_start_modules.code_graph_health import check_code_graph_health
 from session_start_modules.code_search_stale_project_guard import cleanup_stale_projects
@@ -51,16 +52,22 @@ from session_start_modules.worktree_gc import prune_worktrees
 
 
 def check_concurrent_session_risk():
-    """Detect if ~/.claude repo is in a state suggesting another session is active.
+    """Detect if the config repo is in a state suggesting another session is active.
 
-    If the repo is on a feature branch or has uncommitted changes, a concurrent
-    session will share the same branch/index and risk corrupting each other's
-    git state. Recommend --worktree for isolation.
+    The repo is the catalog's `session_start.config_repo` ({"label", "path"};
+    typically the operator's live ~/.claude checkout). If it is on a feature
+    branch or has uncommitted changes, a concurrent session will share the same
+    branch/index and risk corrupting each other's git state. Recommend
+    --worktree for isolation.
 
-    Returns a warning string or None.
+    Returns a warning string or None; None when no config repo is configured.
     """
     import subprocess
-    claude_dir = Path.home() / ".claude"
+    repo = load_section("session_start").get("config_repo")
+    if not isinstance(repo, dict) or not isinstance(repo.get("path"), str) or not repo["path"].strip():
+        return None
+    claude_dir = expand_path(repo["path"])
+    label = str(repo.get("label") or claude_dir.name)
     try:
         # Check current branch
         result = subprocess.run(
@@ -72,7 +79,7 @@ def check_concurrent_session_risk():
         branch = result.stdout.strip()
         if branch and branch != "main" and not branch.startswith("worktree-"):
             return (
-                f"ACTION REQUIRED: claude-config is on branch '{branch}' (not main). "
+                f"ACTION REQUIRED: {label} is on branch '{branch}' (not main). "
                 f"Another session left the repo on a feature branch. Before doing "
                 f"any work, call EnterWorktree to isolate this session. Do NOT "
                 f"create files or edit code until you are in a worktree."
@@ -91,7 +98,7 @@ def check_concurrent_session_risk():
         ]
         if len(dirty_lines) > 3:
             return (
-                f"ACTION REQUIRED: claude-config has {len(dirty_lines)} uncommitted "
+                f"ACTION REQUIRED: {label} has {len(dirty_lines)} uncommitted "
                 f"changes from another session. Before doing any work, call "
                 f"EnterWorktree to isolate this session. Do NOT create files or "
                 f"edit code until you are in a worktree."
@@ -387,7 +394,7 @@ def main():
             f"{MUTATIONS_ENV}=1 to enable them."
         )
 
-    # Check for concurrent session risk on claude-config repo
+    # Check for concurrent session risk on the catalog's config repo
     worktree_warning = check_concurrent_session_risk()
     if worktree_warning:
         messages.append(worktree_warning)
