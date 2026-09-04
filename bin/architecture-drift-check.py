@@ -100,14 +100,14 @@ def wired_hooks(settings_text):
     """
     wired = _direct_wired_hooks(settings_text)
     # Guards loaded by a dispatcher that is itself wired count as wired.
-    for dispatcher in ("write-edit-dispatcher.py",):
+    for dispatcher in ("write-edit-dispatcher.py", "bash-pretooluse-dispatcher.py"):
         if dispatcher in wired:
             disp_path = REPO / "hooks" / dispatcher
             if disp_path.exists():
                 src = disp_path.read_text(encoding="utf-8", errors="ignore")
-                # GUARDS entries: ("name", "file-name.py"[, "open"|"closed"])
+                # GUARDS entries: ("name", "file-name.py"[, "open"|"closed"|"warn"])
                 # — the optional third element is the per-guard fail posture
-                # (B2/F4, 2026-06-10).
+                # (B2/F4, 2026-06-10; "warn" added with the Bash dispatcher).
                 wired |= set(re.findall(
                     r'\(\s*"[a-z0-9_-]+"\s*,\s*"([a-z0-9_-]+\.py)"'
                     r'(?:\s*,\s*"[a-z]+")?\s*\)', src))

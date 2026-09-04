@@ -423,6 +423,69 @@ def test_materialized_runtime_settings_pass_the_protected_registry_guard(tmp_pat
     assert stderr == ""
 
 
+def _with_bash_dispatcher(payload: dict, hooks_dir: Path, timeout: int = 30) -> dict:
+    """The repository's shape since 2026-09-03: the two Bash guards are not registered
+    directly but run inside bash-pretooluse-dispatcher.py on the Bash|PowerShell matcher."""
+    payload["hooks"]["PreToolUse"] = [
+        group
+        for group in payload["hooks"]["PreToolUse"]
+        if group["hooks"][0]["args"][0] not in ("bash-security-guard.py", "destructive-ops-guard.py")
+    ]
+    payload["hooks"]["PreToolUse"].insert(0, {
+        "matcher": "Bash|PowerShell",
+        "hooks": [{
+            "type": "command",
+            "command": str(hooks_dir / "run-hook"),
+            "args": ["bash-pretooluse-dispatcher.py"],
+            "timeout": timeout,
+        }],
+    })
+    return payload
+
+
+def _run_user_settings(tmp_path: Path, payload: dict):
+    settings = tmp_path / "settings.json"
+    settings.write_text(json.dumps(payload), encoding="utf-8")
+    return run_hook(HOOK, _event("user_settings", str(settings)))
+
+
+def test_bash_dispatcher_registration_satisfies_the_protected_bash_guards(tmp_path):
+    """Installer profiles register the two Bash guards directly; the repository's
+    settings.json carries both inside the dispatcher. Both shapes must pass, or the
+    rewired settings.json would be blocked from ever loading."""
+    payload = _with_bash_dispatcher(_protected_user_settings(tmp_path / "hooks"), tmp_path / "hooks")
+
+    rc, stdout, stderr = _run_user_settings(tmp_path, payload)
+
+    assert (rc, stdout, stderr) == (0, "", "")
+
+
+def test_bash_dispatcher_at_a_weakened_timeout_does_not_satisfy_the_protection(tmp_path):
+    payload = _with_bash_dispatcher(
+        _protected_user_settings(tmp_path / "hooks"), tmp_path / "hooks", timeout=3
+    )
+
+    rc, stdout, stderr = _run_user_settings(tmp_path, payload)
+
+    assert rc == 0
+    assert json.loads(stdout)["decision"] == "block"
+    assert stderr == ""
+
+
+def test_dropping_the_dispatcher_and_the_direct_bash_guards_is_blocked(tmp_path):
+    payload = _with_bash_dispatcher(_protected_user_settings(tmp_path / "hooks"), tmp_path / "hooks")
+    payload["hooks"]["PreToolUse"].pop(0)  # the dispatcher; the direct guards are already gone
+
+    rc, stdout, stderr = _run_user_settings(tmp_path, payload)
+
+    assert rc == 0
+    assert json.loads(stdout) == {
+        "decision": "block",
+        "reason": "Changed user settings remove required protected hooks; existing hooks remain active.",
+    }
+    assert stderr == ""
+
+
 def test_malformed_user_settings_are_blocked_without_echoing_contents(tmp_path):
     settings = tmp_path / "settings.json"
     secret_marker = "super-secret-marker"

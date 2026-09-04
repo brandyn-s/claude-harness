@@ -1,0 +1,44 @@
+id: bash-pretooluse-dispatcher
+type: hook
+event: PreToolUse
+matcher: "Bash|PowerShell"
+if_condition: null
+action_type: guard
+description: "Runs the six formerly-unconditional PreToolUse:Bash hooks in ONE interpreter, in order: bash-security-guard.py, destructive-ops-guard.py, git-destructive-checkout-guard.py, bash-tail-buffering-guard.py, zsh-dialect-guard.py, poll-loop-nudge.py. Reads the payload once; each hook runs unchanged under runpy as __main__. The first exit 2 wins and stops the chain; an updatedInput rewrite is what the remaining hooks see and the last one is emitted; additionalContext, permissionDecision (strictest wins) and systemMessage are merged into one JSON object. Writes one run-hook-format fire row per hook it ran. PowerShell payloads reach only destructive-ops-guard.py, the one hook whose matcher ever included PowerShell."
+enforces: []
+blocks_patterns: []
+injects: null
+modifies: null
+depends_on_files:
+  - bash-security-guard.py
+  - destructive-ops-guard.py
+  - git-destructive-checkout-guard.py
+  - bash-tail-buffering-guard.py
+  - zsh-dialect-guard.py
+  - poll-loop-nudge.py
+depends_on_env:
+  - CLAUDE_CONFIG_DIR
+exit_codes:
+  "0": "allow — merged JSON on stdout only when some hook had something to say"
+  "2": "block — the first blocking hook's stderr; later hooks did not run"
+output_format: json
+notes: |
+  WHY. Six run-hook + python3 spawns per Bash call measured 210 ms median for
+  `ls -la` (2026-09-03, author's machine) for hook bodies totalling ~18 ms; one
+  interpreter does the same work in ~50 ms. The three `if`-gated Bash hooks
+  (git-empty-push-guard, staged-additions-guard, pr-duplicate-preflight) stay wired
+  on their own because their `if` already stops them spawning on most calls.
+
+  CRASH POSTURE mirrors each hook's own __main__ block and applies only to an
+  exception that escapes it (import-time failure, missing file): bash-security-guard
+  blocks with its own BLOCKED text (fail-closed), destructive-ops-guard allows with
+  its own WARNING text, the advisories allow silently. A fault in the dispatcher
+  itself fails closed only while the fail-closed guard's verdict is still pending.
+
+  TELEMETRY. The dispatcher's own fire row is written by run-hook, which launches
+  it; the per-hook rows are written here so bin/hook-fire-report.py and the
+  liveness check keep seeing each guard. Wiring parity is pinned by
+  hooks/test-hooks/test_bash_pretooluse_dispatcher.py: every unconditional Bash
+  PreToolUse hook in settings.json must be this one, and nothing inside it may also
+  be wired directly (that would run it twice).
+incidents: []
