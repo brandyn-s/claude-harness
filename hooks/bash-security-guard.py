@@ -37,6 +37,7 @@ _HOOK_DIR = str(Path(__file__).resolve().parent)
 if _HOOK_DIR not in sys.path:
     sys.path.insert(0, _HOOK_DIR)
 
+from _environment_catalog import load_section
 from bash_policy_tables import entries, pattern_block_reason, resolve_policy_packs
 
 SEC_REMEDY = (
@@ -489,6 +490,13 @@ PROCESS_CMDLINE_LEAK = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 
+# Hosts a command may legitimately send a credential to; a secret posted or
+# piped anywhere else is exfiltration. The built-ins are the generic package
+# registries plus GitHub and Anthropic. The operator's own API hosts (an EDR
+# tenant, a scanner, an identity provider, a wiki) are environment data and
+# come from the `safe_domains` list of the environment catalog
+# (hooks/_environment_catalog.py); with that list empty only the built-ins
+# apply, which is the stricter direction.
 SAFE_DOMAINS = [
     r"pypi\.org",
     r"github\.com",
@@ -496,16 +504,22 @@ SAFE_DOMAINS = [
     r"anthropic\.com",
     r"npmjs\.org",
     r"registry\.npmjs\.org",
-    r"fedcloud\.tenable\.com",
-    r"api\.laggar\.gcw\.crowdstrike\.com",
-    r"graph\.microsoft\.(us|com)",
-    r"login\.microsoftonline\.(us|com)",
-    r"managedwhitelisting\.com",
-    r"api\.tailscale\.com",
-    r"mcp\.tavily\.com",
-    r"example\.atlassian\.net",
 ]
-SAFE_RE = re.compile("|".join(SAFE_DOMAINS), re.IGNORECASE)
+
+
+def _catalog_safe_domains() -> list[str]:
+    """Escaped patterns for the catalog's `safe_domains` (plain hostnames, matched
+    case-insensitively as substrings like the built-ins). Non-string or empty
+    entries are dropped; a loader failure yields no extra hosts, so a broken
+    catalog can only make this guard stricter, never more permissive."""
+    try:
+        hosts = load_section("safe_domains")
+    except Exception:  # noqa: BLE001 -- fail toward blocking, never toward allowing
+        return []
+    return [re.escape(host.strip()) for host in hosts if isinstance(host, str) and host.strip()]
+
+
+SAFE_RE = re.compile("|".join(SAFE_DOMAINS + _catalog_safe_domains()), re.IGNORECASE)
 
 
 def check_exfiltration(command):

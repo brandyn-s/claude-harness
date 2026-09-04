@@ -142,9 +142,11 @@ repos to fast-forward or index-check (`session_start_modules/repo_sync.py`,
 `index_staleness.py`); which checkout `session-start.py` watches for a
 concurrent session; and which variables `session_start_modules/env_loader.py`
 exports into the session through `CLAUDE_ENV_FILE` (`env_exports`: names and
-values, plus the names of secrets resolved from the Keychain at write time).
-None of that is in Python. `hooks/_environment_catalog.py` reads it at run time
-from, in merge order:
+values, plus the names of secrets resolved from the Keychain at write time); and
+which API hosts `bash-security-guard.py`'s exfiltration check lets a credential
+travel to beyond its generic built-ins (`safe_domains`). None of that is in
+Python. `hooks/_environment_catalog.py` reads it at run time from, in merge
+order:
 
 1. `contracts/environment-catalog.json` -- the shipped default. Every section is
    empty, so each of these hooks is a clean no-op until it is configured.

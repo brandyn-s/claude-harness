@@ -315,8 +315,9 @@ install_hooks() {
     # Always ship shared hook libraries + the run-hook launcher (the committed
     # settings.json / settings.example.json invoke hooks through run-hook), and
     # keep it executable. manifest_metrics is imported by bash-security-guard,
-    # bash-tail-buffering-guard and zsh-dialect-guard.
-    for shared in run-hook atomic_write.py hook_input.py git_lock.py bash_policy_tables.py manifest_metrics.py; do
+    # bash-tail-buffering-guard and zsh-dialect-guard; _environment_catalog by
+    # bash-security-guard (safe_domains) and the catalog-reading advisories.
+    for shared in run-hook atomic_write.py hook_input.py git_lock.py bash_policy_tables.py manifest_metrics.py _environment_catalog.py; do
         files+=("hooks/$shared")
     done
     install_files "${files[@]}"
@@ -498,6 +499,7 @@ if ask_yn "Install the recommended fresh-laptop core? (2 rules + 4 deterministic
         manifest_metrics.py
         protected-repos.json
         bash_policy_tables.py
+        _environment_catalog.py
         "${DISPATCHER_HOOKS[@]}"
         config-guard.py
         read-deny-guard.py

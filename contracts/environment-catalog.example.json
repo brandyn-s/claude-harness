@@ -104,5 +104,13 @@
       "WIKI_SPACES": "DOCS,RUNBOOKS"
     },
     "secrets": ["WIKI_API_TOKEN"]
-  }
+  },
+  "_comment_safe_domains": "API hosts bash-security-guard.py lets a credential travel to (plain hostnames; merged with its built-in registries, GitHub and Anthropic).",
+  "safe_domains": [
+    "api.edr.example.com",
+    "scanner.example.com",
+    "login.directory.example.com",
+    "graph.directory.example.com",
+    "wiki.example.com"
+  ]
 }

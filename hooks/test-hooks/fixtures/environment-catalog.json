@@ -187,5 +187,18 @@
       "CONFLUENCE_EMAIL": "security@example.com"
     },
     "secrets": ["CONFLUENCE_API_TOKEN"]
-  }
+  },
+  "_comment_safe_domains": "The vendor hosts bash-security-guard.py's SAFE_DOMAINS hard-coded before 2026-09-04; the two (us|com) alternations became one entry per host.",
+  "safe_domains": [
+    "fedcloud.tenable.com",
+    "api.laggar.gcw.crowdstrike.com",
+    "graph.microsoft.us",
+    "graph.microsoft.com",
+    "login.microsoftonline.us",
+    "login.microsoftonline.com",
+    "managedwhitelisting.com",
+    "api.tailscale.com",
+    "mcp.tavily.com",
+    "example.atlassian.net"
+  ]
 }
