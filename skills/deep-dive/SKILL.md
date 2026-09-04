@@ -4,7 +4,10 @@ name: deep-dive
 description: "Thorough multi-source research (Tavily + Exa + Firecrawl) synthesized into an evidence-graded report."
 when_to_use: Use when thorough research is needed on any subject — security tools, compliance frameworks, vendor comparisons, technology decisions, architecture patterns. Searches web, academic, and local knowledge across Tavily + Exa + Firecrawl with discrepancy flagging, then synthesizes findings into a saved report with evidence-graded claims. Do NOT use for Claude Code community patterns (use gather-intel), AI research frontier (use gather-research), or internal team comms (use gather-internal-intel).
 argument-hint: "[topic or question, e.g. 'zero-trust for NixOS', 'Airlock vs Carbon Black for FedRAMP']"
-disable-model-invocation: false
+# 2026-09-04: hidden from model routing. Paired A/Bs on Opus 4.8 (2026-05-31) and Fable 5.1
+# (2026-09-03) measured no lift over a plain model with web search, and the harnesses never ran
+# the full skill; see docs/research-skills-root-cause.md. Explicit /<name> invocation still works.
+disable-model-invocation: true
 context: fork
 effort: max
 allowed-tools: ["Agent", "Bash", "Read", "Write", "Glob", "Grep", "mcp__tavily__tavily_search", "mcp__tavily__tavily_extract", "mcp__tavily__tavily_research", "mcp__tavily__tavily_crawl", "mcp__tavily__tavily_map", "mcp__exa__web_search_exa", "mcp__exa__web_fetch_exa", "mcp__firecrawl__firecrawl_search", "mcp__firecrawl__firecrawl_scrape", "mcp__firecrawl__firecrawl_map", "mcp__firecrawl__firecrawl_crawl", "mcp__firecrawl__firecrawl_check_crawl_status", "mcp__firecrawl__firecrawl_extract", "mcp__memory-search__memory_search", "AskUserQuestion"]

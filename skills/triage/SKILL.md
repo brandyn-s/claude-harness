@@ -9,6 +9,10 @@ metadata:
   author: example-security-engineering
   version: "1.0"
 allowed-tools: Read Grep Glob Bash AskUserQuestion mcp__crowdstrike__* mcp__tenable__* mcp__airlock__* mcp__msgraph__* mcp__linear-server__* mcp__00000000-0000-4000-8000-000000000002__* mcp__ramp__* mcp__codebase-memory-mcp__* mcp__tavily__tavily_search
+# 2026-09-04: hidden from model routing. Paired A/Bs on Opus 4.8 (2026-05-31) and Fable 5.1
+# (2026-09-03) measured no lift over a plain model with web search, and the harnesses never ran
+# the full skill; see docs/research-skills-root-cause.md. Explicit /<name> invocation still works.
+disable-model-invocation: true
 ---
 
 ## triage

@@ -15,6 +15,10 @@ compatibility:
     - mcp: tavily
     - mcp: exa
 allowed-tools: Agent Bash Read mcp__exa__web_search_exa mcp__memory-search__memory_search mcp__tavily__tavily_extract mcp__tavily__tavily_research mcp__tavily__tavily_search
+# 2026-09-04: hidden from model routing. Paired A/Bs on Opus 4.8 (2026-05-31) and Fable 5.1
+# (2026-09-03) measured no lift over a plain model with web search, and the harnesses never ran
+# the full skill; see docs/research-skills-root-cause.md. Explicit /<name> invocation still works.
+disable-model-invocation: true
 ---
 
 ## gather-intel
