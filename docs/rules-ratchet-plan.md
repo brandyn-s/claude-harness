@@ -174,6 +174,19 @@ Oracle: 1,823 literals recorded before; after, every literal outside the four de
 files is present, and the deleted files' remainder was dropped file-by-file with the
 reasons above.
 
+## Executed 2026-09-04 on `feat/rules-ratchet-step2`: the two largest narrative relocations
+
+| Rule | Before | After | Moved to `rules/incidents/<rule>.md` |
+|---|---:|---:|---|
+| platform-constraints | 16,526 | 10,633 | 13 dated blocks behind new anchors (guard-blocked-six-times, ifs-tab-read, unquoted-heredoc, blocked-compound, background-notification, npm-pruned-jsdom, bsd-dialect-gaps, aws-region-leak, load-dump-round-trip, hash-pinned-lock, stale-origin-main, pre-commit-hidden-by-tail, empty-capture) plus the urllib mechanism under its existing 2026-07-05 anchor |
+| verify-effectiveness | 23,085 | 17,990 | 9 dated blocks behind new anchors (probe-own-connection, absent-check, seam-no-instrument, transient-control, placeholder-probe, rotation-revoked-nothing, viewer-local-timezone, skipped-layer, teardown-end-state) plus the ladder mechanism (2026-08-15 anchor) and the pinned-pair example (2026-08-29 anchor) |
+
+Ambient 179,347 → 168,359 B. Every block moved verbatim; each leaves its directive and a
+`Full: incidents#<anchor>` pointer. Oracle: 1,699/1,699 literals present with
+`--also rules/incidents`, 0 lost, no allow-drop needed. What remains in both files is
+directive text (REQUIRED lines, GUARDs, imperatives); reaching the table's 3,500/5,000 B
+targets needs step 8 (kernel compaction), which rewrites directives and is a judgment step.
+
 ## Next eight, by expected bytes freed per unit of judgment
 
 1. **platform-constraints.md** 16,526 → ~3,500 — 78% dated narrative (12,934 B), 14 incidents anchors already exist, five hooks cover its guard, encoding and secret lines.
