@@ -472,11 +472,15 @@ def _routed_topic_where(predicate):
 
 
 def test_over_budget_topic_is_reported_not_silently_stubbed():
-    """A topic over budget must yield an explicit NOT DELIVERED pointer."""
+    """A topic over budget must yield an explicit NOT DELIVERED pointer.
+
+    Since 2026-09-04 the over-budget path SLICES (summary + matching sections)
+    instead of dropping the topic; the pointer line still says what was not
+    delivered and names the file, and the payload still fits the budget."""
     atl = _loader_module()
     if not DEPLOYED_TOPICS.exists():
         pytest.skip("deployed topic corpus absent (CI runner)")
-    prefix, topic = _routed_topic_where(lambda n: n > atl.INJECTION_BUDGET_CHARS)
+    prefix, topic = _routed_topic_where(lambda n: n > atl.TOPIC_BUDGET_CHARS)
     if not topic:
         pytest.skip("no routed topic currently exceeds the budget")
     code, out, _ = run_hook(
@@ -496,12 +500,15 @@ def test_over_budget_topic_is_reported_not_silently_stubbed():
 
 
 def test_in_budget_topic_still_delivers_verbatim():
-    """The guard must not touch a topic that fits — no trimming, no marker."""
+    """The guard must not touch a topic that fits — no trimming, no marker.
+
+    "Fits" is TOPIC_BUDGET_CHARS (the whole-file threshold, 2026-09-04); a
+    topic under it is delivered verbatim, never sliced."""
     atl = _loader_module()
     if not DEPLOYED_TOPICS.exists():
         pytest.skip("deployed topic corpus absent (CI runner)")
     prefix, topic = _routed_topic_where(
-        lambda n: 1_000 < n <= atl.INJECTION_BUDGET_CHARS
+        lambda n: 1_000 < n <= atl.TOPIC_BUDGET_CHARS
     )
     if not topic:
         pytest.skip("no routed topic sits comfortably inside the budget")
@@ -514,3 +521,266 @@ def test_in_budget_topic_still_delivers_verbatim():
     body = (DEPLOYED_TOPICS / topic).read_text(encoding="utf-8").strip()
     assert "NOT DELIVERED" not in ctx, f"{topic} fits the budget; must not be dropped"
     assert body in ctx, f"{topic} must be delivered whole, never trimmed"
+
+
+# --- retrieval slicing (added 2026-09-04) -------------------------------------
+#
+# Whole-file injection could only ever deliver a topic that fit the budget; an
+# over-budget topic yielded a NOT DELIVERED pointer and nothing else (2 of 13
+# routes, msgraph.md and linear.md, delivered zero domain content). The loader
+# now splits a topic on markdown headings and, when the file exceeds
+# TOPIC_BUDGET_CHARS, injects the summary plus the sections whose tokens overlap
+# the tool name and tool input, under the cap, ending with a pointer to the file.
+# Sections are remembered per session, so a second tool on the same server adds
+# only what it newly matches and an identical call is silent.
+#
+# These tests build their own corpus in a temp HOME (the hook resolves
+# TOPICS_DIR from Path.home()), so they run on any checkout, CI included.
+
+def _filler(phrase: str, chars: int) -> str:
+    """Deterministic body text built from `phrase`, at least `chars` long."""
+    line = f"{phrase} detail line."
+    return "\n".join(line for _ in range(chars // len(line) + 1))
+
+
+def _over_budget_topic(atl) -> str:
+    """Four sections; three bodies of ~budget/2.5 chars each, so the whole file
+    exceeds TOPIC_BUDGET_CHARS but summary + any one body fits under it."""
+    body = atl.TOPIC_BUDGET_CHARS // 2 - 400
+    parts = [
+        "# Widget Service - Worker Topic Guide",
+        "",
+        "## Critical Gotchas",
+        "- The service rejects unpaged reads over 500 rows.",
+        "- Timestamps are UTC without a suffix.",
+        "",
+        "## Mailbox folder search",
+        "Folder-scoped mail search returns zero rows when handed an opaque",
+        "folder id; resolve the folder by name first.",
+        _filler("mail folder lookup", body),
+        "",
+        "## Invoice billing export",
+        "Billing invoices export as CSV with a trailing total row that must be",
+        "dropped before summing.",
+        _filler("invoice billing csv", body),
+        "",
+        "## Device enrollment",
+        "Enrollment profiles apply on the NEXT check-in, not immediately.",
+        _filler("device enrollment profile", body),
+        "",
+    ]
+    return "\n".join(parts)
+
+
+def _corpus(tmp_path, atl, text: str, sid: str = "slice1"):
+    """Write `text` as the topic file of the first routed server in a temp HOME.
+
+    Returns (tool_prefix, topic_file, env) where env points the hook at the
+    temp HOME (HOME for POSIX, USERPROFILE for Windows expanduser) and pins a
+    fresh session id so the marker starts empty."""
+    prefix, topic = next(iter(atl.STATIC_MAP.items()))
+    home = tmp_path / "home"
+    topics = home / ".claude" / "agent-memory" / "topics"
+    topics.mkdir(parents=True)
+    (topics / topic).write_text(text, encoding="utf-8")
+    env = {"HOME": str(home), "USERPROFILE": str(home), "CLAUDE_SESSION_ID": sid}
+    return prefix, topic, env
+
+
+def _ctx(stdout: str) -> str:
+    out = json.loads(stdout)
+    assert set(out) == {"hookSpecificOutput"}, f"unexpected top-level keys: {list(out)}"
+    hso = out["hookSpecificOutput"]
+    assert set(hso) == {"hookEventName", "additionalContext"}, f"unexpected keys: {list(hso)}"
+    assert hso["hookEventName"] == "PreToolUse"
+    assert isinstance(hso["additionalContext"], str)
+    return hso["additionalContext"]
+
+
+def test_topic_budget_leaves_headroom_for_label_and_pointer():
+    """TOPIC_BUDGET_CHARS bounds section content; the label line and the
+    pointer line ride on top and the whole payload must still clear the
+    platform-derived INJECTION_BUDGET_CHARS."""
+    atl = _loader_module()
+    assert atl.TOPIC_BUDGET_CHARS + 500 <= atl.INJECTION_BUDGET_CHARS, (
+        "raise INJECTION_BUDGET_CHARS headroom before raising TOPIC_BUDGET_CHARS"
+    )
+
+
+def test_split_sections_on_headings_ignores_fenced_hashes():
+    atl = _loader_module()
+    lines = [
+        "intro before any heading",
+        "# Title",
+        "## Alpha",
+        "alpha body",
+        "```sh",
+        "# not a heading, a shell comment",
+        "```",
+        "### Beta",
+        "beta body",
+    ]
+    secs = atl.split_sections("\n".join(lines))
+    headings = [s.heading for s in secs]
+    assert headings == ["", "Title", "Alpha", "Beta"], headings
+    assert [s.level for s in secs] == [0, 1, 2, 3]
+    alpha = next(s for s in secs if s.heading == "Alpha")
+    assert "# not a heading" in alpha.text, "fenced '#' line must stay in its section"
+    assert secs[0].text.strip() == "intro before any heading"
+
+
+def test_select_sections_never_exceeds_budget():
+    atl = _loader_module()
+    # Every section carries its own key and the query names all of them, so
+    # all 30 match with equal score and only the cap decides how many go.
+    text = "# T\n\n" + "\n\n".join(
+        f"## Section {i}\nkey{i} " + _filler("shared filler", 900)
+        for i in range(30)
+    )
+    secs = atl.split_sections(text)
+    query = {"q": " ".join(f"key{i}" for i in range(30))}
+    chosen = atl.select_sections(secs, "mcp__x__probe", query, 4_000, set())
+    assert 2 <= len(chosen) < 30, f"expected a partial fill, got {len(chosen)} sections"
+    total = sum(len(s.text) for s in chosen) + 2 * (len(chosen) - 1)
+    assert total <= 4_000, f"selected {total} chars over a 4,000 budget"
+    assert [s.idx for s in chosen] == sorted(s.idx for s in chosen), "file order kept"
+
+
+def test_over_budget_topic_is_sliced_to_summary_plus_matching_sections(tmp_path):
+    atl = _loader_module()
+    text = _over_budget_topic(atl)
+    assert len(text) > atl.TOPIC_BUDGET_CHARS, "fixture must exceed the budget"
+    prefix, topic, env = _corpus(tmp_path, atl, text)
+    rc, out, err = run_hook(
+        HOOK,
+        {"tool_name": f"{prefix}search_mail_folders",
+         "tool_input": {"folder": "Inbox", "query": "quarterly report"}},
+        env=env,
+    )
+    assert rc == 0, err
+    ctx = _ctx(out)
+    assert "Critical Gotchas" in ctx and "unpaged reads over 500" in ctx, "summary missing"
+    assert "Mailbox folder search" in ctx and "opaque" in ctx, "matching section missing"
+    assert "Invoice billing" not in ctx and "invoice billing csv" not in ctx, "unrelated section present"
+    assert "Device enrollment" not in ctx, "unrelated section present"
+    assert len(ctx) <= atl.INJECTION_BUDGET_CHARS
+    assert len(ctx) < len(text), "slice must be smaller than the whole file"
+    last = ctx.rstrip().splitlines()[-1]
+    assert topic in last and "NOT DELIVERED" in last, f"pointer line must name the file: {last!r}"
+    assert str(atl.TOPICS_DIR.name) in last or "topics" in last
+
+
+def test_small_topic_is_injected_whole_with_pointer(tmp_path):
+    atl = _loader_module()
+    text = "# Tiny - Worker Topic Guide\n\n## Critical Gotchas\n- one\n- two\n\n## Details\nsome detail\n"
+    prefix, topic, env = _corpus(tmp_path, atl, text, sid="whole1")
+    rc, out, err = run_hook(HOOK, {"tool_name": f"{prefix}anything", "tool_input": {}}, env=env)
+    assert rc == 0, err
+    ctx = _ctx(out)
+    assert text.strip() in ctx, "small topic must be delivered verbatim"
+    assert "NOT DELIVERED" not in ctx
+    last = ctx.rstrip().splitlines()[-1]
+    assert topic in last, f"pointer line must name the file: {last!r}"
+    # Whole delivery covers every tool: a different tool on the same server is silent.
+    rc, out, _ = run_hook(HOOK, {"tool_name": f"{prefix}other_tool", "tool_input": {"x": 1}}, env=env)
+    assert rc == 0 and not out.strip()
+
+
+def test_same_call_twice_injects_once_per_session(tmp_path):
+    atl = _loader_module()
+    prefix, _topic, env = _corpus(tmp_path, atl, _over_budget_topic(atl), sid="once1")
+    call = {"tool_name": f"{prefix}search_mail_folders", "tool_input": {"folder": "Inbox"}}
+    rc, out, _ = run_hook(HOOK, call, env=env)
+    assert rc == 0 and out.strip()
+    rc, out, _ = run_hook(HOOK, call, env=env)
+    assert rc == 0 and not out.strip(), "identical call must not re-inject"
+    # A different session starts clean.
+    env2 = dict(env, CLAUDE_SESSION_ID="once2")
+    rc, out, _ = run_hook(HOOK, call, env=env2)
+    assert rc == 0 and out.strip()
+
+
+def test_new_tool_on_same_server_adds_only_new_sections(tmp_path):
+    atl = _loader_module()
+    prefix, topic, env = _corpus(tmp_path, atl, _over_budget_topic(atl), sid="tool1")
+    run_hook(HOOK, {"tool_name": f"{prefix}search_mail_folders", "tool_input": {}}, env=env)
+    rc, out, err = run_hook(
+        HOOK, {"tool_name": f"{prefix}export_invoices", "tool_input": {"format": "csv"}}, env=env,
+    )
+    assert rc == 0, err
+    ctx = _ctx(out)
+    assert "Invoice billing export" in ctx, "newly matching section missing"
+    assert "Critical Gotchas" not in ctx, "summary must not be re-injected"
+    assert "Mailbox folder search" not in ctx, "already-delivered section re-injected"
+    assert "Device enrollment" not in ctx
+    assert topic in ctx.rstrip().splitlines()[-1]
+    rc, out, _ = run_hook(
+        HOOK, {"tool_name": f"{prefix}export_invoices", "tool_input": {"format": "csv"}}, env=env,
+    )
+    assert rc == 0 and not out.strip(), "nothing new left for this tool"
+
+
+def test_no_matching_section_yields_summary_and_pointer_only(tmp_path):
+    atl = _loader_module()
+    prefix, topic, env = _corpus(tmp_path, atl, _over_budget_topic(atl), sid="nomatch")
+    rc, out, err = run_hook(HOOK, {"tool_name": f"{prefix}zzz_qqq", "tool_input": {}}, env=env)
+    assert rc == 0, err
+    ctx = _ctx(out)
+    assert "Critical Gotchas" in ctx
+    for absent in ("Mailbox folder search", "Invoice billing export", "Device enrollment"):
+        assert absent not in ctx, f"{absent} injected without a match"
+    assert topic in ctx.rstrip().splitlines()[-1]
+
+
+def test_legacy_list_marker_is_read_as_whole_topic_delivered(tmp_path):
+    """Markers written before 2026-09-04 were a list of 'topic:<file>' strings."""
+    atl = _loader_module()
+    marker = tmp_path / "topics-loaded-legacy.json"
+    marker.write_text(json.dumps(["topic:linear.md"]), encoding="utf-8")
+    loaded = atl.get_loaded_topics(marker)
+    assert "*" in loaded.get("linear.md", []), loaded
+
+
+def test_selection_is_fast_on_a_large_topic():
+    """Bound the in-process cost so a 200 KB topic cannot push the hook past
+    its 20 ms target: split + select on that size must stay well under it."""
+    import time
+    atl = _loader_module()
+    text = "# Big\n\n" + "\n\n".join(
+        f"## Section {i} about topic {i % 17}\n" + _filler(f"token{i % 23} filler text", 1_500)
+        for i in range(130)
+    )
+    assert len(text) > 190_000
+    t0 = time.perf_counter()
+    secs = atl.split_sections(text)
+    atl.select_sections(secs, "mcp__x__topic_5", {"q": "token3 filler"}, atl.TOPIC_BUDGET_CHARS, set())
+    elapsed_ms = (time.perf_counter() - t0) * 1000
+    assert elapsed_ms < 100, f"split+select took {elapsed_ms:.1f} ms on 200 KB"
+
+
+@needs_deployed_corpus
+def test_report_injected_chars_whole_vs_retrieval():
+    """Reporting test (prints under -s): per routed topic, the chars the loader
+    would emit for one representative call, whole-file vs retrieval. This is
+    the table in hooks/README.md; rerun it after editing a routed topic."""
+    atl = _loader_module()
+    calls = {
+        "msgraph.md": ("graph_request", {"path": "/users/me/mailFolders", "version": "v1.0"}),
+        "linear.md": ("list_issues", {"teamId": "SEC", "query": "webhook"}),
+        "firecrawl.md": ("firecrawl_search", {"query": "site:nsa.gov pdf", "limit": 5}),
+    }
+    total_before = total_after = 0
+    print(f"\n{'topic':28} {'file':>8} {'whole':>8} {'retrieval':>9}")
+    for prefix, topic in atl.STATIC_MAP.items():
+        content = atl._load_file_content(atl.TOPICS_DIR, topic)
+        if content is None:
+            continue
+        tool, tool_input = calls.get(topic, ("probe", {}))
+        payload, _ = atl.build_payload(topic, content, prefix + tool, tool_input, set())
+        before = len(f"Domain context for {topic}:\n{content}")
+        after = len(payload or "")
+        total_before += before
+        total_after += after
+        print(f"{topic:28} {len(content):>8,} {before:>8,} {after:>9,}")
+    print(f"{'TOTAL':28} {'':>8} {total_before:>8,} {total_after:>9,}")
+    assert total_after <= total_before

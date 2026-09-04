@@ -1,13 +1,13 @@
 id: auto-topic-loader
 type: hook
 event: PreToolUse
-matcher: "mcp__remote-.*|mcp__linear-server__.*|mcp__ramp__.*|mcp__slack-user__.*"
+matcher: "mcp__.*|WebSearch|WebFetch"
 if_condition: null
 action_type: injector
-description: "Auto-loads topic context on first call to each MCP server in a session. Maps server prefixes to topic files."
+description: "Injects the routed topic on the first call to each MCP server in a session. Topics over 8,000 chars are split on headings and only the summary plus the sections matching the tool name and input are injected, ending with a pointer to the file; sections are not repeated within a session. Maps server prefixes to topic files."
 enforces: []
 blocks_patterns: []
-injects: "additionalContext with topic file content"
+injects: "additionalContext with the topic file: whole when it fits 8,000 chars, otherwise summary + matching sections + a one-line pointer to the file"
 modifies: null
 depends_on_files: []
 depends_on_env:
