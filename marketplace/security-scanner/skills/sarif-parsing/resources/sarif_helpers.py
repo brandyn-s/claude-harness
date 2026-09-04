@@ -440,7 +440,8 @@ def summary(findings: list[Finding]) -> dict:
 # Example usage
 if __name__ == "__main__":
     if any(a in ("-h", "--help") for a in sys.argv[1:]):
-        print(__doc__ or "<usage TBD>"); sys.exit(0)
+        print(__doc__ or "<usage TBD>")
+        sys.exit(0)
     if len(sys.argv) < 2:
         print("Usage: python sarif_helpers.py <sarif_file>")
         sys.exit(1)

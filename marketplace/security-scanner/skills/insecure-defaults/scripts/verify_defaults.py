@@ -44,7 +44,13 @@ Exit codes:
     1   one or more checks failed
     2   runner error (bad args, malformed spec)
 """
-import argparse, json, os, re, shlex, subprocess, sys
+import argparse
+import json
+import os
+import re
+import shlex
+import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 

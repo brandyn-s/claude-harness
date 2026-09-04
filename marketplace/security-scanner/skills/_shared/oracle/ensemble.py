@@ -31,7 +31,6 @@ from __future__ import annotations
 import dataclasses
 import re
 from collections import defaultdict
-from pathlib import Path
 
 from .finding import Finding
 

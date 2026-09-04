@@ -57,7 +57,7 @@ REPO = Path(__file__).resolve().parent.parent
 # below points at the parent so `from oracle import ...` resolves.
 sys.path.insert(0, str(REPO / "skills" / "_shared"))
 
-from oracle.finding import Finding, FindingsParseError, load_findings
+from oracle.finding import Finding, FindingsParseError, load_findings  # noqa: E402 -- resolves via the sys.path insert above
 
 
 def _load_findings_or_exit(src: Path) -> list[Finding]:
@@ -74,20 +74,20 @@ def _load_findings_or_exit(src: Path) -> list[Finding]:
         # raw traceback (exit 1) instead of this clean error (exit 2).
         print(f"error: {e}", file=sys.stderr)
         sys.exit(2)
-from oracle import trace as trace_mod
-from oracle.act_on import act_on, format_act_on_summary
-from oracle.corpus import (
+from oracle import trace as trace_mod  # noqa: E402 -- resolves via the sys.path insert above
+from oracle.act_on import act_on, format_act_on_summary  # noqa: E402 -- resolves via the sys.path insert above
+from oracle.corpus import (  # noqa: E402 -- resolves via the sys.path insert above
     check_corpus_against_findings,
     check_corpus_static,
     load_corpus,
 )
-from oracle.discover import discover_worklist
-from oracle.ensemble import aggregate
-from oracle.fix_loop import verify_fix_against_refs
-from oracle.report import build_report, render_json, render_markdown
-from oracle.reverify import format_results, reverify
-from oracle.tracker import convert_tracker_to_yaml
-from oracle.validate import format_rejections, validate_for_dispatch
+from oracle.discover import discover_worklist  # noqa: E402 -- resolves via the sys.path insert above
+from oracle.ensemble import aggregate  # noqa: E402 -- resolves via the sys.path insert above
+from oracle.fix_loop import verify_fix_against_refs  # noqa: E402 -- resolves via the sys.path insert above
+from oracle.report import build_report, render_json, render_markdown  # noqa: E402 -- resolves via the sys.path insert above
+from oracle.reverify import format_results, reverify  # noqa: E402 -- resolves via the sys.path insert above
+from oracle.tracker import convert_tracker_to_yaml  # noqa: E402 -- resolves via the sys.path insert above
+from oracle.validate import format_rejections, validate_for_dispatch  # noqa: E402 -- resolves via the sys.path insert above
 
 
 def cmd_reverify(args):

@@ -23,7 +23,7 @@ def gh(args):
 
 
 def main(repo, pr):
-    files = [l.strip() for l in gh(["pr", "diff", str(pr), "--repo", repo, "--name-only"]).splitlines() if l.strip()]
+    files = [line.strip() for line in gh(["pr", "diff", str(pr), "--repo", repo, "--name-only"]).splitlines() if line.strip()]
     print(f"  diff files ({len(files)}): {' '.join(files)}")
 
     names = json.loads(gh(["api", f"repos/{repo}/contents/.github/workflows?ref=main", "--jq", "[.[].name]"]))

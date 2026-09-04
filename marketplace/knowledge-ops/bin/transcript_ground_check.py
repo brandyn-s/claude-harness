@@ -73,11 +73,15 @@ def validate(findings: list, record_count: int, start_index: int = 0):
             flagged.append(f2)
             reasons["ungrounded"] += 1
         elif n < lo:
-            f2 = dict(f); f2["_flag"] = f"nonpositive rec n={n} < {lo}"
-            flagged.append(f2); reasons["nonpositive"] += 1
+            f2 = dict(f)
+            f2["_flag"] = f"nonpositive rec n={n} < {lo}"
+            flagged.append(f2)
+            reasons["nonpositive"] += 1
         elif n > hi:
-            f2 = dict(f); f2["_flag"] = f"out_of_range rec n={n} > {hi}"
-            flagged.append(f2); reasons["out_of_range"] += 1
+            f2 = dict(f)
+            f2["_flag"] = f"out_of_range rec n={n} > {hi}"
+            flagged.append(f2)
+            reasons["out_of_range"] += 1
         else:
             valid.append(f)
     return valid, flagged, reasons

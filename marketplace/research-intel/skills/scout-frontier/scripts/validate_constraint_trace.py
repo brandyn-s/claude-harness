@@ -131,8 +131,8 @@ def validate(trace: dict) -> list[str]:
     if not isinstance(abstracted, list) or len(abstracted) == 0:
         if isinstance(friction, list) and len(friction) >= 3:
             failures.append(
-                f"3+ friction entries with 0 abstracted constraints — "
-                f"trace is incomplete; reduce friction to structural essence"
+                "3+ friction entries with 0 abstracted constraints — "
+                "trace is incomplete; reduce friction to structural essence"
             )
         else:
             failures.append("abstracted_constraints must have ≥1 non-empty entry")

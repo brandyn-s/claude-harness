@@ -280,9 +280,8 @@ def audit_architecture_md(state):
         if srv not in arch:
             findings.append(('ARCHITECTURE.md', f'MCP server `{srv}` not documented'))
 
-    # 6. Hook count accuracy
-    # The doc has hook tables per event type — just verify total is reasonable
-    doc_hook_mentions = len(re.findall(r'\| `[a-z-]+\.py`', arch))
+    # 6. Hook count accuracy: not checked. The doc has hook tables per event
+    # type and no total is compared here.
 
     return findings
 
@@ -395,7 +394,7 @@ def audit_memory_md(project_dir):
     # Cross-directory links (~/... or absolute paths) are intentional pointers
     # to KB topics or other resources outside the memory dir; verify those
     # against the actual filesystem instead of the memory dir listing.
-    local_links = {l for l in linked if not l.startswith('~') and not l.startswith('/') and ':' not in l}
+    local_links = {link for link in linked if not link.startswith('~') and not link.startswith('/') and ':' not in link}
     cross_links = linked - local_links
 
     for link in sorted(local_links - actual):

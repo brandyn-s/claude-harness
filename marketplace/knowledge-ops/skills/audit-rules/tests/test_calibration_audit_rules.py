@@ -116,7 +116,7 @@ def test_audit_rules_calibration_above_floors(tmp_path, monkeypatch):
     tnr = tn / (tn + fp) if (tn + fp) else 0.0
     error_tpr = error_tp / len(expected_error)
 
-    print(f"\n=== audit-rules Layer A calibration ===")
+    print("\n=== audit-rules Layer A calibration ===")
     print(f"TPR={tpr:.3f}     (need ≥ {MIN_TPR})")
     print(f"TNR={tnr:.3f}     (need ≥ {MIN_TNR})")
     print(f"ERROR-TPR={error_tpr:.3f} (need ≥ {MIN_ERROR_TPR})")

@@ -258,7 +258,7 @@ def _has_over_cap_topic() -> bool:
     here the real CI condition was "dir present, corpus small", a third state
     neither environment covered.
     """
-    cap = SURFACES_CAP = sweep.SURFACES["agent-memory"]["cap"]
+    cap = sweep.SURFACES["agent-memory"]["cap"]
     topics = Path.home() / ".claude" / "agent-memory" / "topics"
     if not topics.is_dir():
         return False

@@ -52,7 +52,12 @@ Exit codes (without --strict):
     0   checks run (passed or failed)
     2   runner error
 """
-import argparse, json, os, re, subprocess, sys
+import argparse
+import json
+import os
+import re
+import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -271,21 +276,20 @@ def probe_calls_edges(claims_path, project, root, ndjson):
         if kind != "usage":
             endpoints.append(c.get("from_pattern"))
         details = []
-        any_absent = any_present = any_inconclusive = False
+        any_absent = any_present = False
         for pat in [p for p in endpoints if p]:
             tok = _searchable_token(pat)
             if tok is None:
-                any_inconclusive = True
                 details.append({"pattern": pat, "token": None, "matches": None})
                 continue
             cnt, sample = _search_count(tok, root)
             details.append({"pattern": pat, "token": tok, "matches": cnt, "sample": sample})
-            if cnt is None:
-                any_inconclusive = True
-            elif cnt == 0:
+            if cnt == 0:
                 any_absent = True
-            else:
+            elif cnt is not None:
                 any_present = True
+            # cnt is None: inconclusive search; it neither grounds nor refutes,
+            # so the claim falls through to the MANUAL verdict below.
         if any_absent:
             verdict = "UNSUBSTANTIATED"
             unsubstantiated += 1

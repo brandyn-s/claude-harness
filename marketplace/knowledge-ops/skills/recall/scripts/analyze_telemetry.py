@@ -120,7 +120,7 @@ def main() -> int:
                 only_top12 += 1
 
     print(f"  records with deep reads: {n_slot_records}")
-    print(f"  slot frequency:")
+    print("  slot frequency:")
     max_slot = max(slot_freq) if slot_freq else 0
     for s in range(1, max_slot + 1):
         count = slot_freq.get(s, 0)
@@ -144,7 +144,7 @@ def main() -> int:
     if n_slot_records < 50:
         print()
         print(f"  WARNING: sample size n={n_slot_records} is below 50. Treat verdict as preliminary;")
-        print(f"  expand to >=100 deep-read records before locking the D2 decision.")
+        print("  expand to >=100 deep-read records before locking the D2 decision.")
 
     return 0
 
