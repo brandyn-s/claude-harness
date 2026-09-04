@@ -12,6 +12,13 @@ from pathlib import Path
 from conftest import make_bash_input, run_hook, windows_only
 
 HOOK = "bash-security-guard.py"
+
+
+def _ctx(stdout):
+    """Model-facing advisory text (hookSpecificOutput.additionalContext) or ''."""
+    if not stdout.strip():
+        return ""
+    return json.loads(stdout).get("hookSpecificOutput", {}).get("additionalContext", "")
 HOME = str(Path.home())
 CLAUDE_DIR = str(Path.home() / ".claude")
 MCP_SERVERS = str(Path.home() / "Documents" / "GitHub" / "mcp-servers")
@@ -1392,12 +1399,12 @@ def test_org_allow_commit_message_bare_mention():
 def test_org_warn_interpreter_subprocess_list_indirection():
     """The undecidable residual: a write built as a python subprocess LIST with a variable
     org. check_forbidden_org cannot hard-block it (tokens decomposed + indirected) — Phase 3
-    WARNS (rc 0 + stderr) instead of silently allowing."""
+    WARNS (rc 0 + additionalContext to the model) instead of silently allowing."""
     cmd = ('python3 - <<\'PY\'\nREPO="example-technologies/tunnl"\n'
            'subprocess.run(["gh","api","-X","PUT",f"repos/{REPO}/contents/x"])\nPY')
-    rc, _, stderr = run_hook(HOOK, make_bash_input(cmd))
+    rc, out, _ = run_hook(HOOK, make_bash_input(cmd))
     assert rc == 0
-    assert "org-guard] WARNING" in stderr
+    assert "org-guard] WARNING" in _ctx(out)
 
 
 # --- credential-guard SSH false-positive tune (2026-07-21) ---
@@ -1570,20 +1577,20 @@ _ADVISORY = "[branch-base-freshness] ADVISORY"
 def test_branch_base_advisory_fires_on_checkout_B_from_remote():
     rc, _out, err = run_hook(HOOK, make_bash_input("git checkout -B feat/x origin/main"))
     assert rc == 0, "advisory must never block"
-    assert _ADVISORY in err
+    assert _ADVISORY in _ctx(_out)
 
 
 def test_branch_base_advisory_fires_on_worktree_add_from_remote():
     rc, _out, err = run_hook(
         HOOK, make_bash_input("git worktree add ~/w/x -b feat/y origin/main"))
     assert rc == 0
-    assert _ADVISORY in err
+    assert _ADVISORY in _ctx(_out)
 
 
 def test_branch_base_advisory_fires_on_switch_c_from_remote():
     rc, _out, err = run_hook(HOOK, make_bash_input("git switch -c feat/z origin/develop"))
     assert rc == 0
-    assert _ADVISORY in err
+    assert _ADVISORY in _ctx(_out)
 
 
 def test_branch_base_advisory_exempts_in_command_fetch():
@@ -1591,7 +1598,7 @@ def test_branch_base_advisory_exempts_in_command_fetch():
     rc, _out, err = run_hook(
         HOOK, make_bash_input("git fetch origin main && git checkout -B feat/x origin/main"))
     assert rc == 0
-    assert _ADVISORY not in err
+    assert _ADVISORY not in _ctx(_out)
 
 
 def test_branch_base_advisory_exempts_remote_update():
@@ -1599,7 +1606,7 @@ def test_branch_base_advisory_exempts_remote_update():
         HOOK,
         make_bash_input("git remote update && git worktree add ~/w/x -b feat/y origin/main"))
     assert rc == 0
-    assert _ADVISORY not in err
+    assert _ADVISORY not in _ctx(_out)
 
 
 def test_branch_base_advisory_ignores_non_remote_base():
@@ -1607,7 +1614,7 @@ def test_branch_base_advisory_ignores_non_remote_base():
     for cmd in ("git checkout -B feat/x HEAD", "git checkout -b feat/x", "git status --short"):
         rc, _out, err = run_hook(HOOK, make_bash_input(cmd))
         assert rc == 0, cmd
-        assert _ADVISORY not in err, cmd
+        assert _ADVISORY not in _ctx(_out), cmd
 
 
 def test_branch_base_advisory_does_not_disturb_existing_blocks():
@@ -1890,3 +1897,44 @@ def test_forbidden_org_guard_is_configured_not_hardcoded():
     rc, _o, err = run_hook(HOOK, make_bash_input("gh repo delete acme-corp/docs --yes"),
                            env={"CLAUDE_BASH_POLICY_PACKS": "delivery", "CLAUDE_FORBIDDEN_GITHUB_ORGS": "acme-corp"})
     assert rc == 2 and "acme-corp" in err, err
+
+
+# ── catastrophic-layer bypass closure, 2026-09-03 comparison review ──
+# Two independent code reviews (cc-safety-net and codex-claude-code-config
+# comparisons) found the same untested forms slipping past the always-on layer.
+
+import pytest as _pytest
+
+
+@_pytest.mark.parametrize("command", [
+    "git -C /repo push --force origin main",          # git global option before the subcommand
+    "git -c core.x=1 push --force origin main",       # ditto, -c form
+    "git --no-pager push --force origin master",
+    "git push -uf origin main",                       # clustered short flags
+    "rm -rf \\\n~/",                                  # backslash-newline continuation
+    "git push \\\n--force origin main",
+    "echo 'rm -rf /' | bash",                         # literal that becomes a command when piped to a shell
+    "printf 'rm -rf ~/' | sh",
+    "T=/; rm -rf $T",                                 # same-command variable target
+    "T=~; rm -rf ${T}/",
+])
+def test_catastrophic_layer_closes_reviewed_bypasses(command):
+    rc, _stdout, stderr = run_hook(HOOK, make_bash_input(command))
+    assert rc == 2, (command, stderr)
+
+
+@_pytest.mark.parametrize("command", [
+    "git push --force-with-lease origin feature",
+    "git push -u origin feature",
+    "git -C /repo status",
+    "git -C /repo push origin feature",
+    "rm -rf node_modules",
+    "rm -rf ./build dist",
+    "echo 'see rm -rf docs' | tee notes.txt",
+    "printf 'rm -rf /' > notes.txt",
+    "T=./build; rm -rf $T",
+    "ls -la \\\n  ~/Documents",
+])
+def test_everyday_commands_stay_allowed_after_bypass_closure(command):
+    rc, _stdout, stderr = run_hook(HOOK, make_bash_input(command))
+    assert rc == 0, (command, stderr)

@@ -168,6 +168,42 @@ def _normalize_git_command(s):
     return _GIT_GLOBAL_OPTS_RE.sub(r"\1", s)
 
 
+# Same-command scalar assignment whose value is a plain path-like token:
+# `T=/; rm -rf $T`, `D="~"; rm -rf ${D}/`. Only such values are substituted, so
+# `URL=https://... ; curl $URL` and computed values are left alone.
+_SIMPLE_ASSIGN_RE = re.compile(
+    r"""(?:^|[;&|(]\s*)([A-Za-z_][A-Za-z0-9_]*)=(['"]?)([~/$A-Za-z0-9_./*-]*)\2(?=\s|;|&|\||$)"""
+)
+_PIPE_TO_SHELL_SINK_RE = re.compile(r"\|\s*(?:sudo\s+)?(?:ba|z|da|k)?sh\b")
+_QUOTED_LITERAL_RE = re.compile(r"""'([^']*)'|"((?:[^"\\]|\\.)*)\"""")
+_CONTINUATION_RE = re.compile(r"\\\r?\n\s*")
+
+
+def _normalize_for_matching(command):
+    """Canonical text for the always-on catastrophic checks.
+
+    Closes the forms two independent 2026-09-03 reviews found slipping past
+    regexes written for the plain spelling:
+      * backslash-newline continuations (`rm -rf \\<newline> ~/`) are joined;
+      * `git` global options are dropped (`git -C repo push --force origin main`);
+      * a same-command variable holding a path is substituted (`T=/; rm -rf $T`);
+      * when output is piped into a shell, quoted literals are appended unquoted
+        so `echo 'rm -rf /' | bash` is judged by what the shell will run.
+    Auto-fix rewrites and the audit log still use the original command.
+    """
+    text = _CONTINUATION_RE.sub(" ", command)
+    text = _normalize_git_command(text)
+    for m in _SIMPLE_ASSIGN_RE.finditer(text):
+        name, value = m.group(1), m.group(3)
+        if value:
+            text = re.sub(r"\$\{?" + re.escape(name) + r"\}?", lambda _m, v=value: v, text)
+    if _PIPE_TO_SHELL_SINK_RE.search(text):
+        literals = [a or b for a, b in _QUOTED_LITERAL_RE.findall(text)]
+        if literals:
+            text = text + " ; " + " ; ".join(literals)
+    return text
+
+
 def _resolve_git_cwd(command, cwd):
     """Effective repo directory for a git command.
 
@@ -582,7 +618,7 @@ DANGEROUS_PATTERNS = [
         # Force-indicator (--force / --force-with-lease / -f) and main|master in
         # the same `git push`, order-independent (lookaheads), plus the `+refspec`
         # force form (`git push origin +main`, `+HEAD:main`).
-        r"git\s+push\b(?=.*(?:--force\b|--force-with-lease\b|\s-f\b))(?=.*\b(?:main|master)\b)"
+        r"git\s+push\b(?=.*(?:--force\b|--force-with-lease\b|\s-[a-zA-Z]*f[a-zA-Z]*\b))(?=.*\b(?:main|master)\b)"
         r"|git\s+push\b.*\s\+(?:[^\s:]*:)?(?:main|master)\b",
         "Force-push to main/master. This rewrites history and can cause data loss.",
     ),
@@ -2364,20 +2400,24 @@ def main():
         sys.exit(0)
 
     enabled_packs = resolve_policy_packs(os.environ.get("CLAUDE_BASH_POLICY_PACKS"))
+    analysis = _normalize_for_matching(command)
 
     # Phase 1: Catastrophic checks — always active, hard BLOCK (exit 2).
     # These cover secret exposure, code-execution attacks, security-control
     # disablement, and broad/irreversible destruction. First match wins.
+    # They run on the normalized text (continuations joined, git global options
+    # dropped, same-command path variables resolved, shell-piped literals
+    # exposed); the ORIGINAL command is still what gets rewritten or logged.
     for check in [
-        lambda: check_credentials(command),
-        lambda: check_reverse_shell(command),
-        lambda: check_shell_wrapper(command),
-        lambda: check_ansi_c_quote_obfuscation(command),
-        lambda: check_exfiltration(command),
-        lambda: check_process_listing_secret_leak(command),
-        lambda: check_dangerous(command),
-        lambda: check_env_var_diagnostic(command),
-        lambda: check_secret_store_exposure(command),
+        lambda: check_credentials(analysis),
+        lambda: check_reverse_shell(analysis),
+        lambda: check_shell_wrapper(analysis),
+        lambda: check_ansi_c_quote_obfuscation(analysis),
+        lambda: check_exfiltration(analysis),
+        lambda: check_process_listing_secret_leak(analysis),
+        lambda: check_dangerous(analysis),
+        lambda: check_env_var_diagnostic(analysis),
+        lambda: check_secret_store_exposure(analysis),
     ]:
         reason = check()
         if reason:
@@ -2465,11 +2505,17 @@ def main():
         "warn_forbidden_org_indirection": lambda: warn_forbidden_org_indirection(command),
         "warn_stale_branch_base": lambda: warn_stale_branch_base(command),
     }
+    warnings = []
     for name in entries(enabled_packs, "advisory"):
         warning = advisories[name]()
         if warning:
             _audit_log(command, "warned", warning)
-            print(warning, file=sys.stderr)
+            warnings.append(warning)
+    if warnings:
+        # additionalContext is the only exit-0 channel the model reads; stderr on
+        # exit 0 reached nobody (live-probed 2026-09-03), so advisories were silent.
+        print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse",
+                                                 "additionalContext": "\n".join(warnings)}}))
     for name in entries(enabled_packs, "observer"):
         if name != "check_pr_security":
             raise ValueError(f"unknown optional policy observer: {name}")
