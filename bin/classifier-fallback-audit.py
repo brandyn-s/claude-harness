@@ -67,8 +67,8 @@ for f in files:
                     continue
                 try:
                     r = json.loads(line)
-                except Exception:
-                    continue
+                except Exception:  # noqa: S112, BLE001 -- best-effort probe: skip unparseable JSONL lines
+                    continue  # skip unparseable line
                 t = r.get("type")
                 msg = r.get("message") or {}
                 if t == "user":
@@ -89,8 +89,8 @@ for f in files:
                         transitions.append(
                             (sid, last_user[:160].replace("\n", " "), bool(SEC.search(last_user))))
                     prev = m
-    except Exception:
-        continue
+    except Exception:  # noqa: S112, BLE001 -- best-effort probe: skip unreadable transcripts
+        continue  # skip unreadable transcript
     nonsynth = {x for x in seen if not x.startswith("<")}
     if nonsynth == {"claude-opus-4-8"}:
         whole_opus += 1

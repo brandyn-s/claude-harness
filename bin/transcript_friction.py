@@ -158,8 +158,8 @@ def extract(path, n_examples=2):
                 continue
             try:
                 r = json.loads(raw)
-            except Exception:
-                continue
+            except Exception:  # noqa: S112, BLE001 -- report tooling: skip unparseable JSONL lines
+                continue  # skip unparseable line
             if r.get("isCompactSummary"):
                 counts["compaction"] += 1
                 bump("session:compaction-boundary", "[compaction]")

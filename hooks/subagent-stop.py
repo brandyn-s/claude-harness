@@ -461,7 +461,7 @@ def cleanup_subagent_worktrees(session_id):
                     f"{wt}` to clean up.",
                     file=sys.stderr,
                 )
-        except Exception:
+        except Exception:  # noqa: S112, BLE001 -- fail-open per-claim: one bad worktree never aborts the rest
             # fail-open per-claim: one bad worktree never aborts the rest.
             continue
 
@@ -558,14 +558,14 @@ def main():
                                 with open(topic_path, "rb") as tf:
                                     checksums[topic] = hashlib.sha256(tf.read()).hexdigest()
                                 atomic_write(checksum_path, json.dumps(checksums, indent=2))
-                            except Exception:
-                                pass
+                            except Exception:  # noqa: S110, BLE001 -- fail-open: checksum bookkeeping must never fail the capture
+                                pass  # fail-open: checksum bookkeeping only
                         print(
                             f"[SubagentStop] Captured learning -> {topic}",
                             file=sys.stderr,
                         )
-                    except Exception:
-                        pass
+                    except Exception:  # noqa: S110, BLE001 -- fail-open: learning capture is best-effort and never affects the stop outcome
+                        pass  # fail-open: best-effort capture
 
     # PHASE F (OPT-IN, fail-open): GC/flag per-subagent worktrees provisioned
     # by pre-agent-dispatch.py for this session. Runs before the Layer-D gate
@@ -573,7 +573,7 @@ def main():
     # when SUBAGENT_WORKTREE_ISOLATION is unset — default behavior unchanged.
     try:
         cleanup_subagent_worktrees(session_id)
-    except Exception:
+    except Exception:  # noqa: S110, BLE001 -- fail-open: cleanup never affects the stop outcome
         pass  # fail-open: cleanup never affects stop outcome
 
     # Enforced Layer-D gate: block completion if a dispatched fix for this

@@ -234,8 +234,8 @@ def scan(path: Path, cands: list[Candidate]) -> Facts:
                 continue
             try:
                 rec = json.loads(s)
-            except Exception:
-                continue
+            except Exception:  # noqa: S112, BLE001 -- best-effort report: skip unparseable JSONL lines
+                continue  # skip unparseable line
             msg = rec.get("message") or {}
             content = msg.get("content")
 

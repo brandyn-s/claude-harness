@@ -96,7 +96,7 @@ def check_concurrent_session_risk():
                 f"EnterWorktree to isolate this session. Do NOT create files or "
                 f"edit code until you are in a worktree."
             )
-    except Exception:
+    except Exception:  # noqa: S110, BLE001 -- fail-open: never block session start
         pass  # Never block session start
     return None
 
@@ -173,7 +173,7 @@ def check_global_model_default():
                         f"rewrote it to 1P-format '{healed}'. Provider-specific "
                         f"models belong only in a launcher's own ANTHROPIC_MODEL."
                     )
-            except Exception:
+            except Exception:  # noqa: S110, BLE001 -- fail-open: falls through to the warning below
                 pass  # rewrite failed -> fall through to the warn below
 
         # Couldn't heal (arn:aws, non-claude strip, or the write failed): warn.
@@ -185,7 +185,7 @@ def check_global_model_default():
             f"session via /model, or remove the key — launchers that need a "
             f"provider-specific model already set their own ANTHROPIC_MODEL."
         )
-    except Exception:
+    except Exception:  # noqa: S110, BLE001 -- fail-open: never block session start
         pass  # Never block session start
     return None
 
@@ -241,8 +241,8 @@ def validate_hook_paths():
                             f"registered in settings.json but file not found. "
                             f"This will cause {event} hook errors on {matcher} tool calls."
                         )
-    except Exception:
-        pass
+    except Exception:  # noqa: S110, BLE001 -- fail-open: never block session start
+        pass  # fail-open: hook-path validation is advisory
     return warnings
 
 
@@ -333,8 +333,8 @@ def main():
             hook_input = json.load(sys.stdin)
             session_id = hook_input.get("session_id")
             session_source = hook_input.get("source") or ""
-    except Exception:
-        pass
+    except Exception:  # noqa: S110, BLE001 -- fail-open: never block session start
+        pass  # fail-open: no stdin payload -> no session id
 
     # Write our session marker BEFORE the parallel work; prune stale markers
     # left over from crashed sessions in the same call.
@@ -464,8 +464,8 @@ def main():
                         )
                 except (ValueError, TypeError):
                     pass
-        except Exception:
-            pass
+        except Exception:  # noqa: S110, BLE001 -- fail-open: never block session start
+            pass  # fail-open: the checkpoint notice is advisory
 
     # Check friction alert from previous session
     friction_alert = Path.home() / ".claude" / "friction-alert.txt"
@@ -474,8 +474,8 @@ def main():
             alert_text = friction_alert.read_text(encoding="utf-8").strip()
             if alert_text:
                 messages.append(f"FRICTION ALERT: {alert_text}")
-        except Exception:
-            pass
+        except Exception:  # noqa: S110, BLE001 -- fail-open: never block session start
+            pass  # fail-open: skip an unreadable alert
 
     # Check for handoff from previous session
     handoff_file = Path.home() / ".claude" / "HANDOFF.md"
@@ -486,8 +486,8 @@ def main():
                 # Show the handoff, then delete so it doesn't persist forever
                 messages.append(f"HANDOFF FROM PREVIOUS SESSION:\n{handoff_text}")
                 handoff_file.unlink()
-        except Exception:
-            pass
+        except Exception:  # noqa: S110, BLE001 -- fail-open: never block session start
+            pass  # fail-open: the handoff is best-effort
 
     # Inject the active platform's rules (macos/windows/linux) as additionalContext.
     # Claude Code has no native OS-conditional rule loading, so cross-platform
@@ -513,8 +513,8 @@ def main():
         ledger_ctx, ledger_summary = run_ledger_rehydrate(session_id, session_source)
         if ledger_summary:
             messages.append(ledger_summary)
-    except Exception:
-        pass
+    except Exception:  # noqa: S110, BLE001 -- fail-open: never block session start
+        pass  # fail-open: ledger rehydration is advisory
 
     # Emit systemMessage (banner) + platform rules and/or ledger as additionalContext.
     # Both are concatenated: overwriting one with the other would silently drop the

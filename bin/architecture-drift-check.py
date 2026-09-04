@@ -252,8 +252,8 @@ def _tracked_topic_count():
             capture_output=True, timeout=10)
         if out.returncode == 0:
             return len([l for l in out.stdout.decode("utf-8").splitlines() if l.strip()])
-    except Exception:
-        pass
+    except Exception:  # noqa: S110, BLE001 -- fail-open: fall back to the glob count when git is unavailable
+        pass  # fall back to the glob count below
     return _count("agent-memory/topics/*.md")
 
 
@@ -742,7 +742,7 @@ def main():
     settings = json.loads(settings_text)
 
     hard, advisory = [], []
-    readme_path = ROOT / "hooks" / "README.md" if "ROOT" in globals() else Path(__file__).resolve().parents[1] / "hooks" / "README.md"
+    readme_path = ROOT / "hooks" / "README.md" if "ROOT" in globals() else Path(__file__).resolve().parents[1] / "hooks" / "README.md"  # noqa: F821 -- ROOT is only evaluated when a caller injects it into module globals (guarded by the globals() check)
     readme_text = readme_path.read_text(encoding="utf-8") if readme_path.exists() else ""
     h, a = check_hooks(arch, settings_text, readme_text); hard += h; advisory += a
     hard += check_settings(arch, settings)

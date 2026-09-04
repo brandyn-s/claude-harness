@@ -26,8 +26,8 @@ def load_receipts(path):
             for line in fh:
                 try:
                     r = json.loads(line)
-                except Exception:
-                    continue
+                except Exception:  # noqa: S112, BLE001 -- a dropped receipt can only over-flag (fails closed)
+                    continue  # skip unparseable receipt; over-flags, never under-flags
                 if r.get("tool_use_id"):
                     seen[r["tool_use_id"]] = r
     except FileNotFoundError:
@@ -43,6 +43,7 @@ def verify(tpath, rpath):
             try:
                 r = json.loads(line)
             except Exception:
+                # TODO(review): silently skipping an unparseable transcript line means any tool_result on it is never checked; a forgery verifier should count/report skipped lines or fail closed
                 continue
             msg = r.get("message") or {}
             if r.get("type") == "assistant":

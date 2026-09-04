@@ -74,7 +74,7 @@ def main() -> int:
         if not isinstance(event, dict):
             event = {}
         write_receipt(event)
-    except Exception:
+    except Exception:  # noqa: S110, BLE001 -- fail-open: receipt capture is observability only
         # Receipt capture is observability, never a reason to block exit.
         pass
     return 0

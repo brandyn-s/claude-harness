@@ -88,7 +88,7 @@ def log_manifest_query(hook_name, query_type, result_summary, used_fallback=Fals
         }
         with open(path, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry) + "\n")
-    except Exception:
+    except Exception:  # noqa: S110, BLE001 -- fail-open: telemetry is fire-and-forget
         pass  # Fire-and-forget
 
 
@@ -118,7 +118,7 @@ def log_advisory_warning(hook_name, tool_name, operation, warned=True, session_i
         }
         with open(path, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry) + "\n")
-    except Exception:
+    except Exception:  # noqa: S110, BLE001 -- fail-open: telemetry is fire-and-forget
         pass  # Fire-and-forget
 
 
@@ -128,8 +128,8 @@ def get_session_warning_count(hook_name, session_id=None):
     if marker.exists():
         try:
             return json.loads(marker.read_text(encoding="utf-8"))
-        except Exception:
-            pass
+        except Exception:  # noqa: S110, BLE001 -- fail-open: an unreadable marker yields the default counts
+            pass  # fail-open: fall through to the default counts
     return {"warnings": 0, "complied": 0, "ignored": 0}
 
 

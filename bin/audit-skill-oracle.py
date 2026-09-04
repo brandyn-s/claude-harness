@@ -194,8 +194,8 @@ def cmd_corpus_check(args):
         try:
             audit_mod.SKILLS = REPO / "skills"
             canon_entry = audit_mod._load_known_tools()
-        except Exception:
-            pass
+        except Exception:  # noqa: S110, BLE001 -- fail-open: cache warm-up is optional; canon_entry stays None
+            pass  # optional warm-up; canon_entry stays None
         for entry in corpus:
             audit_mod.SKILLS = fixtures_root
             if canon_entry is not None:
