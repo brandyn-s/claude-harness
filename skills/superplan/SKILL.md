@@ -133,10 +133,10 @@ If preflight surfaces only ✓ entries, note "Phase 0 clean" in one line and pro
 
 ```
 PHASE 0 — Reality Check
-  ✓ /superplan exists at ~/.claude/skills/superplan/SKILL.md (667 lines)
-  ✓ rules/agent-delegation.md exists, last updated 2026-04-19
-  ✗ /writing-plans NOT FOUND (sunset 2026-05-03 in PR #829, redirects to /superplan)
-  ⚠ function `dispatch_agent` exists in 2 files: hooks/run-hook.py:42, scripts/team-spawn.py:88
+  ✓ /<skill> exists at ~/.claude/skills/<skill>/SKILL.md (<N> lines)
+  ✓ rules/<rule>.md exists, last updated <date>
+  ✗ /<retired-skill> NOT FOUND (sunset <date> in PR #<n>, redirects to /<successor>)
+  ⚠ function `<name>` exists in 2 files: <path-a>:<line>, <path-b>:<line>
         — plan must specify which one
 ```
 
@@ -222,9 +222,7 @@ The wrong framing treats the prior measurement as load-bearing fact; the right f
 
 **Discipline check for every phase**: read the phase's first step. If it begins with an action that depends on a prior measurement (apply, ship, fix, lift), insert a refresh step BEFORE it. Renumber the rest of the phase. The first action becomes "if refresh holds, do X; if not, document and drop."
 
-INCIDENT 2026-05-10 (Phase G assetman override): parent plan framed Lever 1 as "ship `{"assetman/":20}` based on 2026-05-09 CI." Refresh was Phase A1, BUT the framing implied "Phase G ships, Phase A is the verification side-check." On execution, refreshed CI showed assetman CI now includes zero — the original ship intent was dead. The falsifier-driven design correctly handled this (Phase G dropped), but the FRAMING burned conversational confidence on a measurement that hadn't been re-validated yet. Correct framing would have been "Phase A refreshes CI; Phase G fires IF CI still excludes zero. Default expectation: undetermined."
-
-This is a discipline fix, not a new gate. Phase 4b's per-phase freshness re-check (>24h gate) catches stale measurements at execution time. Refresh-then-decide framing catches the same risk at plan-authoring time — by structurally writing the phase so that "act on the measurement" is impossible without "refresh the measurement" first.
+This is a discipline fix, not a new gate: Phase 4b's per-phase freshness re-check (>24h gate) catches stale measurements at execution time; refresh-then-decide framing catches the same risk at plan-authoring time, by writing the phase so that "act on the measurement" is impossible without "refresh the measurement" first (worked incident: `references/run-history.md`).
 
 ### Load-bearing-mechanism verification (mandatory — fires Phase-4-wide, NOT gated on a lift claim)
 
@@ -232,7 +230,7 @@ A plan phase whose step **trusts an existing mechanism to do what its name/docst
 
 1. **Read the mechanism at file:line BEFORE presenting** — the actual function body / tool contract, not its name or your memory. Cite the file:line in the step.
 2. **Assert contract == reality** for the INPUTS the plan feeds it. Handling case A is not proof it handles the case B the step depends on.
-3. **If it diverges → fix the phase at authoring time** (build the missing path + a contract test, or honestly re-scope the step) — NOT at a later red-team. When the plan IS size-of-effect, escalate to Phase 3.5 step 3a's full synthetic contract test. Rationale + the 2026-06-22 worked incident (doc-42 Phase C `extract_values()` defect, shipped past a non-firing Phase 3.5, caught only at red-team): `references/size-of-effect-gate.md` step 3a.
+3. **If it diverges → fix the phase at authoring time** (build the missing path + a contract test, or honestly re-scope the step) — NOT at a later red-team. When the plan IS size-of-effect, escalate to Phase 3.5 step 3a's full synthetic contract test. Rationale + worked incident: `references/size-of-effect-gate.md` step 3a.
 
 **Product-intent gate for audit-led plans:** an audit ranks release risk; it does
 not define the product roadmap. Before promoting audit findings into a build
@@ -315,8 +313,6 @@ Quick-reference summary:
 
 ## Phase 4c: Context Capture into Plan
 
-> Selectively cloned from tobihagemann/turbo `/capture-context` pattern.
-
 Before saving and presenting the plan, scan the conversation for accumulated
 knowledge that should be preserved in the plan file itself:
 
@@ -368,7 +364,7 @@ The attestation locks the plan against mid-loop tamper. supergoal's verification
 
 Intentional updates: stop supergoal, re-run superplan to update the plan (which re-attests), re-invoke supergoal. Do not edit the plan file directly during an active loop.
 
-Pattern from `OthmanAdi/planning-with-files`'s `/plan-attest`. The mtime-keyed cache avoids re-hashing on every turn (~99% I/O savings when the plan is unchanged) — see `~/.claude/skills/supergoal/references/verification-hook.md` Step 1 for the full procedure.
+The mtime-keyed cache avoids re-hashing on every turn — see `~/.claude/skills/supergoal/references/verification-hook.md` Step 1 for the full procedure.
 
 ### Step 5a.2: Plan template — required new sections
 
@@ -378,13 +374,13 @@ Beyond the existing Goal / Constraints / Steps / Verification structure, plans m
 and live probes and routes nonblocking findings to backlog. It prevents a green
 vertical slice from expanding into open-ended review or validation work.
 
-**`### Metric Commands`** — explicit code block of shell commands whose output (final line matching `^METRIC <name>=<value>`) is the authoritative measurement. supergoal parses these; conflating with `Verification:` legacy is still supported but emit the explicit section if possible. Pattern from `autoresearch`.
+**`### Metric Commands`** — explicit code block of shell commands whose output (final line matching `^METRIC <name>=<value>`) is the authoritative measurement. supergoal parses these; conflating with `Verification:` legacy is still supported but emit the explicit section if possible.
 
-**`### Guard Commands`** — code block of commands that must continue to pass (existing tests, lints). Separate from metric — guards catch regressions, metrics drive progress. autoresearch v2's lesson: conflating them lets the model succeed by regressing tests.
+**`### Guard Commands`** — code block of commands that must continue to pass (existing tests, lints). Separate from metric — guards catch regressions, metrics drive progress; conflating them lets the model succeed by regressing tests.
 
-**`### Artifact Probe`** — code block of commands that observe the *artifact* (not the metric). Different surface area. Run only at exit as a Goodhart probe. Source: mpt.solutions Goodhart's-Law post documenting `/goal` shipping a 960×540 space shooter with 3 starfield pixels because conversation-eval passed. Without this section, supergoal warns and disables the probe; metric-gaming becomes undetectable.
+**`### Artifact Probe`** — code block of commands that observe the *artifact* (not the metric). Different surface area. Run only at exit as a Goodhart probe — a metric can pass while the artifact is junk. Without this section, supergoal warns and disables the probe; metric-gaming becomes undetectable.
 
-**`### Forbidden Actions`** — list of tool-call patterns the agent must NOT take during the loop. Convention from Devin playbooks. supergoal's hook can be extended to refuse these. Examples:
+**`### Forbidden Actions`** — list of tool-call patterns the agent must NOT take during the loop. supergoal's hook can be extended to refuse these. Examples:
 - `Bash(rm *)`
 - `Edit(file_path=/etc/*)`
 - `Bash(git push --force *)`
@@ -393,11 +389,11 @@ If omitted, supergoal warns and disables the policy axis.
 
 **Falsifier format is a parser contract:** `## Falsifiers` must be markdown
 LIST ITEMS — a table parses as zero falsifiers and `parse_plan.py` exits 20
-(measured 2026-08-24; the dry-run below is what catches it pre-commit).
+(the dry-run below catches it pre-commit).
 
-**Readiness self-check (supergoal-bound plans).** Nothing verifies superplan's OWN output matches this template, so a deviating plan (prose `## Verification` instead of an executable `### Metric Commands` block; bolded `**Demo:**`; sentence-final baseline) ships clean and fails only at supergoal parse-time. Before declaring ready, dry-run: `python3 ~/.claude/skills/supergoal/scripts/parse_plan.py <plan> --state-dir /tmp/claude/sp-check/ --reset` — exit 0 with `metric_commands: N≥1` = ready; exit 20 = fix the named section. The metric block must RUN as-is in the not-yet-built state (guard with `[ -f X ] &&`) and print a real `METRIC name=<number>`, not a `<placeholder>`. (2026-06-21 mega-capture miss; parser made tolerant in #1416.)
+**Readiness self-check (supergoal-bound plans).** Nothing verifies superplan's OWN output matches this template, so a deviating plan (prose `## Verification` instead of an executable `### Metric Commands` block; bolded `**Demo:**`; sentence-final baseline) ships clean and fails only at supergoal parse-time. Before declaring ready, dry-run: `python3 ~/.claude/skills/supergoal/scripts/parse_plan.py <plan> --state-dir /tmp/claude/sp-check/ --reset` — exit 0 with `metric_commands: N≥1` = ready; exit 20 = fix the named section. The metric block must RUN as-is in the not-yet-built state (guard with `[ -f X ] &&`) and print a real `METRIC name=<number>`, not a `<placeholder>`.
 
-**A metric that reads a remote-tracking ref MUST `git fetch` inside the metric block.** `git -C "$REPO" show origin/main:<path>` reads the LOCAL remote-tracking ref, so after a PR merges the metric reports the world as of the last unrelated fetch. Measured 2026-08-24: `librechat_confluence_config_sites` still printed **0** after its PR merged — local `origin/main` was `fa87c87b`, actual was `a0a9bbc8`; adding `git fetch origin main -q` to the top of the block made the same command print **2** with no other change. The reason this survives plan authoring is structural: at baseline the true value and the stale-ref value are BOTH the baseline, so a metric verified only at baseline cannot reveal a staleness bug — the two agree exactly until the first real change lands. Emit the fetch for every repo the block reads, and treat "verified at baseline" as unverified for any metric whose source is a ref.
+**A metric that reads a remote-tracking ref MUST `git fetch` inside the metric block.** `git -C "$REPO" show origin/main:<path>` reads the LOCAL remote-tracking ref, so after a PR merges the metric reports the world as of the last unrelated fetch. This survives plan authoring structurally: at baseline the true value and the stale-ref value agree, so a metric verified only at baseline cannot reveal the staleness bug. Emit the fetch for every repo the block reads, and treat "verified at baseline" as unverified for any metric whose source is a ref (`references/run-history.md`).
 
 ### Step 5a.3: Plan-pattern library write (on successful supergoal exit only)
 
@@ -405,7 +401,7 @@ When a downstream supergoal run exits with `success`, the terminal-doc writer ex
 
 ### Step 5a.4: Parallel-dispatch routing recommendation
 
-If the plan has ≥3 vertical slices that are independent at the file level (no shared mutable state between slices), Step 5b's execution-path recommendation should suggest **Task-tool parallel dispatch** instead of sequential `/supergoal`. Pattern from `evanflow/skills/evanflow-writing-plans` ("Parallelization Check") and `obra/superpowers/skills/dispatching-parallel-agents`. Sub-tasks each get **scoped context** (their slice + the relevant plan steps), NOT the full plan — context inheritance corrupts subagent reasoning and explodes token cost (Roo Code Boomerang convention).
+If the plan has ≥3 vertical slices that are independent at the file level (no shared mutable state between slices), Step 5b's execution-path recommendation should suggest **Task-tool parallel dispatch** instead of sequential `/supergoal`. Sub-tasks each get **scoped context** (their slice + the relevant plan steps), NOT the full plan — context inheritance corrupts subagent reasoning and explodes token cost.
 
 **Full procedure** (mkdir, slug generation, Write, readback verification,
 `git checkout -b plan/<slug>` → `git add` → commit → push → gh pr create →
@@ -442,12 +438,8 @@ KEEP supergoal's disciplines inline: run the plan's `### Metric Commands` as the
 and honor the falsifiers. Mention supergoal only as the resumption vehicle if an unattended
 residue emerges later.
 
-Measured basis (2026-08-23): a 7-phase close-out program executed directly hit FOUR moments a
-headless loop could not have crossed (a user policy decision, two classifier denials requiring
-operator handoff, an SSO expiry) — while the inline metric gate still verified completion. The
-same session's zero-ceremony build, by contrast, was a genuine supergoal shape (one demo metric,
-no human gates) and ran under the loop's hook. Both routings were right; offering the loop for
-both would not have been.
+Measured basis (a direct close-out program vs a genuine loop-shaped build, same session):
+`references/run-history.md`.
 
 ### Step 5c: Terminal-doc-on-undershoot contract (mandatory after plan execution)
 
@@ -501,12 +493,9 @@ See `references/examples.md` for three worked examples covering cross-domain sec
 
 ## When NOT to Use This Skill
 
-- Simple one-shot queries ("how many open CrowdStrike detections?") — just ask, no plan needed
-- Brainstorming / design exploration — use `superpowers:brainstorming` instead
 - Pure research / learning — just explore, don't plan
 - Tasks the user already fully understands — if the user says "just do X," do X. Don't impose ceremony on a clear instruction.
-
-For the previously-listed "urgent tasks where planning overhead exceeds execution time" case, **use `--lite`** instead of avoiding the skill. Lite mode short-circuits after Phase 3b with a 3-line plan and no persistence, matching `/plan`'s overhead.
+- Urgent tasks where planning overhead exceeds execution time — **use `--lite`** rather than skipping the skill; it short-circuits after Phase 3b with a 3-line plan and no persistence, matching `/plan`'s overhead.
 
 ## Completion Checklist
 

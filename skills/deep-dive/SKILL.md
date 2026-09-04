@@ -31,7 +31,7 @@ General-purpose research skill. Takes any topic, dynamically generates research 
 
 **Priority: synthesis quality.** Clear trade-offs, honest uncertainty, and defensible recommendations matter more than source quantity. Cost and speed are not constraints.
 
-> **Output grounding (REQUIRED READ)**: before writing research findings, read `skills/_shared/output-grounding.md` and apply its three-layer contract (confidence + provenance + counterfactual) to every load-bearing claim. That file is NOT ambient — it was relocated out of `rules/` on 2026-08-26 after measuring EXPOSED=0 over 438 transcripts — so it is in context only if you read it. No hook grades the final answer; skill instructions and final-output evaluation are the controls.
+> **Output grounding (REQUIRED READ)**: before writing research findings, read `skills/_shared/output-grounding.md` and apply its three-layer contract (confidence + provenance + counterfactual) to every load-bearing claim. That file is NOT ambient, so it is in context only if you read it. No hook grades the final answer; skill instructions and final-output evaluation are the controls.
 
 ---
 
@@ -59,11 +59,11 @@ multi-wave pass on a plausible but unrelated question.
 
 ## Scale the wave to the parent's context, not to the budget
 
-**"Cost and speed are not constraints" is about SYNTHESIS DEPTH, not fan-out width.** Measured 2026-07-30: a fork that read that line as licence for "a full multi-wave campaign… all three providers in parallel" **stalled with zero results and was killed by the 600 s watchdog**. A bounded main-thread pass — 2 searches, 3 targeted fetches — then produced better-sourced findings than the agent had, faster.
+**"Cost and speed are not constraints" is about SYNTHESIS DEPTH, not fan-out width.** A fork that read that line as licence for a full parallel multi-provider campaign stalled with zero results and was killed by the 600 s watchdog; a bounded main-thread pass (2 searches, 3 fetches) then answered better and faster (`references/run-history.md`).
 
 - Fire **one batch at a time** and read it before firing the next. A parallel burst across all providers is the documented stall shape.
 - Dispatching from a **large parent context** raises the stall risk (see `rules/agent-delegation.md` — parent context is the constraint, not the prompt). When the parent is deep into a long session, prefer running the wave inline.
-- Go **authoritative-source-first**: one domain-filtered search against the primary source (a government or vendor domain) usually beats a broad multi-provider sweep. In the observed run, `cyber.gov.au` and the vendor's own docs answered the question in 2 searches + 3 fetches.
+- Go **authoritative-source-first**: one domain-filtered search against the primary source (a government or vendor domain) usually beats a broad multi-provider sweep.
 
 ---
 
@@ -119,7 +119,7 @@ If the user picks verify-only:
 
 If any of the three conditions fails, proceed to Phase 2 (full ceremony). Specifically: if local knowledge is older than 30 days, the user has not provided a narrow question, or no `[confirmed]` entry exists, skip Step 3b silently.
 
-**Why this exists**: the 2026-05-03 roundtable identified "no early exit" + "Cost and speed are not constraints" as creating sunk-cost friction on narrow questions where the user already has fresh local knowledge. This gate gives the user a proportional path while preserving full ceremony as the default for genuinely open research. `/gather-intel` and `/gather-research` cover narrow Claude-Code-community and AI-research-frontier scopes respectively — for everything else (vendor pricing, version checks, "is X still true"), the verify-only mode lives inside `/deep-dive`.
+**Why this exists**: "no early exit" + "Cost and speed are not constraints" created sunk-cost friction on narrow questions where the user already has fresh local knowledge. This gate is the proportional path; full ceremony stays the default for genuinely open research (`references/run-history.md`).
 
 ---
 
@@ -131,7 +131,7 @@ Generate search queries tailored to this specific topic. **No hardcoded queries*
 
 > For Tavily tool selection, wave execution, and graceful degradation patterns shared across all research skills, see `~/.claude/skills/deep-dive/references/research-methodology.md`.
 
-**MULTI-SOURCE DEFAULT (v2.0):** Every research question MUST be queried across **Tavily + Exa + Firecrawl** in parallel, not one provider alone. Single-source research under-samples the web — Tavily's keyword-weighted index, Exa's semantic/embedding index, and Firecrawl's structured site crawl surface different hits. This is the `/vendor-breach` multi-source-with-discrepancy-flagging pattern, generalized to all research. Follow `rules/web-search-preference.md` for per-query tool shape (source: `<claude-config-repo>/rules/web-search-preference.md`; deployed at `~/.claude/rules/web-search-preference.md`).
+**MULTI-SOURCE DEFAULT:** Every research question MUST be queried across **Tavily + Exa + Firecrawl** in parallel, not one provider alone. Single-source research under-samples the web — Tavily's keyword-weighted index, Exa's semantic/embedding index, and Firecrawl's structured site crawl surface different hits. Follow `rules/web-search-preference.md` for per-query tool shape (source: `<claude-config-repo>/rules/web-search-preference.md`; deployed at `~/.claude/rules/web-search-preference.md`).
 
 **REQUIRED ERROR DIAGNOSIS:** If any provider returns an error (402, 429, 5xx, timeout), capture the exact error text and surface it in the report header. Do NOT interpret an unexplained error as "credits exhausted" or any other specific cause without the raw error payload — misdiagnosis has caused false claims about provider availability.
 
@@ -159,9 +159,9 @@ Generate search queries tailored to this specific topic. **No hardcoded queries*
 - For compliance/standards topics, search for the standard itself AND for practical implementation guidance — across all three providers.
 - For each question where local knowledge provided a partial answer, generate at least one query (per provider) that specifically tests or updates the existing knowledge. Example: if local knowledge says "Product X lacks feature Y," search "Product X feature Y 2026 update."
 - If any research question is primarily answerable from a known documentation site (docs.aws.amazon.com, learn.microsoft.com, etc.), include a **Firecrawl Map → Crawl** plan for that site (preferred over Tavily map for cleaner structured output). Crawling official docs is higher-value than searching for blog posts about them.
-- Default to `search_depth: "advanced"` with `chunks_per_source: 3` for all Tavily searches. Default Exa to `freshness: "month"` for time-sensitive queries. Use `topic: "news"` + `time_range: "month"` (Tavily) for current events; `topic: "finance"` for vendor/spend queries. See `rules/web-search-preference.md` for parameter reference.
+- Parameter defaults are the ones in the table above; `rules/web-search-preference.md` is the parameter reference.
 
-**Use `tavily_research(pro)` liberally** — it produces better synthesis than assembling individual search results. Good for: "What are the pros and cons of X?", "How does X compare to Y?", "What is the current state of X in the industry?" Still cross-check its claims against Exa and Firecrawl results in the same wave. **VERIFICATION REQUIRED:** For each factual claim in a `tavily_research` synthesis, identify the underlying primary source URL. If a claim cannot be traced to a specific URL, downgrade it to Low confidence or re-search for the primary source using `tavily_search` + Exa + Firecrawl.
+**Use `tavily_research(pro)` liberally** — it produces better synthesis than assembling individual search results ("pros and cons of X", "X vs Y", "current state of X"). The table row's verification requirement applies to every claim it returns; cross-check against Exa and Firecrawl in the same wave.
 
 ## Step 5: Fire Wave 1
 
@@ -285,7 +285,7 @@ Record the outcome on each juried finding with a `**Jury:**` line (models, per-j
 
 **Graceful degradation.** If disjoint-`model` Agent dispatch is unavailable in the runtime, fall back to **N≥3 independent same-model samples with order-swap** (sample-not-greedy still beats a single greedy self-check) and label the finding "[same-model jury — partial]". For a single claim decision-critical enough to warrant a true cross-vendor panel (Opus + Grok + GPT), escalate to `/roundtable` rather than approximating it here.
 
-**Dispatch PROHIBITED is a different case from dispatch UNAVAILABLE — and silently skipping is not one of the options.** A standing user/project directive against Agent dispatch does not make the jury optional; it only rules out the *disjoint-model* path. When dispatch is prohibited rather than absent, do BOTH: (a) run the same-model N≥3 fallback above, which needs no Agent tool; and (b) name the qualifying findings and offer the disjoint-model jury explicitly at the gate — `AskUserQuestion` is in `allowed-tools` for exactly this. Do not defer the disclosure to a report footnote; a footnote is not a decision point the user can act on. (2026-08-17: Step 11b was skipped citing a no-Agent directive and disclosed only in the report header. When the user later asked for it, the jury **changed two of three findings** — one downgraded to Low as ungroundable, one restated after a unanimous verdict that its comparative claim was unsourced. The same-model fallback was available the whole time and went unused, and the report shipped an unadjudicated overclaim in the interim.)
+**Dispatch PROHIBITED is a different case from dispatch UNAVAILABLE — and silently skipping is not one of the options.** A standing user/project directive against Agent dispatch does not make the jury optional; it only rules out the *disjoint-model* path. When dispatch is prohibited rather than absent, do BOTH: (a) run the same-model N≥3 fallback above, which needs no Agent tool; and (b) name the qualifying findings and offer the disjoint-model jury explicitly at the gate — `AskUserQuestion` is in `allowed-tools` for exactly this. Do not defer the disclosure to a report footnote; a footnote is not a decision point the user can act on (`references/run-history.md`).
 
 **Not yet measured.** The jury's accuracy lift over Step-11 synthesis is a hypothesis, not a result — it has NOT been A/B'd in `harness/`. Per ship-discipline, don't claim it "improves" verification until the harness measures it on a fixture hard enough to produce judge errors (the current fixture is ceiling-accuracy — see Measured Efficacy). It is justified by the *direction* of the judge-bias evidence, not a local measurement.
 
@@ -297,9 +297,9 @@ Follow the template in `references/report-template.md` exactly.
 
 **Verify-only carve-out (Step 3b mode)**: When Step 3b verify-only mode was taken, Step 12 TEMPLATE COMPLIANCE CHECK is reduced. The verify-only short report MUST still include: Date, Waves completed (1), Provider status (per-provider call counts + raw errors), one Key Finding with Claim/Confidence/Sources/Evidence/Caveats/**Counterfactual**, and a one-line Recommendation. The Sources table is required (with authority tier and provider columns) but may be condensed per the report-template.md "fewer than 10 sources" rule. Sections that may be skipped in verify-only: Prior Knowledge subsections beyond a single sentence, Comparison Matrix, Changes from Prior Research, multi-finding Trade-offs and Disagreements (a single-line note is sufficient). Per-provider credit accounting is still required. Full-ceremony reports remain bound by the unreduced compliance check.
 
-**PER-FINDING COUNTERFACTUAL** (mandatory): Each Key Finding MUST include a Counterfactual line stating the inverted hypothesis and a SURVIVES / COLLAPSES / AMBIGUOUS verdict. A boilerplate "what if X were not true" without engagement does NOT satisfy this — the inversion must be specific enough that someone could disprove the original finding by checking it. The 2026-05-03 roundtable identified counterfactuals as the structurally weakest layer of the three-layer defense; this check closes the gap. See `references/report-template.md` for examples.
+**PER-FINDING COUNTERFACTUAL** (mandatory): Each Key Finding MUST include a Counterfactual line stating the inverted hypothesis and a SURVIVES / COLLAPSES / AMBIGUOUS verdict. A boilerplate "what if X were not true" without engagement does NOT satisfy this — the inversion must be specific enough that someone could disprove the original finding by checking it. See `references/report-template.md` for examples.
 
-**COMPARATIVE-CLAIM GATE** (mandatory): before saving, re-read every finding title and claim for a **comparison or superlative** — "X **not** Y", "the primary/limiting/binding factor", "matters more than", "the real discriminator", "biggest". For each one, name the source that makes *that comparison*. Sources that independently establish "X is a serious problem" do **not** license "X outranks Y" — the ranking is then yours, not theirs. If no source ranks them, either delete the comparison and keep the qualitative finding, or restate it as an explicit open question. This is the single most likely place for synthesis to outrun evidence, because a comparative framing reads as a sharper insight and therefore survives self-review. (2026-08-17: a finding asserted "false-alarm rate — **not** detection range — is the limiting factor"; three jurors independently returned INSUFFICIENT with the identical objection that no supplied source compared the two. The qualitative half was well-sourced across three non-vendor sources spanning 2019–2025; only the ranking was invented, and it was in the finding's title.)
+**COMPARATIVE-CLAIM GATE** (mandatory): before saving, re-read every finding title and claim for a **comparison or superlative** — "X **not** Y", "the primary/limiting/binding factor", "matters more than", "the real discriminator", "biggest". For each one, name the source that makes *that comparison*. Sources that independently establish "X is a serious problem" do **not** license "X outranks Y" — the ranking is then yours, not theirs. If no source ranks them, either delete the comparison and keep the qualitative finding, or restate it as an explicit open question. This is the single most likely place for synthesis to outrun evidence, because a comparative framing reads as a sharper insight and therefore survives self-review (`references/run-history.md`).
 
 1. Create the output directory if it doesn't exist: `mkdir -p "$HOME/Documents/knowledge-base/research"`
 2. Generate the topic slug (lowercase, hyphens, max 50 chars)
@@ -318,34 +318,24 @@ If any tool or source fails during research:
 
 | Failure | Action |
 |---------|--------|
-| `tavily_search` returns 0 results | Reformulate query: drop year terms, try alternate terminology, broaden scope. Retry 2-3 times, then continue with Exa + Firecrawl hits for that question and mark "[Tavily silent]". |
-| `mcp__exa__web_search_exa` returns 0 results | Retry with an in-query `category:` or `mcp__firecrawl__firecrawl_search` operators. If still empty, continue with Tavily + Firecrawl and mark "[Exa silent]". |
-| `mcp__firecrawl__firecrawl_search` returns 0 results | Retry with alternate phrasing or switch to `firecrawl_map` on the target domain. If still empty, continue and mark "[Firecrawl silent]". |
-| Any provider returns an error (402, 429, 5xx, timeout, `fetch failed`) | **Capture the raw error text verbatim.** Do NOT interpret the cause without the raw payload. Surface in the report header: "Exa returned 429 on call 4/12: <raw error>". Continue with other providers; do not abandon the skill on one provider's error. **RETRY THE IDENTICAL QUERY ONCE before recording it as a coverage gap.** Note the asymmetry this fixes: the three zero-results rows above prescribe 2-3 retries, but a hard error historically got none — backwards, because a transient network fault is far more likely to clear on retry than a genuine zero-result is. A one-call retry is cheaper than the finding you lose. (2026-08-17: `web_search_exa error: fetch failed` was recorded as a permanent gap and "recovered via Firecrawl"; the identical query retried later succeeded and surfaced four facts Firecrawl had missed — a 41% vendor price contradiction, a conflicting compliance claim, a government competition award, and an entire new finding that changed a recommendation. The fallback provider is not equivalent coverage.) |
-| `tavily_extract` / `mcp__firecrawl__firecrawl_scrape` / `mcp__exa__web_fetch_exa` times out or returns empty | Try the other two providers on the same URL before giving up — JS-rendered pages often need Firecrawl while login-walled pages sometimes open to Exa. If all three fail, fall back to search snippets already collected. |
-| `tavily_research` returns low-quality synthesis | Supplement with targeted multi-provider searches to fill gaps. Verify all claims against traceable URLs before accepting. |
-| `tavily_map`/`tavily_crawl` fails | Use `mcp__firecrawl__firecrawl_map` → `firecrawl_crawl` instead. |
-| `firecrawl_crawl` times out on a large site | Switch to async pattern: fire `firecrawl_crawl` without waiting, then poll `firecrawl_check_crawl_status`. If still failing, fall back to `tavily_map`. |
+| A provider returns 0 results, or an extract/scrape/fetch, map/crawl, or `tavily_research` call fails or returns thin content | Per-tool reformulation and fallback chains: `references/research-methodology.md` §4–6. Retry 2-3 reformulations, try the other two providers on the same URL, then continue with the remaining providers' hits and mark the silent one ("[Tavily silent]", "[Exa silent]", "[Firecrawl silent]"). |
+| Any provider returns an error (402, 429, 5xx, timeout, `fetch failed`) | **Capture the raw error text verbatim.** Do NOT interpret the cause without the raw payload. Surface in the report header: "Exa returned 429 on call 4/12: <raw error>". Continue with other providers; do not abandon the skill on one provider's error. **RETRY THE IDENTICAL QUERY ONCE before recording it as a coverage gap** — a transient fault is far more likely to clear on retry than a genuine zero-result is, and the fallback provider is not equivalent coverage (`references/run-history.md`). |
 | Entire provider (Tavily, Exa, or Firecrawl) MCP unavailable | Log "[<provider> MCP unavailable: <raw error>]" in the report header, continue with remaining providers, and downgrade affected findings' confidence by one tier. Two-of-three is the minimum — if two providers are down, surface that to the user before continuing. |
-| `memory_search` unavailable, errors, or hangs | **Do NOT record "local knowledge not checked" — fall back to grep, which is deterministic and takes seconds.** Run `Grep`/`Bash` for the topic's distinctive nouns across `$HOME/.claude/projects/$PROJECT_ID/memory/`, `$HOME/.claude/agent-memory/topics/`, and `$HOME/Documents/knowledge-base/`, then read any adjacent report the hits name. Report the corpora searched, the file counts, and the hit counts so the check is auditable. Only if the grep ALSO cannot run may you note the scan as skipped. (2026-08-17: `memory_search` hung 1800 s on a degraded VPN link; this row's former "skip and note it" guidance turned a 5-second fallback into a published gap in the report, which the user flagged. Grep found 0 hits across 179 memory files and 2 adjacent reports — a complete answer the semantic tool never delivered.) |
+| `memory_search` unavailable, errors, or hangs | **Do NOT record "local knowledge not checked" — fall back to grep, which is deterministic and takes seconds.** Run `Grep`/`Bash` for the topic's distinctive nouns across `$HOME/.claude/projects/$PROJECT_ID/memory/`, `$HOME/.claude/agent-memory/topics/`, and `$HOME/Documents/knowledge-base/`, then read any adjacent report the hits name. Report the corpora searched, the file counts, and the hit counts so the check is auditable. Only if the grep ALSO cannot run may you note the scan as skipped (`references/run-history.md`). |
 | Output directory write fails | The `worktree-enforcement.py` hook explicitly allows `knowledge-base/research/` writes from forked skill context (ALLOWED_SUBPATHS), so this should not occur. If a write still fails (disk full, permissions), capture the raw error and fall back to `$HOME/Documents/`, noting the failure path in the in-conversation summary. |
 
 **Never fail the entire skill because one source or tool is unavailable.** Log the failure, skip that source, continue with remaining results. Partial multi-provider coverage (2 of 3) is acceptable with documented caveats; single-provider research is not — pause and surface to the user.
 
-**ZERO providers reachable is a HARD ABORT, not a degradation — and in a forked run it is the DEFAULT, not an edge case.** This skill is `context: fork`, and the standing project limitation is that **Agent-tool workers cannot authenticate to remote MCPs**. All three discovery providers are remote MCPs, so the expected forked outcome is *all three unavailable at once*: the "two of three is the minimum" row above reads like an unlikely tail and is in fact the modal case for this skill's own execution mode.
+**ZERO providers reachable is a HARD ABORT, not a degradation — and in a forked run it is the DEFAULT, not an edge case.** This skill is `context: fork`, and the standing project limitation is that **Agent-tool workers cannot authenticate to remote MCPs**. All three discovery providers are remote MCPs, so the expected forked outcome is *all three unavailable at once*.
 
-REQUIRED, before Wave 1: issue ONE cheap probe per provider. If **zero** return results, do NOT proceed to synthesis. Emit `INSUFFICIENT_PROVIDERS: 0/3 reachable — remote-MCP auth unavailable in forked context; run the research wave from the main thread` as the skill's result and stop. A report assembled from prior-turn context with a "providers unavailable" header is **not research** — it restates the briefing it was handed, and every confidence and provenance label in it is unearned.
-
-(2026-08-26: all three providers errored in a forked run. The fork continued anyway, produced a 47 KB report whose only inputs were the invoking turn's own ground truth, labelled it with an honest provider-status line — and introduced a fabricated figure, "outlook … 99 tools", against a real filter list of 30. The main thread then re-ran the identical wave successfully in 11 searches, because from the main thread those same three providers work. Cost: one wasted fork run plus the full re-run. The honest provider-status header is what made it survive review: it looked like disclosed degradation rather than a null result.)
+REQUIRED, before Wave 1: issue ONE cheap probe per provider. If **zero** return results, do NOT proceed to synthesis. Emit `INSUFFICIENT_PROVIDERS: 0/3 reachable — remote-MCP auth unavailable in forked context; run the research wave from the main thread` as the skill's result and stop. A report assembled from prior-turn context with a "providers unavailable" header is **not research** — it restates the briefing it was handed, and every confidence and provenance label in it is unearned; an honest provider-status header does not make it one (`references/run-history.md`).
 
 ---
 
 # What This Skill Does NOT Do
 
-- Does NOT search internal comms (Slack/Linear/Confluence) — use `gather-internal-intel`
-- Does NOT maintain a cumulative intelligence report — each run is independent
+- Does NOT maintain a cumulative intelligence report — each run is independent (gather-intel and gather-research do that for their domains)
 - Does NOT modify architecture files, agent memory, or CLAUDE.md — research output only
-- Does NOT replace gather-intel or gather-research — those maintain cumulative domain-specific reports
 
 ---
 
@@ -360,23 +350,7 @@ Actions:
 4. Phase 4: Report with 7 findings (3 High, 3 Medium, 1 Low). 1 disagreement flagged. Provider attribution per finding. Report saved.
 Result: Structured comparison with evidence-graded, provider-attributed claims and honest assessment of vendor bias.
 
-**Example 2: Standards deep dive**
-User says: `/deep-dive FIPS 140-3 validation timeline for Tailscale`
-Actions:
-1. Phase 1: 3 research questions. Memory search finds tailscale-patterns.md.
-2. Phase 2: 9 parallel searches — 3 questions × 3 providers + 1 tavily_research(pro).
-3. Phase 3: Wave 1 mostly answers questions. Wave 2 extracts CMVP database page (firecrawl_scrape) and Tailscale's security docs (tavily_extract cross-check). Convergence in 2 waves.
-4. Phase 4: Report with 4 findings (1 High, 2 Medium, 1 Low). 1 unanswered. Report saved.
-Result: Clear assessment with the High-confidence answer that Tailscale is not FIPS-validated, Medium-confidence timeline estimate, and alternatives list.
-
-**Example 3: Technology best practices**
-User says: `/deep-dive best practices for OPA policy testing in CI/CD`
-Actions:
-1. Phase 1: 4 research questions. Memory search finds OPA source repo reference.
-2. Phase 2: 12+ parallel searches — 4 questions × 3 providers + 1 tavily_research(pro) + firecrawl_map on OPA docs site.
-3. Phase 3: Wave 1 answers 3/4 questions. Wave 2 crawls OPA docs (firecrawl_crawl) for testing section. Wave 3 extracts 3 high-signal blog posts. Convergence in 3 waves.
-4. Phase 4: Report with 6 findings (2 High, 3 Medium, 1 Low). No major disagreements. Report saved.
-Result: Comprehensive practices guide grounded in official docs (firecrawl) and practitioner experience (tavily + exa).
+Two more (standards deep dive; technology best practices): `references/examples.md`.
 
 ---
 

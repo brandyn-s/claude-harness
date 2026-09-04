@@ -34,7 +34,7 @@ Comprehensive meta-analysis of the Claude Code architecture. Dynamically discove
 
 Run live checks FIRST — these find problems that static analysis cannot.
 
-**Platform gate**: Check `platform.system()` before running performance probes. The CPU/memory/process-dedup probes below use Windows-only APIs (`CreateToolhelp32Snapshot`, `kernel32.GetProcessTimes`, `psapi.GetProcessMemoryInfo`, `Get-CimInstance`). On non-Windows hosts, either substitute `psutil` (`cpu_percent`, `memory_info`, `cmdline`) for the same measurements, or skip the performance subsection and report `SKIP — non-Windows host`. **macOS fallback (no psutil):** rather than a total no-op, run the two cheap native probes — process **dedup/orphan** via `pgrep -f <substring>` counts (PIDs only), and **memory** via `ps -o rss=,comm=` summed across matched PIDs. **Derive the substring per server from its EXEC'D form, not its config**: launcher scripts (`*-mcp-launch`) exec their child, so `pgrep -f` on the launcher path returns 0 — match the script basename (`jamf_mcp_server.py`) or the npm form (`npm exec tavily-mcp`) instead. Never use a generic `mcp` pattern: measured 2026-08-22 it swept in Claude Helper, SkyComputerUseClient, and Palantir browser processes, inflating the "MCP footprint" to a meaningless 15 GB. NEVER use `ps -o args=`/`command=` or `pgrep -a`/`pgrep -lf` (they dump argv, which leaks launcher-inlined secrets — see platform-constraints.md). Idle-CPU sampling has no cheap safe native equivalent — SKIP it. Reliability probes (connectivity, hook exec, stale paths, config syntax, credential scan) run on all platforms.
+**Platform gate**: Check `platform.system()` before running performance probes. The CPU/memory/process-dedup probes below use Windows-only APIs (`CreateToolhelp32Snapshot`, `kernel32.GetProcessTimes`, `psapi.GetProcessMemoryInfo`, `Get-CimInstance`). On non-Windows hosts, either substitute `psutil` (`cpu_percent`, `memory_info`, `cmdline`) for the same measurements, or skip the performance subsection and report `SKIP — non-Windows host`. **macOS fallback (no psutil):** rather than a total no-op, run the two cheap native probes — process **dedup/orphan** via `pgrep -f <substring>` counts (PIDs only), and **memory** via `ps -o rss=,comm=` summed across matched PIDs. **Derive the substring per server from its EXEC'D form, not its config**: launcher scripts (`*-mcp-launch`) exec their child, so `pgrep -f` on the launcher path returns 0 — match the script basename (`jamf_mcp_server.py`) or the npm form (`npm exec tavily-mcp`) instead. Never use a generic `mcp` pattern — it sweeps in unrelated processes and inflates the footprint to a meaningless number (`references/run-history.md`). NEVER use `ps -o args=`/`command=` or `pgrep -a`/`pgrep -lf` (they dump argv, which leaks launcher-inlined secrets — see platform-constraints.md). Idle-CPU sampling has no cheap safe native equivalent — SKIP it. Reliability probes (connectivity, hook exec, stale paths, config syntax, credential scan) run on all platforms.
 
 **Probe error handling**: If any probe crashes (ctypes permission denied, CimInstance unavailable, MCP tool timeout, psutil import error), report that probe as `SKIP — {error}` and continue with remaining probes. Never let a single probe failure stall the entire audit.
 
@@ -52,7 +52,7 @@ Run live checks FIRST — these find problems that static analysis cannot.
 
 **Process deduplication:** First, count active Claude Code sessions by finding distinct `claude` parent processes. Then group MCP processes by normalized command line. For each unique MCP server, count instances. Expected count per server = number of active sessions. Flag any server with more instances than active sessions. Report: active sessions, expected instances per server, actual count, and excess.
 
-**FastMCP version check:** Verify all stdio Python MCP servers use FastMCP >= 3.0. For each stdio Python server in `~/.mcp.json` AND `~/.claude.json`, read the script file and check for `from fastmcp` imports, then verify the fastmcp version **through each server's own launch interpreter** (resolve the `command`/launcher to its venv python and run `<venv-python> -m pip show fastmcp`). System `pip show fastmcp` is the wrong instrument — on venv-launched fleets it reports NOT INSTALLED while every server runs fine (measured 2026-08-22); that result is UNKNOWN, not a finding.
+**FastMCP version check:** Verify all stdio Python MCP servers use FastMCP >= 3.0. For each stdio Python server in `~/.mcp.json` AND `~/.claude.json`, read the script file and check for `from fastmcp` imports, then verify the fastmcp version **through each server's own launch interpreter** (resolve the `command`/launcher to its venv python and run `<venv-python> -m pip show fastmcp`). System `pip show fastmcp` is the wrong instrument — on venv-launched fleets it reports NOT INSTALLED while every server runs fine; that result is UNKNOWN, not a finding.
 
 ### Reliability Probes
 
@@ -86,11 +86,11 @@ Phase 0 evidence.
 
 **Credential exposure check:** Scan `~/.mcp.json` and `~/.claude.json` for patterns matching API keys or tokens in URLs, headers, or env values (e.g., `tskey-`, `Bearer `, `sk-`, API key patterns in query strings). Flag any inline credential that should be in an environment variable.
 
-**Checkout currency (stale-base guard):** The audit reads `~/.claude`, which may be on a feature branch or behind `origin/main` in a contended checkout. Run `git -C ~/.claude fetch origin main` then `git -C ~/.claude rev-list --count HEAD..origin/main`. If the count is > 0, emit a banner in the report header: `findings derived from a checkout N commits behind origin/main — doc/count findings (D3/D4) may already be fixed on main; re-verify against origin/main before acting`. This is not a finding; it calibrates trust in every doc/count finding, and Phase 7 fixes MUST be re-verified against `origin/main` (a worktree cut from it), not the stale working tree. **When the count is > 0, do more than banner it — REDIRECT THE AUDIT BASE:** cut a read-only worktree from `origin/main` (`git -C ~/.claude worktree add --quiet ~/worktrees/cc-audit-base origin/main` — `--quiet` suppresses ~3,500 lines of checkout progress; reuse the path if it already exists and is at the right commit) and run Phase 1 discovery AND both scanners against it by exporting `CLAUDE_CONFIG_DIR=<worktree>` (both `doc_accuracy_audit.py` and `skill_quality_audit.py` honor it). Auditing the stale tree yields an INCOMPLETE finding SET, not just uncertain counts — 2026-07-24: a 34-behind tree surfaced 5 undocumented doc items when the true `origin/main` set was 8; the 3 extra (a skill + 2 topics) were structurally invisible against the stale tree. The banner still describes the DEPLOYED-state delta; the finding set comes from the `origin/main` base. **The redirect covers the skill's own definition too**: the SKILL.md you were invoked with is the DEPLOYED (stale) copy — diff it against the worktree's copy (`git -C ~/.claude diff HEAD origin/main -- skills/audit-architecture/`) and follow the worktree version where phases/steps were added (2026-08-22: origin/main carried a newer Phase 0 executable-collision guard step the deployed copy lacked; it was nearly skipped). (2026-06-16: a 29-behind checkout produced two D3 findings — topic count, hook-manifest count — already fixed on main; both would have been "re-fixed" to wrong values.)
+**Checkout currency (stale-base guard):** The audit reads `~/.claude`, which may be on a feature branch or behind `origin/main` in a contended checkout. Run `git -C ~/.claude fetch origin main` then `git -C ~/.claude rev-list --count HEAD..origin/main`. If the count is > 0, emit a banner in the report header: `findings derived from a checkout N commits behind origin/main — doc/count findings (D3/D4) may already be fixed on main; re-verify against origin/main before acting`. This is not a finding; it calibrates trust in every doc/count finding, and Phase 7 fixes MUST be re-verified against `origin/main` (a worktree cut from it), not the stale working tree. **When the count is > 0, do more than banner it — REDIRECT THE AUDIT BASE:** cut a read-only worktree from `origin/main` (`git -C ~/.claude worktree add --quiet ~/worktrees/cc-audit-base origin/main` — `--quiet` suppresses ~3,500 lines of checkout progress; reuse the path if it already exists and is at the right commit) and run Phase 1 discovery AND both scanners against it by exporting `CLAUDE_CONFIG_DIR=<worktree>` (both `doc_accuracy_audit.py` and `skill_quality_audit.py` honor it). Auditing the stale tree yields an INCOMPLETE finding SET, not just uncertain counts. The banner still describes the DEPLOYED-state delta; the finding set comes from the `origin/main` base. **The redirect covers the skill's own definition too**: the SKILL.md you were invoked with is the DEPLOYED (stale) copy — diff it against the worktree's copy (`git -C ~/.claude diff HEAD origin/main -- skills/audit-architecture/`) and follow the worktree version where phases/steps were added. Measured instances of all three failure shapes: `references/run-history.md`.
 
 ## Phase 1: Discovery
 
-**Run the discovery script FIRST** — it covers the deterministic parts of Phases 1, 2, and 6 in one pass and eliminates the ad-hoc-matcher false positives (2026-08-22: hand-rolled coverage matchers produced two false gaps):
+**Run the discovery script FIRST** — it covers the deterministic parts of Phases 1, 2, and 6 in one pass and eliminates the ad-hoc-matcher false positives (`references/run-history.md`):
 
 ```bash
 python3 ~/.claude/skills/audit-architecture/references/discovery.py > discovery.json
@@ -288,14 +288,9 @@ Drop any finding that fails all five checks. Downgrade findings that fail one ch
 
 **Rubric-bias warning**: The `skill_quality_audit.py` scanner has a history of producing findings that violate compare-by-need. Before surfacing any finding sourced only from the scanner's rubric, apply gate 4 above and verify the skill is actually broken from a user's perspective.
 
-**Concrete FP pattern — broken-reference detection on meta-references** (2026-05-26 incident): The scanner's "broken refs" check greps SKILL.md for `references/<name>.md` mentions and flags any whose file doesn't exist. It does NOT distinguish META-references from LITERAL citations. Examples of meta-references that are NOT broken:
-  - `` `references/X.md` `` inside prose like "For each `references/X.md`, identify ..." (X is a placeholder, not a filename)
-  - `path: skills/<skill>/references/missing-ref.md` inside a YAML schema EXAMPLE (the file is intentionally absent — it's a synthetic fixture for the audit pattern itself)
-  - `references/search-waves.md` cited inside a `reason: invoked via X` example (describing what the audit looks for, not citing X)
+**Concrete FP pattern — broken-reference detection on meta-references:** the scanner's "broken refs" check greps SKILL.md for `references/<name>.md` mentions and flags any whose file doesn't exist, without distinguishing META-references (a placeholder like `references/X.md` in prose, a path inside a YAML schema example, a path inside a `reason:` example — `references/run-history.md`) from LITERAL citations. Before auto-fixing a "broken ref" finding, READ the cited line and surrounding context; if the path appears inside a code block, backtick-wrapped placeholder string, YAML example, or "the scanner flags X" prose, the finding is an FP — the file is meta-cited, not literally cited.
 
-Verification: before auto-fixing a "broken ref" finding, READ the cited line and surrounding context. If the path appears inside a code block, backtick-wrapped placeholder string, YAML example, or "the scanner flags X" prose, the finding is an FP — the file is meta-cited, not literally cited.
-
-**Emit findings to YAML**: Write all surviving findings to `~/.claude/agent-memory/sentinel/audit-architecture-findings.yaml` (the canonical file the oracle reads) AND copy the same content to a dated snapshot `audit-architecture-findings-<YYYY-MM-DD>.yaml` in that dir. The dated snapshot survives concurrent-session churn — on this contended host a parallel session can delete the canonical file mid-run (observed 2026-07-24), which silently destroys delta history; the dated snapshots are the durable per-run record the delta step reads. For each finding, write a machine-checkable reproducer using the patterns in `references/finding-codes.md`. Findings that cannot be expressed as grep/bash/python/file_exists/file_missing must use `type: manual` and `label: unverified`.
+**Emit findings to YAML**: Write all surviving findings to `~/.claude/agent-memory/sentinel/audit-architecture-findings.yaml` (the canonical file the oracle reads) AND copy the same content to a dated snapshot `audit-architecture-findings-<YYYY-MM-DD>.yaml` in that dir. The dated snapshot survives concurrent-session churn — a parallel session can delete the canonical file mid-run, which silently destroys delta history; the dated snapshots are the durable per-run record the delta step reads. For each finding, write a machine-checkable reproducer using the patterns in `references/finding-codes.md`. Findings that cannot be expressed as grep/bash/python/file_exists/file_missing must use `type: manual` and `label: unverified`.
 
 **Run the two-way pairing contract-check**: `type: manual` ⟺ `label: unverified`. Any finding with `type: manual` + `label: behavior-fix` or `doc-fix` violates the contract — backfill a real reproducer or demote the label to `unverified` before proceeding.
 
@@ -340,7 +335,7 @@ This re-runs reverify, drops STALE findings, and emits only STILL-FIRES + MANUAL
 
 Consult the **Fix Safety Classification** in `references/scoring-and-output.md` to determine which fixes are auto-safe vs require user confirmation.
 
-> **Repo-fix mechanics (measured 2026-08-22, 5-PR fix batch):**
+> **Repo-fix mechanics** (`references/run-history.md`)**:**
 > - Any fix touching `skills/`, `hooks/`, or `rules/` needs `python3 scripts/build-marketplace.py` + `git add marketplace/ .claude-plugin/` BEFORE push — the pre-push guard rejects an out-of-sync marketplace, costing a round-trip per forgotten regen.
 > - **The marketplace treadmill**: when a fix batch spans multiple PRs that each carry regenerated `marketplace/` + `.claude-plugin/plugin-versions.json`, EVERY merge invalidates every other open branch's generated files (DIRTY/conflict). Either batch all same-subsystem fixes into ONE PR, or merge serially and re-cut each remaining branch from fresh `origin/main` (`git checkout -B <branch> origin/main`, `git checkout <old-tip> -- <source paths>`, regenerate, force-with-lease). Never hand-merge generated files.
 > - Worktree cleanup is part of the fix arc: after all PRs reach terminal MERGED state, `git -C ~/.claude worktree remove` BOTH audit worktrees (`cc-audit-base` and the fix worktree). Remove only paths this run created.
@@ -360,16 +355,18 @@ Apply fixes? Enter "all", specific numbers (e.g. "1,3,5"), or "skip".
 
 ## Success Criteria
 
-- Phase 0 runtime probes complete before static analysis begins
+- `audit-context.md` read before Phase 0; `audit-suppress.yaml` consulted and suppressions logged
+- Phase 0 runtime probes complete before static analysis begins; no probe failure stalls the audit
 - All MCP servers discovered from config files (not hardcoded)
 - Coverage matrix includes all 8 dimensions per server
 - Every finding self-challenged before emitting to YAML (alternative explanation, data dependency, code verification)
-- Every finding has a machine-checkable reproducer or is explicitly `[unverified]`
-- Oracle reverify runs before any finding appears in the ranked report
+- Every finding has a machine-checkable reproducer or is explicitly `[unverified]` (`manual` ⟺ `unverified`)
+- Findings YAML written to `~/.claude/agent-memory/sentinel/audit-architecture-findings.yaml` plus a dated snapshot
+- Oracle reverify runs before any finding appears in the ranked report; STALE findings dropped
 - Pre-action gate (`act-on`) runs before any fix batch is dispatched
 - 0 `[behavior-fix]` findings acted on without Layer D fix-loop verification (pre-fix fires + post-fix stale)
 - 0 fixes applied without user confirmation (exception: auto-safe fixes per `references/scoring-and-output.md`)
-- Delta section appears in the report when a previous findings file exists
+- Delta section appears in the report when a previous findings file exists (or noted as first run)
 
 ## Examples
 
@@ -394,25 +391,3 @@ Actions:
 5. Phase 7B: Oracle confirms all 4 STILL-FIRES
 6. Phase 7D: User says "all" → 3 auto-safe fixes applied + verified; 1 routing rule fix requires confirmation
 Result: System in sync after new server is fully wired in.
-
-## Output Format
-
-Use the **Output Report Template** in `references/scoring-and-output.md`.
-
-After presenting the report, ask the user what fixes to apply. Do NOT make changes without confirmation.
-
-## Completion Checklist
-
-- [ ] `audit-context.md` read before Phase 0
-- [ ] Phase 0 runtime probes ran; no probe failure stalled the audit
-- [ ] Phase 1 discovery complete; all servers discovered dynamically
-- [ ] Coverage matrix built for all MCP servers
-- [ ] Phase 7A self-challenge applied to every finding
-- [ ] `audit-suppress.yaml` consulted; suppressions logged
-- [ ] Findings YAML written to `~/.claude/agent-memory/sentinel/audit-architecture-findings.yaml`
-- [ ] Two-way pairing contract satisfied (`manual` ⟺ `unverified`)
-- [ ] Oracle reverify ran (`audit-skill-oracle.py reverify`)
-- [ ] STALE findings dropped; only STILL-FIRES + MANUAL in report
-- [ ] Pre-action gate (`act-on`) ran before any fix batch
-- [ ] Delta section included (or noted as first run)
-- [ ] No fix applied without user confirmation (or logged as auto-safe)

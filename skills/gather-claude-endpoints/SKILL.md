@@ -54,13 +54,11 @@ keys) · `baseline` = establish/refresh baselines after review.
 
 ## Step 0b: The scripts gate their OWN code freshness (enforced in code)
 
-The baseline-freshness gate (finding #27) checks the **KB tree**; run 6
-measured that nothing checked the **code being run**: `~/.claude` was **143
-commits behind** `origin/main`, so the run executed run-5-era scripts — the
-Athena leg died on the exact 240 s budget finding #26 had already fixed
-upstream (PR #1960), and the differ ran without the freshness gate at all.
+The baseline-freshness gate checks the **KB tree**; `code_freshness()` checks
+the **code being run** — a stale checkout has executed old scripts against a
+fixed-upstream problem before ([references/run-history.md](references/run-history.md)).
 
-Both `diff_channels.py` and `reconcile_observed.py` now run
+Both `diff_channels.py` and `reconcile_observed.py` run
 `code_freshness()` at startup: **STALE refuses (exit 2)** and prints the fix;
 UNKNOWN (non-git copy, failed fetch) warns and proceeds — unlike the baseline
 gate, code legitimately runs from non-git copies, and the baseline gate is the
@@ -78,9 +76,9 @@ git -C ~/Documents/GitHub/claude-knowledge-base worktree add \
   ~/worktrees/kb-gce-<date> -b docs/gather-claude-endpoints-<date> origin/main
 ```
 
-Run 5 diffed a tree **35 commits behind `origin/main`** — behind run 4's own output —
-and a `--update-baseline` commit from it would have reverted run 4 (43 files, 824
-deletions). The differ now refuses a stale tree, but cannot fix your checkout.
+The differ refuses a stale tree, but cannot fix your checkout — a stale tree has
+produced a baseline commit that would have reverted the prior run's output
+([references/run-history.md](references/run-history.md)).
 
 Read in parallel; note any absent file in the Sources Log and continue:
 
@@ -119,13 +117,10 @@ re-downloading multi-MB pages the differ just fetched.
 **Exit codes:** `0` no drift · `1` drift found OR a prose Watching trigger
 fired · `2` instrument/channel problem.
 
-**Self-vintage gate (run this BEFORE trusting any diff):** the differ's
-baseline-freshness gate checks the KB, not its OWN code. A stale skill checkout
-re-manufactures finding #36: measured 2026-08-24, a 208-commits-behind
-`~/.claude` reported phantom drift (+4 "otel events" that were exactly the four
-trace-span names run 6b had moved out). Compare the skill checkout to
-origin/main first; when behind, run the differ from an origin/main worktree of
-claude-config and pass an origin/main worktree of the KB via `--kb`.
+**Self-vintage gate:** a stale skill checkout reports phantom drift
+([references/run-history.md](references/run-history.md)). When `code_freshness()`
+(Step 0b) refuses, run the differ from an origin/main worktree of claude-config
+and pass an origin/main worktree of the KB via `--kb`.
 
 **`[BASELINE_STALE]` / `[BASELINE_UNKNOWN]`** = the `--kb` tree is not proven current with
 `origin/main`; the run stops (exit 2). Fix the checkout. `--allow-stale-baselines` is for
@@ -152,12 +147,10 @@ plausible phenomenon is a detection bug until proven otherwise.
 ### A `REMOVED` row on a RECONCILED baseline: check provenance before grading it
 
 This tool reads ONE source (the docs). Step 2c merges a SECOND (our telemetry) into
-the same baseline files, so an observed-only value — which cannot appear in a docs
-extraction — reported REMOVED **forever**: 25 phantom rows on run 3, the arithmetic
-exact (436 − 412 = the 24 merged activity types; 29 − 28 = `subagent_completed`).
-
-Fixed 2026-08-01 via per-value `observed_values` + the `OBSERVED_ONLY` verdict. A
-held-out value is **unchecked by this tool by design**, and both current ones back
+the same baseline files; per-value `observed_values` and the `OBSERVED_ONLY` verdict
+keep those values out of the docs diff (before that, every observed-only value
+reported REMOVED forever — [references/run-history.md](references/run-history.md)).
+A held-out value is **unchecked by this tool by design**, and both current ones back
 *closed-set* detector predicates, so only the Athena leg can catch a rename of them.
 Never "fix" a phantom removal by deleting the value — that re-opens the blindness
 Step 2c exists to close. Mechanics, and what to do when a baseline has
@@ -176,31 +169,25 @@ Step 2c exists to close. Mechanics, and what to do when a baseline has
    codify improvisations in the same run, or they are re-derived next run).
 
 **Extract from the DECLARATION marker, never from surrounding prose.** A pattern
-loose enough to match a path mentioned in a sentence will capture path
-**PREFIXES** as if they were endpoints: "Download via `GET
-.../apps/artifacts/{id}/content`" yielded a phantom `/apps/artifacts` fact.
-Anchor on the vendor's own declaration form — `**<verb>** \`<path>\`` — which
-gave 31 operations / 28 paths with **zero declared operations missed**. Two
-follow-ons this makes explicit:
+loose enough to match a path mentioned in a sentence captures path **PREFIXES** as
+if they were endpoints. Anchor on the vendor's own declaration form —
+`**<verb>** \`<path>\`` (measured precision:
+[references/run-history.md](references/run-history.md)). Two follow-ons:
 
 - **Capture the VERB with the path** (`kind="pair"`), because one path can carry
   both `GET` and `DELETE`. A `map`-shaped fact keyed on path alone silently
   dedupes them and undercounts the surface.
-- **A prefix is NOT probeable as a collection.** Having produced the phantom
-  prefixes, I then probed them, got `404`, and reported real registry rows as
-  *vendor phantoms* — a correction I had to issue. A 404 on a path you
-  synthesized is evidence about **your extractor**, not about the vendor. Before
-  grading any path `404`/absent, confirm the path came from a declaration marker
-  and not from your own regex's truncation of a longer one.
+- **A prefix is NOT probeable as a collection.** A 404 on a path you synthesized
+  is evidence about **your extractor**, not about the vendor. Before grading any
+  path `404`/absent, confirm the path came from a declaration marker and not from
+  your own regex's truncation of a longer one.
 
 ---
 
 ## Step 2c: Reconcile against LIVE data (MANDATORY when AWS is reachable)
 
 Step 2 asks the vendor. This step asks **our own pipeline** — the only source that
-can reveal a surface the docs omit. Skipping it is what let 24 live activity types
-and a live-and-already-consumed OTel event sit outside the baselines indefinitely
-(see *What "authoritative" means here*).
+can reveal a surface the docs omit (see *What "authoritative" means here*).
 
 ```bash
 # Full: observed inventory + canned Watching checks + reachability probes.
@@ -222,9 +209,8 @@ python3 scripts/reconcile_observed.py --kb <kb-dir> --probe --timeout 1800
 ```
 
 All Athena queries in a run go as **one concurrent batch** (start all, poll
-all): wall-clock is ~max of the scans, not their sum — run 6 measured the
-serial form at 3–8 min *per query*, the run's dominant cost. The `--timeout`
-budget is shared by the whole batch.
+all): wall-clock is ~max of the scans, not their sum. The `--timeout` budget is
+shared by the whole batch.
 
 **`--watch` verdicts:** a MISSING baselined Desktop type (a rename — the only
 detectable signature) alarms; a credential-pair threshold crossing
@@ -236,10 +222,9 @@ for reading, never auto-alarmed — check appearances by reading names
 (finding #22). Lake naming/columns: `references/athena-lake-contract.md`.
 
 **A timeout is not "no data" — recover it.** Budget is `DEFAULT_ATHENA_TIMEOUT_S`
-(900 s); measured 2026-08-11 the `otel-events` query scans **228 GB** and finishes at
-**~460 s**, so the old 240 s literal made this MANDATORY step exit 2 before diffing. The
-query is usually **still RUNNING**: the error prints its id and poll command. Never let a
-timeout stand as a live-leg result — it is the only leg that sees what the docs omit.
+(900 s; the largest scan runs ~460 s). On timeout the query is usually **still
+RUNNING**: the error prints its id and poll command. Never let a timeout stand as a
+live-leg result — it is the only leg that sees what the docs omit.
 
 **Read these verdicts correctly — they are not symmetric:**
 
@@ -259,9 +244,7 @@ Two hard rules on the probe leg:
    non-GET method, and no compliance channel is in the probe set at all.
 2. **A 400 "field required" is REACHABLE, not a gap.** The request was incomplete,
    not the endpoint absent — an absent endpoint 404s, a wrong key class 401s, a
-   missing scope 403s. The first run of this script reported *0/11 analytics
-   endpoints unreachable* on exactly this confusion, when all 11 had been verified
-   200 the same day. `classify_probe()` owns that mapping; a missing Keychain key
+   missing scope 403s. `classify_probe()` owns that mapping; a missing Keychain key
    reports `SKIPPED_NO_KEY` (an instrument gap) and never as unreachable.
 
 If `--update-baseline` is passed, `UNDOCUMENTED` values are merged into their
@@ -372,16 +355,11 @@ alone.
 
 #### The grep must be WIDE, or it manufactures false gaps
 
-A "we don't collect X" claim has been wrong **four times in one session** —
-every time from a grep that was too narrow, not from a missing grep. The
-implementation was in a module the searcher didn't have in mind:
+Every wrong "we don't collect X" claim on record came from a grep that was too
+narrow, not from a missing grep — the implementation was in a module the searcher
+didn't have in mind ([references/run-history.md](references/run-history.md)).
 
-| What I grepped | Where it actually was |
-|---|---|
-| `compliance_poller.py` for `/settings` | `anthropic_audit_v2/compliance.py:248` |
-| `lambda/*.py` for `organizations/analytics` | `anthropic_audit_v2/analytics.py:44` |
-
-**Three rules, each learned the hard way:**
+**Three rules:**
 
 1. **Grep the FIELD NAME, not the endpoint path.** A path can be assembled
    (`f"{BASE}/organizations/{uuid}/settings"`) and never appear as a literal, while
@@ -410,20 +388,14 @@ grep -rn -A2 'name = "<field>"' ~/Documents/GitHub/mcp-infra
 evidence about the module you searched (`verify-before-assuming.md`: absence in a
 bounded search is a property of the search).
 
-Three questions, each with a recorded failure:
+Three questions, each with a recorded failure
+([references/run-history.md](references/run-history.md)):
 
 1. **"We never collect this" — do we already?** Per the three rules above: field
-   name, every repo, and check for an existing guard. *(2026-07-28, twice: five
-   Analytics endpoints called "never probed by us" were live at
-   `anthropic_audit_v2/analytics.py:44`; and a Compliance key inventory called
-   "uncollected" was not only ingested but graded by an always-on credential guard
-   emitting a CloudWatch alarm metric — stronger than the change proposed.)*
+   name, every repo, and check for an existing guard.
 2. **"This would break X" — would it?** Find the consumer and read it. A field
    stored as an untyped string and parsed schema-on-read **absorbs** new values;
-   a typed column or a closed enum **breaks**. *(2026-07-28: a new actor type was
-   graded HIGH for "breaking a SIEM rule keyed on 6 types". No closed actor enum
-   existed anywhere — `actor` is a string column read with `json_extract_scalar`.
-   Correct severity was LOW.)*
+   a typed column or a closed enum **breaks**.
 3. **"This is a new capability" — is the surface reachable for us?** Capability
    != reachability (`verify-before-assuming.md`): a documented feature whose
    enable path is a console we don't govern is not available to us.
@@ -473,29 +445,22 @@ Every finding here has two halves (Step 4b): "the vendor documents X" and "which
 matters because it affects us". **A trigger that watches the vendor cannot expire a
 wrong claim about US.**
 
-Measured 2026-08-08: finding #4 asserted "OTel traces are a live signal we have
-**never enabled**" and armed the trigger *"(beta) removed from the Traces heading"* —
-a vendor-doc watch. Traces were in fact live the entire time, at **1,444,269 spans**
-with `CLAUDE_CODE_ENHANCED_TELEMETRY_BETA=1` deployed fleet-wide by MDM. The trigger
-was well-formed, machine-checkable, and structurally incapable of firing on the half
-that was false. It survived two further runs. Same session: DEFER #3 had already been
-closed by another team, and its closure was **already recorded in this KB's own
-`channels/endpoint-registry.md`** while `INTELLIGENCE.md` still said DEFER.
-
-So, when writing a DEFER:
+A well-formed vendor-doc trigger has survived two runs while the our-side half
+of its finding was false the entire time
+([references/run-history.md](references/run-history.md)). So, when writing a DEFER:
 
 1. Identify which half the finding's action depends on. If the action is "we should
    start collecting X", the load-bearing half is **ours**, and the trigger must be a
    query against **our** telemetry/code/live state — not a doc marker.
 2. **Re-measure every open DEFER's our-system half at the start of each run.** A DEFER
    is a claim about *current* state and nothing notifies this KB when it stops being
-   true; 2 of 4 carried-forward DEFERs were stale on the run that first checked.
+   true.
 3. Reconcile Active Findings against their own `channels/*.md` pages, not just against
    the live system — two pages of one KB disagreeing is worse than uniform staleness,
    because either read alone looks authoritative.
 4. For a documented-but-never-observed condition, get the **denominator** before
-   proposing work. `service_account_actor`: 0 rows of 2,349,182 ⇒ `DOC_ONLY`, not a
-   gap, and not grounds for editing a protected repo.
+   proposing work: 0 rows of millions ⇒ `DOC_ONLY`, not a gap, and not grounds for
+   editing a protected repo.
 
 Finding format (exact field spellings — parsed by later runs):
 
@@ -518,12 +483,10 @@ Finding format (exact field spellings — parsed by later runs):
 - **Qualification**: PASSED — <command and result> | not-applicable — <reason for DEFER/REJECT>
 ```
 
-`API probe`, `Code probe`, and `Severity basis` are **required fields**, added
-2026-07-28 after the first run shipped two findings whose impact halves were
-inferred (one HIGH that should have been LOW, one that should have been REJECT).
-A finding missing them is incomplete, not merely under-documented — and the
-allowed non-value is an explicit `N/A —`/`BLOCKED —` **with a reason**, never a
-blank. The probe is what separates a graded finding from a guess.
+`API probe`, `Code probe`, and `Severity basis` are **required fields**. A finding
+missing them is incomplete, not merely under-documented — the allowed non-value is
+an explicit `N/A —`/`BLOCKED —` **with a reason**, never a blank. The probe is what
+separates a graded finding from a guess.
 
 ---
 
@@ -558,8 +521,7 @@ Archived, reject legacy calendar-observation state or unresolved QUALIFY, and
 update the Watching table. The **per-channel Sources Log dates are bumped by
 the differ itself** (`--update-baseline` implies it; `--update-sources-log`
 does it standalone) — it bumps only fetched-OK channels and WARNS about any
-registered channel with no row (run 5 found 8 silently missing); add missing
-rows by hand with a real note.
+registered channel with no row; add missing rows by hand with a real note.
 Re-run deterministic qualification without applying the edit and resolve it in
 the same run. Update any `channels/*.md` page whose facts changed, and bump the
 `Verified` date in its header.
@@ -592,111 +554,31 @@ Two rules keep it honest:
 - **Vendor docs are a FILTER, not the surface — so they cannot be the only
   source.** `diff_channels.py` asks exactly one question: what do Anthropic's doc
   pages say? A filter returns a subset of what it was pointed at, so the differ is
-  structurally incapable of finding anything the docs OMIT. Measured 2026-07-28:
-  **24 activity types are live in our Compliance feed and absent from the 412-type
-  baseline** (incl. `claude_file_uploaded`, 46,860 events, a DLP signal), and
-  `claude_code.subagent_completed` is live in OTel (7,380 events) and absent from
-  the 28-event baseline **while already being consumed by
-  `otel_usage_briefing.py`** — a vendor rename would break a live consumer with no
-  DRIFT ever firing. Neither is findable by re-reading docs.
-  **Our own telemetry is the second authoritative source**, and for "what does
-  this org actually emit" it is the better one: docs describe the product,
-  telemetry describes us. Run `scripts/reconcile_observed.py` (Step 2c) so the
-  diff is bidirectional.
-- **There is no machine-readable spec to fall back on.** Probed 2026-07-28: all
-  four OpenAPI candidates 404 (`api.anthropic.com/v1/openapi.json`,
-  `platform.claude.com/{,docs/,api/}openapi.json`), and the official
-  `anthropic-sdk-python` `api.md` declares 80 paths — **zero** of them Admin,
-  Analytics, or Compliance. So doc prose genuinely is the only vendor source for
-  our surfaces; the skill is not choosing a weak one. That is exactly why the
-  extraction must be STRUCTURED and the live reconciliation is not optional.
-- **Three false zeros to avoid, all hit on run 3 and all would have shipped a wrong
-  HIGH finding.** (a) Call `enumerate_uncovered_pages()`, never a hand-rolled
-  resolver — mine reported 17 uncovered pages vs the guard's 0 (`.md` keys vs bare
-  names), and the guard is what found the real one-page delta. (b) A Watching trigger
-  names a SPECIFIC page: probing `usage_report/retrieve_claude_code.md` instead of
-  `manage-claude/claude-code-analytics-api.md` returned 0 hits for an exclusion that
-  is intact verbatim. (c) `curl -L` the doc index — `docs/llms.txt` returns **9
-  bytes** without redirects (reads as "no such pages exist") and 56,941 with; check
-  `size_download` before believing any absence.
-- **Extract DECLARED operations, not prose mentions.** The reference renders
-  paths mid-sentence ("Download via `GET .../apps/artifacts/{id}/content`"), and a
-  prose regex captures those *and their prefixes* as if each were an endpoint.
-  Measured on the live compliance page: prose regex → 33 "endpoints"; the
-  `**verb** \`path\`` markers → 31 operations / 28 distinct paths, with **zero
-  declared operations missed**. The old pattern never under-captured; it
-  OVER-captured by 5, all prefixes of real paths — and those 5 phantom rows cost a
-  wrong "we don't call 11 of 33 endpoints" grading, four of which were then probed
-  as collection paths, 404'd, and reported as vendor phantoms when the endpoints
-  are real at their `{id}` form.
+  structurally incapable of finding anything the docs OMIT — live activity types
+  and an already-consumed OTel event have sat outside the baselines that way
+  ([references/run-history.md](references/run-history.md)). **Our own telemetry is
+  the second authoritative source**, and for "what does this org actually emit" it
+  is the better one: docs describe the product, telemetry describes us. Run
+  `scripts/reconcile_observed.py` (Step 2c) so the diff is bidirectional.
+- **There is no machine-readable spec to fall back on.** The OpenAPI candidates
+  404 and the official SDK's `api.md` declares no Admin, Analytics, or Compliance
+  paths, so doc prose genuinely is the only vendor source for our surfaces. That
+  is exactly why the extraction must be STRUCTURED and the live reconciliation is
+  not optional.
+- **Three false zeros to avoid** (each shipped-a-wrong-HIGH near miss is in
+  [references/run-history.md](references/run-history.md)): (a) call
+  `enumerate_uncovered_pages()`, never a hand-rolled resolver; (b) a Watching
+  trigger names a SPECIFIC page — probe that page, not a sibling; (c) `curl -L`
+  the doc index and check `size_download` before believing any absence
+  (`docs/llms.txt` returns 9 bytes without redirects).
 
 ---
 
-## Worked example
+## Worked examples
 
-Real output from the establishing run, 2026-07-27.
-
-### Example 1 — a run that surfaced three detector bugs, not vendor changes
-
-```
-$ python3 scripts/diff_channels.py --kb ~/Documents/knowledge-base --run-date 2026-07-27
-========================================================================
-CLAUDE DATA-CHANNEL DRIFT REPORT
-========================================================================
-channels: 15  drift: 0  new-baseline: 10  problems: 3
-
--- INSTRUMENT / CHANNEL PROBLEMS (fix before trusting any diff) --
-  [INSTRUMENT_BLIND] compliance-activities:
-      extractor activity-actor-types: extracted 0 < min_expected 6
-      -- treat as extractor blindness (page restructured?), NOT as removal
-  [INSTRUMENT_BLIND] compliance-endpoints:
-      extractor compliance-scopes: extracted 0 < min_expected 3
-  [INSTRUMENT_BLIND] gateway:
-      extractor gateway-telemetry-keys: extracted 1 < min_expected 4
-```
-
-Correct reading: **zero of these is a vendor change.** Without the
-`min_expected` floor, the first would have been reported as "Anthropic removed
-all actor types." Diagnosis and fixes, all applied in the same run (Step 2b):
-
-| Extractor | Root cause | Fix |
-|---|---|---|
-| `activity-actor-types` | required backticks; the API **reference** lists actor types as bare schema tokens | dropped the backtick anchor |
-| `compliance-scopes` | pointed at the endpoint reference, which never names scopes | split out a new `compliance-access` channel |
-| `gateway-telemetry-keys` | required backticks; pushed-var list is a plain bullet list | dropped the backtick anchor |
-
-Fixing #1 produced a genuine **HIGH** finding: the reference carries **9** actor
-types (`federated_identity_actor`, `service_account_actor`, `system_actor` beyond
-the prose guide's 6). A SIEM rule keyed on a 6-member union silently drops three
-principal classes.
-
-Post-fix, clean:
-
-```
-channels: 15  drift: 0  new-baseline: 14  problems: 0
-  activity-types: 412 values captured
-  activity-actor-types: 9 values captured
-  analytics-endpoint-paths: 11 values captured
-```
-
-### Example 2 — what a real drift run looks like
-
-```
--- DRIFT --
-  otel  (https://code.claude.com/docs/en/monitoring-usage.md)
-    otel-events: 28 baseline -> 29 live
-      + claude_code.sandbox_denied   [NEW]
-      why it matters: Event types are the audit-grade surface.
-                      New event = new detection opportunity.
-
-  analytics-enterprise  (https://platform.claude.com/docs/en/api/admin/analytics.md)
-    analytics-endpoint-paths: 11 baseline -> 10 live
-      - /v1/organizations/analytics/plugins   [REMOVED]
-```
-
-Grade these differently (Step 3): the **addition** is MEDIUM — an opportunity.
-The **removal** is HIGH — if anything we run calls that endpoint, it is already
-broken and we hadn't noticed. Removals outrank additions.
+Two real runs — the establishing run that surfaced three detector bugs (not
+vendor changes), and what a real drift run looks like — are in
+[references/examples.md](references/examples.md).
 
 ## Reference
 
@@ -704,20 +586,20 @@ broken and we hadn't noticed. Removals outrank additions.
 - `references/adding-a-channel.md` — how to add a channel or extractor safely
 - `references/athena-lake-contract.md` — lake naming/columns the queries assume
   (bare event names, `sweep_*` columns, `principal`; read BEFORE hand-authoring
-  any Athena query — run 6 burned three round-trips rediscovering these)
+  any Athena query)
+- `references/run-history.md` — dated measurements behind the rules above
 - `scripts/diff_channels.py` — compatibility shim; the ENGINE lives at
-  `skills/_shared/endpoint-drift/diff_engine.py` (moved 2026-08-22) and has a
-  second consumer, `gather-openai-endpoints` — an engine change must keep both
-  vendors' test suites green
+  `skills/_shared/endpoint-drift/diff_engine.py` and has a second consumer,
+  `gather-openai-endpoints` — an engine change must keep both vendors' test
+  suites green
 - `scripts/channel_specs.py` — the channel + extractor + trigger registry
   (data, not logic; dataclasses import from `_shared/endpoint-drift/spec_types.py`)
 - `tests/test_diff_channels.py` — fixture tests that prove the differ before use
 
-**Extractor authoring rule (audited 2026-08-22):** never guard an open
-vocabulary with a closed alternation. The verb-suffix whitelist (80 phantoms +
-missed real types), the webhook prefix family, the metric family list, the
-scope verbs (`org:admin` missed), and the `1[mhd]` bucket literal were all the
-same defect. Anchor on the vendor's DECLARATION FORM (table cell, enum bullet
+**Extractor authoring rule:** never guard an open vocabulary with a closed
+alternation (five extractors shared that one defect —
+[references/run-history.md](references/run-history.md)). Anchor on the vendor's
+DECLARATION FORM (table cell, enum bullet
 + description, `**Event Name**:` marker) and leave the value half open. Where
 a closed set is genuinely unavoidable, mark it `ACCEPTED-CLOSED` with the
 reason in the spec comment (see `hook-verdict-fields`, `otel-env-vars`).
