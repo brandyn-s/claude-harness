@@ -32,8 +32,8 @@ def test_detects_ignore_instructions():
     )
     assert rc == 0  # Non-blocking
     out = json.loads(stdout)
-    assert "systemMessage" in out
-    assert "injection" in out["systemMessage"].lower()
+    assert "hookSpecificOutput" in out
+    assert "injection" in out["hookSpecificOutput"]["additionalContext"].lower()
 
 
 def test_detects_system_tag():
@@ -46,7 +46,7 @@ def test_detects_system_tag():
     )
     assert rc == 0
     out = json.loads(stdout)
-    assert "systemMessage" in out
+    assert "hookSpecificOutput" in out
 
 
 def test_detects_disregard_instructions():
@@ -59,7 +59,7 @@ def test_detects_disregard_instructions():
     )
     assert rc == 0
     out = json.loads(stdout)
-    assert "systemMessage" in out
+    assert "hookSpecificOutput" in out
 
 
 def test_detects_important_directive():
@@ -72,7 +72,7 @@ def test_detects_important_directive():
     )
     assert rc == 0
     out = json.loads(stdout)
-    assert "systemMessage" in out
+    assert "hookSpecificOutput" in out
 
 
 def test_detects_override_security():
@@ -85,7 +85,7 @@ def test_detects_override_security():
     )
     assert rc == 0
     out = json.loads(stdout)
-    assert "systemMessage" in out
+    assert "hookSpecificOutput" in out
 
 
 def test_detects_you_are_now_mode():
@@ -98,7 +98,7 @@ def test_detects_you_are_now_mode():
     )
     assert rc == 0
     out = json.loads(stdout)
-    assert "systemMessage" in out
+    assert "hookSpecificOutput" in out
 
 
 def test_detects_injection_at_low_effort():
@@ -113,7 +113,7 @@ def test_detects_injection_at_low_effort():
     )
     assert rc == 0
     out = json.loads(stdout)
-    assert "injection" in out["systemMessage"].lower()
+    assert "injection" in out["hookSpecificOutput"]["additionalContext"].lower()
 
 
 def test_clean_mcp_result_no_warning():
@@ -152,7 +152,7 @@ def test_large_result_compression_warning():
     )
     assert rc == 0
     out = json.loads(stdout)
-    assert "CONTEXT EFFICIENCY" in out.get("systemMessage", "")
+    assert "CONTEXT EFFICIENCY" in out.get("hookSpecificOutput", {}).get("additionalContext", "")
 
 
 def test_very_large_result_critical_warning():
@@ -162,7 +162,7 @@ def test_very_large_result_critical_warning():
     )
     assert rc == 0
     out = json.loads(stdout)
-    assert "CRITICAL" in out.get("systemMessage", "")
+    assert "CRITICAL" in out.get("hookSpecificOutput", {}).get("additionalContext", "")
 
 
 def test_invalid_json_input():
@@ -188,8 +188,8 @@ def test_detects_injection_in_list_result():
     })
     assert rc == 0
     out = json.loads(stdout)
-    assert "systemMessage" in out
-    assert "injection" in out["systemMessage"].lower()
+    assert "hookSpecificOutput" in out
+    assert "injection" in out["hookSpecificOutput"]["additionalContext"].lower()
 
 
 def test_detects_injection_in_dict_result():
@@ -200,7 +200,7 @@ def test_detects_injection_in_dict_result():
     })
     assert rc == 0
     out = json.loads(stdout)
-    assert "systemMessage" in out
+    assert "hookSpecificOutput" in out
 
 
 def test_clean_dict_result_no_warning():
@@ -225,7 +225,7 @@ def test_injection_and_large_result_emits_both(monkeypatch=None):
     assert rc == 0
     # Exactly one JSON object on stdout (combined message, not JSONL).
     out = json.loads(stdout)
-    msg = out["systemMessage"]
+    msg = out["hookSpecificOutput"]["additionalContext"]
     assert "prompt injection" in msg.lower()      # injection warning present
     assert "CONTEXT EFFICIENCY" in msg or "CRITICAL" in msg  # compression nudge present
 
@@ -238,4 +238,4 @@ def test_large_result_only_still_emits_compression():
     })
     assert rc == 0
     out = json.loads(stdout)
-    assert "CONTEXT EFFICIENCY" in out["systemMessage"]
+    assert "CONTEXT EFFICIENCY" in out["hookSpecificOutput"]["additionalContext"]

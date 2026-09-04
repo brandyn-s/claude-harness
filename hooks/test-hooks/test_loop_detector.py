@@ -60,7 +60,7 @@ def test_three_identical_calls_triggers_loop():
     rc, stdout, _ = run_hook(HOOK, inp)
     assert rc == 0
     out = json.loads(stdout)
-    assert "LOOP DETECTED" in out.get("systemMessage", "")
+    assert "LOOP DETECTED" in out.get("hookSpecificOutput", {}).get("additionalContext", "")
 
 
 def test_no_loop_with_different_inputs():
@@ -92,7 +92,7 @@ def test_four_failures_triggers_storm():
     rc, stdout, _ = run_hook(HOOK, inp)
     assert rc == 0
     out = json.loads(stdout)
-    assert "RETRY STORM" in out.get("systemMessage", "")
+    assert "RETRY STORM" in out.get("hookSpecificOutput", {}).get("additionalContext", "")
 
 
 def test_three_failures_no_storm():

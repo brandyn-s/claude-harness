@@ -10,7 +10,7 @@ with auth_constraint: main_thread_only, supplemented by keyword fallback for
 prompts that don't reference a specific skill.
 
 Exit codes:
-  0 = continue (with optional systemMessage warning)
+  0 = continue (with optional additionalContext warning to the model)
 """
 import json
 import os
@@ -518,19 +518,17 @@ def main():
     # Build the hook output. The warnings `message` and the Phase-F
     # additionalContext are independent: either, both, or neither may be set.
     # When neither is set we print nothing (identical to pre-Phase-F output).
-    out = {}
+    # Warnings and the Phase-F worktree instruction both go to the model through
+    # additionalContext; the former top-level "message" was undocumented and
+    # never reached it (probed 2026-09-03).
+    parts = []
     if warnings:
-        out["message"] = " | ".join(warnings)
+        parts.append(" | ".join(warnings))
     if extra_context:
-        # Inject the "work only in this worktree" instruction + the worktree
-        # cwd into the subagent via additionalContext (PreToolUse convention).
-        out["hookSpecificOutput"] = {
-            "hookEventName": "PreToolUse",
-            "additionalContext": extra_context,
-        }
-    if out:
-        print(json.dumps(out))
-
+        parts.append(extra_context)
+    if parts:
+        print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse",
+                                                 "additionalContext": "\n\n".join(parts)}}))
     sys.exit(0)
 
 

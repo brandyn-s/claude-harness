@@ -191,12 +191,12 @@ def _warn_unwired_githooks(cwd):
         configured = _run_git(["config", "--get", "core.hooksPath"], cwd)
         if configured:
             return
-        print(json.dumps({"systemMessage": (
+        print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": (
             "[git-empty-push-guard] This clone ships `.githooks/` but "
             "`core.hooksPath` is UNSET, so pre-push gates did NOT run for this "
             "push — silently (no error, no skipped-hook notice). Wire it once "
             "per clone:  git config core.hooksPath .githooks"
-        )}))
+        )}}))
     except Exception:
         return  # advisory only — never let this path affect the push
 

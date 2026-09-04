@@ -33,7 +33,7 @@ the same command. Generic unquoted variables remain out of scope.
 
 DECISION CONTRACT — ADVISORY ONLY
 ---------------------------------
-Prints a top-level {"systemMessage": ...} and exits 0. It does NOT block, per
+Prints hookSpecificOutput.additionalContext (the model-facing channel) and exits 0. It does NOT block, per
 verify-effectiveness's enforcement gate: these shapes are recoverable by
 re-quoting or using arrays. Any blocking proposal requires a separate,
 evidence-backed review and explicit authorization.
@@ -303,7 +303,7 @@ _COLON_CONSEQUENCE_ABORT = (
 
 
 def advise(token, branch=None):
-    """Build the advisory. Top-level systemMessage warns; it does not block.
+    """Build the advisory text (emitted as additionalContext by main); it does not block.
 
     The FIX suggestion is branch-specific. Quoting only the value after the first
     `=` is right for `--include=*.py` and WRONG for a query string: in
@@ -319,7 +319,7 @@ def advise(token, branch=None):
         assert m is not None, f"colon-modifier token does not re-match: {token!r}"
         name, mod = m.group("name"), m.group("mod")
         return {
-            "systemMessage": _COLON_MESSAGE.format(
+            "advice": _COLON_MESSAGE.format(
                 token=token, name=name, mod=mod,
                 meaning=_COLON_MEANINGS.get(mod, "a history modifier"),
                 consequence=(
@@ -334,10 +334,10 @@ def advise(token, branch=None):
     if branch in {"set-dashdash", "flag-packing", "for-in-split"}:
         name = token[2:-1] if token.startswith("${") else token[1:]
         return {
-            "systemMessage": _WORD_SPLIT_MESSAGE.format(token=token, name=name)
+            "advice": _WORD_SPLIT_MESSAGE.format(token=token, name=name)
         }
     if branch == "url-query":
-        return {"systemMessage": _MESSAGE.format(tok=token, fix=f'"{token}"')}
+        return {"advice": _MESSAGE.format(tok=token, fix=f'"{token}"')}
     fix = token
     if "=" in token:
         key, _, value = token.partition("=")
@@ -346,7 +346,7 @@ def advise(token, branch=None):
         parts = token.split(None, 1)
         if len(parts) == 2:
             fix = f"{parts[0]} '{parts[1]}'"
-    return {"systemMessage": _MESSAGE.format(tok=token, fix=fix)}
+    return {"advice": _MESSAGE.format(tok=token, fix=fix)}
 
 
 def _log(branch, fired):
@@ -369,7 +369,7 @@ def main():
         fired, token, branch = check_unquoted_glob(command)
         _log(branch, fired)
         if fired:
-            print(json.dumps(advise(token, branch)))
+            print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": advise(token, branch)["advice"]}}))
         sys.exit(0)
     except Exception:
         # Fail OPEN. An ADVISORY guard has nothing to protect by refusing, and a

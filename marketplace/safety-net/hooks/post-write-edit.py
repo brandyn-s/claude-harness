@@ -183,12 +183,12 @@ def check_python_encoding(file_path, content):
             print(
                 json.dumps(
                     {
-                        "systemMessage": (
+                        "hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": (
                             f"[encoding] {os.path.basename(file_path)}: open() at "
                             f"{lines_str} lacks an explicit encoding=. Add "
                             f"encoding='utf-8' for Windows portability "
                             f"(harmless on macOS/Linux; cp1252-corrupts on Windows)."
-                        ),
+                        )},
                     }
                 )
             )
@@ -216,12 +216,12 @@ def check_str_replace_crlf(file_path, content):
     print(
         json.dumps(
             {
-                "systemMessage": (
+                "hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": (
                     f"{os.path.basename(file_path)}: .replace('\\n', ...) used "
                     f"alongside a file read. On Windows, CRLF endings in the "
                     f"source can make this silently no-op. Verify the read "
                     f"opened in binary mode or that line endings are known."
-                ),
+                )},
             }
         )
     )
@@ -235,7 +235,7 @@ def check_py_compile(file_path):
         print(
             json.dumps(
                 {
-                    "systemMessage": f"Syntax error in {os.path.basename(file_path)}: {e.msg}",
+                    "hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": f"Syntax error in {os.path.basename(file_path)}: {e.msg}"},
                 }
             )
         )
@@ -395,7 +395,7 @@ def check_secrets(file_path, content):
         print(
             json.dumps(
                 {
-                    "systemMessage": f"Possible secrets in {os.path.basename(file_path)}: {', '.join(findings)}",
+                    "hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": f"Possible secrets in {os.path.basename(file_path)}: {', '.join(findings)}"},
                 }
             )
         )

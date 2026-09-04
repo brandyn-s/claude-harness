@@ -6,7 +6,7 @@ tool calls and detects:
 - No-op loops: same tool + same args repeated >=3 times
 - Retry storms: same tool, all failing, >=4 times
 
-Non-blocking (always exit 0). Emits systemMessage to redirect agent.
+Non-blocking (always exit 0). Emits hookSpecificOutput.additionalContext to redirect the agent (systemMessage only reached the user).
 """
 
 import hashlib
@@ -207,7 +207,7 @@ def main():
         )
 
     if warnings:
-        print(json.dumps({"systemMessage": " | ".join(warnings)}))
+        print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": " | ".join(warnings)}}))
 
     sys.exit(0)  # Always non-blocking
 

@@ -4,7 +4,7 @@
 PostToolUse hook for MCP tools that scans tool results for embedded
 instruction patterns that could hijack agent behavior.
 
-Non-blocking (always exit 0). Emits systemMessage warning when
+Non-blocking (always exit 0). Emits an additionalContext warning to the model when
 injection patterns detected so the agent treats results as data.
 Only applies to MCP tool results (mcp__* prefix).
 """
@@ -79,7 +79,7 @@ def main():
     if not tool_result:
         sys.exit(0)
 
-    # Collect every advisory into ONE systemMessage. Two separate
+    # Collect every advisory into ONE additionalContext payload. Two separate
     # json.dumps prints would put two JSON objects on stdout, and whether the
     # hook protocol reads that as JSONL or a single document is ambiguous — so
     # accumulate and emit once. (Pre-2026-06-10 the code emitted the injection
@@ -114,7 +114,7 @@ def main():
         messages.append(compress_msg)
 
     if messages:
-        print(json.dumps({"systemMessage": "\n\n".join(messages)}))
+        print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": "\n\n".join(messages)}}))
 
     sys.exit(0)  # Always non-blocking
 

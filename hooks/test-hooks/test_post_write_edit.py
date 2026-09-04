@@ -244,12 +244,12 @@ def test_str_replace_crlf_with_file_read_warns(tmp_path):
         if line.strip():
             try:
                 out = json.loads(line)
-                # advisory now emits systemMessage (not the invalid decision:"warn")
-                if "crlf" in out.get("systemMessage", "").lower():
+                # advisory now emits hookSpecificOutput.additionalContext (not the invalid decision:"warn")
+                if "crlf" in out.get("hookSpecificOutput", {}).get("additionalContext", "").lower():
                     found_warn = True
             except json.JSONDecodeError:
                 pass
-    assert found_warn, "expected CRLF systemMessage advisory for str.replace near file read"
+    assert found_warn, "expected CRLF additionalContext advisory for str.replace near file read"
 
 
 def test_str_replace_without_file_read_no_warn(tmp_path):
@@ -301,8 +301,8 @@ def test_python_syntax_error_warns(tmp_path):
     assert rc == 0
     if stdout.strip():
         out = json.loads(stdout)
-        # advisory now emits systemMessage (not the invalid decision:"warn"/reason shape)
-        assert "syntax" in out.get("systemMessage", "").lower()
+        # advisory now emits hookSpecificOutput.additionalContext (not the invalid decision:"warn"/reason shape)
+        assert "syntax" in out.get("hookSpecificOutput", {}).get("additionalContext", "").lower()
 
 
 def test_python_valid_syntax_no_warn(tmp_path):
@@ -330,26 +330,26 @@ def test_secret_detection_api_key(tmp_path):
     assert rc == 0
     if stdout.strip():
         out = json.loads(stdout)
-        # Advisory now emits systemMessage (NOT the invalid decision:"warn" the PostToolUse
+        # Advisory now emits hookSpecificOutput.additionalContext (NOT the invalid decision:"warn" the PostToolUse
         # schema silently drops — mega-retro FLAW on eff98a2f, 16x recurrence). The advisory
-        # content moved from "reason" into "systemMessage".
-        msg = out.get("systemMessage", "")
-        assert "secret" in msg.lower() or "key" in msg.lower(), f"expected systemMessage advisory, got {out}"
+        # content moved from "reason" into hookSpecificOutput.additionalContext.
+        msg = out.get("hookSpecificOutput", {}).get("additionalContext", "")
+        assert "secret" in msg.lower() or "key" in msg.lower(), f"expected additionalContext advisory, got {out}"
 
 
 def test_secret_advisory_uses_systemmessage_not_warn(tmp_path):
     """Regression for the mega-retro-found bug: the secret/syntax/CRLF advisories emitted
     {"decision":"warn"}, which the PostToolUse hook-output schema (approve|block only) silently
-    drops — so the warning never reached anyone (16x on eff98a2f). They must emit systemMessage."""
+    drops — so the warning never reached anyone (16x on eff98a2f). They must emit additionalContext, the only channel the model sees."""
     py_file = tmp_path / "leak.py"
     py_file.write_text('key = "AKIAIOSFODNN7EXAMPLE"\n', encoding="utf-8")
     rc, stdout, _ = run_hook(HOOK, make_write_result(str(py_file)))
     assert rc == 0
     assert stdout.strip(), "secret detection should produce advisory output"
     out = json.loads(stdout.splitlines()[0])
-    # the invalid 'warn' decision must NOT appear; the advisory must be a systemMessage
+    # the invalid 'warn' decision must NOT appear; the advisory must be additionalContext
     assert out.get("decision") != "warn", "decision:'warn' is invalid for PostToolUse — silently dropped"
-    assert out.get("systemMessage"), f"advisory must use systemMessage, got keys {list(out.keys())}"
+    assert out.get("hookSpecificOutput", {}).get("additionalContext"), f"advisory must use additionalContext, got keys {list(out.keys())}"
 
 
 def test_secret_detection_aws_key(tmp_path):
@@ -359,7 +359,7 @@ def test_secret_detection_aws_key(tmp_path):
     assert rc == 0
     if stdout.strip():
         out = json.loads(stdout)
-        msg = out.get("systemMessage", "").lower()
+        msg = out.get("hookSpecificOutput", {}).get("additionalContext", "").lower()
         assert "aws" in msg or "key" in msg
 
 

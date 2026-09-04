@@ -11,7 +11,7 @@ def test_no_auth_keywords_no_warning():
     assert rc == 0
     if out.strip():
         data = json.loads(out)
-        assert "Auth warning" not in data.get("message", "")
+        assert "Auth warning" not in data.get("hookSpecificOutput", {}).get("additionalContext", "")
 
 
 def test_crowdstrike_keyword_warns():
@@ -21,7 +21,7 @@ def test_crowdstrike_keyword_warns():
     assert rc == 0
     if out.strip():
         data = json.loads(out)
-        assert "Auth warning" in data.get("message", "") or "crowdstrike" in data.get("message", "").lower()
+        assert "Auth warning" in data.get("hookSpecificOutput", {}).get("additionalContext", "") or "crowdstrike" in data.get("hookSpecificOutput", {}).get("additionalContext", "").lower()
 
 
 def test_multiple_auth_keywords():
@@ -31,7 +31,7 @@ def test_multiple_auth_keywords():
     assert rc == 0
     if out.strip():
         data = json.loads(out)
-        msg = data.get("message", "").lower()
+        msg = data.get("hookSpecificOutput", {}).get("additionalContext", "").lower()
         assert "crowdstrike" in msg
         assert "tenable" in msg
 

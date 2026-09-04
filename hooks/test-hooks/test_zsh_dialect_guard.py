@@ -267,13 +267,13 @@ class AdvisoryContract(unittest.TestCase):
         )
         self.assertEqual(r.returncode, 0, "an advisory guard must never block")
         out = json.loads(r.stdout.decode())
-        self.assertIn("systemMessage", out)
+        self.assertIn("hookSpecificOutput", out)
         self.assertNotIn(
             "permissionDecision",
             out,
             "a permissionDecision would make this a GATE, not an advisory",
         )
-        msg = out["systemMessage"]
+        msg = out["hookSpecificOutput"]["additionalContext"]
         self.assertIn("--include=*.py", msg)
         self.assertIn("--include='*.py'", msg, "must show the QUOTED fix")
         self.assertIn("PHANTOM 0-HIT", msg)
@@ -304,7 +304,7 @@ class AdvisoryContract(unittest.TestCase):
             {"tool_name": "Bash", "tool_input": {"command": "find . -name *.md"}}
         )
         self.assertEqual(r.returncode, 0)
-        msg = json.loads(r.stdout.decode())["systemMessage"]
+        msg = json.loads(r.stdout.decode())["hookSpecificOutput"]["additionalContext"]
         self.assertIn("-name '*.md'", msg)
 
     def test_word_splitting_advisory_explains_wrong_argv_and_stays_nonblocking(self):
@@ -314,7 +314,7 @@ class AdvisoryContract(unittest.TestCase):
         self.assertEqual(r.returncode, 0, "the word-splitting check is advisory")
         out = json.loads(r.stdout.decode())
         self.assertNotIn("permissionDecision", out)
-        msg = out["systemMessage"]
+        msg = out["hookSpecificOutput"]["additionalContext"]
         self.assertIn("zsh does not word-split $spec", msg)
         self.assertIn("whole string", msg)
         self.assertIn("array", msg)
@@ -331,7 +331,7 @@ class AdvisoryContract(unittest.TestCase):
         fired, token, branch = G.check_unquoted_glob("for r in $repos; do :; done")
         self.assertTrue(fired)
         self.assertEqual(branch, "for-in-split")
-        msg = G.advise(token, branch)["systemMessage"]
+        msg = G.advise(token, branch)["advice"]
         self.assertIn("does not word-split $repos", msg)
         self.assertIn("${=repos}", msg)
         self.assertNotIn("will ABORT", msg)
@@ -349,7 +349,7 @@ class AdvisoryContract(unittest.TestCase):
             }
         )
         self.assertEqual(r.returncode, 0)
-        msg = json.loads(r.stdout.decode())["systemMessage"]
+        msg = json.loads(r.stdout.decode())["hookSpecificOutput"]["additionalContext"]
         self.assertIn("$FLAGS", msg)
         self.assertNotIn("sensitive-example-value", msg)
 
@@ -538,7 +538,7 @@ class UrlQueryBranch(unittest.TestCase):
         fix the problem is worse than none: it is followed.
         """
         tok = "repos/o/r/x.toml?ref=v0.11.0"
-        msg = G.advise(tok, "url-query")["systemMessage"]
+        msg = G.advise(tok, "url-query")["advice"]
         self.assertIn(f'"{tok}"', msg)
         self.assertNotIn("?ref='v0.11.0'", msg)
 
@@ -560,7 +560,7 @@ class UrlQueryBranch(unittest.TestCase):
 
     def test_other_branches_keep_their_own_fix_shape(self):
         # Regression guard: the branch param must not change existing advice.
-        msg = G.advise("--include=*.py", "option-value")["systemMessage"]
+        msg = G.advise("--include=*.py", "option-value")["advice"]
         self.assertIn("--include='*.py'", msg)
 
     def test_replay_runs_fixtures_without_private_transcripts(self):
@@ -747,7 +747,7 @@ class ColonModifierBranch(unittest.TestCase):
     def test_advisory_names_the_variable_the_letter_and_the_braced_fix(self):
         fired, tok, branch = G.check_unquoted_glob('docker build -t "$ECR:latest" .')
         self.assertTrue(fired)
-        msg = G.advise(tok, branch)["systemMessage"]
+        msg = G.advise(tok, branch)["advice"]
         self.assertIn("$ECR", msg)
         self.assertIn("lowercased", msg)
         self.assertIn("${ECR}", msg, "must show the braced fix")
@@ -761,7 +761,7 @@ class ColonModifierBranch(unittest.TestCase):
         """
         fired, tok, branch = G.check_unquoted_glob('git log "$br:squashed"')
         self.assertTrue(fired)
-        msg = G.advise(tok, branch)["systemMessage"]
+        msg = G.advise(tok, branch)["advice"]
         self.assertIn("bad substitution", msg)
         self.assertNotIn("No error is raised", msg)
 
@@ -773,16 +773,16 @@ class ColonModifierBranch(unittest.TestCase):
         """
         fired, tok, branch = G.check_unquoted_glob('docker build -t "$ECR:latest" .')
         self.assertTrue(fired)
-        msg = G.advise(tok, branch)["systemMessage"]
+        msg = G.advise(tok, branch)["advice"]
         self.assertIn("No error is raised", msg)
         self.assertNotIn("bad substitution", msg)
 
     def test_git_note_appears_only_for_rev_and_refspec_modifiers(self):
         """Scoped so the note lands where it helps instead of padding every message."""
         _f, tok, br = G.check_unquoted_glob("git rev-parse $sha:rules/x.md")
-        self.assertIn("refspec", G.advise(tok, br)["systemMessage"])
+        self.assertIn("refspec", G.advise(tok, br)["advice"])
         _f2, tok2, br2 = G.check_unquoted_glob('docker build -t "$ECR:latest" .')
-        self.assertNotIn("refspec", G.advise(tok2, br2)["systemMessage"])
+        self.assertNotIn("refspec", G.advise(tok2, br2)["advice"])
 
     def test_advisory_exits_zero_end_to_end(self):
         """The branch must never block — the guard's whole contract."""
@@ -796,8 +796,8 @@ class ColonModifierBranch(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         emitted = json.loads(result.stdout)
-        self.assertIn("systemMessage", emitted)
-        self.assertIn("$ECR", emitted["systemMessage"])
+        self.assertIn("hookSpecificOutput", emitted)
+        self.assertIn("$ECR", emitted["hookSpecificOutput"]["additionalContext"])
 
     def test_existing_branches_keep_precedence(self):
         """The colon branch is evaluated LAST, deliberately.

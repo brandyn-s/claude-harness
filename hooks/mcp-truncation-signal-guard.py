@@ -9,7 +9,7 @@ Three signal families (spec section "Detection"):
   3. page exhaustion   — integer compare `scannedCount < totalCount`
 
 Marker: TRUNCATION_SIGNAL (staleness tracking).
-Advisory ONLY (systemMessage; exit 0 always). Sampling is often deliberate —
+Advisory ONLY (additionalContext to the model; exit 0 always). Sampling is often deliberate —
 blocking would train routing-around, which platform-constraints forbids.
 INTERRUPTION: safe — read-only observer, no state.
 """
@@ -114,7 +114,7 @@ def main():
             sys.exit(0)
         findings = detect(tool_name, data.get('tool_response'))
         if findings:
-            print(json.dumps({'systemMessage': '\n'.join(findings)}))
+            print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": '\n'.join(findings)}}))
         sys.exit(0)
     except Exception:
         sys.exit(0)  # a guard that raises on odd shapes is worse than silence

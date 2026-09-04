@@ -87,7 +87,7 @@ class MainTests(unittest.TestCase):
         code, out = self.run_main({'tool_name': 'mcp__jamf__t',
                                    'tool_response': blocks(json.dumps({'scannedCount': 1, 'totalCount': 3}))})
         self.assertEqual(code, 0)
-        self.assertIn('systemMessage', json.loads(out))
+        self.assertIn('additionalContext', json.loads(out)['hookSpecificOutput'])
 
     def test_garbage_stdin_exit_zero(self):
         stdin = sys.stdin
