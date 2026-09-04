@@ -6,37 +6,12 @@ Match by substring if exact name differs (e.g., `remote-crowdstrike` matches `cr
 
 <!-- BEGIN GENERATED: current-host-servers (gen_probe_targets.py) -->
 
-### Current host servers (34 registered — generated from live `~/.claude.json`; do not hand-edit this block)
+### Current host servers (0 registered — generated from live `~/.claude.json`; do not hand-edit this block)
 
-Connectivity shortcut: a server whose full toolset is registered in the
-session's deferred-tools list connected successfully at session start —
-that registration IS the connectivity evidence. Reserve live ping calls
-for the verified-cheap table; never probe billing-metered search tools
-unless a failure is suspected.
-
-**Verified cheap pings:**
-
-| Server | Ping tool |
-|---|---|
-| box-admin | `box_whoami` |
-| crowdstrike | `falcon_check_connectivity` |
-| jamf | `jamf_ping` |
-| linear-server | `list_teams` (limit: 1) |
-| memory-search | `memory_stats` |
-| slack-user | `connection_status` |
-| tailscale | `get_tailnet_settings` |
-
-**AUTH-PENDING class (do NOT probe — only auth-bootstrap tools exposed):**
-
-| Server | Note |
-|---|---|
-| confluence | exposes only `authenticate`/`complete_authentication`; probing starts an OAuth flow |
-
-**Remaining registered servers** (session tool-registration = connectivity
-evidence; if a live probe is needed, ToolSearch any read-only list/get tool):
-airlock, ashby, azure-automation, claude-compliance, claude_platform, compliance-access-framework, confluence-gov, exa, firecrawl, github, hologram, knowbe4, msgraph, netcloud, office-docs, pa-cdss, palantir-mcp, paloalto, pryzm, sec-automations-query, security-remix, solarwinds, tavily, tenable, workspace-provisioner, xai.
-
-Billing-metered probes (only when a failure is suspected): tavily `tavily_search` (max_results: 1, ultra-fast), exa `web_search_exa` (numResults: 1), firecrawl `firecrawl_map` (example.com, limit: 1).
+No MCP servers are registered on this host (`~/.claude.json` top-level
+and project scopes, `~/.mcp.json`). There is nothing to probe: report
+R1 connectivity as N/A, and re-run `gen_probe_targets.py --write` after
+registering a server.
 
 <!-- END GENERATED: current-host-servers -->
 

@@ -1,11 +1,18 @@
 """Generate/verify the current-host section of probe-targets.md from live config.
 
-The "Current macOS host servers" section of probe-targets.md went stale once
-per architecture generation when hand-maintained (S1 findings 2026-06-12 and
-2026-08-22). This script makes it generated content: the server LIST comes
-from live `~/.claude.json`; the curated knowledge (which ping tool is cheap,
-which servers are AUTH-PENDING) lives in the dicts below, where updating it
-is a one-line diff instead of a table rewrite.
+The current-host section of probe-targets.md went stale once per architecture
+generation when hand-maintained (S1 findings 2026-06-12 and 2026-08-22). This
+script makes it generated content: the server LIST comes only from the live
+machine config — `~/.claude.json` (top-level and project scopes) plus
+`~/.mcp.json` when present — never from a catalog in the repo, so the public
+harness ships no inventory of anyone's servers. The curated knowledge below
+(which ping is cheap on a common public MCP server, which servers expose only
+OAuth-bootstrap tools) is keyed by the conventional registration name and is
+rendered only for servers that are actually registered; a catalog entry with
+no live server is simply silent.
+
+Zero registered servers is a normal state (a fresh machine) and renders a
+one-line block, not a wall of empty tables.
 
 Usage:
   python3 gen_probe_targets.py --check   # exit 1 if the block drifted from live config
@@ -26,14 +33,16 @@ BEGIN = '<!-- BEGIN GENERATED: current-host-servers (gen_probe_targets.py) -->'
 END = '<!-- END GENERATED: current-host-servers -->'
 
 # Curated knowledge — update these dicts, then run --write.
-# Only list a ping here after actually exercising it (cheap, read-only).
+# Keys are the conventional public registration names (`claude mcp add linear
+# ...` registers `linear`); a live server matches a key only on the exact
+# name. Only list a ping here after actually exercising it (cheap, read-only):
+# a wrong tool name is harmless — the audit falls back to ToolSearch — but a
+# billable or mutating one is not.
 PING_TOOLS = {
     'memory-search': '`memory_stats`',
-    'jamf': '`jamf_ping`',
-    'crowdstrike': '`falcon_check_connectivity`',
-    'slack-user': '`connection_status`',
-    'box-admin': '`box_whoami`',
-    'linear-server': '`list_teams` (limit: 1)',
+    'linear': '`list_teams` (limit: 1)',
+    'slack': '`connection_status`',
+    'box': '`box_whoami`',
     'tailscale': '`get_tailnet_settings`',
 }
 AUTH_PENDING = {
@@ -63,43 +72,49 @@ def live_servers():
 
 
 def render(servers):
-    pinged = [s for s in servers if s in PING_TOOLS]
-    pending = [s for s in servers if s in AUTH_PENDING]
-    rest = [s for s in servers if s not in PING_TOOLS and s not in AUTH_PENDING]
-    stale_pings = sorted(set(PING_TOOLS) - set(servers))
     lines = [BEGIN, '']
     lines.append(f'### Current host servers ({len(servers)} registered — '
                  'generated from live `~/.claude.json`; do not hand-edit this block)')
     lines.append('')
+    if not servers:
+        lines.append('No MCP servers are registered on this host (`~/.claude.json` top-level')
+        lines.append('and project scopes, `~/.mcp.json`). There is nothing to probe: report')
+        lines.append('R1 connectivity as N/A, and re-run `gen_probe_targets.py --write` after')
+        lines.append('registering a server.')
+        lines.append('')
+        lines.append(END)
+        return '\n'.join(lines)
+    pinged = [s for s in servers if s in PING_TOOLS]
+    pending = [s for s in servers if s in AUTH_PENDING]
+    rest = [s for s in servers if s not in PING_TOOLS and s not in AUTH_PENDING]
     lines.append('Connectivity shortcut: a server whose full toolset is registered in the')
     lines.append("session's deferred-tools list connected successfully at session start —")
     lines.append('that registration IS the connectivity evidence. Reserve live ping calls')
     lines.append('for the verified-cheap table; never probe billing-metered search tools')
     lines.append('unless a failure is suspected.')
     lines.append('')
-    lines.append('**Verified cheap pings:**')
-    lines.append('')
-    lines.append('| Server | Ping tool |')
-    lines.append('|---|---|')
-    for s in pinged:
-        lines.append(f'| {s} | {PING_TOOLS[s]} |')
-    lines.append('')
-    lines.append('**AUTH-PENDING class (do NOT probe — only auth-bootstrap tools exposed):**')
-    lines.append('')
-    lines.append('| Server | Note |')
-    lines.append('|---|---|')
-    for s in pending:
-        lines.append(f'| {s} | {AUTH_PENDING[s]} |')
-    lines.append('')
-    lines.append('**Remaining registered servers** (session tool-registration = connectivity')
-    lines.append('evidence; if a live probe is needed, ToolSearch any read-only list/get tool):')
-    lines.append(', '.join(rest) + '.')
-    lines.append('')
-    lines.append(BILLING_NOTE)
-    if stale_pings:
+    if pinged:
+        lines.append('**Verified cheap pings:**')
         lines.append('')
-        lines.append(f'> WARNING: PING_TOOLS entries with no live server: {", ".join(stale_pings)}'
-                     ' — remove them from gen_probe_targets.py.')
+        lines.append('| Server | Ping tool |')
+        lines.append('|---|---|')
+        for s in pinged:
+            lines.append(f'| {s} | {PING_TOOLS[s]} |')
+        lines.append('')
+    if pending:
+        lines.append('**AUTH-PENDING class (do NOT probe — only auth-bootstrap tools exposed):**')
+        lines.append('')
+        lines.append('| Server | Note |')
+        lines.append('|---|---|')
+        for s in pending:
+            lines.append(f'| {s} | {AUTH_PENDING[s]} |')
+        lines.append('')
+    if rest:
+        lines.append('**Remaining registered servers** (session tool-registration = connectivity')
+        lines.append('evidence; if a live probe is needed, ToolSearch any read-only list/get tool):')
+        lines.append(', '.join(rest) + '.')
+        lines.append('')
+    lines.append(BILLING_NOTE)
     lines.append('')
     lines.append(END)
     return '\n'.join(lines)
