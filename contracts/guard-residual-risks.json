@@ -1,0 +1,22 @@
+{
+  "_about": "Executable residual-risk registry for hooks/bash-security-guard.py's always-on catastrophic layer. Every entry is asserted by hooks/test-hooks/test_bash_security_guard.py: 'block' entries are closed forms that must keep blocking, 'allow' entries are accepted residuals or everyday look-alikes that must never block. Add a row instead of re-litigating a known limit (pattern: cc-safety-net docs/residual-risk.md).",
+  "entries": [
+    {"command": "echo / | xargs rm -rf", "expected": "block", "why": "rm -rf via xargs fed by the filesystem root (closed 2026-09-04)"},
+    {"command": "find / -maxdepth 1 | xargs rm -rf", "expected": "block", "why": "rm -rf via xargs fed by a broad find (closed 2026-09-04)"},
+    {"command": "ls ~ | xargs -I{} rm -rf ~/{}", "expected": "block", "why": "rm -rf of every home entry through xargs substitution (closed 2026-09-04)"},
+    {"command": "find / -delete", "expected": "block", "why": "find -delete rooted at / (closed 2026-09-04)"},
+    {"command": "find ~ -delete", "expected": "block", "why": "find -delete rooted at the home root (closed 2026-09-04)"},
+    {"command": "find /etc -type f -exec rm -rf {} +", "expected": "block", "why": "find -exec rm -rf rooted at a critical path (closed 2026-09-04)"},
+    {"command": "git -c alias.wipe='!rm -rf /' wipe", "expected": "block", "why": "shell alias body defined inline runs rm -rf / (closed 2026-09-04)"},
+    {"command": "sudo -u www rm -rf /var/www", "expected": "block", "why": "rm -rf under a critical path through sudo -u; already blocked, pinned"},
+    {"command": "find . -name '*.pyc' | xargs rm -f", "expected": "allow", "why": "scoped producer, non-recursive rm: everyday cleanup"},
+    {"command": "git ls-files -z | xargs -0 rm -rf", "expected": "allow", "why": "ACCEPTED RESIDUAL: producer is repo-scoped by construction; a static check cannot see the list"},
+    {"command": "find . -name '*.pyc' -delete", "expected": "allow", "why": "scoped find -delete: everyday cleanup"},
+    {"command": "find ./build -type f -delete", "expected": "allow", "why": "scoped find -delete"},
+    {"command": "git -c alias.st=status st", "expected": "allow", "why": "non-shell alias"},
+    {"command": "sudo rm -rf ./build", "expected": "allow", "why": "scoped rm through sudo"},
+    {"command": "cat <<'EOF' > notes.sh\nrm -rf /\nEOF", "expected": "allow", "why": "ACCEPTED RESIDUAL: heredoc body is data being written, not executed; blocking it false-positives on documentation"},
+    {"command": "python3 -c \"import shutil; shutil.rmtree('/tmp/scratch')\"", "expected": "allow", "why": "ACCEPTED RESIDUAL: interpreter bodies are not parsed; /tmp scratch is scoped"},
+    {"command": "b=base64; echo cm0gLXJmIC8K | $b -d | bash", "expected": "block", "why": "indirect decoder piped to shell (closed 2026-09-03), pinned"}
+  ]
+}

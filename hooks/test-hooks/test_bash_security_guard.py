@@ -1938,3 +1938,17 @@ def test_catastrophic_layer_closes_reviewed_bypasses(command):
 def test_everyday_commands_stay_allowed_after_bypass_closure(command):
     rc, _stdout, stderr = run_hook(HOOK, make_bash_input(command))
     assert rc == 0, (command, stderr)
+
+
+# ── executable residual-risk registry (contracts/guard-residual-risks.json) ──
+
+_REGISTRY = json.loads(
+    (Path(__file__).resolve().parents[2] / "contracts" / "guard-residual-risks.json").read_text(encoding="utf-8")
+)["entries"]
+
+
+@_pytest.mark.parametrize("entry", _REGISTRY, ids=[e["command"][:48] for e in _REGISTRY])
+def test_residual_risk_registry_holds(entry):
+    rc, _stdout, stderr = run_hook(HOOK, make_bash_input(entry["command"]))
+    want = 2 if entry["expected"] == "block" else 0
+    assert rc == want, (entry["command"], entry["why"], stderr)

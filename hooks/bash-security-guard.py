@@ -177,6 +177,11 @@ _SIMPLE_ASSIGN_RE = re.compile(
 _PIPE_TO_SHELL_SINK_RE = re.compile(r"\|\s*(?:sudo\s+)?(?:ba|z|da|k)?sh\b")
 _QUOTED_LITERAL_RE = re.compile(r"""'([^']*)'|"((?:[^"\\]|\\.)*)\"""")
 _CONTINUATION_RE = re.compile(r"\\\r?\n\s*")
+# `git -c alias.NAME='!BODY' NAME`: the body is a shell command; judge it as one.
+_GIT_SHELL_ALIAS_RE = re.compile(r"""-c\s+alias\.[\w.-]+=(['"]?)!(.+?)\1(?=\s|$)""")
+# `PRODUCER | xargs [opts] rm -rf`: the producer's broad path tokens become rm targets.
+_XARGS_RM_RE = re.compile(r"\|\s*xargs\b[^|]*?\b(?:sudo\s+)?rm\s+(-[a-zA-Z]*r[a-zA-Z]*f|-[a-zA-Z]*f[a-zA-Z]*r|--recursive\s+--force)\b")
+_BROAD_PATH_TOKEN_RE = re.compile(r"(?:^|\s)(/(?:etc|usr|var|home)?|~/?|\$\{?HOME\}?/?)(?=\s|$|;|\||&)")
 
 
 def _normalize_for_matching(command):
@@ -192,7 +197,16 @@ def _normalize_for_matching(command):
     Auto-fix rewrites and the audit log still use the original command.
     """
     text = _CONTINUATION_RE.sub(" ", command)
+    for m in _GIT_SHELL_ALIAS_RE.finditer(text):
+        text = text + " ; " + m.group(2)
     text = _normalize_git_command(text)
+    # xargs/find substitution placeholders expand to every produced entry: judge
+    # `rm -rf ~/{}` as `rm -rf ~/*`.
+    text = text.replace("{}", "*")
+    for m in _XARGS_RM_RE.finditer(text):
+        producer = text[:m.start()].rsplit("|", 1)[-1]
+        for tok in _BROAD_PATH_TOKEN_RE.findall(producer):
+            text = text + f" ; rm -rf {tok}"
     for m in _SIMPLE_ASSIGN_RE.finditer(text):
         name, value = m.group(1), m.group(3)
         if value:
@@ -609,6 +623,12 @@ DANGEROUS_PATTERNS = [
         r"(/(?:\s|$|[*;&|>])|~/?(?:\s|$|[*;&|>])|/home\b|\$\{?HOME\}?/?(?:\s|$|[*;&|>])"
         r"|/usr\b|/etc\b|/var\b|C:\\|\*(?:\s|$|[;&|>]))",
         "rm -rf on a critical or broad path. Specify a more targeted path.",
+    ),
+    (
+        # `find <broad root> ... -delete` / `-exec rm -rf`: the whole subtree goes.
+        r"find\s+(?:/(?:etc|usr|var|home)?|~/?|\$\{?HOME\}?/?)(?:\s|$)[^|;&]*?"
+        r"(?:-delete\b|-exec\s+(?:sudo\s+)?rm\s+-[a-zA-Z]*(?:r[a-zA-Z]*f|f[a-zA-Z]*r))",
+        "find rooted at a critical or broad path with -delete/-exec rm. Scope the root.",
     ),
     (
         r"chmod\s+(777|a\+rwx|o\+w)",
