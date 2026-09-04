@@ -1,4 +1,4 @@
-"""Check codebase-memory-mcp and code-search index freshness.
+"""Check codebase-memory-mcp (graph) and semantic-search index freshness.
 
 Each indexing system is its own source of truth, so this check is self-healing:
 refreshing an index through any path clears the warning on the next session start.
@@ -10,9 +10,10 @@ codebase-memory-mcp: ENUMERATES the registry — every `*.db` in
     5-entry list covered 3 of 19 indexed projects, and 11 stale indexes went
     unreported for two days as a result.
 
-code-search (split backend): stats the FAISS index file mtime under
+semantic search (split backend): stats the FAISS index file mtime under
     `~/.claude_code_search/projects/<name>_<hash>/index/code.index`. That side is
-    still keyed by friendly project name, so it uses TRACKED_REPOS.
+    still keyed by project name (the checkout's directory name), so it uses
+    TRACKED_REPOS, built from the environment catalog's `repo_paths`.
 
 Staleness signal, strongest available first:
   1. `index_identity.source_revision` != `git rev-parse HEAD` — exact. Catches a
@@ -33,6 +34,10 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+
+# The environment catalog lives beside the hooks, one level up from this package.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from _environment_catalog import load_section, repo_entries
 
 CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
 CODE_GRAPH_DIR = Path.home() / ".cache" / "codebase-memory-mcp"
@@ -56,14 +61,13 @@ GRAPH_SWEEP_DEADLINE_SECS = 4.0
 # A 40-char lowercase hex object name.
 _SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 
-# code-search (split backend) only. The graph side enumerates instead — see the
-# module docstring. Maps friendly name (== code-search project_name) → repo path.
+# Semantic-search (split backend) side only. The graph side enumerates instead —
+# see the module docstring. Maps project name (== the checkout's directory name,
+# which is what the search server registers) → repo path, from the catalog's
+# `repo_paths`. Empty catalog -> nothing to compare on this side.
 TRACKED_REPOS = {
-    ".claude": Path.home() / ".claude",
-    "knowledge-base": Path.home() / "Documents" / "knowledge-base",
-    "mcp-servers": Path.home() / "Documents" / "GitHub" / "mcp-servers",
-    "mcp-infra": Path.home() / "Documents" / "GitHub" / "mcp-infra",
-    "code-search": Path.home() / "Documents" / "GitHub" / "code-search",
+    entry["path"].name: entry["path"]
+    for entry in repo_entries(load_section("repo_paths"))
 }
 
 
@@ -427,7 +431,7 @@ def heal_candidates():
 
 
 def _code_search_indexed_unix(name):
-    """FAISS index file mtime for the named code-search project. None if missing."""
+    """FAISS index file mtime for the named semantic-search project. None if missing."""
     if not CODE_SEARCH_DIR.exists():
         return None
     for pdir in CODE_SEARCH_DIR.iterdir():
