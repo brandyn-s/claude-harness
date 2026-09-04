@@ -592,9 +592,9 @@ def test_shared_skill_assets_ship_with_any_skill_selection():
         "the _shared copy is still gated on skills this repo does not ship"
     )
     lines = body.splitlines()
-    copy_lines = [i for i, line in enumerate(lines) if 'cp -r "$src_dir/_shared" "$dest_dir/_shared"' in line]
+    copy_lines = [i for i, line in enumerate(lines) if 'files+=("skills/_shared")' in line]
     assert len(copy_lines) == 1, "expected exactly one _shared copy in install_skills"
-    assert "${#skills[@]}" in lines[copy_lines[0] - 1], (
+    assert "${#files[@]}" in lines[copy_lines[0] - 1], (
         "the _shared copy must be conditioned on at least one skill being installed"
     )
 
@@ -605,3 +605,35 @@ def test_installer_states_the_real_python_floor():
     src = INSTALLER.read_text(encoding="utf-8")
     assert "Python 3.8+" not in src
     assert "(3, 11)" in src
+
+
+def test_pick_individual_skills_asks_per_skill_and_installs_the_chosen_one(tmp_path):
+    """Skills menu option 7 ("Pick individually") must read each answer from the
+    user. It used to prompt inside `while read ... < <(find ...)`, so ask_yn's read
+    consumed the next find line as the answer: the user was never asked and no
+    skill was installed (found 2026-09-03 by the manifest e2e test)."""
+    # skills/<name>/SKILL.md only: the menu must not offer the SKILL.md fixtures
+    # under skills/audit-skill/tests/, which can never install.
+    skills = sorted(p.parent.name for p in (REPO / "skills").glob("*/SKILL.md") if p.parent.name != "_shared")
+    assert len(skills) > 2
+    # `read -p` shows no prompt on piped stdin, so prompts cannot be counted;
+    # instead answer yes to the FIRST and LAST skill: the last one lands only if
+    # exactly one answer was consumed per skill, in menu order.
+    per_skill = "y\n" + "n\n" * (len(skills) - 2) + "y\n"
+    env = dict(os.environ)
+    env["HOME"] = str(tmp_path)
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    env["LC_ALL"] = "C"  # the menu sorts with `sort`; make it agree with sorted()
+    # skip profile, skip core, skip rules, pick skills individually, <one answer
+    # per skill>, skip hooks, no agents, no agent-memory, no ARCHITECTURE.md,
+    # no CLAUDE.md template
+    result = subprocess.run(
+        [BASH, str(INSTALLER)],
+        input="n\nn\n3\n7\n" + per_skill + "4\nn\nn\nn\nn\n",
+        capture_output=True, text=True, encoding="utf-8", timeout=120, check=False,
+        cwd=REPO, env=env,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    installed = sorted(p.name for p in (tmp_path / ".claude" / "skills").iterdir())
+    assert installed == sorted([skills[0], skills[-1], "_shared"]), installed
+    assert "Installed 2 skills" in result.stdout

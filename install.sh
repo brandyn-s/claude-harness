@@ -94,12 +94,27 @@ else
     exit 1
 fi
 
+# ── Classified copy ───────────────────────────────────────────────────
+# Every component installer copies through scripts/install-profile.py --install.
+# Each repo-relative path (a directory means every file beneath it) lands under
+# $CLAUDE_DIR and is recorded with its sha256 in
+# $CLAUDE_DIR/.harness-install-state.json, so a re-run upgrades untouched
+# copies, keeps your edits (MODIFIED-BY-USER), and writes a conflicting upstream
+# version beside yours as <name>.harness-new (CONFLICT) -- instead of
+# overwriting everything or nothing. A missing source aborts before any write.
+install_files() {
+    (( $# )) || return 0
+    local install_args=()
+    for f in "$@"; do install_args+=(--install "$f"); done
+    "$PYTHON_CMD" "$SCRIPT_DIR/scripts/install-profile.py" \
+        --target "$CLAUDE_DIR/settings.json" --apply "${install_args[@]}" \
+        || { err "Copy aborted; see the error above."; exit 1; }
+}
+
 # ── Component installers ──────────────────────────────────────────────
 
 install_rules() {
     local src_dir="$SCRIPT_DIR/rules"
-    local dest_dir="$CLAUDE_DIR/rules"
-    mkdir -p "$dest_dir"
 
     echo -e "\n${BOLD}Available rules:${NC}"
     local rules=()
@@ -110,29 +125,20 @@ install_rules() {
     local choice
     choice=$(ask_choice "Install which rules?" "All ${#rules[@]} rules" "Pick individually" "Skip rules")
 
+    local files=()
     case "$choice" in
-        1)
-            for r in "${rules[@]}"; do
-                cp "$src_dir/$r" "$dest_dir/$r"
-            done
-            ok "Installed ${#rules[@]} rules"
-            ;;
-        2)
-            for r in "${rules[@]}"; do
-                if ask_yn "  Install $r?"; then
-                    cp "$src_dir/$r" "$dest_dir/$r"
-                    ok "  Installed $r"
-                fi
-            done
-            ;;
-        *) info "Skipping rules" ;;
+        1) for r in "${rules[@]}"; do files+=("rules/$r"); done ;;
+        2) for r in "${rules[@]}"; do
+               if ask_yn "  Install $r?"; then files+=("rules/$r"); fi
+           done ;;
+        *) info "Skipping rules"; return ;;
     esac
+    install_files "${files[@]}"
+    ok "Installed ${#files[@]} rules"
 }
 
 install_skills() {
     local src_dir="$SCRIPT_DIR/skills"
-    local dest_dir="$CLAUDE_DIR/skills"
-    mkdir -p "$dest_dir"
 
     # Category rosters. Counts shown in the menu are COMPUTED from these arrays,
     # never hardcoded (audit finding M3, 2026-07-26).
@@ -160,13 +166,15 @@ install_skills() {
                     gather-claude gather-research deep-dive)
 
     # Count what is actually installable, so "All" cannot advertise a stale total.
+    # -maxdepth 2: only skills/<name>/SKILL.md. Without it, SKILL.md fixtures under
+    # skills/audit-skill/tests/ were offered as six skills that could never install.
     local all_skills=()
     while IFS= read -r d; do
         local n
         n="$(basename "$d")"
         [[ "$n" == "_shared" ]] && continue
         all_skills+=("$n")
-    done < <(find "$src_dir" -name "SKILL.md" -exec dirname {} \; | sort)
+    done < <(find "$src_dir" -maxdepth 2 -name "SKILL.md" -exec dirname {} \; | sort)
 
     local choice
     choice=$(ask_choice "Install which skills?" \
@@ -187,33 +195,31 @@ install_skills() {
         4) skills=("${knowledge[@]}") ;;
         5) skills=("${codeintel[@]}") ;;
         6) skills=("${research[@]}") ;;
-        7) # Pick individually
-            while IFS= read -r d; do
-                local name
-                name="$(basename "$d")"
-                [[ "$name" == "_shared" ]] && continue
-                if ask_yn "  Install /$(basename "$d")?"; then
+        7) # Pick individually. Iterate the array, not `while read < <(find)`:
+           # inside that loop ask_yn's own `read` took its answer from the find
+           # output, so the user was never asked and nothing was installed
+           # (measured 2026-09-03; scripts/test_install_menus.py pins the fix).
+            for name in "${all_skills[@]}"; do
+                if ask_yn "  Install /$name?"; then
                     skills+=("$name")
                 fi
-            done < <(find "$src_dir" -name "SKILL.md" -exec dirname {} \; | sort)
+            done
             ;;
         *) info "Skipping skills"; return ;;
     esac
 
+    local files=()
     for skill in "${skills[@]}"; do
-        if [[ -d "$src_dir/$skill" ]]; then
-            cp -r "$src_dir/$skill" "$dest_dir/$skill"
-            ok "  Installed /$(basename "$skill")"
-        fi
+        if [[ -d "$src_dir/$skill" ]]; then files+=("skills/$skill"); fi
     done
 
     # skills/_shared/ (oracle, conventions, model overlays) is read by ~60 of the
     # shipped skills. The copy used to be gated on three skills that this export
     # does not contain, so no menu path ever installed it (review 2026-09-03).
-    if (( ${#skills[@]} )) && [[ -d "$src_dir/_shared" ]]; then
-        cp -r "$src_dir/_shared" "$dest_dir/_shared"
-        ok "  Installed skills/_shared"
+    if (( ${#files[@]} )) && [[ -d "$src_dir/_shared" ]]; then
+        files+=("skills/_shared")
     fi
+    install_files "${files[@]}"
 
     ok "Installed ${#skills[@]} skills"
 }
@@ -221,7 +227,6 @@ install_skills() {
 install_hooks() {
     local src_dir="$SCRIPT_DIR/hooks"
     local dest_dir="$CLAUDE_DIR/hooks"
-    mkdir -p "$dest_dir"
 
     echo -e "\n${BOLD}Available hook bundles:${NC}"
     echo "  Hooks require settings.json wiring. This installer can do it automatically."
@@ -286,26 +291,17 @@ install_hooks() {
         *) info "Skipping hooks"; return ;;
     esac
 
-    for hook in "${hooks[@]}"; do
-        if [[ -f "$src_dir/$hook" ]]; then
-            cp "$src_dir/$hook" "$dest_dir/$hook"
-        fi
-    done
-    for hook_dir in "${hook_dirs[@]}"; do
-        if [[ -d "$src_dir/$hook_dir" ]]; then
-            mkdir -p "$dest_dir/$hook_dir"
-            cp -R "$src_dir/$hook_dir/." "$dest_dir/$hook_dir/"
-        fi
-    done
-    # Always ship shared hook libraries + the run-hook dispatcher (the committed
+    local files=()
+    for hook in "${hooks[@]}"; do files+=("hooks/$hook"); done
+    for hook_dir in "${hook_dirs[@]}"; do files+=("hooks/$hook_dir"); done
+    # Always ship shared hook libraries + the run-hook launcher (the committed
     # settings.json / settings.example.json invoke hooks through run-hook), and
     # keep it executable.
     for shared in run-hook atomic_write.py hook_input.py git_lock.py bash_policy_tables.py; do
-        if [[ -f "$src_dir/$shared" ]]; then
-            cp "$src_dir/$shared" "$dest_dir/$shared"
-        fi
+        files+=("hooks/$shared")
     done
-    [[ -f "$dest_dir/run-hook" ]] && chmod +x "$dest_dir/run-hook"
+    install_files "${files[@]}"
+    chmod +x "$dest_dir/run-hook"
     ok "Copied ${#hooks[@]} hook files to $dest_dir/"
 
     # Auto-wire hooks into settings.json
@@ -336,14 +332,12 @@ wire_hooks() {
 
 install_agents() {
     local src_dir="$SCRIPT_DIR/agents"
-    local dest_dir="$CLAUDE_DIR/agents"
-    mkdir -p "$dest_dir"
 
     if ask_yn "Install agent definitions (worker + 5 specialized)?"; then
-        for f in "$src_dir"/*.md; do
-            cp "$f" "$dest_dir/"
-        done
-        ok "Installed $(ls "$src_dir"/*.md | wc -l) agent definitions"
+        local files=()
+        for f in "$src_dir"/*.md; do files+=("agents/$(basename "$f")"); done
+        install_files "${files[@]}"
+        ok "Installed ${#files[@]} agent definitions"
     else
         info "Skipping agents"
     fi
@@ -355,14 +349,12 @@ install_agent_memory() {
     # under ~/.claude/agent-memory/. Without these, skills hit a runtime
     # gap and fall back to source-repo paths (works, but inconsistent).
     local src_dir="$SCRIPT_DIR/agent-memory"
-    local dest_dir="$CLAUDE_DIR/agent-memory"
     if [[ ! -d "$src_dir" ]]; then
         warn "agent-memory/ not in source tree — skipping"
         return
     fi
     if ask_yn "Install agent-memory/ (topics + rules read by many skills)?" "y"; then
-        mkdir -p "$dest_dir"
-        cp -r "$src_dir/." "$dest_dir/"
+        install_files agent-memory
         ok "Installed agent-memory/ ($(find "$src_dir" -type f | wc -l) files)"
     else
         info "Skipping agent-memory — skills will use source-repo fallback paths"
@@ -373,13 +365,11 @@ install_architecture_doc() {
     # ARCHITECTURE.md is cited by audit-architecture, sync-repo, gather-intel,
     # gather-claude, deep-dive ("Only if topic is about this system's own
     # design"). Deploying it makes those cites resolve at ~/.claude/.
-    local src_file="$SCRIPT_DIR/ARCHITECTURE.md"
-    local dest_file="$CLAUDE_DIR/ARCHITECTURE.md"
-    if [[ ! -f "$src_file" ]]; then
+    if [[ ! -f "$SCRIPT_DIR/ARCHITECTURE.md" ]]; then
         return
     fi
     if ask_yn "Install ARCHITECTURE.md (cited by audit/sync/gather skills)?" "y"; then
-        cp "$src_file" "$dest_file"
+        install_files ARCHITECTURE.md
         ok "Installed ARCHITECTURE.md"
     fi
 }
@@ -488,15 +478,9 @@ if ask_yn "Install the recommended fresh-laptop core? (2 rules + 3 deterministic
         warn "Skipping starter kit copy (existing files kept)."
     else
 
-    # Classified copy through the tested installer. Every file it writes is
-    # recorded with its sha256 in $CLAUDE_DIR/.harness-install-state.json, so
-    # the next run upgrades untouched copies, keeps your edits, and writes a
-    # conflicting upstream version beside yours as <name>.harness-new --
-    # instead of overwriting everything or nothing.
-    install_args=()
-    for f in "${starter_files[@]}"; do install_args+=(--install "$f"); done
-    "$PYTHON_CMD" "$SCRIPT_DIR/scripts/install-profile.py" \
-        --target "$CLAUDE_DIR/settings.json" --apply "${install_args[@]}"
+    # Classified copy (see install_files above): untouched copies upgrade, your
+    # edits are kept, a conflict leaves <name>.harness-new beside your version.
+    install_files "${starter_files[@]}"
     chmod +x "$CLAUDE_DIR/hooks/run-hook"
 
     if (( operator_selected )); then

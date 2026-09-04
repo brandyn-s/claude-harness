@@ -2,9 +2,10 @@
 """Preview or apply a portable Claude Code settings profile safely.
 
 `--profile` merges a settings overlay into the target settings.json (permission
-lists union, other keys replace). `--install <repo-relative file>` copies a
-repository file into the config root (the directory holding the target) and
-records its sha256 in <config_root>/.harness-install-state.json, so a later run
+lists union, other keys replace). `--install <repo-relative path>` copies a
+repository file -- or every regular file beneath a directory, `__pycache__`
+skipped -- into the config root (the directory holding the target) and records
+each file's sha256 in <config_root>/.harness-install-state.json, so a later run
 can tell an untouched copy from your edit:
 
     NEW               target absent                                -> written
@@ -214,8 +215,8 @@ def main() -> int:
         action="append",
         default=[],
         metavar="PATH",
-        help="repo-relative file to copy into the config root with hash "
-        "classification; repeatable",
+        help="repo-relative file, or directory of files, to copy into the config "
+        "root with hash classification; repeatable",
     )
     parser.add_argument(
         "--source-root",
@@ -251,11 +252,22 @@ def main() -> int:
         path = Path(rel)
         if path.is_absolute() or ".." in path.parts:
             parser.error(f"--install {rel}: must be a relative path inside the checkout")
-        if not (source_root / path).is_file():
-            parser.error(f"--install {rel}: {source_root / path} is not a file")
-        if (config_root / path).resolve() == target:
-            parser.error(f"--install {rel}: settings.json is merged from --profile, not copied")
-        install.append(path.as_posix())
+        source = source_root / path
+        if source.is_dir():
+            found = [p for p in sorted(source.rglob("*"))
+                     if p.is_file() and "__pycache__" not in p.relative_to(source).parts]
+            if not found:
+                parser.error(f"--install {rel}: {source} contains no files")
+            members = [p.relative_to(source_root).as_posix() for p in found]
+        elif source.is_file():
+            members = [path.as_posix()]
+        else:
+            parser.error(f"--install {rel}: {source} is not a file or directory")
+        for member in members:
+            if (config_root / member).resolve() == target:
+                parser.error(f"--install {rel}: settings.json is merged from --profile, not copied")
+            if member not in install:
+                install.append(member)
 
     print("profiles: " + (" -> ".join(profile_names) or "(none)"))
     print(f"target: {target}")

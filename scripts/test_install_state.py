@@ -13,6 +13,9 @@ Classification (proved below):
     (no record)       == new -> UNCHANGED, else -> CONFLICT
     --force           write everything regardless
 
+    --install DIR     every regular file beneath it (``__pycache__`` skipped),
+                      one record each; an empty directory is an error
+
 settings.json is never hash-classified; it keeps the union merge.
 """
 from __future__ import annotations
@@ -20,6 +23,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -234,12 +238,25 @@ pytestmark_bash = pytest.mark.skipif(
     BASH is None or sys.platform == "win32", reason="install.sh needs POSIX bash")
 
 
-def test_install_sh_starter_kit_uses_the_classified_copy() -> None:
+def test_install_sh_routes_every_component_through_the_classified_copy() -> None:
+    """Every installer copies through install_files (the manifest), not cp.
+
+    The starter kit was routed first; the optional installers (rules, skills,
+    hooks, agents, agent-memory, ARCHITECTURE.md) still used cp, so a re-run
+    overwrote a user's edits to any of those files. The one cp left is the
+    CLAUDE.template.md -> CLAUDE.md rename, which only runs when CLAUDE.md is
+    absent and so can never overwrite anything.
+    """
     src = INSTALL_SH.read_text(encoding="utf-8")
-    assert 'cp "$SCRIPT_DIR/rules/$rule" "$CLAUDE_DIR/rules/$rule"' not in src
-    assert 'cp "$SCRIPT_DIR/hooks/$hook" "$CLAUDE_DIR/hooks/$hook"' not in src
+    copies = [line.strip() for line in src.splitlines() if re.match(r"\s*cp\b", line)]
+    assert copies == ['cp "$SCRIPT_DIR/CLAUDE.template.md" "$CLAUDE_DIR/CLAUDE.md"'], copies
     assert 'install_args+=(--install "$f")' in src
-    assert 'for f in "${starter_files[@]}"' in src, "the copy must feed from the shared manifest"
+    assert 'install_files "${starter_files[@]}"' in src, "the starter copy must feed from the shared manifest"
+    for installer in ("install_rules", "install_skills", "install_hooks", "install_agents",
+                      "install_agent_memory", "install_architecture_doc"):
+        start = src.index(f"{installer}() {{")
+        body = src[start:src.index("\n}\n", start)]
+        assert "install_files " in body, f"{installer} does not copy through the manifest"
 
 
 @pytestmark_bash
@@ -273,3 +290,198 @@ def test_install_sh_rerun_keeps_a_local_edit_and_records_state(tmp_path: Path) -
     assert not rule.with_name(rule.name + ".harness-new").exists()
     settings = json.loads((config / "settings.json").read_text(encoding="utf-8"))
     assert settings["hooks"], "kept files still count as present, so hooks are wired"
+
+
+# ── --install of a directory (skills, agent-memory, session_start_modules) ─
+
+def test_directory_install_records_every_file_beneath_it(config: Path, source: Path) -> None:
+    skill = source / "skills" / "demo"
+    (skill / "scripts").mkdir(parents=True)
+    (skill / "SKILL.md").write_text("demo v1\n", encoding="utf-8")
+    tool = skill / "scripts" / "tool.py"
+    tool.write_text("print(1)\n", encoding="utf-8")
+    tool.chmod(0o755)
+    cache = skill / "scripts" / "__pycache__"
+    cache.mkdir()
+    (cache / "tool.cpython-313.pyc").write_bytes(b"\x00")
+
+    result = run(config, source, files=("skills/demo",))
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert (config / "skills" / "demo" / "SKILL.md").read_text(encoding="utf-8") == "demo v1\n"
+    assert os.access(config / "skills" / "demo" / "scripts" / "tool.py", os.X_OK)
+    assert not (config / "skills" / "demo" / "scripts" / "__pycache__").exists()
+    assert set(manifest(config)["files"]) == {"skills/demo/SKILL.md", "skills/demo/scripts/tool.py"}
+    assert "2 NEW" in result.stdout, result.stdout
+
+
+def test_directory_reinstall_stays_flat_and_classifies_per_file(config: Path, source: Path) -> None:
+    """`cp -r src/skill dest/skill` into an EXISTING dest nested a second copy at
+    dest/skill/skill; the manifest copy addresses each file, so it cannot."""
+    skill = source / "skills" / "demo"
+    skill.mkdir(parents=True)
+    (skill / "SKILL.md").write_text("demo v1\n", encoding="utf-8")
+    (skill / "notes.md").write_text("notes v1\n", encoding="utf-8")
+    run(config, source, files=("skills/demo",))
+    (config / "skills" / "demo" / "notes.md").write_text("my notes\n", encoding="utf-8")
+
+    result = run(config, source, files=("skills/demo",))
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert not (config / "skills" / "demo" / "demo").exists()
+    assert (config / "skills" / "demo" / "notes.md").read_text(encoding="utf-8") == "my notes\n"
+    assert "MODIFIED-BY-USER skills/demo/notes.md" in result.stdout, result.stdout
+    assert "1 UNCHANGED" in result.stdout and "1 MODIFIED-BY-USER" in result.stdout
+
+
+def test_empty_directory_is_rejected(config: Path, source: Path) -> None:
+    (source / "skills" / "empty").mkdir(parents=True)
+
+    result = run(config, source, files=("skills/empty",))
+
+    assert result.returncode == 2
+    assert "skills/empty" in result.stderr
+    assert not (config / MANIFEST).exists()
+
+
+def test_repeated_install_paths_are_counted_once(config: Path, source: Path) -> None:
+    result = run(config, source, files=("rules/a.md", "rules/a.md", "rules"))
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "1 NEW" in result.stdout, result.stdout
+    assert set(manifest(config)["files"]) == {"rules/a.md"}
+
+
+# ── install.sh optional installers go through the same classified copy ─────
+#
+# These drive the real install.sh against a PRIVATE copy of its inputs, so a test
+# can change UPSTREAM (edit a hook in the checkout) without touching this tree.
+
+def _scratch_checkout(tmp_path: Path) -> Path:
+    root = tmp_path / "checkout"
+    root.mkdir()
+    shutil.copy2(ROOT / "install.sh", root / "install.sh")
+    shutil.copytree(ROOT / "scripts", root / "scripts",
+                    ignore=shutil.ignore_patterns("test_*", "__pycache__", "*.ps1", "runtime-qualification"))
+    for component in ("profiles", "rules", "agents", "agent-memory"):
+        shutil.copytree(ROOT / component, root / component, ignore=shutil.ignore_patterns("__pycache__"))
+    (root / "hooks").mkdir()
+    for path in (ROOT / "hooks").iterdir():
+        if path.is_file():
+            shutil.copy2(path, root / "hooks" / path.name)
+    shutil.copytree(ROOT / "hooks" / "session_start_modules", root / "hooks" / "session_start_modules",
+                    ignore=shutil.ignore_patterns("__pycache__"))
+    # One tiny skill plus the shared assets keeps the skills menu real and fast.
+    (root / "skills" / "demo").mkdir(parents=True)
+    (root / "skills" / "demo" / "SKILL.md").write_text("---\nname: demo\n---\ndemo\n", encoding="utf-8")
+    (root / "skills" / "_shared").mkdir()
+    (root / "skills" / "_shared" / "conventions.md").write_text("shared\n", encoding="utf-8")
+    return root
+
+
+def _install(checkout: Path, home: Path, answers: str) -> subprocess.CompletedProcess[str]:
+    env = dict(os.environ)
+    env["HOME"] = str(home)
+    env["CLAUDE_CONFIG_DIR"] = str(home / ".claude")
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    return subprocess.run(
+        [BASH, str(checkout / "install.sh")], input=answers, cwd=checkout, env=env,
+        capture_output=True, text=True, encoding="utf-8", timeout=120, check=False)
+
+
+# Answer prefixes: skip the settings profile, skip the starter core. The scratch
+# checkout has no ARCHITECTURE.md or CLAUDE.template.md, so no prompt follows
+# agent-memory.
+SKIP_TO_COMPONENTS = "n\nn\n"
+
+
+@pytestmark_bash
+def test_install_sh_rules_menu_keeps_a_user_edit_on_reinstall(tmp_path: Path) -> None:
+    checkout = _scratch_checkout(tmp_path)
+    home = tmp_path / "home"
+    home.mkdir()
+    # all rules, skip skills, skip hooks, no agents, no agent-memory
+    answers = SKIP_TO_COMPONENTS + "1\n8\n4\nn\nn\n"
+    name = sorted(p.name for p in (checkout / "rules").glob("*.md"))[0]
+    rule = home / ".claude" / "rules" / name
+
+    first = _install(checkout, home, answers)
+    assert first.returncode == 0, first.stdout + first.stderr
+    assert f"rules/{name}" in manifest(home / ".claude")["files"]
+    rule.write_text("my local edit\n", encoding="utf-8")
+
+    second = _install(checkout, home, answers)
+    assert second.returncode == 0, second.stdout + second.stderr
+    assert rule.read_text(encoding="utf-8") == "my local edit\n"
+    assert f"MODIFIED-BY-USER rules/{name}" in second.stdout, second.stdout
+    assert not rule.with_name(rule.name + ".harness-new").exists()
+
+
+@pytestmark_bash
+def test_install_sh_hooks_menu_upgrades_an_untouched_hook(tmp_path: Path) -> None:
+    checkout = _scratch_checkout(tmp_path)
+    home = tmp_path / "home"
+    home.mkdir()
+    # skip rules, skip skills, fresh-laptop hook bundle, wire, no agents, no agent-memory
+    answers = SKIP_TO_COMPONENTS + "3\n8\n1\ny\nn\nn\n"
+    installed = home / ".claude" / "hooks" / "config-guard.py"
+    upstream = checkout / "hooks" / "config-guard.py"
+
+    first = _install(checkout, home, answers)
+    assert first.returncode == 0, first.stdout + first.stderr
+    v1 = installed.read_bytes()
+    upstream.write_bytes(v1 + b"\n# upstream v2\n")
+
+    second = _install(checkout, home, answers)
+    assert second.returncode == 0, second.stdout + second.stderr
+    assert installed.read_bytes() == v1 + b"\n# upstream v2\n"
+    assert "CONFLICT" not in second.stdout and "MODIFIED-BY-USER" not in second.stdout, second.stdout
+    assert not installed.with_name(installed.name + ".harness-new").exists()
+
+
+@pytestmark_bash
+def test_install_sh_hooks_menu_both_changed_leaves_harness_new(tmp_path: Path) -> None:
+    checkout = _scratch_checkout(tmp_path)
+    home = tmp_path / "home"
+    home.mkdir()
+    answers = SKIP_TO_COMPONENTS + "3\n8\n1\ny\nn\nn\n"
+    installed = home / ".claude" / "hooks" / "config-guard.py"
+    upstream = checkout / "hooks" / "config-guard.py"
+
+    first = _install(checkout, home, answers)
+    assert first.returncode == 0, first.stdout + first.stderr
+    v1 = installed.read_bytes()
+    installed.write_bytes(v1 + b"\n# my edit\n")
+    upstream.write_bytes(v1 + b"\n# upstream v2\n")
+
+    second = _install(checkout, home, answers)
+    assert second.returncode == 0, second.stdout + second.stderr
+    assert installed.read_bytes() == v1 + b"\n# my edit\n"
+    assert installed.with_name("config-guard.py.harness-new").read_bytes() == v1 + b"\n# upstream v2\n"
+    assert "CONFLICT hooks/config-guard.py" in second.stdout, second.stdout
+    settings = json.loads((home / ".claude" / "settings.json").read_text(encoding="utf-8"))
+    wired = {h["args"][0] for groups in settings["hooks"].values() for g in groups for h in g["hooks"]}
+    assert "config-guard.py" in wired, "a kept file is still present, so it is still wired"
+
+
+@pytestmark_bash
+def test_install_sh_skills_agents_and_memory_are_recorded_and_reinstall_flat(tmp_path: Path) -> None:
+    checkout = _scratch_checkout(tmp_path)
+    home = tmp_path / "home"
+    home.mkdir()
+    # skip rules, pick skills individually -> demo yes, skip hooks, agents, agent-memory
+    answers = SKIP_TO_COMPONENTS + "3\n7\ny\n4\ny\ny\n"
+    agent = sorted(p.name for p in (checkout / "agents").glob("*.md"))[0]
+
+    first = _install(checkout, home, answers)
+    assert first.returncode == 0, first.stdout + first.stderr
+    files = manifest(home / ".claude")["files"]
+    assert {"skills/demo/SKILL.md", "skills/_shared/conventions.md",
+            f"agents/{agent}", "agent-memory/README.md"} <= set(files), sorted(files)
+
+    second = _install(checkout, home, answers)
+    assert second.returncode == 0, second.stdout + second.stderr
+    assert not (home / ".claude" / "skills" / "demo" / "demo").exists(), "cp -r used to nest a second copy here"
+    assert "CONFLICT" not in second.stdout
+    assert "NEW" not in second.stdout.replace(".harness-new", ""), second.stdout
+

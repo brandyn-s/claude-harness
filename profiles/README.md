@@ -73,10 +73,12 @@ survive the merge; other profile-owned lists replace the existing value. Before
 this, applying the fresh profile over a curated `settings.json` silently cut a
 34-entry allow list to 3.
 
-Files the installer copies (the starter rules and hooks) are recorded with their
-sha256 in `~/.claude/.harness-install-state.json`, so a re-run upgrades copies
-you never touched, keeps the ones you edited (reported as `MODIFIED-BY-USER`),
-and on a conflict keeps yours and writes the new version beside it as
-`<name>.harness-new`. The same classification is available per file --
+Every file the installer copies (starter kit, rules, skills, hooks, agents,
+agent-memory, ARCHITECTURE.md) is recorded with its sha256 in
+`~/.claude/.harness-install-state.json`, so a re-run upgrades copies you never
+touched, keeps the ones you edited (reported as `MODIFIED-BY-USER`), and on a
+conflict keeps yours and writes the new version beside it as
+`<name>.harness-new`. The same classification is available per path --
 `python3 scripts/install-profile.py --target ~/.claude/settings.json --install
-rules/operator-discipline.md --apply` -- and `--force` overwrites regardless.
+rules/operator-discipline.md --apply`; a directory installs every file beneath
+it -- and `--force` overwrites regardless.
