@@ -8,8 +8,9 @@ gaps).
 
 Path semantics match doc_accuracy_audit.py:
 - REPO content (agents/, skills/, settings.json,
-  agent-memory/topics/) resolves under CLAUDE_CONFIG_DIR when set (the
-  stale-base worktree redirect), else ~/.claude.
+  agent-memory/topics/) and the optional, user-owned
+  audit-architecture/aliases.json resolve under CLAUDE_CONFIG_DIR when set
+  (the stale-base worktree redirect), else ~/.claude.
 - RUNTIME state (~/.claude.json, ~/.mcp.json, projects/<dir>/ memory and
   CLAUDE.md, agent-memory accumulation) always resolves under HOME —
   it is not versioned, so a worktree never contains it.
@@ -30,22 +31,20 @@ import sys
 BASE = os.environ.get('CLAUDE_CONFIG_DIR') or os.path.expanduser('~/.claude')
 HOME = os.path.expanduser('~')
 
-# Server-name -> topic/routing alias. Explicit beats fuzzy: a loose prefix
-# match ("pa" -> palantir-foundry.md) manufactured a false paloalto-covered
-# row on 2026-08-22. Extend this map rather than loosening the matcher.
-ALIASES = {
-    'linear-server': 'linear',
-    'slack-user': 'slack',
-    'claude_platform': 'claude-platform',
-    'sec-automations-query': 'sec-automation',
-    'box-admin': 'box',
-    'confluence-gov': 'confluence-gov',
-    'palantir-mcp': 'palantir-foundry',
-    'claude-compliance': 'claude-monitoring',
-    'memory-search': 'memory-search-dev',
-    'compliance-access-framework': 'compliance-access',
-    'workspace-provisioner': 'provision',
-}
+# Server-name -> topic/routing alias. Explicit beats fuzzy: on 2026-08-22 a
+# loose prefix match let a two-letter prefix shared by two unrelated servers
+# manufacture a false "covered" row. Extend the alias FILE rather than
+# loosening the matcher.
+#
+# The built-in map ships EMPTY on purpose: which servers exist and what their
+# topic files are called is environment state, not harness content. Aliases
+# live outside the repo in a flat JSON object {"server-name": "topic-alias"}:
+#   $CLAUDE_CONFIG_DIR/audit-architecture/aliases.json   (when the var is set)
+#   ~/.claude/audit-architecture/aliases.json            (otherwise)
+# A missing file means no aliases; a malformed one is a config parse failure
+# (exit 2), never silently ignored.
+ALIASES = {}
+ALIASES_FILE = os.path.join('audit-architecture', 'aliases.json')
 
 def _load_json(path):
     try:
@@ -55,6 +54,30 @@ def _load_json(path):
         return None, 'absent'
     except json.JSONDecodeError as e:
         return None, f'parse error: {e}'
+
+
+class AliasFileError(ValueError):
+    """The alias file exists but is not a flat {"server": "alias"} JSON object."""
+
+
+def aliases_path():
+    return os.path.join(BASE, ALIASES_FILE)
+
+
+def load_aliases(path=None):
+    """Built-in aliases overlaid with the user file; built-ins alone when absent."""
+    path = path or aliases_path()
+    data, err = _load_json(path)
+    if err == 'absent':
+        return dict(ALIASES)
+    if err:
+        raise AliasFileError(f'{path}: {err}')
+    flat = isinstance(data, dict) and all(
+        isinstance(k, str) and isinstance(v, str) for k, v in data.items())
+    if not flat:
+        raise AliasFileError(
+            f'{path}: expected a flat JSON object {{"server-name": "topic-alias"}}')
+    return {**ALIASES, **data}
 
 
 def load_servers():
@@ -96,11 +119,17 @@ def load_servers():
     return servers, errors
 
 
-def name_variants(server):
-    """Candidate names for topic/routing lookups. Explicit + mechanical only."""
+def name_variants(server, aliases=None):
+    """Candidate names for topic/routing lookups. Explicit + mechanical only.
+
+    `aliases` defaults to load_aliases(); build() passes the map it already
+    loaded so a malformed file is reported once, not once per server.
+    """
+    if aliases is None:
+        aliases = load_aliases()
     out = [server]
-    if server in ALIASES:
-        out.append(ALIASES[server])
+    if server in aliases:
+        out.append(aliases[server])
     out.append(server.replace('_', '-'))
     out.append(server.replace('-mcp', ''))
     first = server.split('-')[0]
@@ -132,6 +161,15 @@ def build():
     servers, errs = load_servers()
     result['errors'].extend(errs)
     result['mcp_servers'] = servers
+
+    # --- Server aliases (user file; see ALIASES) ---
+    result['alias_file'] = aliases_path()
+    try:
+        aliases = load_aliases()
+    except AliasFileError as e:
+        result['errors'].append(str(e))
+        aliases = dict(ALIASES)
+    result['aliases'] = aliases
 
     # --- Hooks (repo settings.json; deployed may differ — see banner) ---
     st, err = _load_json(os.path.join(BASE, 'settings.json'))
@@ -221,7 +259,7 @@ def build():
 
     matrix = {}
     for s in sorted(servers):
-        variants = name_variants(s)
+        variants = name_variants(s, aliases)
         topic = next((v for v in variants if v in topics), None)
         matrix[s] = {
             'topic_file': topic,
@@ -258,6 +296,8 @@ def main():
     result = build()
     json.dump(result, sys.stdout, indent=1)
     sys.stdout.write('\n')
+    for err in result['errors']:  # stdout is normally redirected to discovery.json
+        print(f'discovery.py: {err}', file=sys.stderr)
     return 2 if result['errors'] else 0
 
 

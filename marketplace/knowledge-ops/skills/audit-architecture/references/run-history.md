@@ -19,16 +19,18 @@ evidence lives here.
 ## Phase 0 — performance probes (2026-08-22)
 
 - A generic `mcp` `pgrep` pattern swept in Claude Helper, SkyComputerUseClient,
-  and Palantir browser processes, inflating the "MCP footprint" to a meaningless
-  15 GB. Derive the substring per server from its exec'd form.
+  and a third-party vendor's browser helper processes, inflating the "MCP
+  footprint" to a meaningless 15 GB. Derive the substring per server from its
+  exec'd form.
 - System `pip show fastmcp` reported NOT INSTALLED on a venv-launched fleet while
   every server ran fine; the version must be read through each server's own
   launch interpreter.
 
 ## Phase 1 — discovery script (2026-08-22)
 
-Hand-rolled coverage matchers produced two false gaps; `discovery.py` with the
-maintained alias map replaced them.
+Hand-rolled coverage matchers produced two false gaps; `discovery.py` with an
+explicit alias map replaced them. The map is now the optional user file
+`audit-architecture/aliases.json`; the repo ships it empty.
 
 ## Phase 7A — meta-reference false positives (2026-05-26)
 

@@ -212,12 +212,12 @@ findings:
     code: C2
     severity: drift
     label: behavior-fix
-    description: crowdstrike routing rule IS present in false_fixture/routing-rules.json
+    description: example-vendor routing rule IS present in false_fixture/routing-rules.json
     expected_fires: false
     reproducer:
       type: grep_absent
       command: |
-        grep -q 'crowdstrike' skills/audit-architecture/tests/golden-findings/calibration/false_fixture/routing-rules.json
+        grep -q 'example-vendor' skills/audit-architecture/tests/golden-findings/calibration/false_fixture/routing-rules.json
 
   - skill: false-fixture
     code: D5

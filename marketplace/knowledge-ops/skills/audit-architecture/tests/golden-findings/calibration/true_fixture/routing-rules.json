@@ -1,6 +1,6 @@
 {
   "rules": [
-    { "pattern": "crowdstrike", "skill": "investigate", "agent": "security-ops" }
+    { "pattern": "example-vendor", "skill": "investigate", "agent": "security-ops" }
   ],
   "skipPatterns": []
 }
