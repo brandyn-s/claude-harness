@@ -260,7 +260,7 @@ install_hooks() {
            hook_configs=(
                'PreToolUse|Bash|PowerShell|bash-pretooluse-dispatcher.py|30'
                'PreToolUse|Write|Edit|config-guard.py|30'
-               'PreToolUse|Read|read-deny-guard.py|30'
+               'PreToolUse|Read|read-deny-guard.py|15'
                'PostToolUse|mcp__.*|result-injection-guard.py|30'
            ) ;;
         2) hooks=(loop-detector.py result-injection-guard.py "${DISPATCHER_HOOKS[@]}"
@@ -513,7 +513,7 @@ if ask_yn "Install the recommended fresh-laptop core? (2 rules + 4 deterministic
     hook_configs=(
         'PreToolUse|Bash|PowerShell|bash-pretooluse-dispatcher.py|30'
         'PreToolUse|Write|Edit|config-guard.py|30'
-        'PreToolUse|Read|read-deny-guard.py|30'
+        'PreToolUse|Read|read-deny-guard.py|15'
         'PostToolUse|mcp__.*|result-injection-guard.py|30'
     )
     if (( operator_selected )); then
