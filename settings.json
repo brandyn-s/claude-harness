@@ -883,6 +883,20 @@
         ]
       }
     ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "precompact-priorities.py"
+            ],
+            "timeout": 15
+          }
+        ]
+      }
+    ],
     "PostCompact": [
       {
         "hooks": [
