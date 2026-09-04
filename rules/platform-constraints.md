@@ -98,9 +98,8 @@ Full: incidents#2026-08-25-exported-aws-region-leaked-into-govcloud-tests
   then prove validity by parsing the result.
   Full: incidents#2026-08-24-load-dump-round-trip-rewrote-a-registry
 - Do not name scratch modules after standard-library or installed packages.
-- Never hand-roll a `urllib` Microsoft Graph probe. Import the shared helper:
-  `from msgraph_helper import graph_get, odata_quote` (`bin/msgraph_helper.py`,
-  app-only GCC High auth via Keychain, no `az login`); a `safe=` set that
+- Never hand-roll a `urllib` Microsoft Graph probe. Use one shared, tested Graph
+  helper (`graph_get`, `odata_quote`) and keep auth inside it; a `safe=` set that
   contains a space reproduces the crash `quote()` was meant to prevent.
   Full: incidents#2026-07-05-6th-recurrence-each-new-hand-rolled-urllib-graph
 - Use unique temporary directories rather than predictable shared filenames.

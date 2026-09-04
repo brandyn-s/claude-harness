@@ -102,15 +102,15 @@ Snapshot-specific observations retained for diagnosis:
 
 ## Registered gateway candidates at snapshot time
 
-These gateway aliases were registered but required shared Entra GCC High OAuth
-completion through /mcp at snapshot time: msgraph, crowdstrike, tenable, airlock,
-security-remix, confluence, ashby, solarwinds, paloalto, and pa-cdss.
+Some gateway aliases are registered but expose only their OAuth bootstrap tools
+until an interactive `/mcp` authentication completes. Which aliases those are is
+environment-specific and is not reproduced here.
 
-Do not infer current authentication or individual tool names from that list.
-Authenticate when authorized, then discover and exact-probe the live tools. Lever
-was removed after its 2026-07-24 sunset. Tailscale later authenticated; NetCloud
-later became live as local stdio. Slack-user authentication and aliases have also
-changed across migrations, so discover them live rather than copying an old GUID.
+Do not infer current authentication or individual tool names from any registration
+list. Authenticate when authorized, then discover and exact-probe the live tools.
+Aliases, authentication state and even transport (remote gateway versus local
+stdio) change across migrations, so discover them live rather than copying an old
+GUID.
 
 ## Retired or not migrated in this snapshot
 
