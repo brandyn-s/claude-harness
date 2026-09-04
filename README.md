@@ -56,8 +56,10 @@ python3 scripts/install-profile.py --apply
 ```
 
 Apply creates a timestamped backup when `~/.claude/settings.json` already
-exists, preserves unrelated settings, and writes atomically. The installer also
-backs up collisions before copying runtime files. Re-running it is idempotent.
+exists, preserves unrelated settings, and writes atomically. Re-running the
+installer upgrades starter files you never edited, keeps the ones you did, and
+writes a conflicting upstream version beside yours as `<name>.harness-new`; the
+record is `~/.claude/.harness-install-state.json`.
 See [`profiles/README.md`](profiles/README.md) for the merge contract.
 
 On macOS, run `brew bundle` first. On Linux, install Python 3.10+, Git,
