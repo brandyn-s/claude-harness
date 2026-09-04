@@ -80,17 +80,23 @@ def score_tree(tree_text):
         return 0, buckets
     lines = tree_text.lower()
     if "hooks/" in lines or "hooks\\" in lines:
-        buckets["hooks"] = True; score += 1
+        buckets["hooks"] = True
+        score += 1
     if "rules/" in lines or "rules\\" in lines:
-        buckets["rules"] = True; score += 1
+        buckets["rules"] = True
+        score += 1
     if "skill" in lines and ".md" in lines:
-        buckets["skills"] = True; score += 1
+        buckets["skills"] = True
+        score += 1
     if "agents/" in lines or "agents\\" in lines:
-        buckets["agents"] = True; score += 1
+        buckets["agents"] = True
+        score += 1
     if "memory/" in lines or "topics/" in lines:
-        buckets["memory"] = True; score += 1
+        buckets["memory"] = True
+        score += 1
     if "settings.json" in lines:
-        buckets["config"] = True; score += 1
+        buckets["config"] = True
+        score += 1
     return score, buckets
 
 

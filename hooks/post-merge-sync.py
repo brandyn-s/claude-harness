@@ -155,7 +155,9 @@ def _is_linked_worktree(repo_path):
         git_dir, common_dir = lines[0].strip(), lines[1].strip()
         if not os.path.isabs(common_dir):
             common_dir = os.path.join(repo_path, common_dir)
-        norm = lambda p: os.path.normcase(os.path.realpath(p))
+        def norm(p):
+            return os.path.normcase(os.path.realpath(p))
+
         return norm(git_dir) != norm(common_dir)
     except Exception:
         return False

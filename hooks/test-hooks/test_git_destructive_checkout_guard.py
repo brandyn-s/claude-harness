@@ -158,7 +158,7 @@ def test_clean_is_gated_on_untracked_not_unstaged(tmp_path):
     _git(["checkout", "--", UNSTAGED], d)  # clean tracked tree, no unstaged edit
     porcelain = _git(["status", "--porcelain"], d).stdout
     assert "??" in porcelain, "fixture must leave an UNTRACKED file for clean to eat"
-    assert not any(l[1:2] in ("M", "D") for l in porcelain.splitlines() if len(l) > 1), \
+    assert not any(line[1:2] in ("M", "D") for line in porcelain.splitlines() if len(line) > 1), \
         "fixture must have NO unstaged tracked edits, or it cannot pin the regression"
     assert _ask_guard(f"git -C {d} clean -fd") == 2, (
         "clean -fd must block on untracked files even with a clean tracked tree"

@@ -347,16 +347,27 @@ def main(argv=None) -> int:
     p = argparse.ArgumentParser(description="durable run-status surface")
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    sp = sub.add_parser("start"); sp.add_argument("id"); sp.add_argument("--phase"); sp.add_argument("--detail"); sp.add_argument("--pct", type=int)
+    sp = sub.add_parser("start")
+    sp.add_argument("id")
+    sp.add_argument("--phase")
+    sp.add_argument("--detail")
+    sp.add_argument("--pct", type=int)
     # Receipt fields (2026-07-26 audit, Phase 1): identity + where the evidence lives.
     sp.add_argument("--task-id", dest="task_id", help="orchestrator task/agent id, if any")
     sp.add_argument("--log", help="path to the run's durable log")
     sp.add_argument("--artifact", help="path to the run's primary output artifact")
     sp.set_defaults(fn=cmd_start)
 
-    sp = sub.add_parser("update"); sp.add_argument("id"); sp.add_argument("--phase"); sp.add_argument("--detail"); sp.add_argument("--pct", type=int); sp.set_defaults(fn=cmd_update)
+    sp = sub.add_parser("update")
+    sp.add_argument("id")
+    sp.add_argument("--phase")
+    sp.add_argument("--detail")
+    sp.add_argument("--pct", type=int)
+    sp.set_defaults(fn=cmd_update)
 
-    sp = sub.add_parser("done"); sp.add_argument("id"); sp.add_argument("--summary")
+    sp = sub.add_parser("done")
+    sp.add_argument("id")
+    sp.add_argument("--summary")
     # `.done` is a VERIFIED-SUCCESS claim; one of these is required.
     sp.add_argument("--verify-cmd", dest="verify_cmd",
                     help="shell command that must exit 0 for success to be recorded")
@@ -366,11 +377,16 @@ def main(argv=None) -> int:
                     help="record success WITHOUT evidence (marked unverified in the receipt)")
     sp.set_defaults(fn=cmd_done)
 
-    sp = sub.add_parser("fail"); sp.add_argument("id"); sp.add_argument("--reason")
+    sp = sub.add_parser("fail")
+    sp.add_argument("id")
+    sp.add_argument("--reason")
     sp.add_argument("--exit-code", dest="exit_code", type=int, help="process exit code")
     sp.set_defaults(fn=cmd_fail)
-    sp = sub.add_parser("show"); sp.add_argument("id"); sp.set_defaults(fn=cmd_show)
-    sp = sub.add_parser("list"); sp.set_defaults(fn=cmd_list)
+    sp = sub.add_parser("show")
+    sp.add_argument("id")
+    sp.set_defaults(fn=cmd_show)
+    sp = sub.add_parser("list")
+    sp.set_defaults(fn=cmd_list)
 
     a = p.parse_args(argv)
     return a.fn(a)

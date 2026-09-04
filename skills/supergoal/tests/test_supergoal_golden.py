@@ -124,7 +124,7 @@ def test_write_terminal_records_int_turn(tmp_path):
     assert rc == 0, f"write_terminal.py failed: rc={rc}, err={err}"
 
     events = (state_dir / "events.jsonl").read_text().splitlines()
-    exited = [json.loads(l) for l in events if json.loads(l).get("event") == "exited"]
+    exited = [json.loads(line) for line in events if json.loads(line).get("event") == "exited"]
     assert len(exited) == 1, "expected exactly one exited event"
     turn = exited[0]["turn"]
     assert isinstance(turn, int), f"exit event turn must be int, got {type(turn).__name__}: {turn!r}"

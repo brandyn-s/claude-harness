@@ -38,7 +38,7 @@ def _run(tmp_path, payload, extra_env=None):
     rc, out, _err = run_hook(HOOK, payload, env=env)
     rows = []
     if log.exists():
-        rows = [json.loads(l) for l in log.read_text(encoding="utf-8").splitlines() if l]
+        rows = [json.loads(line) for line in log.read_text(encoding="utf-8").splitlines() if line]
     return rc, out, rows
 
 

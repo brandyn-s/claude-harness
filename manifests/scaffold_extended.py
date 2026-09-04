@@ -270,7 +270,6 @@ def scaffold_terraform(dry_run=False):
 
         # Find module/variable references for dependency detection
         var_refs = sorted(set(re.findall(r'var\.(\w+)', text)))
-        local_refs = sorted(set(re.findall(r'local\.(\w+)', text)))
 
         lines = [
             f"id: {name}",

@@ -197,7 +197,7 @@ def test_layer_d_writes_trace_records(tmp_path, monkeypatch):
     # SubagentStop gate). Confirm exactly one layer="D" record landed
     # with the VERIFIED verdict and a session_id attribution key.
     trace_file = tmp_path / "trace.jsonl"
-    recs = [json.loads(l) for l in trace_file.read_text(encoding="utf-8").splitlines() if l.strip()]
+    recs = [json.loads(line) for line in trace_file.read_text(encoding="utf-8").splitlines() if line.strip()]
     d_recs = [r for r in recs if r.get("layer") == "D"]
     assert len(d_recs) == 1, f"expected 1 Layer-D record, got {len(d_recs)}"
     assert d_recs[0]["verdict"] == "VERIFIED"

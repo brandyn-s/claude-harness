@@ -174,10 +174,12 @@ def run_assertion(atype, aval, skill_dir, fm, body, body_no_code):
         for r in list(local_refs):
             for ss in sib_names:
                 if r.startswith(ss + "/"):
-                    local_refs.discard(r); break
+                    local_refs.discard(r)
+                    break
             for ss in sib_names:
                 if re.search(re.escape(ss) + "/" + re.escape(r), body_no_code):
-                    local_refs.discard(r); break
+                    local_refs.discard(r)
+                    break
         missing = [r for r in local_refs if r not in existing]
         if missing:
             return False, f"missing refs: {missing[:5]}"

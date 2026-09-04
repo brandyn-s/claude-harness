@@ -97,7 +97,6 @@ def main():
     # check whether the target's body acknowledges the source.
     unilateral = []
     for source, chains in chain_graph.items():
-        source_body = (Path("skills") / source / "SKILL.md").read_text(encoding='utf-8').lower()
         for target, kind, ctx in chains:
             if kind != "compose":
                 continue  # only enforce bidirectionality for explicit composition

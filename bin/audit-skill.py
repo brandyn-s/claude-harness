@@ -1936,7 +1936,8 @@ def _finalize_suppression(entry, line_no, on_invalid, result):
         try:
             if "-" in sl:
                 lo, hi = sl.split("-", 1)
-                int(lo); int(hi)
+                int(lo)
+                int(hi)
             else:
                 int(sl)
         except (ValueError, TypeError):
@@ -2652,7 +2653,7 @@ def check_marketplace_freshness():
         ["git", "status", "--porcelain", "marketplace/", ".claude-plugin/"],
         cwd=str(REPO), capture_output=True, text=True,
     )
-    files = [l for l in status.stdout.splitlines() if l.strip()]
+    files = [line for line in status.stdout.splitlines() if line.strip()]
     if not files:
         return True, "marketplace/ + .claude-plugin/ are in sync with build-marketplace.py"
     return False, (
@@ -2682,7 +2683,7 @@ def _fix_c5_in_file(path):
     """
     text = path.read_text(encoding="utf-8")
     lines = text.splitlines(keepends=True)
-    in_doc = _docstring_line_mask([l.rstrip("\n") for l in lines])
+    in_doc = _docstring_line_mask([ln.rstrip("\n") for ln in lines])
 
     # (line_idx, match_start_col, kind) tuples for every call to fix.
     targets = []
@@ -2693,7 +2694,7 @@ def _fix_c5_in_file(path):
         if in_doc[line_no - 1]:
             continue
         idx = line_no - 1
-        clean_lines = [l.rstrip("\n") for l in lines]
+        clean_lines = [ln.rstrip("\n") for ln in lines]
 
         for m in C5_READ_TEXT_PAT.finditer(line):
             if _looks_like_string_literal(line, m.start()):
@@ -2725,7 +2726,7 @@ def _fix_c5_in_file(path):
     # For each target, walk paren-depth forward to find the matching close
     # paren's (line, col). Record (close_line, close_col) per target.
     close_positions = []
-    clean_lines = [l.rstrip("\n") for l in lines]
+    clean_lines = [ln.rstrip("\n") for ln in lines]
     for idx, ms, _kind in targets:
         depth = 0
         seen_open = False
@@ -2754,7 +2755,7 @@ def _fix_c5_in_file(path):
     # Sort back-to-front so earlier inserts don't shift later positions.
     edits = sorted(set(close_positions), key=lambda lc: (lc[0], lc[1]), reverse=True)
     insert_text = ", encoding='utf-8'"
-    new_lines = [l for l in lines]
+    new_lines = list(lines)
     for (line_idx, col) in edits:
         raw = new_lines[line_idx]
         # Skip if the call already gained encoding= via an earlier insert
@@ -2868,8 +2869,8 @@ def _fix_c7_in_file(path):
         # Insert `import sys` after the last existing top-level import,
         # or at the top of the file (after shebang/docstring) if none.
         import_lines = []
-        for i, l in enumerate(new_lines):
-            if re.match(r"^\s*(?:from|import)\s+\w", l):
+        for i, ln in enumerate(new_lines):
+            if re.match(r"^\s*(?:from|import)\s+\w", ln):
                 import_lines.append(i)
         if import_lines:
             ins_idx = import_lines[-1] + 1
@@ -2877,11 +2878,11 @@ def _fix_c7_in_file(path):
             # Find first non-shebang, non-docstring, non-blank line.
             ins_idx = 0
             in_doc = False
-            for i, l in enumerate(new_lines):
-                if l.startswith("#!"):
+            for i, ln in enumerate(new_lines):
+                if ln.startswith("#!"):
                     ins_idx = i + 1
                     continue
-                stripped = l.strip()
+                stripped = ln.strip()
                 if stripped.startswith(('"""', "'''")):
                     in_doc = not in_doc
                     if not in_doc:

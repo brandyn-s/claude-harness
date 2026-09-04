@@ -441,20 +441,24 @@ def self_test(root: Path) -> int:
     results = {}
     with tempfile.TemporaryDirectory(prefix="compile-selftest-") as tmp:
         base = Path(tmp)
-        scratch = base / "dangling"; _copy_tree(root, scratch)          # DANGLING
+        scratch = base / "dangling"  # DANGLING
+        _copy_tree(root, scratch)
         m = _first(scratch, "hooks/manifests", "*.yaml")
         m.write_text(m.read_text(encoding="utf-8") + "\nenforces:\n  - no-such-rule-selftest\n", encoding="utf-8")
         results["DANGLING"] = "DANGLING" in _issues(scratch)
-        scratch = base / "placeholder"; _copy_tree(root, scratch)       # PLACEHOLDER
+        scratch = base / "placeholder"  # PLACEHOLDER
+        _copy_tree(root, scratch)
         m = _first(scratch, "hooks/manifests", "*.yaml")
         text = m.read_text(encoding="utf-8")
         text = re.sub(r"(?m)^event:.*$", "event: TODO_EVENT", text) if re.search(r"(?m)^event:", text) else text + "\nevent: TODO_EVENT\n"
         m.write_text(text, encoding="utf-8")
         results["PLACEHOLDER"] = "PLACEHOLDER" in _issues(scratch)
-        scratch = base / "missing"; _copy_tree(root, scratch)           # MISSING_SOURCE
+        scratch = base / "missing"  # MISSING_SOURCE
+        _copy_tree(root, scratch)
         _first(scratch, "skills", "*/SKILL.md").unlink()
         results["MISSING_SOURCE"] = "MISSING_SOURCE" in _issues(scratch)
-        scratch = base / "drift"; _copy_tree(root, scratch)             # DRIFT
+        scratch = base / "drift"  # DRIFT
+        _copy_tree(root, scratch)
         skill_md = _first(scratch, "skills", "*/SKILL.md")
         skill_md.write_text(skill_md.read_text(encoding="utf-8") + "\n\nUse mcp__selftest_server__probe here.\n", encoding="utf-8")
         results["DRIFT"] = "DRIFT" in _issues(scratch)

@@ -100,7 +100,6 @@ def _extract_skill_refs(text):
 
 def _guess_category(name, text):
     """Guess skill category from name and content."""
-    text_lower = text.lower()
     if any(w in name for w in ["triage", "investigate", "alert", "monitor", "cc-monitor"]):
         return "operations"
     if any(w in name for w in ["stig", "semgrep", "codeql", "fp-check", "threat", "security",

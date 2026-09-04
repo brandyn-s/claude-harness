@@ -149,8 +149,10 @@ def cluster(units: list[dict], cap: int) -> list[dict]:
                 # Best vocabulary overlap wins; size is the tiebreak, not the rule.
                 best = max(candidates,
                            key=lambda h: (len(h["kw"] & g["kw"]), -h["size"]))
-                best["units"] += g["units"]; best["size"] += g["size"]
-                best["kw"] |= g["kw"]; placed = True
+                best["units"] += g["units"]
+                best["size"] += g["size"]
+                best["kw"] |= g["kw"]
+                placed = True
         if not placed:
             merged.append(g)
     for g in merged:

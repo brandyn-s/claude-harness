@@ -370,15 +370,16 @@ def _sync_one_repo(repo: Path, self_session_id: str | None = None) -> list[str]:
     warnings: list[str] = []
     repo_name = repo.name
     repo_str = str(repo)
-    _git = lambda args, _rs=repo_str: subprocess.run(
-        ["git"] + args,
-        cwd=_rs,
-        capture_output=True,
-        text=True,
-        timeout=10,
-        creationflags=CREATE_NO_WINDOW,
-        startupinfo=_startupinfo(),
-    )
+    def _git(args, _rs=repo_str):
+        return subprocess.run(
+            ["git"] + args,
+            cwd=_rs,
+            capture_output=True,
+            text=True,
+            timeout=10,
+            creationflags=CREATE_NO_WINDOW,
+            startupinfo=_startupinfo(),
+        )
     # Activate a committed git-hooks directory if the repo ships one (e.g. the
     # knowledge-base's .githooks/pre-commit finalize gate). A committed hook is
     # inert until core.hooksPath points at it, and that wiring is one-time per

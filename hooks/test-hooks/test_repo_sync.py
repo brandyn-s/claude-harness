@@ -1080,7 +1080,7 @@ def test_stashed_is_not_referenced_before_it_is_assigned():
             (stores if isinstance(node.ctx, ast.Store) else loads).append(node.lineno)
     assert stores, "`stashed` is never assigned in _sync_one_repo"
     first_store = min(stores)
-    early = sorted(l for l in loads if l < first_store)
+    early = sorted(lineno for lineno in loads if lineno < first_store)
     assert not early, (
         f"`stashed` is READ at line(s) {early} but first assigned at line "
         f"{first_store} -- UnboundLocalError, silently swallowed by the "

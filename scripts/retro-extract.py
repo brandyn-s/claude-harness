@@ -526,7 +526,6 @@ def extract_session(filepath, deep=True):
     # Track outcome signals
     has_git_commit = False
     has_file_write = False
-    ended_with_error = False
     last_user_message = None
     # Fix 1: Parent-skill attribution — track active slash command
     active_command = None

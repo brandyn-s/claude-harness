@@ -140,7 +140,7 @@ def test_hook_makes_no_network_call():
     """A fetch inside a Read hook is its own hazard; the source must not contain one."""
     src = (HOOKS_DIR / HOOK).read_text(encoding="utf-8")
     code = "\n".join(
-        l for l in src.splitlines() if not l.lstrip().startswith("#")
+        line for line in src.splitlines() if not line.lstrip().startswith("#")
     )
     # Comment lines legitimately mention `git fetch` in the remediation text; the
     # CODE must not invoke it. Checked after stripping comments for that reason.

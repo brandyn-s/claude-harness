@@ -32,8 +32,6 @@ import dataclasses
 import re
 from pathlib import Path
 
-from .finding import _parse_minimal_yaml
-
 
 @dataclasses.dataclass
 class CorpusEntry:
@@ -56,10 +54,9 @@ def load_corpus(corpus_root: Path) -> list[CorpusEntry]:
         expected = sub / "expected-findings.yaml"
         if not expected.is_file():
             continue
-        data = _parse_minimal_yaml(expected.read_text(encoding="utf-8"))
         # Schema: { fixture: <name>, required_codes: [..], forbidden_codes: [..], notes: '...' }
-        # _parse_minimal_yaml is tailored for the findings format; do a
-        # second-level parse for these top-level keys.
+        # The findings-format parser (oracle.finding._parse_minimal_yaml) does
+        # not apply here; the corpus schema has its own minimal parser below.
         entries.append(_parse_corpus_entry(expected.read_text(encoding="utf-8"), sub.name))
     return entries
 

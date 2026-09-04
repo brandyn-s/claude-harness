@@ -1805,8 +1805,8 @@ def _autofix_rebase_dirty(command, _cwd=""):
             capture_output=True, text=True, timeout=5,
             creationflags=CREATE_NO_WINDOW,
         )
-        dirty = [l for l in result.stdout.strip().split("\n")
-                 if l.strip() and not l.startswith("??")]
+        dirty = [line for line in result.stdout.strip().split("\n")
+                 if line.strip() and not line.startswith("??")]
     except Exception:
         return None, None
     if not dirty:

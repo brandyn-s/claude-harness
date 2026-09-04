@@ -265,8 +265,8 @@ def preflight(topics_dir):
     behind = int(behind_p.stdout.strip()) if behind_p.returncode == 0 else None
 
     status = git("status", "--porcelain", "--", rel, cwd=root).stdout.splitlines()
-    dirty = {l[3:].strip() for l in status if l[:2].strip() and not l.startswith("??")}
-    untracked = {l[3:].strip() for l in status if l.startswith("??")}
+    dirty = {line[3:].strip() for line in status if line[:2].strip() and not line.startswith("??")}
+    untracked = {line[3:].strip() for line in status if line.startswith("??")}
     diverged_p = git("diff", "--name-only", "HEAD", "origin/main", "--", rel, cwd=root)
     diverged = set(diverged_p.stdout.splitlines()) if diverged_p.returncode == 0 else set()
     tracked = git("ls-files", "--", rel, cwd=root).stdout.splitlines()
@@ -340,5 +340,6 @@ def main():
 
 if __name__ == "__main__":
     if any(a in ("-h", "--help") for a in sys.argv[1:]):
-        print(__doc__ or "<usage TBD>"); sys.exit(0)
+        print(__doc__ or "<usage TBD>")
+        sys.exit(0)
     main()

@@ -216,15 +216,15 @@ def at_risk(cwd, risks):
     need_ignored = "ignored" in risks
     lines = _porcelain(cwd, ignored=need_ignored)
     if "unstaged" in risks:
-        p = [l[3:].strip() for l in lines if len(l) > 3 and l[1] in ("M", "D")]
+        p = [line[3:].strip() for line in lines if len(line) > 3 and line[1] in ("M", "D")]
         if p:
             found["unstaged tracked edits"] = p
     if "untracked" in risks:
-        p = [l[3:].strip() for l in lines if l.startswith("??")]
+        p = [line[3:].strip() for line in lines if line.startswith("??")]
         if p:
             found["untracked files"] = p
     if need_ignored:
-        p = [l[3:].strip() for l in lines if l.startswith("!!")]
+        p = [line[3:].strip() for line in lines if line.startswith("!!")]
         if p:
             found["ignored files"] = p
     return found

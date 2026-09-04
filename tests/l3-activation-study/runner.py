@@ -225,7 +225,8 @@ def main():
                     cell, trial_idx, args.model, args.effort, args.provider, cli_version)
                 out.write(json.dumps(rec) + "\n")
                 n_done += 1
-                if rec["activated"]: n_activated += 1
+                if rec["activated"]:
+                    n_activated += 1
                 if n_done % 10 == 0:
                     rate = n_activated / max(n_done, 1)
                     print(f"  {n_done}/{len(tasks)}  activation_rate={rate:.1%}")
@@ -241,7 +242,8 @@ def main():
                     rec = fut.result()
                     out.write(json.dumps(rec) + "\n")
                     n_done += 1
-                    if rec["activated"]: n_activated += 1
+                    if rec["activated"]:
+                        n_activated += 1
                     if n_done % 10 == 0:
                         rate = n_activated / max(n_done, 1)
                         print(f"  {n_done}/{len(tasks)}  activation_rate={rate:.1%}")
