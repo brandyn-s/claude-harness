@@ -42,7 +42,8 @@ from adapters import anthropic_adapter, openai_adapter, xai_adapter  # noqa: E40
 from embed import round_convergence, should_stop  # noqa: E402
 
 # --- Base-token pricing per 1M tokens (rough tracking, not a billing oracle) ---
-# Verified 2026-08-19: Fable 5 $10/$50 (Anthropic docs); grok-4.6 $2/$6
+# Verified 2026-09-04: Fable 5.1 $10/$50 (Anthropic models overview, the same
+# rate as its predecessor). Verified 2026-08-19: grok-4.6 $2/$6
 # short-context, $4/$12 at >=200k prompt tokens (docs.x.ai — the previous
 # 125/250 figures here were ~100x above any published xAI rate); gpt-5.6-sol
 # $5/$30 short-context, 2x in / 1.5x out for >272K-token prompts (OpenAI

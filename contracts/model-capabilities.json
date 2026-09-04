@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "verified_on": "2026-08-08",
-  "source": "Per-model Claude API request contract. Rows under `models` were transcribed 2026-09-04 from the prose matrix in skills/api-guardrails/SKILL.md, whose primary sources (Anthropic models overview, choosing a model, migration guide, effort, adaptive thinking, refusals and fallback, API and data retention) were verified 2026-08-08. `verified_on` carries that date rather than the transcription date because skills/_shared/model-runtime-policy.md and contracts/model-runtime.json state no per-model capability facts to re-verify against. `superseded` rows carry only the request restrictions scripts/validate-skills.py enforces for them: sampling and manual thinking per skills/_shared/opus-4-7-policy.md (verified 2026-05-27); assistant prefill carried from the validator's pre-existing rule. bin/render-model-capabilities.py renders `models` into the skill; scripts/validate-skills.py reads every row; bin/test_render_model_capabilities.py fails when `verified_on` is older than 120 days.",
+  "verified_on": "2026-09-04",
+  "source": "Per-model Claude API request contract. Every row was re-verified 2026-09-04 (`verified_on`) by fetching the vendor pages: the models overview (platform.claude.com/docs/en/about-claude/models/overview: ids, aliases, dated snapshot, thinking mode, default effort, context window, max output, legacy list) and the model pages it links (fable-5-1 and mythos-5-1 overviews, whats-new-fable-5-1); the per-model migration guides linked from /docs/en/about-claude/models/migration-guide (fable-5-1, fable-5, opus-5, sonnet-5, haiku-4-5: thinking defaults, the Opus 5 disable cap, budget_tokens, sampling, prefill, tool_choice, retention, classifiers, Priority Tier, web fetch); effort (/docs/en/build-with-claude/effort: supported models, levels, default); thinking (/docs/en/build-with-claude/thinking) with its per-model configuration table (/docs/en/build-with-claude/thinking-troubleshooting); extended thinking (/docs/en/build-with-claude/extended-thinking); API and data retention (Covered Models); refusals and fallback; service tiers (Priority Tier exclusions); the web fetch tool (model list); model deprecations (status table); choosing a model. Claude Fable 5.1 and Claude Mythos 5.1 (released 2026-09-01) are the current fable/mythos rows; Claude Fable 5 and Claude Mythos 5 remain served (deprecations table: claude-fable-5 Active, retirement not sooner than 2027-06-09) and moved to `superseded`, which carries only the request restrictions scripts/validate-skills.py enforces. Two facts no fetched page states stay null: Claude Mythos 5.1's own refusal behaviour (the fable-5-1 migration guide lists safety classifiers under 'where the two models diverge' but describes only Fable 5.1's) and Claude Haiku 4.5 web fetch support. bin/render-model-capabilities.py renders `models` into skills/api-guardrails/SKILL.md; scripts/validate-skills.py reads every row; bin/test_render_model_capabilities.py fails when `verified_on` is older than 120 days.",
   "effort_levels": ["low", "medium", "high", "xhigh", "max"],
   "models": [
     {
-      "id": "claude-fable-5",
-      "display_name": "Claude Fable 5",
+      "id": "claude-fable-5-1",
+      "display_name": "Claude Fable 5.1",
       "tier": "fable",
       "thinking": {
         "adaptive": "always_on",
@@ -18,16 +18,19 @@
       "assistant_prefill": false,
       "retention": {"covered_model": true, "minimum_days": 30, "zdr": false},
       "refusals": "classifier",
-      "priority_tier": true,
-      "web_fetch": null,
+      "priority_tier": false,
+      "web_fetch": true,
       "availability": "general",
-      "context_window_tokens": null,
-      "max_output_tokens": null,
-      "notes": []
+      "context_window_tokens": 1000000,
+      "max_output_tokens": 128000,
+      "notes": [
+        "Forced `tool_choice` (`any`/`tool`) returns 400; keep `auto` and instruct.",
+        "Thinking blocks are bound to the producing model and conversation; keep history append-only."
+      ]
     },
     {
-      "id": "claude-mythos-5",
-      "display_name": "Claude Mythos 5",
+      "id": "claude-mythos-5-1",
+      "display_name": "Claude Mythos 5.1",
       "tier": "mythos",
       "thinking": {
         "adaptive": "always_on",
@@ -38,13 +41,16 @@
       "sampling": "rejected",
       "assistant_prefill": false,
       "retention": {"covered_model": true, "minimum_days": 30, "zdr": false},
-      "refusals": "none",
+      "refusals": null,
       "priority_tier": false,
-      "web_fetch": null,
+      "web_fetch": true,
       "availability": "project-glasswing",
-      "context_window_tokens": null,
-      "max_output_tokens": null,
-      "notes": []
+      "context_window_tokens": 1000000,
+      "max_output_tokens": 128000,
+      "notes": [
+        "Forced `tool_choice` (`any`/`tool`) returns 400; keep `auto` and instruct.",
+        "Refusal behaviour is not stated by the vendor; handle `stop_reason: refusal`."
+      ]
     },
     {
       "id": "claude-opus-5",
@@ -58,13 +64,13 @@
       "effort": {"levels": ["low", "medium", "high", "xhigh", "max"], "default": "high"},
       "sampling": "rejected",
       "assistant_prefill": false,
-      "retention": {"covered_model": false, "minimum_days": null, "zdr": null},
+      "retention": {"covered_model": false, "minimum_days": null, "zdr": true},
       "refusals": "classifier",
       "priority_tier": false,
       "web_fetch": false,
       "availability": "general",
-      "context_window_tokens": null,
-      "max_output_tokens": null,
+      "context_window_tokens": 1000000,
+      "max_output_tokens": 128000,
       "notes": ["Re-run effort sweeps rather than inheriting earlier-model settings."]
     },
     {
@@ -84,8 +90,8 @@
       "priority_tier": false,
       "web_fetch": true,
       "availability": "general",
-      "context_window_tokens": null,
-      "max_output_tokens": null,
+      "context_window_tokens": 1000000,
+      "max_output_tokens": 128000,
       "notes": ["Re-count tokens and re-test truncation because it uses a different tokenizer from Sonnet 4.6."]
     },
     {
@@ -103,7 +109,7 @@
       "assistant_prefill": true,
       "retention": {"covered_model": false, "minimum_days": null, "zdr": null},
       "refusals": null,
-      "priority_tier": null,
+      "priority_tier": true,
       "web_fetch": null,
       "availability": "general",
       "context_window_tokens": 200000,
@@ -115,6 +121,32 @@
     }
   ],
   "superseded": [
+    {
+      "id": "claude-fable-5",
+      "display_name": "Claude Fable 5",
+      "tier": "fable",
+      "superseded_by": "claude-fable-5-1",
+      "thinking": {
+        "adaptive": "always_on",
+        "disable": {"allowed": false, "max_effort": null},
+        "manual_budget_tokens": false
+      },
+      "sampling": "rejected",
+      "assistant_prefill": false
+    },
+    {
+      "id": "claude-mythos-5",
+      "display_name": "Claude Mythos 5",
+      "tier": "mythos",
+      "superseded_by": "claude-mythos-5-1",
+      "thinking": {
+        "adaptive": "always_on",
+        "disable": {"allowed": false, "max_effort": null},
+        "manual_budget_tokens": false
+      },
+      "sampling": "rejected",
+      "assistant_prefill": false
+    },
     {
       "id": "claude-opus-4-8",
       "display_name": "Claude Opus 4.8",

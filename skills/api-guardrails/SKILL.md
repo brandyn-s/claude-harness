@@ -5,7 +5,7 @@ when_to_use: "Use when building a Claude API application, writing system prompts
 effort: medium
 argument-hint: "[system-prompt or code-file to review]"
 allowed-tools: Read Grep Glob
-verified_on: 2026-08-08
+verified_on: 2026-09-04
 metadata:
   author: example-security-engineering
   version: "2.0"
@@ -21,13 +21,13 @@ assume that a model name, provider, feature, or retention contract is portable.
 > requested and effective model, provider, effort, context class, fallback or
 > switch reason, and refusal outcome for each production request path.
 
-Primary sources (verified 2026-08-08):
+Primary sources (verified 2026-09-04):
 
-- [Models overview](https://platform.claude.com/docs/en/about-claude/models/overview)
+- [Models overview](https://platform.claude.com/docs/en/about-claude/models/overview) and its model pages
 - [Choosing a model](https://platform.claude.com/docs/en/about-claude/models/choosing-a-model)
-- [Migration guide](https://platform.claude.com/docs/en/about-claude/models/migration-guide)
+- [Migration guides](https://platform.claude.com/docs/en/about-claude/models/migration-guide)
 - [Effort](https://platform.claude.com/docs/en/build-with-claude/effort)
-- [Thinking](https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking)
+- [Thinking](https://platform.claude.com/docs/en/build-with-claude/thinking) and its [per-model table](https://platform.claude.com/docs/en/build-with-claude/thinking-troubleshooting)
 - [Refusals and fallback](https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback)
 - [API and data retention](https://platform.claude.com/docs/en/manage-claude/api-and-data-retention)
 - [Reduce hallucinations](https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations)
@@ -52,15 +52,15 @@ success even when the HTTP status is 200.
 
 <!-- model-capabilities:begin -->
 <!-- Generated from contracts/model-capabilities.json by bin/render-model-capabilities.py; edit the contract, then run it with --write. -->
-Rows verified 2026-08-08 against the primary sources above; `contracts/model-capabilities.json` is the source of record.
+Rows verified 2026-09-04 against the primary sources above; `contracts/model-capabilities.json` is the source of record.
 
 | Model | Thinking | Effort | Request restrictions | Retention and refusal notes |
 |---|---|---|---|---|
-| Claude Fable 5 (`claude-fable-5`) | Adaptive thinking is always on; `thinking: {"type": "disabled"}` returns 400. Manual `enabled`/`budget_tokens` returns 400. | `low`, `medium`, `high` (default), `xhigh`, `max` | Non-default `temperature`/`top_p`/`top_k` return 400. Assistant-message prefill returns 400. | Covered Model: requires 30-day data retention and is unavailable under ZDR. Handle classifier refusals and qualify fallback behavior. Priority Tier is supported. |
-| Claude Mythos 5 (`claude-mythos-5`) | Adaptive thinking is always on; `thinking: {"type": "disabled"}` returns 400. Manual `enabled`/`budget_tokens` returns 400. | `low`, `medium`, `high` (default), `xhigh`, `max` | Non-default `temperature`/`top_p`/`top_k` return 400. Assistant-message prefill returns 400. | Limited Project Glasswing availability. Covered Model: requires 30-day data retention and is unavailable under ZDR. It has no Fable safety classifiers. Priority Tier is unavailable. |
-| Claude Opus 5 (`claude-opus-5`) | Adaptive thinking is on by default. Thinking may be disabled at `low` through `high`; disabled + `xhigh`/`max` returns 400. Manual `enabled`/`budget_tokens` returns 400. | `low`, `medium`, `high` (default), `xhigh`, `max` | Non-default `temperature`/`top_p`/`top_k` return 400. Assistant-message prefill returns 400. | Handle classifier refusals and qualify fallback behavior. Web fetch is unavailable. Priority Tier is unavailable. Re-run effort sweeps rather than inheriting earlier-model settings. |
-| Claude Sonnet 5 (`claude-sonnet-5`) | Adaptive thinking is on by default and may be disabled at any supported effort. Manual `enabled`/`budget_tokens` returns 400. | `low`, `medium`, `high` (default), `xhigh`, `max` | Non-default `temperature`/`top_p`/`top_k` return 400. Assistant-message prefill returns 400. | Handle cyber-safeguard refusals. Web fetch is available. Priority Tier is unavailable. Re-count tokens and re-test truncation because it uses a different tokenizer from Sonnet 4.6. |
-| Claude Haiku 4.5 (`claude-haiku-4-5`) | Adaptive thinking is not supported. Manual extended thinking (`enabled` + `budget_tokens`) is supported. | Effort is unavailable. | `temperature` or `top_p` may be set, one at a time. Assistant-message prefill is accepted. | 200k context window; up to 64k output tokens. Current low-latency, high-volume, cost-sensitive option. Do not apply Claude 5 request restrictions to it. |
+| Claude Fable 5.1 (`claude-fable-5-1`) | Adaptive thinking is always on; `thinking: {"type": "disabled"}` returns 400. Manual `enabled`/`budget_tokens` returns 400. | `low`, `medium`, `high` (default), `xhigh`, `max` | Non-default `temperature`/`top_p`/`top_k` return 400. Assistant-message prefill returns 400. | Covered Model: requires 30-day data retention and is unavailable under ZDR. Handle classifier refusals and qualify fallback behavior. Web fetch is available. Priority Tier is unavailable. 1M context window; 128k max output. Forced `tool_choice` (`any`/`tool`) returns 400; keep `auto` and instruct. Thinking blocks are bound to the producing model and conversation; keep history append-only. |
+| Claude Mythos 5.1 (`claude-mythos-5-1`) | Adaptive thinking is always on; `thinking: {"type": "disabled"}` returns 400. Manual `enabled`/`budget_tokens` returns 400. | `low`, `medium`, `high` (default), `xhigh`, `max` | Non-default `temperature`/`top_p`/`top_k` return 400. Assistant-message prefill returns 400. | Limited Project Glasswing availability. Covered Model: requires 30-day data retention and is unavailable under ZDR. Web fetch is available. Priority Tier is unavailable. 1M context window; 128k max output. Forced `tool_choice` (`any`/`tool`) returns 400; keep `auto` and instruct. Refusal behaviour is not stated by the vendor; handle `stop_reason: refusal`. |
+| Claude Opus 5 (`claude-opus-5`) | Adaptive thinking is on by default. Thinking may be disabled at `low` through `high`; disabled + `xhigh`/`max` returns 400. Manual `enabled`/`budget_tokens` returns 400. | `low`, `medium`, `high` (default), `xhigh`, `max` | Non-default `temperature`/`top_p`/`top_k` return 400. Assistant-message prefill returns 400. | Handle classifier refusals and qualify fallback behavior. Web fetch is unavailable. Priority Tier is unavailable. 1M context window; 128k max output. Re-run effort sweeps rather than inheriting earlier-model settings. |
+| Claude Sonnet 5 (`claude-sonnet-5`) | Adaptive thinking is on by default and may be disabled at any supported effort. Manual `enabled`/`budget_tokens` returns 400. | `low`, `medium`, `high` (default), `xhigh`, `max` | Non-default `temperature`/`top_p`/`top_k` return 400. Assistant-message prefill returns 400. | Handle cyber-safeguard refusals. Web fetch is available. Priority Tier is unavailable. 1M context window; 128k max output. Re-count tokens and re-test truncation because it uses a different tokenizer from Sonnet 4.6. |
+| Claude Haiku 4.5 (`claude-haiku-4-5`) | Adaptive thinking is not supported. Manual extended thinking (`enabled` + `budget_tokens`) is supported. | Effort is unavailable. | `temperature` or `top_p` may be set, one at a time. Assistant-message prefill is accepted. | Priority Tier is supported. 200k context window; 64k max output. Current low-latency, high-volume, cost-sensitive option. Do not apply Claude 5 request restrictions to it. |
 <!-- model-capabilities:end -->
 
 For the Claude 5 rows above:
@@ -187,7 +187,7 @@ change—an effort label is not a cross-model performance equivalence.
 
 ## Step 4 — Handle Refusal, Fallback, and Partial Results
 
-Claude Fable 5 and other refusal-capable models can return a classifier refusal as HTTP 200.
+Refusal-capable models (Fable 5.1, Opus 5) can return a classifier refusal as HTTP 200.
 Treat it as a typed terminal outcome:
 
 ```python
@@ -231,9 +231,10 @@ it. A silent model change invalidates model-specific evaluation claims.
 
 ## Step 5 — Enforce Data Governance Before Model Selection
 
-- Claude Fable 5 and Claude Mythos 5 are Covered Models requiring 30-day data
-  retention and cannot serve a ZDR workspace. Do not select either merely as a
-  quality upgrade. Mythos 5 also requires approved Project Glasswing access.
+- Fable 5.1 and Mythos 5.1 (and their 5.0 predecessors) are Covered Models:
+  30-day data retention, no ZDR unless Anthropic expressly authorizes it. Do
+  not select either merely as a quality upgrade; Mythos 5.1 also requires
+  Project Glasswing access.
 - Retention responsibility differs by provider. On the Claude API and Claude
   Platform on AWS, Anthropic is the data processor; on Amazon Bedrock and
   Google Cloud, consult the provider's equivalent controls.

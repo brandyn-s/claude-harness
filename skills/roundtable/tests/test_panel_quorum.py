@@ -7,6 +7,11 @@ from pathlib import Path
 
 import pytest
 
+from scripts import model_contracts as ids
+
+# The default Anthropic arm is the contract's current Fable row, never a literal.
+FLAGSHIP = ids.model_id("fable")
+
 
 HARNESS = Path(__file__).resolve().parent.parent / "scripts" / "harness.py"
 
@@ -58,7 +63,7 @@ def test_run_phase_uses_anthropic_model_effort_headroom(tmp_path, monkeypatch):
             "output_tokens": 5,
             "elapsed_s": 0.1,
             "model": {
-                "opus": "claude-fable-5",
+                "opus": FLAGSHIP,
                 "grok": "grok-4.6",
                 "gpt": "gpt-5.6-sol",
             }[agent],
@@ -141,7 +146,7 @@ def test_run_start_event_contains_nested_runtime_receipt(
     )
     assert first["event"] == "run_start"
     assert first["runtime_receipt"]["provider"] == "anthropic"
-    assert first["runtime_receipt"]["requested_model"] == "claude-fable-5"
+    assert first["runtime_receipt"]["requested_model"] == FLAGSHIP
     assert first["runtime_receipt"]["effective_model"] == "<unavailable>"
     assert first["runtime_receipt"]["context_class"] == "<unavailable>"
 
@@ -150,13 +155,13 @@ def test_harness_records_context_class_only_from_explicit_result_metadata():
     harness = _load_harness()
 
     unobserved = harness.result_runtime_receipt(
-        "opus", {"ok": True, "model": "claude-fable-5"}
+        "opus", {"ok": True, "model": FLAGSHIP}
     )
     observed = harness.result_runtime_receipt(
         "opus",
         {
             "ok": True,
-            "model": "claude-fable-5",
+            "model": FLAGSHIP,
             "context_class": "runtime-observed",
         },
     )
@@ -380,7 +385,7 @@ def test_run_phase_does_not_count_a_provider_model_switch_as_quorum(
 
     def fake_call(agent, _prompt, _max_tokens):
         models = {
-            "opus": "claude-fable-5",
+            "opus": FLAGSHIP,
             "grok": "grok-unexpected-fallback",
             "gpt": "gpt-5.6-sol",
         }
