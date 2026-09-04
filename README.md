@@ -37,7 +37,9 @@ portable core installs one ambient rule, one path-scoped rule, and three
 deterministic hooks:
 
 - `outcome-over-verification.md` and `claude-md-quality.md`
-- catastrophic Bash safety, config integrity, and MCP result-injection guards
+- Bash command safety (`bash-pretooluse-dispatcher.py`, which runs the two Bash
+  guards and four advisories in one process), config integrity, and MCP
+  result-injection guards
 - `acceptEdits` plus sandbox-auto-approved Bash; sandbox escapes require review
 - project MCP auto-activation disabled
 
@@ -57,7 +59,7 @@ python3 scripts/install-profile.py --apply
 
 Apply creates a timestamped backup when `~/.claude/settings.json` already
 exists, preserves unrelated settings, and writes atomically. Re-running the
-installer upgrades starter files you never edited, keeps the ones you did, and
+installer upgrades installed files you never edited, keeps the ones you did, and
 writes a conflicting upstream version beside yours as `<name>.harness-new`; the
 record is `~/.claude/.harness-install-state.json`.
 See [`profiles/README.md`](profiles/README.md) for the merge contract.

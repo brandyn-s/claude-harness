@@ -42,7 +42,8 @@ class ProtectedHook:
 
 
 # Runs bash-security-guard and destructive-ops-guard (plus four advisories) in one
-# process; the repository's settings.json registers this instead of the two guards.
+# process; the repository's settings.json, install.sh and the safety-net bundle
+# register this instead of the two guards.
 _BASH_DISPATCHER = ProtectedHook(
     "PreToolUse", "Bash|PowerShell", "bash-pretooluse-dispatcher.py", 30
 )
@@ -56,8 +57,9 @@ PROTECTED_USER_HOOKS = (
         "config-change-validate.py",
         30,
     ),
-    # Installer profiles register the two Bash guards directly; the repository's
-    # settings.json carries both inside the dispatcher. Either keeps the boundary.
+    # Configs installed before 2026-09-03 register the two Bash guards directly;
+    # everything installed since carries both inside the dispatcher. Either
+    # shape keeps the boundary.
     ProtectedHook(
         "PreToolUse", "Bash", "bash-security-guard.py", 30, carried_by=(_BASH_DISPATCHER,)
     ),

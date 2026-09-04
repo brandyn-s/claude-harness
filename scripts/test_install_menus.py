@@ -96,6 +96,31 @@ def run_wire_hooks(settings: Path, *configs: str) -> subprocess.CompletedProcess
     )
 
 
+DISPATCHER = "bash-pretooluse-dispatcher.py"
+DISPATCHER_WIRING = "'PreToolUse|Bash|PowerShell|bash-pretooluse-dispatcher.py|30'"
+
+
+def _dispatcher_hooks(src: str) -> list[str]:
+    """The DISPATCHER_HOOKS array install.sh copies as one set."""
+    m = re.search(r"\nDISPATCHER_HOOKS=\((.*?)\n\)", src, re.DOTALL)
+    assert m, "install.sh no longer defines DISPATCHER_HOOKS"
+    return m.group(1).split()
+
+
+def _expand_dispatcher_hooks(names: list[str], src: str) -> list[str]:
+    expanded = []
+    for name in names:
+        expanded.extend(_dispatcher_hooks(src) if name == '"${DISPATCHER_HOOKS[@]}"' else [name])
+    return expanded
+
+
+def _hosted_by_dispatcher() -> list[str]:
+    """The six hook files hooks/bash-pretooluse-dispatcher.py runs in-process
+    (its GUARDS table, in order)."""
+    text = (REPO / "hooks" / DISPATCHER).read_text(encoding="utf-8")
+    return re.findall(r'\(\s*"[a-z0-9_-]+"\s*,\s*"([a-z0-9_-]+\.py)"\s*,\s*"(?:closed|warn|open)"\s*\)', text)
+
+
 def test_installer_sources_the_helpers_under_test():
     """Guard against the tests drifting onto a copy.
 
@@ -286,7 +311,7 @@ def test_starter_kit_files_all_exist():
     for array, subdir in (("starter_rules", "rules"), ("starter_hooks", "hooks")):
         m = re.search(rf"{array}=\((.*?)\n    \)", src, re.DOTALL)
         assert m, f"could not parse the {array} manifest out of install.sh"
-        names = m.group(1).split()
+        names = _expand_dispatcher_hooks(m.group(1).split(), src)
         duplicates.extend(
             f"{subdir}/{name}" for name in names if names.count(name) > 1
         )
@@ -341,8 +366,10 @@ def test_full_hook_install_produces_self_validating_protected_registry(tmp_path)
             "config-change-validate.py",
             30,
         ),
-        ("PreToolUse", "Bash", "bash-security-guard.py", 30),
-        ("PreToolUse", "Bash|PowerShell", "destructive-ops-guard.py", 30),
+        # The two Bash guards are carried by the dispatcher (the shape the
+        # repository's settings.json has used since 2026-09-03); the registry
+        # in config-change-validate.py accepts either that or the direct form.
+        ("PreToolUse", "Bash|PowerShell", "bash-pretooluse-dispatcher.py", 30),
         ("PreToolUse", "Write|Edit", "write-edit-dispatcher.py", 30),
         ("PostToolUse", "Write|Edit", "post-write-edit.py", 30),
         ("SessionStart", None, "session-start.py", 30),
@@ -360,6 +387,17 @@ def test_full_hook_install_produces_self_validating_protected_registry(tmp_path)
         ]
         assert matching, f"missing protected registration: {event}/{script}"
         assert (config_dir / "hooks" / script).is_file(), script
+    registered = {
+        hook["args"][0]
+        for groups in settings["hooks"].values()
+        for group in groups
+        for hook in group["hooks"]
+    }
+    assert not registered & {"bash-security-guard.py", "destructive-ops-guard.py"}, (
+        "the guards run inside the dispatcher; wiring them directly too would run them twice"
+    )
+    for script in _dispatcher_hooks(INSTALLER.read_text(encoding="utf-8")):
+        assert (config_dir / "hooks" / script).is_file(), f"dispatcher set incomplete: {script}"
 
     validator = subprocess.run(
         [sys.executable, str(config_dir / "hooks" / "config-change-validate.py")],
@@ -592,9 +630,9 @@ def test_shared_skill_assets_ship_with_any_skill_selection():
         "the _shared copy is still gated on skills this repo does not ship"
     )
     lines = body.splitlines()
-    copy_lines = [i for i, line in enumerate(lines) if 'cp -r "$src_dir/_shared" "$dest_dir/_shared"' in line]
+    copy_lines = [i for i, line in enumerate(lines) if 'files+=("skills/_shared")' in line]
     assert len(copy_lines) == 1, "expected exactly one _shared copy in install_skills"
-    assert "${#skills[@]}" in lines[copy_lines[0] - 1], (
+    assert "${#files[@]}" in lines[copy_lines[0] - 1], (
         "the _shared copy must be conditioned on at least one skill being installed"
     )
 
@@ -605,3 +643,127 @@ def test_installer_states_the_real_python_floor():
     src = INSTALLER.read_text(encoding="utf-8")
     assert "Python 3.8+" not in src
     assert "(3, 11)" in src
+
+
+# ---------------------------------------------------------------------------
+# 2026-09-03 -- every installer path wires the Bash dispatcher, never the guards
+# ---------------------------------------------------------------------------
+def test_dispatcher_hook_set_matches_the_dispatcher_and_exists():
+    """install.sh copies the dispatcher and the six hooks it runs as ONE set.
+
+    The list is hand-written in bash, so pin it to the dispatcher's own GUARDS
+    table: a hook added to (or dropped from) the dispatcher without updating the
+    installer would ship a dispatcher that crashes on a missing sibling.
+    """
+    src = INSTALLER.read_text(encoding="utf-8")
+    hosted = _hosted_by_dispatcher()
+    assert len(hosted) == 6, hosted
+    assert _dispatcher_hooks(src) == [DISPATCHER, *hosted]
+    for name in _dispatcher_hooks(src):
+        assert (REPO / "hooks" / name).is_file(), name
+
+
+def test_no_installer_path_wires_the_bash_guards_directly():
+    """The starter kit, the fresh-laptop bundle and the author bundle all register
+    the dispatcher on Bash|PowerShell at the live timeout; none registers
+    bash-security-guard.py or destructive-ops-guard.py on its own (that shape is
+    accepted from pre-dispatcher installs by config-change-validate.py, but no
+    longer produced)."""
+    src = INSTALLER.read_text(encoding="utf-8")
+    assert "|bash-security-guard.py|" not in src
+    assert "|destructive-ops-guard.py|" not in src
+    assert src.count(DISPATCHER_WIRING) == 3, src.count(DISPATCHER_WIRING)
+
+
+def test_every_hook_bundle_names_files_that_exist():
+    """A missing source now aborts the copy (by design), so every name in the two
+    fixed bundles and the always-shipped library list must exist in hooks/."""
+    src = INSTALLER.read_text(encoding="utf-8")
+    body = src[src.index("install_hooks() {"):src.index("wire_hooks() {")]
+    names = []
+    for bundle in ("1", "2"):
+        m = re.search(rf"{bundle}\) hooks=\(([^)]*)\)", body)
+        assert m, f"could not parse hook bundle {bundle}"
+        names += _expand_dispatcher_hooks(m.group(1).split(), src)
+        assert DISPATCHER in names, f"bundle {bundle} does not ship the dispatcher"
+    shared = re.search(r"for shared in ([^;]+); do", body)
+    assert shared, "could not parse the shared library list"
+    names += shared.group(1).split()
+    assert "manifest_metrics.py" in names, "three of the six dispatcher hooks import it"
+    missing = [n for n in names if not (REPO / "hooks" / n).is_file()]
+    assert missing == [], f"hook bundles name missing files: {missing}"
+
+
+def test_fresh_laptop_hook_bundle_installs_a_working_dispatcher(tmp_path):
+    """End to end: bundle 1 lands the dispatcher with its six hooks and their
+    libraries, wires it on Bash|PowerShell, and the INSTALLED copy blocks a
+    catastrophic command through run-hook (so the set really works together)."""
+    env = dict(os.environ)
+    env["HOME"] = str(tmp_path)
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    env.pop("CLAUDE_BASH_POLICY_PACKS", None)  # fresh-laptop: catastrophic core only
+    # skip profile, skip starter core, skip rules, skip skills, fresh-laptop hooks,
+    # wire, no agents, no agent-memory, no ARCHITECTURE.md, no CLAUDE.md template
+    result = subprocess.run(
+        [BASH, str(INSTALLER)],
+        input="n\nn\n3\n8\n1\ny\nn\nn\nn\nn\n",
+        capture_output=True, text=True, encoding="utf-8", timeout=60, check=False,
+        cwd=REPO, env=env,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+
+    config = tmp_path / ".claude"
+    src = INSTALLER.read_text(encoding="utf-8")
+    for name in (*_dispatcher_hooks(src), "manifest_metrics.py", "bash_policy_tables.py",
+                 "protected-repos.json", "hook_input.py", "run-hook"):
+        assert (config / "hooks" / name).is_file(), name
+    settings = json.loads((config / "settings.json").read_text(encoding="utf-8"))
+    bash_groups = [g for g in settings["hooks"]["PreToolUse"] if g.get("matcher") == "Bash|PowerShell"]
+    assert [h["args"] for g in bash_groups for h in g["hooks"]] == [[DISPATCHER]]
+    assert {h["timeout"] for g in bash_groups for h in g["hooks"]} == {30}
+
+    def fire(command: str) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            [str(config / "hooks" / "run-hook"), DISPATCHER],
+            input=json.dumps({"tool_name": "Bash", "tool_input": {"command": command}}),
+            capture_output=True, text=True, encoding="utf-8", timeout=30, check=False,
+            cwd=config, env={**env, "CLAUDE_CONFIG_DIR": str(config)},
+        )
+
+    blocked = fire("rm -rf /")
+    assert blocked.returncode == 2, blocked.stdout + blocked.stderr
+    assert "BLOCKED" in blocked.stderr
+    allowed = fire("ls -la")
+    assert allowed.returncode == 0, allowed.stdout + allowed.stderr
+
+
+def test_pick_individual_skills_asks_per_skill_and_installs_the_chosen_one(tmp_path):
+    """Skills menu option 7 ("Pick individually") must read each answer from the
+    user. It used to prompt inside `while read ... < <(find ...)`, so ask_yn's read
+    consumed the next find line as the answer: the user was never asked and no
+    skill was installed (found 2026-09-03 by the manifest e2e test)."""
+    # skills/<name>/SKILL.md only: the menu must not offer the SKILL.md fixtures
+    # under skills/audit-skill/tests/, which can never install.
+    skills = sorted(p.parent.name for p in (REPO / "skills").glob("*/SKILL.md") if p.parent.name != "_shared")
+    assert len(skills) > 2
+    # `read -p` shows no prompt on piped stdin, so prompts cannot be counted;
+    # instead answer yes to the FIRST and LAST skill: the last one lands only if
+    # exactly one answer was consumed per skill, in menu order.
+    per_skill = "y\n" + "n\n" * (len(skills) - 2) + "y\n"
+    env = dict(os.environ)
+    env["HOME"] = str(tmp_path)
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    env["LC_ALL"] = "C"  # the menu sorts with `sort`; make it agree with sorted()
+    # skip profile, skip core, skip rules, pick skills individually, <one answer
+    # per skill>, skip hooks, no agents, no agent-memory, no ARCHITECTURE.md,
+    # no CLAUDE.md template
+    result = subprocess.run(
+        [BASH, str(INSTALLER)],
+        input="n\nn\n3\n7\n" + per_skill + "4\nn\nn\nn\nn\n",
+        capture_output=True, text=True, encoding="utf-8", timeout=120, check=False,
+        cwd=REPO, env=env,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    installed = sorted(p.name for p in (tmp_path / ".claude" / "skills").iterdir())
+    assert installed == sorted([skills[0], skills[-1], "_shared"]), installed
+    assert "Installed 2 skills" in result.stdout

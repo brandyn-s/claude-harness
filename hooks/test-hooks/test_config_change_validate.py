@@ -450,9 +450,10 @@ def _run_user_settings(tmp_path: Path, payload: dict):
 
 
 def test_bash_dispatcher_registration_satisfies_the_protected_bash_guards(tmp_path):
-    """Installer profiles register the two Bash guards directly; the repository's
-    settings.json carries both inside the dispatcher. Both shapes must pass, or the
-    rewired settings.json would be blocked from ever loading."""
+    """Configs installed before 2026-09-03 register the two Bash guards directly;
+    the repository's settings.json and every installer since carry both inside the
+    dispatcher. Both shapes must pass, or a rewired settings.json would be blocked
+    from ever loading."""
     payload = _with_bash_dispatcher(_protected_user_settings(tmp_path / "hooks"), tmp_path / "hooks")
 
     rc, stdout, stderr = _run_user_settings(tmp_path, payload)

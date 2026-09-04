@@ -44,8 +44,10 @@ def test_recommended_install_builds_portable_core_in_empty_config(tmp_path: Path
         for group in groups
         for hook in group["hooks"]
     ]
+    # Bash safety is one registration: the dispatcher, which runs the two Bash
+    # guards and four advisories in-process (the repository's own shape).
     assert {hook["args"][0] for hook in handlers} == {
-        "bash-security-guard.py",
+        "bash-pretooluse-dispatcher.py",
         "config-guard.py",
         "result-injection-guard.py",
     }
@@ -57,7 +59,13 @@ def test_recommended_install_builds_portable_core_in_empty_config(tmp_path: Path
         "manifest_metrics.py",
         "protected-repos.json",
         "bash_policy_tables.py",
+        "bash-pretooluse-dispatcher.py",
         "bash-security-guard.py",
+        "destructive-ops-guard.py",
+        "git-destructive-checkout-guard.py",
+        "bash-tail-buffering-guard.py",
+        "zsh-dialect-guard.py",
+        "poll-loop-nudge.py",
         "config-guard.py",
         "result-injection-guard.py",
     ):
