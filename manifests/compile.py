@@ -74,6 +74,9 @@ def load_manifests(root: Path):
 
 _HOOK_NAME_RX = re.compile(r"([A-Za-z0-9_./-]+\.py)")
 _RUN_HOOK_RX = re.compile(r"run-hook\s+([A-Za-z0-9_-]+)")
+# Dispatchers run other hooks in-process from a GUARDS table of
+# ("name", "file.py", posture) tuples; those hooks are wired without a settings entry.
+_DISPATCHERS = ("write-edit-dispatcher.py", "bash-pretooluse-dispatcher.py")
 
 
 def wired_hook_ids(root):
@@ -102,13 +105,14 @@ def wired_hook_ids(root):
                         ids.add(Path(m.group(1)).stem)
                     for m in _RUN_HOOK_RX.finditer(blob):
                         ids.add(m.group(1))
-    dispatcher = Path(root) / "hooks" / "write-edit-dispatcher.py"
-    if dispatcher.exists():
-        text = dispatcher.read_text(encoding="utf-8", errors="replace")
-        m = re.search(r"GUARDS\s*[:=].*?\n(?=\S)", text, re.S)
-        for g in re.findall(r"[\"']([a-z0-9][a-z0-9_-]+)\.py[\"']",
-                            m.group(0) if m else text):
-            ids.add(g)
+    for name in _DISPATCHERS:
+        dispatcher = Path(root) / "hooks" / name
+        if dispatcher.exists():
+            text = dispatcher.read_text(encoding="utf-8", errors="replace")
+            m = re.search(r"GUARDS\s*[:=].*?\n(?=\S)", text, re.S)
+            for g in re.findall(r"[\"']([a-z0-9][a-z0-9_-]+)\.py[\"']",
+                                m.group(0) if m else text):
+                ids.add(g)
     return ids
 
 

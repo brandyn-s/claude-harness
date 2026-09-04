@@ -35,7 +35,17 @@ class ProtectedHook:
     matcher: str | None
     script: str
     timeout: int
+    # Registrations that satisfy this protection in place of the direct one: a
+    # dispatcher that runs the script in-process is the same boundary behind one
+    # launcher. Each alternative is matched as exactly as the direct registration.
+    carried_by: tuple["ProtectedHook", ...] = ()
 
+
+# Runs bash-security-guard and destructive-ops-guard (plus four advisories) in one
+# process; the repository's settings.json registers this instead of the two guards.
+_BASH_DISPATCHER = ProtectedHook(
+    "PreToolUse", "Bash|PowerShell", "bash-pretooluse-dispatcher.py", 30
+)
 
 # These are the exact registrations whose removal or weakening would disable
 # the architecture's settings-integrity and command-safety boundary.
@@ -46,12 +56,17 @@ PROTECTED_USER_HOOKS = (
         "config-change-validate.py",
         30,
     ),
-    ProtectedHook("PreToolUse", "Bash", "bash-security-guard.py", 30),
+    # Installer profiles register the two Bash guards directly; the repository's
+    # settings.json carries both inside the dispatcher. Either keeps the boundary.
+    ProtectedHook(
+        "PreToolUse", "Bash", "bash-security-guard.py", 30, carried_by=(_BASH_DISPATCHER,)
+    ),
     ProtectedHook(
         "PreToolUse",
         "Bash|PowerShell",
         "destructive-ops-guard.py",
         30,
+        carried_by=(_BASH_DISPATCHER,),
     ),
     ProtectedHook(
         "PreToolUse",
@@ -163,31 +178,51 @@ def _has_protected_user_hooks(settings: dict, settings_path: str) -> bool:
     )
     hooks_dir = os.path.normcase(os.path.normpath(os.path.join(settings_dir, "hooks")))
     expected_runner = os.path.join(hooks_dir, "run-hook")
-    for protected in PROTECTED_USER_HOOKS:
-        groups = hooks.get(protected.event)
-        if not isinstance(groups, list):
-            return False
-        expected_script = os.path.join(hooks_dir, protected.script)
-        if not any(
-            isinstance(group, dict)
-            and "if" not in group
-            and _group_has_exact_matcher(group, protected.matcher)
-            and isinstance(group.get("hooks"), list)
-            and any(
-                isinstance(entry, dict)
-                and _invokes_expected_hook(
-                    entry,
-                    expected_runner=expected_runner,
-                    expected_script=expected_script,
-                    expected_timeout=protected.timeout,
-                    config_home=config_home,
-                )
-                for entry in group["hooks"]
+    return all(
+        any(
+            _registration_present(
+                hooks,
+                candidate,
+                hooks_dir=hooks_dir,
+                expected_runner=expected_runner,
+                config_home=config_home,
             )
-            for group in groups
-        ):
-            return False
-    return True
+            for candidate in (protected, *protected.carried_by)
+        )
+        for protected in PROTECTED_USER_HOOKS
+    )
+
+
+def _registration_present(
+    hooks: dict,
+    protected: ProtectedHook,
+    *,
+    hooks_dir: str,
+    expected_runner: str,
+    config_home: str,
+) -> bool:
+    groups = hooks.get(protected.event)
+    if not isinstance(groups, list):
+        return False
+    expected_script = os.path.join(hooks_dir, protected.script)
+    return any(
+        isinstance(group, dict)
+        and "if" not in group
+        and _group_has_exact_matcher(group, protected.matcher)
+        and isinstance(group.get("hooks"), list)
+        and any(
+            isinstance(entry, dict)
+            and _invokes_expected_hook(
+                entry,
+                expected_runner=expected_runner,
+                expected_script=expected_script,
+                expected_timeout=protected.timeout,
+                config_home=config_home,
+            )
+            for entry in group["hooks"]
+        )
+        for group in groups
+    )
 
 
 def _provider_prefixed_model_surface(settings: dict) -> str | None:

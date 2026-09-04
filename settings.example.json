@@ -312,30 +312,6 @@
             "type": "command",
             "command": "/absolute/path/to/.claude/hooks/run-hook",
             "args": [
-              "bash-security-guard.py"
-            ],
-            "timeout": 30
-          },
-          {
-            "type": "command",
-            "command": "/absolute/path/to/.claude/hooks/run-hook",
-            "args": [
-              "git-destructive-checkout-guard.py"
-            ],
-            "timeout": 30
-          },
-          {
-            "type": "command",
-            "command": "/absolute/path/to/.claude/hooks/run-hook",
-            "args": [
-              "bash-tail-buffering-guard.py"
-            ],
-            "timeout": 30
-          },
-          {
-            "type": "command",
-            "command": "/absolute/path/to/.claude/hooks/run-hook",
-            "args": [
               "git-empty-push-guard.py"
             ],
             "if": "Bash(git push*)",
@@ -358,22 +334,6 @@
             ],
             "if": "Bash(git commit*)",
             "timeout": 30
-          },
-          {
-            "type": "command",
-            "command": "/absolute/path/to/.claude/hooks/run-hook",
-            "args": [
-              "zsh-dialect-guard.py"
-            ],
-            "timeout": 30
-          },
-          {
-            "type": "command",
-            "command": "/absolute/path/to/.claude/hooks/run-hook",
-            "args": [
-              "poll-loop-nudge.py"
-            ],
-            "timeout": 30
           }
         ]
       },
@@ -384,7 +344,7 @@
             "type": "command",
             "command": "/absolute/path/to/.claude/hooks/run-hook",
             "args": [
-              "destructive-ops-guard.py"
+              "bash-pretooluse-dispatcher.py"
             ],
             "timeout": 30
           }

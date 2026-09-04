@@ -67,6 +67,7 @@ Representative hooks:
 
 | Hook | Event | Blocks |
 |---|---|---|
+| `bash-pretooluse-dispatcher.py` | PreToolUse(Bash\|PowerShell) | (runs the six unconditional Bash hooks — bash-security-guard, destructive-ops-guard, git-destructive-checkout-guard, bash-tail-buffering-guard, zsh-dialect-guard, poll-loop-nudge — in one interpreter; the first exit 2 wins, a rewrite feeds the hooks after it) |
 | `bash-security-guard.py` | PreToolUse(Bash) | catastrophic credential, exfiltration, code-execution, security-disablement, and destructive shapes; optional policy tables |
 | `output-secret-redact.py` | PostToolUse | secrets in tool output |
 | `prompt-secret-scan.py` | UserPromptSubmit | pasted credentials |

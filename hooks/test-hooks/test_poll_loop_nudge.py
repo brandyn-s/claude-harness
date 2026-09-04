@@ -39,6 +39,10 @@ from pathlib import Path
 HOOK = Path(__file__).resolve().parent.parent / "poll-loop-nudge.py"
 REPO = HOOK.parents[1]
 ADVISORY = "[poll-loop-nudge]"
+# Since 2026-09-03 this hook runs INSIDE bash-pretooluse-dispatcher.py, which owns every
+# unconditional PreToolUse:Bash hook. A registration is therefore the dispatcher's
+# settings entry carrying this hook in its GUARDS table — removing either half fails here.
+DISPATCHER = HOOK.parent / "bash-pretooluse-dispatcher.py"
 
 
 def _load():
@@ -57,6 +61,15 @@ def _load():
 G = _load()
 
 
+def _dispatcher_hooks():
+    """Filenames in the dispatcher's GUARDS table, in evaluation order."""
+    spec = importlib.util.spec_from_file_location("bash_pretooluse_dispatcher", DISPATCHER)
+    assert spec is not None and spec.loader is not None
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return [filename for _name, filename, _posture in mod.GUARDS]
+
+
 class Wiring(unittest.TestCase):
     """The test class that would have caught the 2026-08-09 loss.
 
@@ -66,14 +79,19 @@ class Wiring(unittest.TestCase):
 
     @staticmethod
     def _registered(settings_path: Path):
+        """Registrations that reach this hook: a direct entry, or the dispatcher's entry
+        when this hook is in the dispatcher's GUARDS table."""
         data = json.loads(settings_path.read_text(encoding="utf-8"))
+        carriers = {"poll-loop-nudge.py"}
+        if "poll-loop-nudge.py" in _dispatcher_hooks():
+            carriers.add(DISPATCHER.name)
         out = []
         for event, groups in (data.get("hooks") or {}).items():
             for group in groups if isinstance(groups, list) else []:
                 if not isinstance(group, dict):
                     continue
                 for h in group.get("hooks", []) or []:
-                    if isinstance(h, dict) and h.get("args") == ["poll-loop-nudge.py"]:
+                    if isinstance(h, dict) and h.get("args") in [[c] for c in carriers]:
                         out.append((event, group.get("matcher"), h.get("timeout")))
         return out
 
@@ -123,14 +141,10 @@ class Wiring(unittest.TestCase):
         verdict that counts. Pinning the order stops a future edit from moving this
         ahead of the guards that can actually stop a command.
         """
-        data = json.loads((REPO / "settings.json").read_text(encoding="utf-8"))
-        names = []
-        for group in data["hooks"]["PreToolUse"]:
-            if "Bash" not in (group.get("matcher") or ""):
-                continue
-            for h in group.get("hooks", []) or []:
-                for a in h.get("args", []) or []:
-                    names.append(a)
+        # Evaluation order is the dispatcher's GUARDS order (settings.json ran the
+        # unconditional Bash hooks in parallel before 2026-09-03; the dispatcher is
+        # sequential, so this order is now the one that actually decides).
+        names = _dispatcher_hooks()
         self.assertIn("poll-loop-nudge.py", names)
         self.assertIn("bash-security-guard.py", names)
         self.assertLess(
