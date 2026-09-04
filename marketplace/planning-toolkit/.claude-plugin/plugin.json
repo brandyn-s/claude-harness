@@ -1,7 +1,7 @@
 {
   "name": "planning-toolkit",
   "description": "Design-before-code and ship-safely workflow skills \u2014 architecture planning, adversarial review, prompt refinement, companions to the superpowers plugin for evidence-first design, hypothesis-driven debugging, legacy-code TDD and risk-tiered review, ship/PR lifecycle, PR cleanup, Claude API guardrails, and bulk scripting.",
-  "version": "1.1.39",
+  "version": "1.1.40",
   "author": {
     "name": "Brandyn Schult",
     "url": "https://github.com/brandyn-s"

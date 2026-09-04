@@ -62,6 +62,7 @@ from model_runtime import (
     recommended_max_tokens,
     resolve_judge_effort,
     resolve_judge_model,
+    resolve_model_id,
     resolve_persona_effort,
     resolve_persona_model,
     runtime_receipt,
@@ -730,8 +731,11 @@ def run_rubric(args: argparse.Namespace) -> int:
     if (args.sampling is not None and fixture_sampling is not None
             and args.sampling != fixture_sampling):
         overrides["sampling"] = {"cli": args.sampling, "fixture": fixture_sampling}
+    # Model values are compared as resolved ids: `--model haiku` against a fixture
+    # that pins the Haiku snapshot is the same lane, not a conflict. An
+    # unresolvable id raises here, before the run directory exists.
     if (args.model is not None and fixture_persona_model is not None
-            and args.model != fixture_persona_model):
+            and resolve_model_id(args.model) != resolve_model_id(fixture_persona_model)):
         overrides["model"] = {"cli": args.model, "fixture": fixture_persona_model}
     if (args.effort is not None and fixture_persona_effort is not None
             and args.effort != fixture_persona_effort):
@@ -740,7 +744,7 @@ def run_rubric(args: argparse.Namespace) -> int:
             "fixture": fixture_persona_effort,
         }
     if (args.judge_model is not None and fixture_judge_model is not None
-            and args.judge_model != fixture_judge_model):
+            and resolve_model_id(args.judge_model) != resolve_model_id(fixture_judge_model)):
         overrides["judge_model"] = {"cli": args.judge_model,
                                       "fixture": fixture_judge_model}
     if (args.judge_effort is not None and fixture_judge_effort is not None
