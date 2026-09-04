@@ -23,7 +23,7 @@ HOOKS_DIR = Path(__file__).resolve().parent.parent
 if str(HOOKS_DIR) not in sys.path:
     sys.path.insert(0, str(HOOKS_DIR))
 
-from session_start_modules import index_autoheal as ah
+from session_start_modules import index_autoheal as ah  # noqa: E402 -- resolves via the sys.path insert above
 
 
 class _SpawnRecorder:

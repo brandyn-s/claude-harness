@@ -43,7 +43,13 @@ Exit codes:
     1   one or more required checks failed (e.g., FP-rate gate, baseline miss)
     2   runner error (bad args, missing tool, malformed spec)
 """
-import argparse, json, os, re, shutil, subprocess, sys
+import argparse
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 

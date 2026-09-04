@@ -14,6 +14,8 @@ Hooks under guard:
 - subagent-stop.py  (topic file updates)
 """
 import re
+import sys
+import threading
 from pathlib import Path
 
 import pytest
@@ -85,9 +87,8 @@ def test_auto_merge_marker_not_written_with_raw_handle():
 # NOT on atomic_write() inside hooks. bounded_topic_append closes that gap
 # with the same 2500-char ceiling.
 
-import sys
 sys.path.insert(0, str(HOOKS_DIR))
-from atomic_write import (
+from atomic_write import (  # noqa: E402 -- resolves via the sys.path insert above
     bounded_topic_append,
     TopicEntryTooLargeError,
     DEFAULT_MAX_TOPIC_ENTRY_CHARS,
@@ -138,8 +139,7 @@ def test_bounded_topic_append_custom_budget(tmp_path):
 # file and crashed with FileNotFoundError mid-rename. The helper must let
 # concurrent writers to the SAME path all succeed.
 
-import threading
-from atomic_write import atomic_write
+from atomic_write import atomic_write  # noqa: E402 -- resolves via the sys.path insert above
 
 
 def test_atomic_write_concurrent_same_path_no_crash(tmp_path):

@@ -107,7 +107,7 @@ def test_layer_b_trace_records_written(tmp_path, monkeypatch):
                 "openai": _mock("", ok=False)}
     ed.dispatch_cross_vendor("p", "foo", vendors=["anthropic", "openai"],
                              adapters=adapters, trace=True)
-    recs = [json.loads(l) for l in trace.read_text().splitlines() if l.strip()]
+    recs = [json.loads(line) for line in trace.read_text().splitlines() if line.strip()]
     b = [r for r in recs if r.get("layer") == "B"]
     assert len(b) == 2
     by_model = {r.get("model_version"): r for r in b}

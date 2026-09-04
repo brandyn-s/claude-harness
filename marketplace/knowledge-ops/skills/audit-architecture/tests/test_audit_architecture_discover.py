@@ -107,7 +107,6 @@ def test_discover_worklist_integrates_phase2_findings(tmp_path, monkeypatch):
     )
 
     # The D5 still-fires finding must appear in the worklist
-    worklist_codes = [f.code for f in report.worklist]
     worklist_descs = [f.description for f in report.worklist]
     assert any(
         "phantom-server missing from architecture docs (phase2)" in d

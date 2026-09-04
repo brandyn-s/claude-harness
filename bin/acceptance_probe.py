@@ -52,7 +52,7 @@ SCRIPTS_DIR = Path(__file__).resolve().parents[1] / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-from hook_exec_form import configured_hook_script
+from hook_exec_form import configured_hook_script  # noqa: E402 -- resolves via the sys.path insert above
 
 HOME = os.path.expanduser("~")
 SNAPSHOT_SCHEMA = "acceptance-probe/4"

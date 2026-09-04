@@ -22,7 +22,6 @@ class IndexRepoExecutionContractTests(unittest.TestCase):
         self.manifest = MANIFEST_PATH.read_text(encoding="utf-8")
 
     def test_indexing_workflow_waits_for_verified_completion(self) -> None:
-        frontmatter = self.skill.split("---", 2)[1]
         split_workflow = section(
             self.skill,
             "## Split backend (code-search + code-graph)",

@@ -25,8 +25,8 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
-import transcript_friction as tf
-import transcript_recurrence as tr
+import transcript_friction as tf  # noqa: E402 -- resolves via the sys.path insert above
+import transcript_recurrence as tr  # noqa: E402 -- resolves via the sys.path insert above
 
 
 def main():

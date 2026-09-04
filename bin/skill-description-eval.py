@@ -722,7 +722,7 @@ def _faithful_mode(meta: dict) -> str:
 def _describe_faithful_run(faithful: dict) -> str:
     meta = faithful["meta"]
     setup = meta.get("setup") or {}
-    flags = [f"`--setting-sources project`", f"`--max-turns {meta.get('max_turns')}`"]
+    flags = ["`--setting-sources project`", f"`--max-turns {meta.get('max_turns')}`"]
     if meta.get("permission_mode", "plan") != "default":
         flags.append(f"`--permission-mode {meta.get('permission_mode', 'plan')}`")
     else:

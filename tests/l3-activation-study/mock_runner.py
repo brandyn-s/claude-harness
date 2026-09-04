@@ -9,7 +9,10 @@ Usage:
     python3 mock_runner.py
     python3 mock_runner.py --output results/dry-run.jsonl --seed 42
 """
-import argparse, json, random, yaml
+import argparse
+import json
+import random
+import yaml
 from datetime import date
 from pathlib import Path
 

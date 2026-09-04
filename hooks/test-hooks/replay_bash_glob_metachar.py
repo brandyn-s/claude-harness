@@ -48,31 +48,41 @@ def fires(cmd: str):
 
 proj = Path.home()/".claude/projects"
 files = sorted(proj.glob("*/*.jsonl"), key=lambda p: p.stat().st_mtime, reverse=True)[:40]
-total=fired=malformed=0; ex=[]; branches={}
+total=fired=malformed=0
+ex=[]
+branches={}
 for f in files:
     for line in f.open(errors="replace"):
-        if not line.strip().startswith("{"): continue
-        try: r=json.loads(line)
-        except json.JSONDecodeError: malformed+=1; continue
+        if not line.strip().startswith("{"):
+            continue
+        try:
+            r=json.loads(line)
+        except json.JSONDecodeError:
+            malformed+=1
+            continue
         c=(r.get("message") or {}).get("content")
-        if not isinstance(c,list): continue
+        if not isinstance(c,list):
+            continue
         for b in c:
             if isinstance(b,dict) and b.get("type")=="tool_use" and b.get("name")=="Bash":
                 cmd=(b.get("input") or {}).get("command") or ""
-                if not cmd: continue
+                if not cmd:
+                    continue
                 total+=1
                 h=fires(cmd)
                 if h:
                     fired+=1
                     branch=h[0][0]
                     branches[branch]=branches.get(branch,0)+1
-                    if len(ex)<14: ex.append((f.stem[:8],h[0][1],cmd[:88].replace("\n"," ")))
+                    if len(ex)<14:
+                        ex.append((f.stem[:8],h[0][1],cmd[:88].replace("\n"," ")))
 rate = 100 * fired / total if total else 0.0
 print(f"Bash commands  : {total}   malformed: {malformed}")
 print(f"WOULD FIRE     : {fired}  ({rate:.2f}%)   [gate >10%]")
 print("BY BRANCH      : " + ", ".join(f"{k}={v}" for k,v in sorted(branches.items())))
 print("--- fires ---")
-for s,tok,cmd in ex: print(f"  [{s}] {tok:24s} {cmd}")
+for s,tok,cmd in ex:
+    print(f"  [{s}] {tok:24s} {cmd}")
 
 FIX=[('grep -rn "x" hooks/ --include=*.py',True,"POSITIVE motivating bug"),
      ("grep -rn 'x' hooks/ --include='*.py'",False,"neg: quoted"),
@@ -157,9 +167,12 @@ FIX=[('grep -rn "x" hooks/ --include=*.py',True,"POSITIVE motivating bug"),
      ('curl "$host:8080/x"',False,"neg: digits are never modifiers")]
 ok=True
 for cmd,want,lbl in FIX:
-    got=bool(fires(cmd)); good = got==want; ok &= good
+    got=bool(fires(cmd))
+    good = got==want
+    ok &= good
     print(f"  {'PASS' if good else '**FAIL**':8s} want={want!s:5s} got={got!s:5s} {lbl}")
 print(f"\nfixtures: {'ALL PASS' if ok else 'FAILURES — do not install'}")
 if not ok or rate > 10.0:
-    print(f"GATE FAILED (rate={rate:.2f}% fixtures_ok={ok})"); raise SystemExit(1)
+    print(f"GATE FAILED (rate={rate:.2f}% fixtures_ok={ok})")
+    raise SystemExit(1)
 print(f"GATE PASSED (rate={rate:.2f}%, fixtures OK)")

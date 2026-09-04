@@ -354,9 +354,12 @@ def main():
     metric_names = extract_metric_names(text)
 
     missing = []
-    if not demo: missing.append("Demo: line")
-    if not falsifiers: missing.append("## Falsifiers section with list items")
-    if not metric_commands: missing.append("### Metric Commands or Verification: code block")
+    if not demo:
+        missing.append("Demo: line")
+    if not falsifiers:
+        missing.append("## Falsifiers section with list items")
+    if not metric_commands:
+        missing.append("### Metric Commands or Verification: code block")
     if missing:
         print(
             "plan is not supergoal-ready. Missing:\n  - "

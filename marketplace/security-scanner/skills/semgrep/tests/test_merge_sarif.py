@@ -64,8 +64,10 @@ def test_skips_unparseable_but_merges_rest(tmp_path):
 
 
 def test_all_unparseable_raises(tmp_path):
-    bad1 = tmp_path / "b1.sarif"; bad1.write_text("{x", encoding="utf-8")
-    bad2 = tmp_path / "b2.sarif"; bad2.write_text("}y", encoding="utf-8")
+    bad1 = tmp_path / "b1.sarif"
+    bad1.write_text("{x", encoding="utf-8")
+    bad2 = tmp_path / "b2.sarif"
+    bad2.write_text("}y", encoding="utf-8")
     with pytest.raises(RuntimeError):
         _m.merge_sarif_pure_python([bad1, bad2])
 

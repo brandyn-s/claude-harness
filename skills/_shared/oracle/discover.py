@@ -37,12 +37,9 @@ For users who want to inspect the Phase 1 findings only (skip Phase
 from __future__ import annotations
 
 import importlib.util
-import subprocess
-import sys
 from pathlib import Path
 
 from .finding import Finding, Reproducer
-from .reverify import reverify
 from .act_on import act_on, ActOnReport
 
 

@@ -18,8 +18,8 @@ import pytest
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
-import diff_channels as dc
-from channel_specs import BY_KEY, Extractor
+import diff_channels as dc  # noqa: E402 -- resolves via the sys.path insert above
+from channel_specs import BY_KEY, Extractor  # noqa: E402 -- resolves via the sys.path insert above
 
 # --------------------------------------------------------------------------
 # Ground-truth fixture: 6 event names, 3 env vars. Countable by hand.

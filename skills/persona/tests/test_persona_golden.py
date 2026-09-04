@@ -11,7 +11,6 @@ update_index() directly via threading, not the full dispatch flow.
 
 import argparse
 import importlib.util
-import json
 import os
 import sys
 import threading
@@ -66,8 +65,8 @@ def test_update_index_serializes_concurrent_writes(tmp_path):
     index = (run_base / "INDEX.md").read_text(encoding="utf-8")
     lines = index.splitlines()
     # 1 title + 1 blank + header + separator + 5 data rows = 9
-    data_rows = [l for l in lines if l.startswith("| ") and "Date" not in l
-                 and "---" not in l]
+    data_rows = [line for line in lines if line.startswith("| ") and "Date" not in line
+                 and "---" not in line]
     assert len(data_rows) == 5, (
         f"expected 5 data rows, got {len(data_rows)}\n--- INDEX.md ---\n{index}"
     )

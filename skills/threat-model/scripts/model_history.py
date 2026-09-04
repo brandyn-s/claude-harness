@@ -20,7 +20,11 @@ Usage:
     model_history.py diff [--last N]
     model_history.py summary [--top N]
 """
-import argparse, json, os, subprocess, sys
+import argparse
+import json
+import os
+import subprocess
+import sys
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path

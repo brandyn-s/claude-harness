@@ -140,7 +140,6 @@ _USAGE = (
 
 
 def _cli(argv):
-    import sys
     if any(a in ("-h", "--help") for a in argv[1:]):
         print(_USAGE)
         return 0

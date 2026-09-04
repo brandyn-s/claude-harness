@@ -55,7 +55,7 @@ def test_corpus_static_check_passes():
     corpus = _load_oracle()
     entries = corpus.load_corpus(CORPUS_ROOT)
     errors = corpus.check_corpus_static(entries, FIXTURES_ROOT)
-    assert not errors, f"corpus static check found errors:\n  " + "\n  ".join(errors)
+    assert not errors, "corpus static check found errors:\n  " + "\n  ".join(errors)
 
 
 def test_corpus_live_check_passes():

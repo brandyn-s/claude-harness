@@ -221,8 +221,10 @@ def parse_verdict(text, kind):
     # fallback: bare token
     t = text.strip().upper()
     if kind == "claim":
-        if "SUPPORTED" in t and "REFUTED" not in t: return "SUPPORTED"
-        if "REFUTED" in t and "SUPPORTED" not in t: return "REFUTED"
+        if "SUPPORTED" in t and "REFUTED" not in t:
+            return "SUPPORTED"
+        if "REFUTED" in t and "SUPPORTED" not in t:
+            return "REFUTED"
     return None
 
 def ask_claim(model_key, claim_text):
@@ -274,7 +276,8 @@ def main():
     pos_results = []  # (model, item, order1_choice_content, order2_choice_content, flipped)
     for mk, _ in models:
         for it in PAIRS:
-            if not budget_ok(): break
+            if not budget_ok():
+                break
             # order 1: A=item.A, B=item.B
             v1, r1 = ask_pair(mk, "A", it["A"], "B", it["B"])
             record_raw_call(
@@ -298,7 +301,8 @@ def main():
     para_results = []
     for mk, _ in models:
         for it in CLAIMS:
-            if not budget_ok(): break
+            if not budget_ok():
+                break
             v_orig, r_orig = ask_claim(mk, it["claim"])
             v_para, r_para = ask_claim(mk, it["para"])
             record_raw_call(
@@ -317,7 +321,8 @@ def main():
     verb_results = []
     for mk, _ in models:
         for it in PAIRS:
-            if not budget_ok(): break
+            if not budget_ok():
+                break
             weaker = "B" if it["gold_is"] == "A" else "A"
             a_text = it["A"] + (PAD if weaker == "A" else "")
             b_text = it["B"] + (PAD if weaker == "B" else "")
@@ -334,7 +339,8 @@ def main():
     stoch_results = []
     for mk, _ in models:
         for it in CLAIMS:
-            if not budget_ok(): break
+            if not budget_ok():
+                break
             vs = []
             for run_number in range(1, 4):
                 v, result = ask_claim(mk, it["claim"])
@@ -349,15 +355,19 @@ def main():
     # ---------------- aggregate Judge Card ----------------
     def rate(rows, key):
         rows = [r for r in rows if r.get(key) is not None]
-        if not rows: return (0, 0, 0.0)
-        n = len(rows); p = sum(1 for r in rows if r[key]); return (p, n, p / n * 100)
+        if not rows:
+            return (0, 0, 0.0)
+        n = len(rows)
+        p = sum(1 for r in rows if r[key])
+        return (p, n, p / n * 100)
 
     card = {}
     # noise floor first (per model) from stochastic
     for mk, mname in models:
         s_p, s_n, s_rate = rate([r for r in stoch_results if r["model"] == mk], "consistent")
         pos_rows = [r for r in pos_results if r["model"] == mk]
-        pos_flip_p = sum(1 for r in pos_rows if r["flipped"]); pos_flip_n = len(pos_rows)
+        pos_flip_p = sum(1 for r in pos_rows if r["flipped"])
+        pos_flip_n = len(pos_rows)
         pos_flip_rate = (pos_flip_p / pos_flip_n * 100) if pos_flip_n else 0.0
         pos_corr_p, pos_corr_n, _ = rate([{"c": r["o1_correct"] and r["o2_correct"]} for r in pos_rows], "c")
         par_p, par_n, par_rate = rate([r for r in para_results if r["model"] == mk], "stable")
@@ -388,7 +398,8 @@ def main():
     print(f"fixture: {len(CLAIMS)} claim + {len(PAIRS)} pairwise items   cost: ${summary['cost_usd']:.2f} / ${BUDGET_USD:.0f} budget")
     print()
     hdr = f"{'juror':<28}{'stoch(floor)':<16}{'pos-flip':<14}{'pos-correct':<14}{'parap-stable':<16}{'verb-correct':<14}"
-    print(hdr); print("-" * len(hdr))
+    print(hdr)
+    print("-" * len(hdr))
     for mk, _ in models:
         c = card[mk]
         print(f"{c['model']:<28}{c['stochastic_consistent']:<16}{c['position_flip']:<14}{c['position_correct_both_orders']:<14}{c['paraphrase_stable']:<16}{c['verbosity_stay_correct']:<14}")

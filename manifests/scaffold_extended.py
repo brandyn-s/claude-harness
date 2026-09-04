@@ -15,10 +15,9 @@ fails if per-topic manifests reappear. Use:
 """
 import argparse
 import json
-import os
 import re
 import sys
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 
 SESSION_DIR = Path.home() / ".claude" / "session-transcripts"
@@ -271,7 +270,6 @@ def scaffold_terraform(dry_run=False):
 
         # Find module/variable references for dependency detection
         var_refs = sorted(set(re.findall(r'var\.(\w+)', text)))
-        local_refs = sorted(set(re.findall(r'local\.(\w+)', text)))
 
         lines = [
             f"id: {name}",

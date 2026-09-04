@@ -796,13 +796,20 @@ def score_skill(skill_dir: Path):
 
 
 def grade(score: int) -> str:
-    if score >= 14: return "S"
-    if score >= 13: return "A"
-    if score >= 12: return "A-"
-    if score >= 11: return "B+"
-    if score >= 10: return "B"
-    if score >= 9:  return "B-"
-    if score >= 8:  return "C+"
+    if score >= 14:
+        return "S"
+    if score >= 13:
+        return "A"
+    if score >= 12:
+        return "A-"
+    if score >= 11:
+        return "B+"
+    if score >= 10:
+        return "B"
+    if score >= 9:
+        return "B-"
+    if score >= 8:
+        return "C+"
     return "C"
 
 

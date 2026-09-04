@@ -28,7 +28,7 @@ from pathlib import Path
 
 HARNESS = Path(__file__).resolve().parent
 sys.path.insert(0, str(HARNESS))
-import grade  # type: ignore
+import grade  # type: ignore  # noqa: E402 -- resolves via the sys.path insert above
 
 FIXTURE = HARNESS / "fixture.json"
 FROZEN_RESULTS = HARNESS / "results.json"

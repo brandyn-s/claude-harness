@@ -9,6 +9,7 @@ helpers that don't touch the network:
 """
 import importlib.util
 import os
+import subprocess
 from pathlib import Path
 
 _HOOK_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -108,8 +109,6 @@ def test_label_missing_from_counts_is_bare_name():
 # These DO touch git, but only against a local bare "remote" in tmp_path --
 # no network. They cover the path that produced all nine 2026-08-05 failures,
 # which the pure-helper tests above structurally cannot reach.
-
-import subprocess
 
 
 def _git(cwd, *args, check=True):

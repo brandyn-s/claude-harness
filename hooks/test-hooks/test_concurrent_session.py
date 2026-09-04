@@ -18,7 +18,7 @@ import pytest
 HOOKS_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(HOOKS_DIR))
 
-from session_start_modules import concurrent_session as cs
+from session_start_modules import concurrent_session as cs  # noqa: E402 -- resolves via the sys.path insert above
 
 POSIX = os.name == "posix"
 

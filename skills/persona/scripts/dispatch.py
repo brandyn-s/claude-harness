@@ -53,8 +53,8 @@ SCRIPTS_DIR = Path(__file__).resolve().parent
 SKILL_DIR = SCRIPTS_DIR.parent
 
 sys.path.insert(0, str(SCRIPTS_DIR))
-from cohort_sample import sample
-from model_runtime import (
+from cohort_sample import sample  # noqa: E402 -- resolves via the sys.path insert above
+from model_runtime import (  # noqa: E402 -- resolves via the sys.path insert above
     DEFAULT_JUDGE_MODEL,
     DEFAULT_PERSONA_MODEL,
     cache_matches_runtime,
@@ -67,7 +67,7 @@ from model_runtime import (
     resolve_persona_model,
     runtime_receipt,
 )
-from parse_inventory import parse_file
+from parse_inventory import parse_file  # noqa: E402 -- resolves via the sys.path insert above
 
 # Configurable defaults — env vars override hardcoded paths so the skill
 # is portable across machines / marketplace installations.

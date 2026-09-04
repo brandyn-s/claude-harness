@@ -9,7 +9,6 @@ Exits 0 if clean, 1 if bad paths found (prints them to stdout).
 """
 import json
 import os
-import re
 import shlex
 import sys
 from pathlib import Path

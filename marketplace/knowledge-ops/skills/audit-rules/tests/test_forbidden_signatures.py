@@ -13,7 +13,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
 
 REPO = Path(__file__).resolve().parents[3]
 SCRIPT = REPO / "skills" / "audit-rules" / "scripts" / "extract_forbidden_signatures.py"

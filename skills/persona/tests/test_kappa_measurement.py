@@ -18,7 +18,6 @@ it is NEVER computed by calling persona's cohens_kappa.
 """
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 HARNESS = Path(__file__).resolve().parent.parent / "harness"

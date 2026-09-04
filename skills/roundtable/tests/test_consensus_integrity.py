@@ -7,7 +7,6 @@ roundtable's decorrelated-multi-vendor value-prop is no longer delivered.
 """
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 HARNESS = Path(__file__).resolve().parent.parent / "harness"

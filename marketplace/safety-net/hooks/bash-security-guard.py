@@ -37,8 +37,8 @@ _HOOK_DIR = str(Path(__file__).resolve().parent)
 if _HOOK_DIR not in sys.path:
     sys.path.insert(0, _HOOK_DIR)
 
-from _environment_catalog import load_section
-from bash_policy_tables import entries, pattern_block_reason, resolve_policy_packs
+from _environment_catalog import load_section  # noqa: E402 -- resolves via the sys.path insert above
+from bash_policy_tables import entries, pattern_block_reason, resolve_policy_packs  # noqa: E402 -- resolves via the sys.path insert above
 
 SEC_REMEDY = (
     "Cheapest fix: write the code to a .py FILE and run it, and split any credential read away from any network call."
@@ -1805,8 +1805,8 @@ def _autofix_rebase_dirty(command, _cwd=""):
             capture_output=True, text=True, timeout=5,
             creationflags=CREATE_NO_WINDOW,
         )
-        dirty = [l for l in result.stdout.strip().split("\n")
-                 if l.strip() and not l.startswith("??")]
+        dirty = [line for line in result.stdout.strip().split("\n")
+                 if line.strip() and not line.startswith("??")]
     except Exception:
         return None, None
     if not dirty:

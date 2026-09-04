@@ -196,8 +196,8 @@ def test_output_schema_for_dirty_fixture_is_stable():
     import re
     code_line_pat = re.compile(r"^  [A-Z][0-9a-z]+ \[(drift|info|error)\] \[.+?\]")
     msg_line_pat = re.compile(r"^      \S")
-    code_lines = [l for l in lines[1:] if code_line_pat.match(l)]
-    msg_lines = [l for l in lines[1:] if msg_line_pat.match(l)]
+    code_lines = [line for line in lines[1:] if code_line_pat.match(line)]
+    msg_lines = [line for line in lines[1:] if msg_line_pat.match(line)]
     assert code_lines, "no finding code lines found in output"
     assert len(msg_lines) == len(code_lines), (
         f"finding-line/message-line count mismatch: "
@@ -243,7 +243,6 @@ def test_every_finding_code_has_a_fixture_trigger():
     excluded = {"E0", "B2"}
 
     # Aggregate observed codes across all fixtures.
-    audit = _load_audit_module()
     observed = set()
     if FIXTURES.is_dir():
         for fixture_dir in FIXTURES.iterdir():

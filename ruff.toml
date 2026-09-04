@@ -1,6 +1,33 @@
-# Pins the lint target so `ruff check` means the same thing on every machine and ruff
-# version. Rule selection stays ruff's default set (the 2026-09-04 cleanup was measured
-# against it); generated marketplace bundles are copies of hooks/ and skills/ and are
-# never linted directly.
+# Pins what `ruff check` means in this repo, so the verdict is the same on every
+# machine and every ruff version.
+#
+# Rule selection is an explicit correctness core rather than ruff's default set:
+#   E4  imports: one per line (E401), at the top of the module (E402)
+#   E7  statements: one per line (E701/E702), no lambda assignment (E731),
+#       no ambiguous single-letter names l/O/I (E741), comparison hygiene
+#   E9  syntax errors and unreadable files
+#   F   pyflakes: undefined names, unused imports and variables, f-strings
+#       without placeholders, redefinitions, star-import misuse
+# Every finding under this set is a real defect or an outright readability trap,
+# so a non-zero count is actionable. The repo is at zero (285 findings fixed
+# 2026-09-04) and scripts/test_ruff_clean.py keeps it there.
+#
+# Why not ruff's own default set: with no `select`, ruff 0.16.5 enables about 415
+# rules (413 measured here) and reports about 1,900 findings in this repo, nearly
+# all style (quote style, line length, upgrade hints) that nobody gates on, so the
+# output could not be acted on. It also flags the deliberately fail-open
+# `except Exception` handlers the hooks document in place, which are intended
+# (a non-gating probe that crashes must not take the hook down with it).
+#
+# E402 note: ruff exempts a bare `sys.path.insert(...)` between imports, but not
+# the `REPO = Path(...)` assignment or `if ... not in sys.path:` guard that
+# precedes it in this repo's scripts and hooks. Imports that must follow such a
+# block carry `# noqa: E402 -- <why>` on the line; do not move them above it.
+#
+# Generated marketplace bundles are copies of hooks/ and skills/ and are never
+# linted directly.
 target-version = "py311"
 extend-exclude = ["marketplace", "**/node_modules", "**/__pycache__"]
+
+[lint]
+select = ["E4", "E7", "E9", "F"]

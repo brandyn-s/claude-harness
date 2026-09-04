@@ -15,6 +15,7 @@ Exit codes:
 import json
 import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -267,8 +268,6 @@ def check_worktree_isolation(tool_input, prompt):
 
 
 # ── PHASE F implementation helpers ──────────────────────────────────────
-
-import subprocess
 
 _CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
 

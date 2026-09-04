@@ -29,7 +29,7 @@ import dataclasses
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .finding import Finding, dump_findings, load_findings
+from .finding import Finding
 from .reverify import ReverifyResult, reverify
 
 # Worklist staleness budget. After act_on emits a worklist, any

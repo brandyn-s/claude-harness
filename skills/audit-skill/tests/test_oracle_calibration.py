@@ -10,10 +10,7 @@ must write a TraceRecord with the schema in SPEC.md §"Trace contract".
 """
 from __future__ import annotations
 
-import importlib.util
-import os
 import sys
-import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[3]
@@ -153,7 +150,7 @@ def test_calibration_tpr_tnr_above_floor(tmp_path, monkeypatch):
     refusal_rate = refusals / len(fs)
 
     # Report the numbers regardless; assert at the end.
-    print(f"\n=== Layer A calibration ===")
+    print("\n=== Layer A calibration ===")
     print(f"predicate TPR={tpr:.3f} (need >= {MIN_TPR})")
     print(f"predicate TNR={tnr:.3f} (need >= {MIN_TNR})")
     print(f"ERROR-pathway TPR={err_tpr:.3f} (need >= {MIN_ERR_TPR})")

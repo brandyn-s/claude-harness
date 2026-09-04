@@ -12,7 +12,6 @@ import sys
 import textwrap
 from pathlib import Path
 
-import pytest
 
 REPO = Path(__file__).resolve().parents[3]
 ORACLE_CLI = REPO / "bin" / "audit-skill-oracle.py"

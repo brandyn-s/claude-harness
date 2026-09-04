@@ -20,7 +20,9 @@ Output is informational by default; use --strict to gate.
 Designed to run alongside scripts/validate-skills.py and scripts/run-skill-evals.py
 in CI. Cheap, no LLM calls.
 """
-import argparse, re, sys
+import argparse
+import re
+import sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -95,7 +97,6 @@ def main():
     # check whether the target's body acknowledges the source.
     unilateral = []
     for source, chains in chain_graph.items():
-        source_body = (Path("skills") / source / "SKILL.md").read_text(encoding='utf-8').lower()
         for target, kind, ctx in chains:
             if kind != "compose":
                 continue  # only enforce bidirectionality for explicit composition
@@ -128,7 +129,7 @@ def main():
 
     # Summary
     total_chains = sum(len(v) for v in chain_graph.values())
-    print(f"=== Chain validation summary ===")
+    print("=== Chain validation summary ===")
     print(f"  Skills emitting chain references: {len(chain_graph)}")
     print(f"  Total chain edges:                {total_chains}")
     print(f"  Dangling (target missing):        {len(dangling)}")

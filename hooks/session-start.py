@@ -92,8 +92,8 @@ def check_concurrent_session_risk():
             creationflags=0x08000000 if __import__("sys").platform == "win32" else 0,
         )
         dirty_lines = [
-            l for l in result.stdout.strip().split("\n")
-            if l.strip() and not l.strip().startswith("??")
+            line for line in result.stdout.strip().split("\n")
+            if line.strip() and not line.strip().startswith("??")
         ]
         if len(dirty_lines) > 3:
             return (

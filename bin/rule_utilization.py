@@ -174,10 +174,10 @@ def _is_path_scoped(text: str) -> bool:
     lines = text.splitlines()
     if not lines or lines[0].strip() != "---":
         return False
-    close = next((i for i, l in enumerate(lines[1:], 1) if l.strip() == "---"), None)
+    close = next((i for i, line in enumerate(lines[1:], 1) if line.strip() == "---"), None)
     if close is None:
         return False
-    return any(l.strip().startswith("paths:") for l in lines[1:close])
+    return any(line.strip().startswith("paths:") for line in lines[1:close])
 
 
 def main() -> int:

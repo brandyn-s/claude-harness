@@ -34,7 +34,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "hooks"))
-from rule_context_budget import estimate_tokens
+from rule_context_budget import estimate_tokens  # noqa: E402 -- resolves via the sys.path insert above
 
 # Extensions common enough that scoping to them is not scoping. Deliberately a
 # LIST rather than a cleverness: a maintainer can see exactly what is counted and

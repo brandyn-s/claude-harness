@@ -13,6 +13,10 @@ filter). The ACTION changed:
 Allow (exit 0, no output) when not a buffering pipe. Non-Bash passes through.
 """
 import json
+import os as _os
+import shutil as _shutil
+
+import pytest as _pytest
 
 from conftest import make_bash_input, make_write_input, run_hook
 
@@ -269,8 +273,8 @@ def test_audit_log_records_autofix_and_block_in_production(tmp_path):
     fire("pytest -q > out.txt | tail -5")      # block: producer already redirects stdout → rewrite() bails (None)
     logs = list(tmp_path.glob("bash-tail-buffering-*.jsonl"))
     assert logs, "no audit log written with CLAUDE_HOOK_TEST cleared"
-    actions = [json.loads(l)["action"]
-               for l in logs[0].read_text(encoding="utf-8").splitlines() if l.strip()]
+    actions = [json.loads(line)["action"]
+               for line in logs[0].read_text(encoding="utf-8").splitlines() if line.strip()]
     assert "auto-fixed" in actions and "blocked" in actions, f"actions={actions}"
 
 
@@ -281,11 +285,6 @@ def test_audit_log_records_autofix_and_block_in_production(tmp_path):
 # had TIMED OUT in the merge queue (that script exits 2 on timeout, 0 only on
 # MERGED). The guard rewrote and approved it as "buffering-safe" while the exit
 # code still lied.
-
-import os as _os
-import shutil as _shutil
-
-import pytest as _pytest
 
 # The rewrite is a POSIX shell script ($? capture, /tmp paths). The two tests
 # that EXECUTE it need a real POSIX shell; the string-assertion test below is
@@ -304,7 +303,7 @@ def test_rewrite_captures_and_reexits_producer_status():
     assert "__tbg_rc=$?" in cmd, f"no rc capture in rewrite:\n{cmd}"
     assert cmd.rstrip().endswith("exit $__tbg_rc"), f"rewrite must end by re-exiting rc:\n{cmd}"
     # rc must be captured IMMEDIATELY after the producer, before the filter runs.
-    lines = [l for l in cmd.splitlines() if l.strip()]
+    lines = [line for line in cmd.splitlines() if line.strip()]
     assert lines[1].strip() == "__tbg_rc=$?", f"rc capture not adjacent to producer:\n{cmd}"
 
 

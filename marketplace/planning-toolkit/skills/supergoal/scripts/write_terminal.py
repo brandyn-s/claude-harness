@@ -36,7 +36,6 @@ Skips git+PR flow silently if KB has no .git or gh is unavailable; the
 markdown is always written locally.
 """
 
-import json
 import os
 import re
 import subprocess

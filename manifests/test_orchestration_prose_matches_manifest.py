@@ -59,7 +59,7 @@ REPO = Path(__file__).resolve().parent.parent
 SKILLS = REPO / "skills"
 
 sys.path.insert(0, str(REPO / "manifests"))
-import query_engine as Q
+import query_engine as Q  # noqa: E402 -- resolves via the sys.path insert above
 
 
 def load_components():

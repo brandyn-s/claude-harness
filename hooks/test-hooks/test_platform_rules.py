@@ -9,7 +9,6 @@ files are injected, and the OTHER platforms' files are never loaded. This is the
 whole point of the system — a Windows-only DOMAIN must not reach a macOS session
 and vice versa.
 """
-import importlib
 import os
 import sys
 from pathlib import Path

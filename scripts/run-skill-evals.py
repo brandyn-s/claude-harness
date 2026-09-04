@@ -39,7 +39,13 @@ Usage:
     python3 scripts/run-skill-evals.py --skill capture  # run one skill's evals
     python3 scripts/run-skill-evals.py --json
 """
-import argparse, json, operator, re, subprocess, sys, yaml
+import argparse
+import json
+import operator
+import re
+import subprocess
+import sys
+import yaml
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -168,10 +174,12 @@ def run_assertion(atype, aval, skill_dir, fm, body, body_no_code):
         for r in list(local_refs):
             for ss in sib_names:
                 if r.startswith(ss + "/"):
-                    local_refs.discard(r); break
+                    local_refs.discard(r)
+                    break
             for ss in sib_names:
                 if re.search(re.escape(ss) + "/" + re.escape(r), body_no_code):
-                    local_refs.discard(r); break
+                    local_refs.discard(r)
+                    break
         missing = [r for r in local_refs if r not in existing]
         if missing:
             return False, f"missing refs: {missing[:5]}"
@@ -275,7 +283,7 @@ def main():
         print("No deterministic evals found. Add `deterministic:` blocks to tests/<skill>/*.yaml.")
         sys.exit(0)
 
-    print(f"=== Skill-eval summary ===")
+    print("=== Skill-eval summary ===")
     print(f"  Skills with deterministic evals: {skills_tested}")
     print(f"  Total assertions: {len(all_results)}")
     print(f"  Passing: {len(all_results) - len(fails)}")

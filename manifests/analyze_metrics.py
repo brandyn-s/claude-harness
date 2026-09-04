@@ -11,7 +11,7 @@ Usage:
 """
 import json
 import sys
-from collections import Counter, defaultdict
+from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -95,7 +95,7 @@ def main():
 
     # Hook usage
     if query_entries:
-        print(f"\nHook usage:")
+        print("\nHook usage:")
         query_stats = analyze_queries(query_entries)
         for hook, stats in sorted(query_stats.items()):
             total = stats["total"]
@@ -107,7 +107,7 @@ def main():
 
     # Advisory compliance
     if compliance_entries:
-        print(f"\nAdvisory compliance:")
+        print("\nAdvisory compliance:")
         comp_stats = analyze_compliance(compliance_entries)
         for hook, stats in sorted(comp_stats.items()):
             warned = stats["warned"]
@@ -121,7 +121,7 @@ def main():
                 # For now, we report warning count as the base metric.
                 print(f"    -> {warned} warnings issued. Check transcripts for compliance rate.")
                 if warned >= 3:
-                    print(f"    WARNING: HIGH WARNING COUNT — consider upgrading to exit 2 (hard block)")
+                    print("    WARNING: HIGH WARNING COUNT — consider upgrading to exit 2 (hard block)")
     else:
         print("\nNo advisory compliance data yet.")
 
@@ -173,5 +173,6 @@ def main():
 
 if __name__ == "__main__":
     if any(a in ("-h", "--help") for a in sys.argv[1:]):
-        print(__doc__ or "<usage TBD>"); sys.exit(0)
+        print(__doc__ or "<usage TBD>")
+        sys.exit(0)
     main()

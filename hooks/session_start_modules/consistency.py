@@ -321,11 +321,11 @@ def check_10_stale_component_references():
                     pattern = rf"(?<!legacy )(?<!remnant ){re.escape(old_agent)}(?:/MEMORY|\.md|\b)"
                     if re.search(pattern, text):
                         # Double check it's not in a "detect legacy" context
-                        lines = [l for l in text.split("\n") if old_agent in l]
+                        lines = [line for line in text.split("\n") if old_agent in line]
                         stale_lines = [
-                            l
-                            for l in lines
-                            if "legacy" not in l.lower() and "remnant" not in l.lower()
+                            line
+                            for line in lines
+                            if "legacy" not in line.lower() and "remnant" not in line.lower()
                         ]
                         if stale_lines:
                             findings.append(

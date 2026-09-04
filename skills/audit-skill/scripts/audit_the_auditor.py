@@ -103,7 +103,7 @@ def main(argv=None) -> int:
         Path(args.out).write_text(worksheet, encoding="utf-8")
     else:
         print(worksheet)
-    print(f"# sampled { {l: len(v) for l, v in sampled.items()} } "
+    print(f"# sampled { {layer: len(v) for layer, v in sampled.items()} } "
           f"from {len(records)} records", file=sys.stderr)
     return 0
 
