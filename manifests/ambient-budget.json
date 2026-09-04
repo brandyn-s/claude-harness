@@ -171,6 +171,18 @@
       "rule": "complete-the-whole-instruction.md",
       "bytes": -3113,
       "reason": "Deleted with its incidents and rule-reference files. Completion-discipline sibling of never-stop-early and validate-to-improve (deleted 2026-09-03): re-read-the-enumeration and restate-the-instruction gates a frontier model does not need and that outcome-over-verification.md already bounds; no skill required it. Its unstated content -- hardest part first with no silent 'next', design docs before planning, the named-artifact format contract -- moved into scope-discipline.md checks 1 and 6 (+743 B). Plan class DUP. Net negative ratchet."
+    },
+    {
+      "date": "2026-09-04",
+      "rule": "platform-constraints.md",
+      "bytes": -5893,
+      "reason": "Relocated 13 dated-narrative blocks and worked examples (2026-08-15 to 2026-08-29) verbatim to rules/incidents/platform-constraints.md behind <a id> anchors, and the urllib $filter mechanism to its existing 2026-07-05 anchor; each block leaves its directive sentence and a Full: incidents# pointer in the rule. 16,526 -> 10,633 B. Oracle: 1,699/1,699 literals present with --also rules/incidents. Negative so the freed budget cannot be silently re-spent."
+    },
+    {
+      "date": "2026-09-04",
+      "rule": "verify-effectiveness.md",
+      "bytes": -5095,
+      "reason": "Relocated 9 dated-narrative blocks (2026-08-16 to 2026-08-28) verbatim to rules/incidents/verify-effectiveness.md behind <a id> anchors, the ladder-runs-both-ways mechanism to the existing 2026-08-15 anchor and the pinned-pair worked example to its 2026-08-29 anchor; directives, REQUIRED lines, GUARDs and one-line pointers stay. 23,085 -> 17,990 B. Oracle: 1,699/1,699 literals present with --also rules/incidents. Negative ratchet."
     }
   ]
 }

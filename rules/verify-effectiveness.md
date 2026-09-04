@@ -20,13 +20,9 @@ Keep these states distinct:
 - Live: the current process/session loaded them.
 - Measured: a fresh observation exercised the requested outcome.
 
-The ladder runs BOTH ways, and the downward direction is the one that gets
-skipped. `source -> live` is the familiar failure ("I merged it, so it is
-deployed"). `live -> source` is its mirror and just as expensive: an out-of-band
-fix that WORKS is self-congratulating, so verification stops at the measured
-outcome and nobody checks the change exists in source. The next apply reverts
-it, and the revert looks like a fresh bug because the symptom's known fix is
-"already done".
+The ladder runs BOTH ways: `source -> live` is the familiar failure ("I merged
+it, so it is deployed"); `live -> source` is its mirror — an out-of-band fix that
+WORKS but was never committed, so the next apply reverts it.
 
 REQUIRED after any change applied outside the normal commit path — a console
 edit, a CLI mutation, a `terraform apply` from a local tree, a hand-run script:
@@ -72,9 +68,7 @@ creates exactly that third case.
 
 For anything whose product is a rendered artifact a human reads — a chat message, a
 digest, an alert card, a report — read the FIRST real delivered output before calling it
-verified. Defects in composed presentation and in semantic fit are invisible to schema,
-plumbing, and unit tests by construction: the tests assert the parts, and the defect is
-in the whole.
+verified; schema, plumbing, and unit tests assert the parts, and the defect is in the whole.
 
 ## Multi-seam changes
 
@@ -89,49 +83,29 @@ For runtime delivery, verify all applicable transitions:
 
 A probe must exercise the DEPLOYED CODE PATH, not a fresh equivalent of it. A
 new client/connection/session constructed by the probe reports the LIBRARY DEFAULT
-and says nothing about the configured runtime. Measured 2026-08-16: a verification
-script called `sqlite3.connect()` itself and read `PRAGMA busy_timeout` = 5000,
-which nearly shipped as "the 30s timeout fix did not apply" -- the setting is
-applied inside the application's own `_get_conn()`, so the only honest measurement
-imports the deployed module and asks IT (30000). Import the module and call its
+and says nothing about the configured runtime. Import the module and call its
 accessor, or attach to the running process; never re-implement the setup you are
 trying to verify.
+Full: incidents#2026-08-16-probe-constructed-its-own-connection
 
 An ABSENT check is not a passing check. A CI job that fails BEFORE creating any
-job produces no logs and simply does not appear in the check list, which reads as
-"not applicable to this repo" rather than broken. Measured 2026-08-16: reported
-"tflint passed" from an all-green aggregate while tflint had never run in that
-repo's history. Before citing a named check as passing, confirm that check appears
-by name. Equally, when a linter job fails, separate ERROR from WARNING counts
-before concluding a fix did not work -- a fix that took the error count 1 -> 0 was
-briefly reported as failed because 16 pre-existing warnings kept the job red.
+job produces no logs and does not appear in the check list, which reads as "not
+applicable to this repo" rather than broken. Before citing a named check as
+passing, confirm that check appears by name; when a linter job fails, separate
+ERROR from WARNING counts before concluding a fix did not work.
+Full: incidents#2026-08-16-absent-check-read-as-passing
 
 ### 4th shape: a seam NO instrument you have can cross (n=4 for multi-seam)
 
-The three recorded shapes -- seam-LOGIC, DEPLOY-BOUNDARY, STUBBED-SEAM -- all assume
-you COULD have tested the seam. The fourth is the one where you cannot, and it is the
-most dangerous because every layer you CAN test goes green.
-
-Measured 2026-08-26 (labs-portal importer): the browser -> ALB -> Lambda hop was
-crossable only by a human's authenticated browser. Everything else was verified --
-31 offline tests, mutation batteries, a botocore-verified presigner, THREE green
-end-to-end runs -- and **two consecutive production defects lived in that one hop**,
-both found by the user: the shared WAF refusing the request body, then a malformed
-response envelope. The ALB access log shows why the E2E could not see either: every
-earlier attempt was `elb=403` or `302`, so **no request had ever reached the Lambda
-through the ALB** until the user clicked.
-
-THE MECHANISM IS REUSABLE, not AWS-specific: `aws lambda invoke` hands the response
-OBJECT back to the caller. Only the ALB parses `statusDescription`, so a bare `"200"`
-instead of `"200 OK"` is invisible to every direct invoke and is a bodyless 502 to the
-browser. A probe that receives your output cannot validate a CONTRACT that a different
-consumer enforces.
+The three recorded shapes -- seam-LOGIC, DEPLOY-BOUNDARY, STUBBED-SEAM -- assume you
+COULD have tested the seam; the fourth is the one where you cannot, and every layer
+you CAN test goes green. A probe that receives your output cannot validate a CONTRACT
+that a different consumer enforces.
+Full: incidents#2026-08-26-seam-no-instrument-can-cross
 
 REQUIRED: when the last hop needs an instrument you do not have, say so as a BLOCKING
-gap BEFORE claiming the feature works -- not as a footnote under a success report. I
-flagged it both times and both times it read as a caveat beside green results, so the
-user paid the round trip. The honest form is "this is unverified and needs you to click
-it", above the summary, not below it.
+gap BEFORE claiming the feature works -- "this is unverified and needs you to click
+it", above the summary, not as a footnote under a success report.
 
 GUARD pattern="the direct-invoke E2E is green, so the feature works":
   Name every consumer that PARSES the output and ask which of them your probe was.
@@ -141,15 +115,10 @@ GUARD pattern="the direct-invoke E2E is green, so the feature works":
 ## Instruments and measurements
 
 When the triggering condition is TRANSIENT, capture the known-positive control
-WHILE it still holds. A degraded link, an outage, a load spike, or a race window
-is the only cheap opportunity to observe a detector firing on the real condition;
-once it clears you can construct synthetic controls but can no longer confirm the
-detector fires on the genuine article, and the difference is not recoverable
-later. Measured 2026-08-17: an auto-detect gate for a degraded-egress hang was
-built while the link was bad, but the link recovered before the gate was
-installed, so its positive branch rests on forced-timeout and DNS-failure
-controls rather than a live observation — an honest gap that a five-second probe
-during the window would have closed. Grab the control first, then build the fix.
+WHILE it still holds; once it clears you can construct synthetic controls but can
+no longer confirm the detector fires on the genuine article. Grab the control
+first, then build the fix.
+Full: incidents#2026-08-17-transient-control-not-captured
 
 Before relying on an instrument, prove it against a synthetic known-positive
 whose expected value is known independently. Confirm pagination, caps,
@@ -157,24 +126,16 @@ filters, time windows, identity mapping, output stream, error rows, and the
 final process exit status. Zero hits from an unqualified instrument mean
 unknown, not absence.
 
-A MULTI-GATE probe with a placeholder input tests only the FIRST gate, and its
-output reads as coverage of all of them. Validation SHORT-CIRCUITS, so a dummy value
-that fails gate 1 means gates 2..N were never reached -- while the report shows N
-rows, N statuses, and N distinct-looking verdicts. Measured 2026-08-26: a probe of a
-new endpoint's five refusal paths passed `upload_key: "x"`, which failed key-format
-validation every time; four "different gates" were the SAME gate, and the two that
-mattered (a repo-shape refusal, and a 404 whose hint must not blame the wrong
-component) were never exercised. Reaching them required staging a REAL artifact.
+A MULTI-GATE probe with a placeholder input tests only the FIRST gate: validation
+SHORT-CIRCUITS, so a dummy value that fails gate 1 means gates 2..N were never
+reached while the report shows N rows, N statuses, and N distinct-looking verdicts.
 REQUIRED: order the gates, then satisfy every earlier one so the probe arrives at the
 gate under test; if two rows produce the same error text, they are one gate.
-
 The INVERSE also misleads: a projection that omits the discriminating field
-manufactures a finding. The same session's census printed `name` and `owner` per row
-and reported a duplicate app; the rows differed in `road` and `url` -- one app on two
-roads, deliberately. And a checker whose INPUT was never produced reports a confident
-zero: an extractor copied 2 of 3 files out of an image, so the grep for a feature that
-WAS present returned 0 with no error. Print the field that would DISTINGUISH the rows,
-and assert the input exists before believing a count of it.
+manufactures a finding, and a checker whose INPUT was never produced reports a
+confident zero. Print the field that would DISTINGUISH the rows, and assert the
+input exists before believing a count of it.
+Full: incidents#2026-08-26-placeholder-probe-tests-only-the-first-gate
 
 Before publishing a benchmark or baseline:
 
@@ -188,19 +149,12 @@ Before publishing a benchmark or baseline:
 Measure distributions before choosing thresholds. A round number or one
 sample is not a calibrated boundary.
 
-A REVOCATION rehearsal needs three observations, not one. A post-revocation 401
-is uninterpretable alone — it is equally consistent with "the credential was
-revoked" and "authentication is now broken for everyone". Required: (1) the SAME
-credential accepted BEFORE the revocation, (2) that credential refused after,
-and (3) a FRESHLY issued credential accepted after. Without (3) an outage reads
-as a successful kill switch. Also test the INTERMEDIATE state, because that is
-what falsifies a one-step runbook: measured 2026-08-25, rotating an ECS service's
-Secrets Manager value revoked NOTHING — the token still returned 200 with ~59
-minutes left on its exp, because ECS injects secrets at task start and the
-running tasks held the old value; only `--force-new-deployment` completed the
-revocation. The documented kill switch said rotation "invalidates every
-outstanding token at once", so an operator following it during a leak would have
-believed 914 users' tokens were dead while every one still worked.
+A REVOCATION rehearsal needs three observations, not one: (1) the SAME credential
+accepted BEFORE the revocation, (2) that credential refused after, and (3) a
+FRESHLY issued credential accepted after. Without (3) an outage reads as a
+successful kill switch. Also test the INTERMEDIATE state; that is what falsifies a
+one-step runbook.
+Full: incidents#2026-08-25-secret-rotation-revoked-nothing
 
 ### Verify the instrument before fixing the subject
 
@@ -229,9 +183,8 @@ rung rather than clearing it.
 
 ## A test that RE-IMPLEMENTS the path it verifies is not testing that path
 
-A test can LOOK like it covers a seam while merely reconstructing it. If a test rebuilds
-the sequence under test rather than invoking it, it verifies your MODEL of the code, and
-the two can diverge silently. Stub the boundaries, not the logic — and prove the choice by
+If a test rebuilds the sequence under test rather than invoking it, it verifies your MODEL
+of the code, not the code. Stub the boundaries, not the logic — and prove the choice by
 mutating the real path and requiring red.
 
 ## Artifacts and transformations
@@ -248,17 +201,10 @@ returning zero does not prove that every intended edit persisted.
 An artifact that renders differently for different readers is not a shareable
 artifact. PIN AND LABEL the timezone, locale, and any other host-derived
 formatting an artifact resolves at view time; never leave a date to the viewer's
-local zone. Two failure modes, and the second is worse: the same file states
-different facts on different machines, and a single artifact contradicts ITSELF
-when two of its code paths pick different zones. Measured 2026-08-20 — a mailbox
-report formatted message times with `toLocaleTimeString` (viewer-local) and
-thread-list dates with `toISOString` (UTC), so one message read `19 Aug 01:47 pm`
-in Chicago and `20 Aug 03:47 am` in Tokyo while disagreeing with its own thread
-list by a day, on a corpus whose subject was cross-timezone travel. The check is
-cheap and belongs in the artifact's own test: render under two or more host zones
-and assert the displayed values are byte-identical. Anchor relative windows
-("last 6 months") to an explicit as-of date rather than to `max(data)`, or one
-future-dated record silently moves the window for everything else.
+local zone. The check belongs in the artifact's own test: render under two or more
+host zones and assert the displayed values are byte-identical. Anchor relative
+windows ("last 6 months") to an explicit as-of date rather than to `max(data)`.
+Full: incidents#2026-08-20-viewer-local-timezone-in-a-shared-report
 
 ## Regression and mutation checks
 
@@ -269,12 +215,9 @@ weakening assertions to make a changed behavior green.
 
 ## A degrade-then-restore repair must be per-target, never two batch loops
 
-When the fix for N targets is "remove the broken state, then re-apply the correct
-one" — disarm/re-arm, disable/re-enable, detach/reattach, revoke/re-grant — the
-targets are STRICTLY WORSE between the two phases. Batching it as two loops means a
-phase-2 failure degrades EVERY target at once, and the failures that do this are
-environmental (network, rate limit, expired token, classifier outage), so they hit
-all N rather than one.
+When the fix for N targets is degrade-then-restore — disarm/re-arm, disable/re-enable,
+detach/reattach, revoke/re-grant — the targets are STRICTLY WORSE between the phases, and
+two batch loops let one environmental phase-2 failure degrade EVERY target at once.
 
 REQUIRED: iterate per target, completing degrade -> restore -> verify for one before
 starting the next. A mid-sequence failure then leaves at most one target degraded.
@@ -322,15 +265,11 @@ GUARD pattern="the push succeeded, moving on" or "I'll verify at the end":
 ## Optional layers and cleanup end-states
 
 A verification layer that is SKIPPED because its dependency is missing reports the
-same exit code as one that ran. Measured 2026-08-28: a portal DOM check fell back to
-a weak id cross-check when jsdom was absent, counted that fallback as a PASSING
-assertion, and exited 0 with `37 checks passed` — so a run with the entire DOM layer
-missing, including a brand-new test that had never executed once, was
-indistinguishable from a clean run. The only tell was one line of prose mid-output.
-A missing dependency must FAIL and name the install command, not degrade. Do NOT add
-a bypass flag: a flag set once in a shell profile restores exactly the hole it was
-added to close. If a layer is genuinely optional, its absence must change the
-reported COUNT and the exit status, never just a log line.
+same exit code as one that ran. A missing dependency must FAIL and name the install
+command, not degrade. Do NOT add a bypass flag: a flag set once in a shell profile
+restores exactly the hole it was added to close. If a layer is genuinely optional,
+its absence must change the reported COUNT and the exit status, never just a log line.
+Full: incidents#2026-08-28-skipped-layer-reported-as-passing
 
 An INDETERMINATE cell tallied beside definitive ones is the same hole one layer in.
 Split outcomes into DEFINITIVE and INDETERMINATE classes, grade against the EXPECTED
@@ -348,23 +287,18 @@ GUARD pattern="every mailbox/row/target it checked came back clean, so we are cl
 Verify a CLEANUP or teardown path by its END STATE, not by each step succeeding. A
 delete against an already-absent resource is the EXPECTED condition on a retry, so a
 step-wise fail-fast turns a partially-completed teardown into a permanently
-unresumable one: the first delete errors and every remaining resource leaks forever.
-Make each delete tolerant, then read the world back and fail on what SURVIVED
-(measured 2026-08-28 — an `undeploy` verb was rewritten this way after a double
-dispatch left an app half-torn-down and each retry aborted on step one). The verdict
-is the post-read, not the sequence of API acknowledgements.
+unresumable one. Make each delete tolerant, then read the world back and fail on
+what SURVIVED. The verdict is the post-read, not the sequence of API acknowledgements.
+Full: incidents#2026-08-28-teardown-verified-by-end-state
 
 ## When two artifacts must agree, assert the RELATIONSHIP, not two literals
 
-A test asserting `A == "x"` and `B == "x"` detects a single-sided change and PASSES
-the lockstep edit — the normal way such a pair changes. Derive one side from the
-other instead (`assert record["tools"] == list(module.PRESET)`), and add a VACUITY
-FLOOR to any per-item loop (`assert pairs >= 12`): an empty collection prints
-`0 mismatches of 0 checked`, identical to a clean run. A comment claiming two files
-"cannot drift" is not a check. For a magnitude literal kept deliberately, say in the
-comment that it is a TRIPWIRE and name what to re-verify when it moves, or the next
-reader deletes it as redundant. Measured 5/5 across different artifact classes:
-`incidents#2026-08-29-pinned-pair-passes-lockstep`.
+A test asserting the same literal on both sides PASSES the lockstep edit that is the
+normal way such a pair changes. Derive one side from the other, add a VACUITY FLOOR to
+any per-item loop (an empty collection prints `0 mismatches of 0 checked`), and mark a
+deliberately kept magnitude literal as a TRIPWIRE naming what to re-verify when it moves;
+a comment claiming two files "cannot drift" is not a check.
+Full: incidents#2026-08-29-pinned-pair-passes-lockstep
 
 Detailed incident mechanisms, domain-specific measurement traps, and worked
 examples live in `rules/incidents/verify-effectiveness.md` and are loaded on

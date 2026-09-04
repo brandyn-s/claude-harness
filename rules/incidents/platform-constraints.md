@@ -1221,6 +1221,24 @@ INCIDENT 2026-04-29 [WINDOWS] Exp 1/4 invalidation: 40% (Exp 4) and 60%
   #      them and the windows-2022 matrix leg failed collection (macOS + ubuntu passed).
   #      One fix-forward commit (guard the import) on the still-open PR.
 
+### Mechanism as restated in the ambient rule 2026-08 (relocated 2026-09-04)
+
+Relocated verbatim from `rules/platform-constraints.md`; the directive (import the shared helper; `safe=` must
+never contain a space) and a pointer stay in the rule.
+
+- Never hand-roll a `urllib` Microsoft Graph probe. Import the shared helper:
+  `from msgraph_helper import graph_get, odata_quote` (`bin/msgraph_helper.py`,
+  app-only GCC High auth via Keychain, no `az login`). A raw space in
+  `$filter=<k> eq '<v>'` makes Python 3.14's `http.client` raise
+  `InvalidURL: URL can't contain control characters` BEFORE the request leaves the
+  client, and the message never mentions OData or `$filter`. Calling `quote()` is
+  NOT sufficient protection: a space left inside its `safe=` set reproduces the
+  identical crash, so a guard that only looks for an *unencoded* filter misses that
+  shape entirely — `safe` must never contain a space. 60+ occurrences across 27+
+  sessions; the fix has lived in the incidents file since 2026-07-05, which loads
+  ONLY on demand, so restating it here is a delivery fix, not a duplicate.
+  Full: incidents#2026-07-05-6th-recurrence-each-new-hand-rolled-urllib-graph
+
 ## 2026-06-10-macos-does-reproduce-tested-tailscale-up-ipv4-on
 <a id="2026-06-10-macos-does-reproduce-tested-tailscale-up-ipv4-on"></a>
 
@@ -1484,6 +1502,240 @@ ambient one).
 **Rule:** name scratch files `<topic>-<session-id-prefix>.<ext>`. Prefer the Write
 tool over a bash redirect for scratch, and when it demands a Read, actually read
 the file before concluding it is yours.
+
+## 2026-08-15 a deterministic guard blocked the same shape six times
+<a id="2026-08-15-guard-blocked-the-same-shape-six-times"></a>
+
+Relocated verbatim from the ambient rule body on 2026-09-04; the directive and a
+pointer stay in `rules/platform-constraints.md`.
+
+- A deterministic guard blocking the SAME shape twice in one session is a
+  signal about your own default, not about the guard. Stop composing that shape
+  for the rest of the session rather than re-deriving the fix each time it
+  fires. Measured 2026-08-15: `bash-tail-buffering-guard` blocked six times in a
+  single session — five distinct `producer | tail/grep/head` constructions plus
+  a trailing `echo`/`cat` after a verdict command — each block correctly
+  explained and each followed later by the same reflex. The guard has no memory
+  to wear down and the verdict never changes; the cheapest response after the
+  first block is to ask the PRODUCER for less (`-n`, `--limit`, `-m`,
+  `sed -n '1,Np' FILE`) or redirect to a file and read it, and to keep doing
+  that unprompted.
+
+## 2026-08-25 `IFS=$'\t' read` collapses empty tab-separated fields
+<a id="2026-08-25-ifs-tab-read-collapses-empty-fields"></a>
+
+Relocated verbatim from the ambient rule body on 2026-09-04; the directive and a
+pointer stay in `rules/platform-constraints.md`.
+
+- `IFS=$'\t' read -r a b c` does NOT make tab a hard delimiter. Tab is an
+  IFS-WHITESPACE character, so consecutive tabs COLLAPSE into one separator and
+  an empty field silently shifts every later column left. Different mechanism
+  from the no-word-split trap above, and it bites the same shape: parsing a TSV
+  whose optional middle column may be empty. Measured 2026-08-25 on
+  `git worktree list --porcelain` — entries with no `branch` line emit
+  `path\t\t1\t0`, `read` assigned the detached flag into `branch`, and ~52 of
+  165 worktrees were misclassified with no error. Emit a placeholder for empty
+  fields, or parse the record in Python; never use positional `read` on a
+  format with optional fields.
+
+## 2026-08-20 an unquoted heredoc delimiter altered the payload
+<a id="2026-08-20-unquoted-heredoc-delimiter-altered-the-payload"></a>
+
+Relocated verbatim from the ambient rule body on 2026-09-04; the directive and a
+pointer stay in `rules/platform-constraints.md`.
+
+- QUOTE THE HEREDOC DELIMITER (`<<'PY'`, not `<<PY`) whenever the body contains a
+  backslash, `$`, or a backtick. An unquoted delimiter makes the shell perform
+  parameter and backslash processing on the body BEFORE the receiving program
+  sees it, so `\n` arrives as a real newline and `$x` arrives empty. Nothing
+  reports an error: the body is delivered, just altered. Measured 2026-08-20 — a
+  heredoc writing a JS probe into a file collapsed `'\nCFG='` into a literal line
+  break, producing an unterminated string literal; the injected script threw at
+  parse time, the element it was meant to append never existed, and the read that
+  looked for that element reported "no output" — which reads as a failed
+  measurement rather than a corrupted payload. `tdd-mutation-testing.md` records
+  this for mutation payloads and names only `` ` `` and `$`; the trigger set
+  includes BACKSLASH and the hazard is not specific to mutation testing. When the
+  body must carry escapes, use a quoted delimiter and pass variable data as
+  `argv` rather than interpolating it.
+
+## 2026-08-24 a blocked compound command ran no stage at all
+<a id="2026-08-24-blocked-compound-command-no-stage-ran"></a>
+
+Relocated verbatim from the ambient rule body on 2026-09-04; the directive and a
+pointer stay in `rules/platform-constraints.md`.
+
+- A guard/hook block rejects the ENTIRE compound command — no stage ran,
+  including stages BEFORE the one that triggered the block. Re-issue every
+  stage, and verify each earlier stage's artifact exists before interpreting
+  any downstream result: a plausible aggregate success is not that evidence.
+  Measured 2026-08-24 (3rd occurrence of the class): a blocked
+  `cat >> tests/… <<'PY' … && pytest | tail` was re-run as pytest alone;
+  "18 passed" read as the new tests passing while the append never executed —
+  caught only when a mutation run selected zero of the new tests.
+  (git-hygiene states this for git state; the hazard is any compound.)
+
+## 2026-08-25 the background notification carries the wrapper's exit status
+<a id="2026-08-25-background-notification-carries-the-wrapper-exit"></a>
+
+Relocated verbatim from the ambient rule body on 2026-09-04; the directive and a
+pointer stay in `rules/platform-constraints.md`.
+
+- A `run_in_background` command's completion notification carries the WRAPPER's
+  final exit status. `cmd > log; tail log` notifies exit 0 even when cmd failed
+  (2026-08-25: a judge run that correctly exited 1 on its own gate was reported
+  as a successful background task). End background wrappers with explicit rc
+  propagation (`; rc=$?; ... ; exit $rc`) or run the verdict command alone.
+
+## 2026-08-25 `npm install <pkg>` pruned jsdom
+<a id="2026-08-25-npm-install-pruned-jsdom"></a>
+
+Relocated verbatim from the ambient rule body on 2026-09-04; the directive and a
+pointer stay in `rules/platform-constraints.md`.
+
+- `npm install <pkg>` PRUNES node_modules entries absent from package.json —
+  it removed jsdom (the render gate's engine) while adding pptxgenjs
+  (2026-08-25). Pin every load-bearing dep in package.json before installing
+  anything else.
+
+## 2026-08-24 BSD dialect gaps whose failure mode is SILENCE (macOS)
+<a id="2026-08-24-bsd-dialect-gaps-whose-failure-mode-is-silence"></a>
+
+Relocated verbatim from the ambient rule body on 2026-09-04; the directive and a
+pointer stay in `rules/platform-constraints.md`.
+
+macOS ships BSD tools, and the ones below fail by emitting NOTHING with exit 0 — which is
+indistinguishable from the negative result you were hoping for. All measured 2026-08-24, in
+one session:
+
+- **`grep -qv PATTERN` is not the inverse of `grep -q`.** `-q` reports whether the PATTERN
+  matched, not whether the inverted selection is non-empty. BSD grep returned `rc=1` while
+  `grep -v PATTERN | wc -l` reported **109** non-matching lines. Use `grep -c` and compare
+  the integer.
+- **BSD `sed` BRE has no `\|` alternation** (a GNU extension), so
+  `sed -n '/passed\|failed/p'` matches the LITERAL string `passed|failed`. Proved with a
+  control: the BRE form printed nothing on a real `52 passed` run, while
+  `sed -nE '/passed|failed/p'` printed both lines. Use `sed -E`.
+- **`producer | head -N || echo "no matches"` can never take the fallback.** The `||` binds
+  to `head`, which exits 0 on empty input, so absence prints as silence. Different mechanism
+  from the `$(producer || echo default)` concatenation trap above — that one produces a wrong
+  VALUE, this one produces no branch at all.
+
+The shared root cause is a habit, not three bugs: defaulting to a shell predicate whose
+failure mode is an empty stream, then reading the empty stream as a negative result. Prefer a
+predicate that emits a NUMBER, and pair every zero with a known-positive control in the same
+command.
+
+## 2026-08-25 an exported AWS_REGION leaked into GovCloud tests
+<a id="2026-08-25-exported-aws-region-leaked-into-govcloud-tests"></a>
+
+Relocated verbatim from the ambient rule body on 2026-09-04; the directive and a
+pointer stay in `rules/platform-constraints.md`.
+
+A test that builds a resource name from `os.environ["AWS_REGION"]` inherits the operator
+shell's value, and the resulting failure looks exactly like a code regression. Measured TWICE
+in one session (2026-08-25 and 2026-08-26), same repo, same cause: `4 failed, 402 passed` and
+later `4 failed` again, both reporting
+`'…-desired-123456789012-us-east-2' == '…-us-gov-east-1'` — a commercial region leaking into
+a GovCloud suite. Re-running with `AWS_REGION=us-gov-east-1` passed 4/4 both times, and
+neither change had touched the rollout path.
+
+The tell is in the assertion's VALUES, not the pass/fail counts: a region mismatch inside a
+diff about secrets or IAM means the environment, not the diff. CI is green forever because
+its workflow `env:` block pins the region. For any GovCloud repo whose tests derive names
+from the region, pin it on the test command — and when a test asserts an env-derived value,
+pin it inside the test (`monkeypatch.setenv`) so the suite does not depend on the shell.
+
+## 2026-08-24 a load→dump round trip rewrote a 21K-line registry
+<a id="2026-08-24-load-dump-round-trip-rewrote-a-registry"></a>
+
+Relocated verbatim from the ambient rule body on 2026-09-04; the directive and a
+pointer stay in `rules/platform-constraints.md`.
+
+- Do not round-trip a formatted JSON/YAML file through load→dump to change a
+  few values: the serializer reformats everything (measured 2026-08-24: 3
+  intended values → an 18,288-line diff on a 21K-line registry; yaml.safe_dump
+  has corrupted long quoted strings the same way). Use anchored text
+  replacement with occurrence-count asserts (`assert text.count(old) == 1`),
+  then prove validity by parsing the result.
+
+## 2026-08-25 a hash-pinned lock compiled on the wrong interpreter
+<a id="2026-08-25-hash-pinned-lock-compiled-on-the-wrong-interpreter"></a>
+
+Relocated verbatim from the ambient rule body on 2026-09-04; the directive and a
+pointer stay in `rules/platform-constraints.md`.
+
+- Hash-pinned locks are platform artifacts unless built for every target — and
+  INTERPRETER-VERSION artifacts too. A dependency with a version-conditional
+  marker changes the resolved set per Python: `anyio` declares
+  `typing_extensions>=4.5; python_version < "3.13"`, so a lock compiled on 3.14
+  correctly OMITS it and then hard-fails on 3.12. Compile against the declared
+  floor and verify the lock installs under every interpreter that consumes it —
+  CI's and the Dockerfile's are frequently different. Note pip enables
+  `--require-hashes` IMPLICITLY for a whole file when ANY entry carries a hash,
+  so an unflagged `pip install -r requirements.txt` fails on one unpinned
+  transitive: `ERROR: In --require-hashes mode, all requirements must have
+  their versions pinned with ==`.
+  PROMOTED here 2026-08-25 on recurrence. The identical finding — same package,
+  same missing dep, same 3.14-vs-3.12 split, same remedy — was already recorded
+  2026-08-13 in `knowledge-base/plans/2026-08-12-private-ai-inkling-model-swap-flaws.md`.
+  It did not prevent the recurrence because a `plans/` flaw log never loads at
+  decision time. A durable lesson written to a non-loading surface is not
+  persisted; route dependency-resolution lessons here or to
+  `agent-memory/topics/python.md`.
+
+## 2026-08-26 branched from a stale origin/main twice in one session
+<a id="2026-08-26-branched-from-a-stale-origin-main-twice"></a>
+
+Relocated verbatim from the ambient rule body on 2026-09-04; the directive and a
+pointer stay in `rules/platform-constraints.md`.
+
+- `origin/main` in `git checkout -B <b> origin/main` / `git worktree add … origin/main`
+  is a LOCAL remote-tracking ref. Branching from it WITHOUT fetching first cuts from a
+  stale tree and silently REVERTS whatever merged since — the checkout reports success
+  either way, and every file the new branch does not touch carries pre-merge bytes.
+  `git-hygiene` STEP_4 already says to verify the base; it was skipped TWICE in one
+  session (2026-08-26), each time reverting a PR merged minutes earlier, and both were
+  caught only by an incidental "file changed on disk" notice. Fetch in the SAME command:
+  `git fetch origin main && git checkout -B <b> origin/main`.
+  Staged gate: `hooks/staged/branch-base-freshness-guard.spec.md`.
+
+## 2026-08-26 a pre-commit failure hidden by `tail`
+<a id="2026-08-26-pre-commit-failure-hidden-by-tail"></a>
+
+Relocated verbatim from the ambient rule body on 2026-09-04; the directive and a
+pointer stay in `rules/platform-constraints.md`.
+
+A pre-commit framework prints the FAILING hook FIRST and the passing hooks after
+it, so `git commit … | tail -N` shows a wall of `Passed`/`Skipped` while the
+commit did NOT happen. This is a DIFFERENT facet from the
+pipe-masks-exit-status family below — there was no `&&`/`||` here and no gate;
+the filter simply showed the wrong END of the output, and `tail` is normally
+where errors live. Measured 2026-08-26: `git commit -F msg | tail -6` displayed
+six green hook lines and read as success; `git log` still pointed at the base
+commit, and the suppressed HEAD of the output was `canonical knowledge-base
+check … Failed` with two real errors. For any state-changing command, redirect
+to a file and read that, capture `$?`, and assert the intended STATE afterwards
+(`git log --oneline -1`, `git status --short`) rather than believing whichever
+end of the output the filter chose to show.
+
+## 2026-08-29 an empty capture read another security group
+<a id="2026-08-29-empty-capture-read-another-security-group"></a>
+
+Relocated verbatim from the ambient rule body on 2026-09-04; the directive and a
+pointer stay in `rules/platform-constraints.md`.
+
+- ECHO A RESOLVED ID AND STOP IF IT IS EMPTY. An empty shell capture
+  interpolated into an AWS `--ids`-family argument does not error — it returns
+  a DIFFERENT resource's data, which reads as a successful answer. Measured
+  2026-08-29: `SG=$(... --query 'Groups[0].GroupId' ...)` came back empty
+  because the task had STOPPED and its ENI was already deleted, so
+  `describe-security-groups --group-ids ""` returned some other group, and its
+  egress rules were one step from being published as a release runner's
+  security posture. The shell printed `runner SG: ` with nothing after it and
+  the plausible JSON below it carried the read. Gate on the capture (`[ -n
+  "$ID" ] || exit 1`), and prefer IaC/source over an ephemeral runtime object
+  for a configuration claim — the runtime object disappears when the task does.
 
 ## Detector-authoring seed index
 
