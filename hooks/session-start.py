@@ -28,7 +28,6 @@ from session_start_modules.env_loader import run_env_loader
 from session_start_modules.index_autoheal import autoheal_indexes
 from session_start_modules.index_corruption import check_index_corruption
 from session_start_modules.index_staleness import check_index_staleness
-from session_start_modules.mcp_binary_staleness import check_mcp_binary_staleness
 from session_start_modules.mcp_oauth_heal import heal_mcp_oauth_clients
 from session_start_modules.mcp_zombie_cleanup import cleanup_stale_mcps
 from session_start_modules.repo_sync import sync_tracked_repos
@@ -361,7 +360,6 @@ def main():
         fut_staleness = executor.submit(check_index_staleness)
         fut_autoheal = executor.submit(autoheal_indexes) if mutate else executor.submit(_skip)
         fut_corruption = executor.submit(check_index_corruption)
-        fut_mcp_staleness = executor.submit(check_mcp_binary_staleness)
         fut_mcp_zombies = executor.submit(cleanup_stale_mcps) if mutate else executor.submit(_skip)
         fut_oauth_heal = executor.submit(heal_mcp_oauth_clients) if mutate else executor.submit(_skip)
         fut_cg_health = executor.submit(check_code_graph_health)
@@ -377,7 +375,6 @@ def main():
         staleness_warnings = fut_staleness.result()
         autoheal_messages = fut_autoheal.result()
         corruption_warnings = fut_corruption.result()
-        mcp_staleness_warnings = fut_mcp_staleness.result()
         mcp_zombie_messages = fut_mcp_zombies.result()
         oauth_heal_messages = fut_oauth_heal.result()
         cg_health_messages = fut_cg_health.result()
@@ -421,8 +418,6 @@ def main():
         messages.extend(autoheal_messages)
     if corruption_warnings:
         messages.extend(corruption_warnings)
-    if mcp_staleness_warnings:
-        messages.extend(mcp_staleness_warnings)
     if mcp_zombie_messages:
         messages.extend(mcp_zombie_messages)
     if oauth_heal_messages:

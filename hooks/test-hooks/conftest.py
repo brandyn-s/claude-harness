@@ -126,7 +126,6 @@ _SYS_EXEC_HAS_OPENPYXL = _sys_executable_has("openpyxl")
 # when introducing a new test that needs either git or a third-party module.
 _NEEDS_GIT = {
     "test_index_staleness.py",
-    "test_mcp_binary_staleness.py",
     "test_git_empty_push_guard.py",
     "test_git_destructive_checkout_guard.py",
     "test_repo_sync.py",
