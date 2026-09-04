@@ -1,15 +1,13 @@
 """PreToolUse hook: auto-load domain TOPIC context when MCP tools are called.
 
-Maps MCP server names to topic files. On first call to each matching server in a
-session, injects the topic via additionalContext so the caller gets the relevant
-domain context without it sitting in the ambient system prompt.
+Maps MCP server names to topic files. On a call to a matching server, injects
+the topic via additionalContext so the caller gets the relevant domain context
+without it sitting in the ambient system prompt.
 
-Manifest-derived routing (2026-04-15): builds the server→topic map from
-graph.json skill manifests (requires_tools → requires_topics). Falls back
-to hardcoded STATIC_MAP when graph.json is unavailable. New MCP servers
-automatically get topic routing when a skill manifest references them.
-A declared topic that does not resolve on disk is SKIPPED rather than minted as
-a route — see `_first_resolvable_topic`.
+Manifest-derived routing (2026-04-15) was REMOVED 2026-07-29; STATIC_MAP is the
+only source of routes — see `_build_server_to_topic_map` for why. A declared
+topic that does not resolve on disk is SKIPPED rather than minted as a route —
+see `_first_resolvable_topic`.
 
 DELIVERY CAP — the binding constraint on every topic this hook injects.
 Per the hooks reference (code.claude.com/docs/en/hooks, verified 2026-07-29):
@@ -17,18 +15,27 @@ Per the hooks reference (code.claude.com/docs/en/hooks, verified 2026-07-29):
 stdout, are capped at 10,000 characters. Output that exceeds this limit is saved
 to a file and replaced with a preview and file path."
 
-So a topic over ~9,550 bytes (10,000 minus this hook's label + JSON envelope,
-measured at ~450B) does NOT arrive. The model receives a ~2KB preview plus a
-path it has no reason to read mid-task, so the rest is silently absent. Measured
-locally: firecrawl.md (8,614B) delivered whole; security.md (13,460B) stubbed.
-Keep injectable topics under that budget, or split them into siblings that fit —
-`/garden` Step 3b reports which ones breach it.
+So a payload over ~9,550 chars (10,000 minus this hook's label + JSON envelope,
+measured at ~450B) does NOT arrive: the model receives a ~2KB preview plus a
+path it has no reason to read mid-task. Measured locally: firecrawl.md (8,614B)
+delivered whole; security.md (13,460B) stubbed.
+
+RETRIEVAL (2026-09-04). Whole-file injection could only ever deliver a topic
+that fit. From 2026-08-15 an over-budget topic produced a NOT DELIVERED pointer
+and no content — msgraph.md (24,170 chars) and linear.md (10,256) delivered
+nothing on every call, and 43 of the 98 corpus topics (44%) are over the cap.
+Now a topic at or under TOPIC_BUDGET_CHARS is injected whole. A larger one is
+split on markdown headings (`split_sections`) and the payload is the SUMMARY
+(a `Summary` section if present, else the title plus the first section with a
+body) plus the sections whose heading/body tokens overlap the tool name and tool
+input (`select_sections`: token overlap, headings weighted double, tokens found
+in more than half the sections ignored as uninformative), greedily by score
+under the same cap, ending with a one-line pointer to the file so the model can
+Read the rest. Sections are remembered per session, so a later tool on the same
+server adds only what it newly matches and an identical call is silent.
 
 Rule injection was RETIRED 2026-07-29 (dead since #1011 deleted its source dir;
-see the note in main()). This hook now loads topics only.
-
-Uses a session-scoped temp file to track which topics have been loaded, so a
-repeated call to the same server does not re-inject.
+see the note in main()). This hook loads topics only.
 
 Output format (validated 2026-03-12):
 {
@@ -41,6 +48,7 @@ Output format (validated 2026-03-12):
 
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -49,11 +57,18 @@ SESSION_MARKER_DIR = Path.home() / ".claude" / "session-env"
 GRAPH_PATH = Path.home() / ".claude" / "manifests" / "graph.json"
 
 # See "DELIVERY CAP" above. The platform caps hook output at 10,000 CHARACTERS;
-# this hook's label + JSON envelope measured ~450, so 9,550 is the usable budget
-# for section content. Enforced in main() — over-budget sections are reported as
-# NOT DELIVERED rather than silently replaced by a platform preview.
+# this hook's label + JSON envelope measured ~450, so 9,550 is the ceiling for
+# the whole payload. A payload over it is replaced by a pointer (never stubbed
+# silently by the platform).
 INJECTION_BUDGET_CHARS = 9_550
-SECTION_SEPARATOR = "\n\n---\n\n"
+
+# Content budget per topic: the whole-file threshold AND the slice cap. 8,000 is
+# the corpus's own soft cap for a topic file (skills/garden Step 3b auto-splits
+# above 8 KB), so a topic the garden considers well-sized arrives whole and only
+# files the garden would already flag get sliced. The label and pointer lines
+# ride on top; test_topic_budget_leaves_headroom_for_label_and_pointer pins the
+# gap to INJECTION_BUDGET_CHARS.
+TOPIC_BUDGET_CHARS = 8_000
 
 # The curated server→topic map. Since the manifest derivation was removed
 # (see _build_server_to_topic_map), this is the ONLY source of routes.
@@ -216,31 +231,40 @@ def get_marker_path(session_id=None):
 
 
 def get_loaded_topics(marker_path):
-    if marker_path.exists():
-        try:
-            return set(json.loads(marker_path.read_text(encoding="utf-8")))
-        except Exception:
-            pass
-    return set()
+    """Return {topic_file: [section ids delivered this session]}; "*" = whole file.
+
+    Markers written before 2026-09-04 were a list of "topic:<file>" strings and
+    meant the whole file had been delivered; read them as such so a session
+    that straddles the upgrade does not re-inject.
+    """
+    try:
+        raw = json.loads(marker_path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    if isinstance(raw, dict):
+        return {k: [str(x) for x in v] for k, v in raw.items() if isinstance(v, list)}
+    if isinstance(raw, list):
+        return {e[len("topic:"):]: ["*"] for e in raw
+                if isinstance(e, str) and e.startswith("topic:")}
+    return {}
 
 
-def mark_loaded(marker_path, topic):
+def mark_loaded(marker_path, topic, section_ids):
     loaded = get_loaded_topics(marker_path)
-    loaded.add(topic)
+    loaded[topic] = sorted(set(loaded.get(topic, [])) | set(section_ids))
+    text = json.dumps(loaded)
     # Atomic write — concurrent sessions writing the same marker would
     # otherwise race and corrupt the JSON, causing get_loaded_topics() to
-    # silently return an empty set on the next call (so every topic
+    # silently return an empty dict on the next call (so every topic
     # reloads every invocation).
     try:
         # atomic_write lives next to this hook.
-        import os
-        import sys
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         from atomic_write import atomic_write
-        atomic_write(marker_path, json.dumps(list(loaded)))
+        atomic_write(marker_path, text)
     except Exception:
         # Fall back to plain write_text if atomic_write isn't importable.
-        marker_path.write_text(json.dumps(list(loaded)), encoding="utf-8")
+        marker_path.write_text(text, encoding="utf-8")
 
 
 def _find_topic_match(tool_name):
@@ -251,7 +275,6 @@ def _find_topic_match(tool_name):
         if tool_name.startswith(prefix):
             return topic, used_manifest, prefix in STATIC_MAP
     return None, used_manifest, False
-
 
 
 def _load_file_content(directory, filename):
@@ -265,6 +288,170 @@ def _load_file_content(directory, filename):
         return None
 
 
+# ── Retrieval: split a topic into sections and pick the ones a call needs ──────
+
+_HEADING = re.compile(r"^(#{1,6})\s+(\S.*)$")
+_CAMEL = re.compile(r"(?<=[a-z0-9])(?=[A-Z])")
+_WORD = re.compile(r"[a-z0-9]+")
+# Function words plus JSON/tool-name noise. Anything left is a candidate match;
+# tokens common to most sections of a topic are dropped per file (see
+# select_sections), which is what keeps the server's own name from matching
+# every section of its topic.
+_STOP = frozenset("""
+the and for with this that not from are was were has have had use used using
+when then than into your you can all any also but its per via non mcp tool
+tools true false null none get set list new one two see only each more most
+such some will does did how what which where who why here there these those
+them they their our out over under about after before between because been
+being both just like make made may might must need should would could still
+very well yet etc
+""".split())
+
+
+def _tokens(text):
+    """Lowercase alnum tokens, camelCase split, 3+ chars, crude plural fold."""
+    out = set()
+    for w in _WORD.findall(_CAMEL.sub(" ", text).lower()):
+        if len(w) < 3 or w in _STOP:
+            continue
+        if len(w) >= 5 and w.endswith("s"):
+            w = w[:-1]
+        out.add(w)
+    return out
+
+
+class Section:
+    """One heading-delimited slice of a topic file (heading line included)."""
+
+    __slots__ = ("body_tokens", "head_tokens", "heading", "idx", "level", "text")
+
+    def __init__(self, idx, level, heading, text):
+        self.idx = idx
+        self.level = level
+        self.heading = heading
+        self.text = text
+        self.head_tokens = _tokens(heading)
+        self.body_tokens = _tokens(text)
+
+    @property
+    def id(self):
+        return f"{self.idx}:{self.heading[:60]}"
+
+    @property
+    def has_body(self):
+        body = self.text.split("\n", 1)[1] if self.level else self.text
+        return bool(body.strip())
+
+
+def split_sections(text):
+    """Split on ATX headings (any level); `#` lines inside code fences stay put.
+
+    Text before the first heading becomes a level-0 section with an empty
+    heading. Each section's text starts with its heading line.
+    """
+    sections = []
+    cur, heading, level, in_fence = [], "", 0, False
+
+    def flush():
+        if cur:
+            sections.append(Section(len(sections), level, heading, "\n".join(cur)))
+
+    for line in text.splitlines():
+        stripped = line.lstrip()
+        if stripped.startswith(("```", "~~~")):
+            in_fence = not in_fence
+        m = None if in_fence else _HEADING.match(line)
+        if m:
+            flush()
+            cur, heading, level = [line], m.group(2).strip(), len(m.group(1))
+        else:
+            cur.append(line)
+    flush()
+    return sections
+
+
+def _summary_indices(sections):
+    """A `Summary`-titled section if there is one; else the leading run of
+    sections up to and including the first one with a body (typically the
+    `# Title` line plus `## Critical Gotchas`)."""
+    for s in sections:
+        if s.level and s.heading.lower().startswith("summary"):
+            return [s.idx]
+    lead = []
+    for s in sections:
+        lead.append(s.idx)
+        if s.has_body:
+            break
+    return lead
+
+
+def _query_tokens(tool_name, tool_input):
+    q = _tokens(tool_name)
+    if tool_input:
+        try:
+            q |= _tokens(json.dumps(tool_input, ensure_ascii=False)[:4000])
+        except (TypeError, ValueError):
+            pass
+    return q
+
+
+def select_sections(sections, tool_name, tool_input, budget, already):
+    """Summary first, then sections by token overlap with the call, greedily
+    under `budget` chars (sections are atomic: whole or skipped). Sections whose
+    id is in `already` were delivered earlier this session and are not repeated.
+    Returned in file order."""
+    q = _query_tokens(tool_name, tool_input)
+    n = len(sections)
+    if n >= 4:
+        # A token present in more than half the sections says nothing about
+        # WHICH section the call needs (the server name, the product name).
+        q = {t for t in q if sum(t in s.body_tokens for s in sections) <= n / 2}
+    summary = _summary_indices(sections)
+    ranked = []
+    for s in sections:
+        if s.idx in summary or s.id in already:
+            continue
+        score = 2 * len(q & s.head_tokens) + len(q & s.body_tokens)
+        if score:
+            ranked.append((-score, s.idx, s))
+    ranked.sort()
+    candidates = [sections[i] for i in summary if sections[i].id not in already]
+    candidates += [r[2] for r in ranked]
+    chosen, used = [], 0
+    for s in candidates:
+        cost = len(s.text) + (2 if chosen else 0)  # "\n\n" joiner
+        if used + cost <= budget:
+            chosen.append(s)
+            used += cost
+    chosen.sort(key=lambda s: s.idx)
+    return chosen
+
+
+def build_payload(topic_file, content, tool_name, tool_input, already):
+    """Return (additionalContext text, section ids delivered) or (None, set()).
+
+    Whole file when it fits TOPIC_BUDGET_CHARS ("*" marks it delivered);
+    otherwise a slice, ending with a one-line pointer that names the file and
+    says what was NOT DELIVERED so the model can Read the rest.
+    """
+    path = TOPICS_DIR / topic_file
+    label = f"Domain context for {topic_file}:"
+    if len(content) <= TOPIC_BUDGET_CHARS:
+        pointer = f"Topic file: {path} (delivered whole, {len(content):,} chars)."
+        return f"{label}\n{content}\n\n{pointer}", {"*"}
+    sections = split_sections(content)
+    chosen = select_sections(sections, tool_name, tool_input, TOPIC_BUDGET_CHARS, already)
+    if not chosen:
+        return None, set()
+    body = "\n\n".join(s.text.strip("\n") for s in chosen)
+    pointer = (
+        f"Topic file: {path} — {len(chosen)} of {len(sections)} sections above "
+        f"({len(body):,} of {len(content):,} chars); the rest was NOT DELIVERED, "
+        f"Read the file for it."
+    )
+    return f"{label}\n{body}\n\n{pointer}", {s.id for s in chosen}
+
+
 def main():
     try:
         data = json.load(sys.stdin)
@@ -275,29 +462,35 @@ def main():
     if not tool_name:
         sys.exit(0)
 
-    marker_path = get_marker_path(data.get("session_id") or None)
-    loaded = get_loaded_topics(marker_path)
-
-    sections = []  # list of (label, content) to inject
-
-    # Topic match (existing behavior)
     topic_file, used_manifest, is_in_static = _find_topic_match(tool_name)
-    if topic_file:
-        try:
-            from manifest_metrics import log_manifest_query
-            log_manifest_query(
-                "auto-topic-loader", "topic_derivation",
-                f"tool={tool_name[:40]} topic={topic_file} manifest={used_manifest} in_static={is_in_static}",
-                used_fallback=not used_manifest,
-            )
-        except Exception:
-            pass
-        topic_marker = f"topic:{topic_file}"
-        if topic_marker not in loaded:
-            content = _load_file_content(TOPICS_DIR, topic_file)
-            if content is not None:
-                sections.append((f"Domain context for {topic_file}", content))
-                mark_loaded(marker_path, topic_marker)
+    if not topic_file:
+        sys.exit(0)
+
+    session_id = data.get("session_id") or None
+    try:
+        from manifest_metrics import log_manifest_query
+        log_manifest_query(
+            "auto-topic-loader", "topic_derivation",
+            f"tool={tool_name[:40]} topic={topic_file} manifest={used_manifest} in_static={is_in_static}",
+            used_fallback=not used_manifest, session_id=session_id,
+        )
+    except Exception:
+        pass
+
+    marker_path = get_marker_path(session_id)
+    already = set(get_loaded_topics(marker_path).get(topic_file, []))
+    if "*" in already:
+        sys.exit(0)
+
+    content = _load_file_content(TOPICS_DIR, topic_file)
+    if content is None:
+        sys.exit(0)
+
+    payload, delivered = build_payload(
+        topic_file, content, tool_name, data.get("tool_input") or {}, already)
+    if not payload:
+        sys.exit(0)
+    mark_loaded(marker_path, topic_file, delivered)
 
     # RULE INJECTION RETIRED 2026-07-29 — it had been dead since 2026-05-26 and
     # repairing it would have made things worse. Kept as a comment, not code,
@@ -321,56 +514,29 @@ def main():
     # already present. Removal is the fix.
     #
     # To REVIVE the lever properly, the rules must first stop being ambient
-    # (that is the token saving), and each must fit under ~9,550 chars after
-    # the label+envelope overhead. Both are prerequisites, not details.
+    # (that is the token saving), and each must fit under the delivery budget
+    # after the label+envelope overhead. Both are prerequisites, not details.
     #
     # Prior instance of this exact class in this same map: the dangling
     # `rules/context7*.md` entries (B7 review) pointed at files that never
     # existed and also silently no-op'd. Two instances is why the mechanism
     # goes rather than getting a third patch.
 
-    if not sections:
-        sys.exit(0)
-
-    combined = SECTION_SEPARATOR.join(
-        f"{label}:\n{content}" for label, content in sections
-    )
-
-    # DELIVERY BUDGET ENFORCEMENT. The cap is documented at the top of this file
-    # and was never checked here: over-budget output is replaced by the platform
-    # with a ~2KB preview plus a file path, so the topic silently does not arrive
-    # and nothing says so. Measured 2026-08-15: msgraph.md is 10,067 chars, over
-    # the 10,000 platform cap, and had been stubbed on every injection.
-    #
-    # Fail LOUD instead. Emit only whole sections that fit, and replace any that
-    # do not with an explicit pointer naming the file and its size. A pointer the
-    # model can act on beats a preview it cannot distinguish from the real thing.
-    # Never truncate a topic mid-way: a partial topic reads as complete and is
-    # worse than an honest absence (`SPLIT, NEVER TRIM`).
-    if len(combined) > INJECTION_BUDGET_CHARS:
-        kept: list[str] = []
-        dropped: list[tuple[str, int]] = []
-        used = 0
-        for label, content in sections:
-            piece = f"{label}:\n{content}"
-            cost = len(piece) + len(SECTION_SEPARATOR)
-            if used + cost <= INJECTION_BUDGET_CHARS:
-                kept.append(piece)
-                used += cost
-            else:
-                dropped.append((label, len(piece)))
-        notices = [
-            f"NOT DELIVERED: {label} ({size:,} chars) exceeds this hook's "
-            f"{INJECTION_BUDGET_CHARS:,}-char delivery budget. Read the topic file "
-            f"directly if this task needs it — it was NOT injected."
-            for label, size in dropped
-        ]
-        combined = SECTION_SEPARATOR.join(kept + notices)
+    # Last-resort ceiling. By construction the payload is under it (content is
+    # capped at TOPIC_BUDGET_CHARS; label + pointer fit the pinned headroom), so
+    # this only fires if someone raises one constant without the other. Fail
+    # LOUD with a pointer rather than let the platform stub the payload.
+    if len(payload) > INJECTION_BUDGET_CHARS:
+        payload = (
+            f"NOT DELIVERED: Domain context for {topic_file} ({len(payload):,} chars) "
+            f"exceeds this hook's {INJECTION_BUDGET_CHARS:,}-char delivery budget. "
+            f"Read {TOPICS_DIR / topic_file} directly if this task needs it."
+        )
 
     result = {
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
-            "additionalContext": combined,
+            "additionalContext": payload,
         }
     }
     print(json.dumps(result))
