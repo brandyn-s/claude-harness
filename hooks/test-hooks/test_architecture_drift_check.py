@@ -419,3 +419,42 @@ def test_wired_hooks_and_timeouts_parse_structured_exec_form():
     assert _mod._hook_timeouts(json.loads(settings_text), "ConfigChange") == {
         "config-change-validate.py": 30
     }
+
+
+# ── Layer-5 parse must follow the document's real heading (2026-09-04) ──
+# ARCHITECTURE.md's hooks section is titled "## 1. Hooks — programmable
+# enforcement" and ends at "## 2. Rules …"; the old "## Layer 5" / "### Rules"
+# anchors matched nothing, so every wired hook read as undocumented (43 advisories
+# of pure noise) and the hard check never fired.
+
+def test_layer5_documented_follows_numbered_hooks_heading():
+    arch = (
+        "# Architecture\n\n## Deployment profiles\n\n`profile-only.py` is mentioned here.\n\n"
+        "## 1. Hooks — programmable enforcement\n\nRepresentative hooks:\n\n"
+        "| Hook | Event | Blocks |\n|---|---|---|\n"
+        "| `bash-security-guard.py` | PreToolUse(Bash) | x |\n"
+        "| `precompact-priorities.py` | PreCompact | y |\n\n"
+        "## 2. Rules — always-loaded engineering discipline\n\n`rule-side.py` is not a hook row.\n"
+    )
+    docd = _mod.layer5_documented_hooks(arch)
+    assert docd == {"bash-security-guard.py", "precompact-priorities.py"}, docd
+
+
+def test_hooks_readme_inventory_counts_as_documentation():
+    readme = "## Hook Inventory\n\n| `inventory-only.py` | PostToolUse | z | w |\n"
+    assert _mod.readme_documented_hooks(readme) == {"inventory-only.py"}
+
+
+def test_check_hooks_treats_readme_rows_as_documented():
+    arch = "## 1. Hooks — programmable enforcement\n| `guard.py` | PreToolUse | x |\n## 2. Rules\n"
+    settings_text = (
+        r'"command": "\"$HOME/.claude/hooks/run-hook\" guard.py"' "\n"
+        r'"command": "\"$HOME/.claude/hooks/run-hook\" inventory-only.py"' "\n"
+        r'"command": "\"$HOME/.claude/hooks/run-hook\" nowhere.py"' "\n"
+    )
+    readme = "## Hook Inventory\n| `inventory-only.py` | PostToolUse | z | w |\n"
+    _hard, advisory = _mod.check_hooks(arch, settings_text, readme)
+    flagged = {a for a in advisory if "undocumented" in a}
+    assert any("`nowhere.py`" in a for a in flagged), advisory
+    assert not any("`inventory-only.py`" in a for a in flagged), advisory
+    assert not any("`guard.py`" in a for a in flagged), advisory

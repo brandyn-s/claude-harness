@@ -114,15 +114,40 @@ def wired_hooks(settings_text):
     return wired
 
 
+_HOOKS_HEADING_RE = re.compile(r"^## (?:Layer 5\b|\d+\.\s*Hooks\b).*$", re.M)
+
+
+def _hooks_section(arch):
+    """The hooks section of ARCHITECTURE.md, whichever heading style it uses.
+
+    Old style: "## Layer 5" up to "### Rules". Current style (2026-09): "## 1. Hooks
+    — programmable enforcement" up to the next "## " heading. The old anchors
+    matched nothing in the current document, so the segment was empty and every
+    wired hook read as undocumented (2026-09-04 fix)."""
+    m = _HOOKS_HEADING_RE.search(arch)
+    if not m:
+        return ""
+    start = m.end()
+    nxt = re.compile(r"^(?:## |### Rules\b)", re.M).search(arch, start)
+    return arch[start:nxt.start()] if nxt else arch[start:]
+
+
 def layer5_documented_hooks(arch):
-    """Hooks ARCHITECTURE.md's Layer-5 tables present as active (excludes the
+    """Hooks ARCHITECTURE.md's hooks section presents as active (excludes the
     'Not Yet Used' subsection)."""
-    seg = arch[arch.find("## Layer 5"):arch.find("### Rules")]
+    seg = _hooks_section(arch)
     nyu = seg.find("#### Not Yet Used")
     if nyu != -1:
         nxt = seg.find("####", nyu + 1)
         seg = seg[:nyu] + (seg[nxt:] if nxt != -1 else "")
     return set(re.findall(r'`([a-z0-9-]+\.py)`', seg))
+
+
+def readme_documented_hooks(readme):
+    """Hooks listed in hooks/README.md's inventory tables. ARCHITECTURE.md is a
+    representative table by design; the README is the full registry, so a hook
+    documented there is documented."""
+    return set(re.findall(r'^\|\s*`([a-z0-9-]+\.py)`', readme, re.M))
 
 
 # ── Check B: curated settings the doc states as the CURRENT value ──
@@ -263,10 +288,11 @@ BLOCKING_HOOKS = {
 }
 
 
-def check_hooks(arch, settings_text):
+def check_hooks(arch, settings_text, readme_text=""):
     hard, advisory = [], []
     wired = wired_hooks(settings_text)
     documented = layer5_documented_hooks(arch)
+    documented_anywhere = documented | readme_documented_hooks(readme_text)
     # Guards loaded via a dispatcher are documented by the DISPATCHER's
     # Layer-5 row (which names them in prose, deliberately not as
     # backticked .py — see the B1 consolidation). Don't advisory-flag them
@@ -275,9 +301,9 @@ def check_hooks(arch, settings_text):
     for h in sorted(documented - wired):
         hard.append(f"[A] hook `{h}` is in ARCHITECTURE.md's Layer-5 tables (active) "
                     f"but is NOT wired in settings.json")
-    for h in sorted({w for w in wired if w.endswith('.py')} - documented - dispatcher_loaded):
-        advisory.append(f"[A] hook `{h}` is wired in settings.json but not listed "
-                        f"in ARCHITECTURE.md's Layer-5 tables (undocumented)")
+    for h in sorted({w for w in wired if w.endswith('.py')} - documented_anywhere - dispatcher_loaded):
+        advisory.append(f"[A] hook `{h}` is wired in settings.json but documented neither in "
+                        f"ARCHITECTURE.md's hooks table nor in hooks/README.md's inventory (undocumented)")
     return hard, advisory
 
 
@@ -716,7 +742,9 @@ def main():
     settings = json.loads(settings_text)
 
     hard, advisory = [], []
-    h, a = check_hooks(arch, settings_text); hard += h; advisory += a
+    readme_path = ROOT / "hooks" / "README.md" if "ROOT" in globals() else Path(__file__).resolve().parents[1] / "hooks" / "README.md"
+    readme_text = readme_path.read_text(encoding="utf-8") if readme_path.exists() else ""
+    h, a = check_hooks(arch, settings_text, readme_text); hard += h; advisory += a
     hard += check_settings(arch, settings)
     hard += check_global_model(settings)
     hard += check_model_runtime_contract(settings)

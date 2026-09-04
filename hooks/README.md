@@ -107,6 +107,28 @@ prompt.
 | `teammate-idle.py` | TeammateIdle | Quality gate — checks teammate produced sufficient activity and file changes | Prevents teammates from going idle without actually completing work. |
 | `task-completed.py` | TaskCompleted | Rejects explicit failures and verifies non-empty paths declared by a `Completion-Contract` in `task_description` | Research/no-diff tasks remain valid; workflows that require artifacts cannot close on missing, empty, partial, truncated, or prompt-too-long outcomes. |
 
+### Other wired hooks
+
+Every remaining hook that settings.json wires, so `bin/architecture-drift-check.py` can hold the inventory complete.
+
+| Hook | Event | What it does | Why it exists |
+|---|---|---|---|
+| `cklb-to-md.py` | PreToolUse(Read) | PreToolUse hook for Read: Auto-convert .cklb (STIG checklist JSON) to Markdown | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
+| `compaction-continuity.py` | PostCompact, UserPromptSubmit | Carry a re-invoke reminder across a compaction boundary | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
+| `config-change-validate.py` | ConfigChange(user_settings\|project_settings\|local_settings) | Validate settings after a Claude Code ConfigChange event.""" | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
+| `git-empty-push-guard.py` | PreToolUse(Bash) | PreToolUse:Bash — BLOCK `git push` of a branch with 0 commits ahead | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
+| `kql-schema-hint.py` | PreToolUse(mcp__remote-msgraph__call_tool\|mcp__msgraph__call_tool) | KQL schema-hint hook for Defender Advanced Hunting queries (RC1) | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
+| `mcp-truncation-signal-guard.py` | PostToolUse(mcp__.*) | Advisory PostToolUse guard: surface MCP truncation signals on the main thread | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
+| `nessus-to-md.py` | PreToolUse(Read) | PreToolUse hook for Read: Auto-convert .nessus (Tenable XML) to Markdown | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
+| `pr-duplicate-preflight.py` | PreToolUse(Bash) | PreToolUse:Bash — BLOCK `gh pr create` when one of YOUR open PRs already | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
+| `security-write-confirm.py` | PreToolUse(mcp__.*) | PreToolUse hook: require user confirmation before security write operations | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
+| `skill-ref-validator.py` | PostToolUse(Write\|Edit) | PostToolUse hook for Edit|Write: warn on dead hook/script refs in SKILL.md | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
+| `staged-additions-guard.py` | PreToolUse(Bash) | PreToolUse:Bash — BLOCK `git commit` when staged ADDITIONS coexist with | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
+| `stale-checkout-before-analysis.py` | PreToolUse(Read\|Grep\|Glob) | PreToolUse:Read|Grep|Glob — advise when analysis reads a BEHIND checkout | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
+| `worktree-remove-snapshot.py` | WorktreeRemove | WorktreeRemove: snapshot uncommitted work before a worktree disappears | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
+| `write-edit-dispatcher.py` | PreToolUse(Write\|Edit) | Consolidated PreToolUse:Write|Edit dispatcher | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
+| `xlsx-to-md.py` | PreToolUse(Read) | PreToolUse hook for Read: Auto-convert .xlsx workbooks to Markdown | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
+
 ## Design Principles
 
 1. **Exit 0 = allow, exit 2 = block.** No ambiguity in hook behavior.
