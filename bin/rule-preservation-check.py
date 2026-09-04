@@ -173,12 +173,12 @@ def load_allow_drop(path: Path) -> tuple[dict[str, str], dict[str, str]]:
     """Return ({literal: reason}, {file: reason}); every entry must carry a reason."""
     data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, list):
-        raise ValueError("allow-drop file must be a JSON list of {literal|file, reason}")
+        raise TypeError("allow-drop file must be a JSON list of {literal|file, reason}")
     allow: dict[str, str] = {}
     allow_files: dict[str, str] = {}
     for i, entry in enumerate(data):
         if not isinstance(entry, dict):
-            raise ValueError(f"allow-drop[{i}] is not an object")
+            raise TypeError(f"allow-drop[{i}] is not an object")
         literal, file, reason = entry.get("literal"), entry.get("file"), entry.get("reason")
         key = literal if isinstance(literal, str) and literal.strip() else file
         if not isinstance(key, str) or not key.strip():
@@ -219,7 +219,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
         allow, allow_files = load_allow_drop(args.allow_drop) if args.allow_drop else ({}, {})
-    except (OSError, ValueError, json.JSONDecodeError) as exc:
+    except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
     if not isinstance(manifest, dict) or "rules" not in manifest:
