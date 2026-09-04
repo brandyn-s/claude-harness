@@ -168,6 +168,184 @@ def test_covered_models_require_explicit_retention_approval(monkeypatch):
     assert runtime.resolve_persona_model(MYTHOS) == MYTHOS
 
 
+def test_model_aliases_resolve_to_current_contract_ids(monkeypatch):
+    """`--model haiku` must reach the API as the exact id the contract maps the tier
+    to, never as the alias (the API answers an alias with a 404 at run time)."""
+    runtime = _load("model_runtime")
+    monkeypatch.setenv("PERSONA_COVERED_MODEL_RETENTION_APPROVED", "1")
+
+    assert runtime.resolve_persona_model("haiku") == HAIKU_SNAPSHOT
+    assert runtime.resolve_judge_model("opus") == JUDGE
+    assert runtime.resolve_judge_model(" Sonnet ") == OTHER
+    assert runtime.resolve_judge_model("fable") == FABLE
+    assert runtime.resolve_judge_model("mythos") == MYTHOS
+    # Exact current ids and the Haiku dated snapshot pass through unchanged.
+    assert runtime.resolve_persona_model(HAIKU_SNAPSHOT) == HAIKU_SNAPSHOT
+    assert runtime.resolve_persona_model(ids.model_id("haiku")) == ids.model_id("haiku")
+    assert runtime.resolve_judge_model(JUDGE) == JUDGE
+
+    # An alias that lands on a Covered Model still goes through the retention gate.
+    monkeypatch.delenv("PERSONA_COVERED_MODEL_RETENTION_APPROVED", raising=False)
+    with pytest.raises(ValueError, match="30-day retention"):
+        runtime.resolve_judge_model("fable")
+
+
+def test_unresolvable_model_fails_before_any_request(monkeypatch, capsys):
+    runtime = _load("model_runtime")
+    with pytest.raises(ValueError, match="claude-opus-9"):
+        runtime.resolve_persona_model("claude-opus-9")
+    with pytest.raises(ValueError, match="superseded"):
+        runtime.resolve_judge_model(SUPERSEDED[0])
+    with pytest.raises(ValueError, match="default"):
+        runtime.resolve_judge_model("default")
+    with pytest.raises(ValueError, match="us.anthropic"):
+        runtime.resolve_judge_model(f"us.anthropic.{JUDGE}")
+
+    dispatch = _load_anthropic_script("dispatch")
+    monkeypatch.delenv("PERSONA_MODEL", raising=False)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "dispatch.py",
+            "discovery",
+            "Find the blind spot",
+            "--slug",
+            "unknown-model",
+            "--criteria-met",
+            "2",
+            "--model",
+            "claude-opus-9",
+        ],
+    )
+    monkeypatch.setattr(
+        dispatch,
+        "run_discovery",
+        lambda _args: pytest.fail("dispatch must not start on an unresolvable model"),
+    )
+    monkeypatch.setattr(
+        dispatch.anthropic,
+        "Anthropic",
+        lambda: pytest.fail("no client may be built before the model resolves"),
+    )
+
+    assert dispatch.main() == 2
+    err = capsys.readouterr().err.lower()
+    assert "configuration error" in err
+    assert "claude-opus-9" in err
+
+
+def test_alias_run_records_the_resolved_id_not_the_alias(monkeypatch):
+    dispatch = _load_anthropic_script("dispatch")
+    captured = {}
+    monkeypatch.delenv("PERSONA_MODEL", raising=False)
+    monkeypatch.delenv("PERSONA_JUDGE_MODEL", raising=False)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "dispatch.py",
+            "discovery",
+            "Find the blind spot",
+            "--slug",
+            "alias-run",
+            "--criteria-met",
+            "2",
+            "--model",
+            "haiku",
+            "--judge-model",
+            "opus",
+        ],
+    )
+
+    def _capture(args):
+        captured.update(vars(args))
+        return 0
+
+    monkeypatch.setattr(dispatch, "run_discovery", _capture)
+    assert dispatch.main() == 0
+    assert captured["model"] == HAIKU_SNAPSHOT
+    assert captured["judge_model"] == JUDGE
+
+    # The request on the wire and the receipt both carry the resolved id.
+    client = _Client(_response(model=HAIKU_SNAPSHOT))
+    result = dispatch.dispatch_one(client, _framework(), "Find the blind spot", captured["model"])
+    assert client.messages.request["model"] == HAIKU_SNAPSHOT
+    assert result["ok"] is True
+    assert result["requested_model"] == HAIKU_SNAPSHOT
+    assert result["runtime_receipt"]["requested_model"] == HAIKU_SNAPSHOT
+    assert result["runtime_receipt"]["effective_model"] == HAIKU_SNAPSHOT
+
+
+def test_rubric_alias_matching_the_pinned_fixture_is_not_a_conflict(tmp_path, monkeypatch):
+    dispatch = _load_anthropic_script("dispatch")
+    fixture = tmp_path / "fixture.yaml"
+    fixture.write_text(
+        "problem: Investigate the plateau\n"
+        "provenance:\n"
+        "  fixture_author: independent reviewer\n"
+        "  inventory_authored_by: curator\n"
+        "  independent: true\n"
+        "cohort:\n"
+        "  n: 1\n"
+        "  sampling: bucket\n"
+        "models:\n"
+        f"  persona: {HAIKU_SNAPSHOT}\n"
+        f"  judge: {JUDGE}\n"
+        "  judge_effort: high\n",
+        encoding="utf-8",
+    )
+    args = __import__("argparse").Namespace(
+        fixture=str(fixture),
+        n=None,
+        sampling=None,
+        model="haiku",
+        effort=None,
+        judge_model="opus",
+        judge_effort=None,
+        override_fixture=False,
+        slug="fixture-alias",
+        frameworks="",
+        inventory=None,
+        seed=7,
+    )
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-only-not-a-key")
+    monkeypatch.setattr(dispatch, "DEFAULT_RUN_BASE", tmp_path / "runs")
+    monkeypatch.setattr(dispatch, "parse_file", lambda _path: [])
+
+    class _StopAfterResolution(Exception):
+        pass
+
+    monkeypatch.setattr(
+        dispatch,
+        "sample",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(_StopAfterResolution()),
+    )
+
+    with pytest.raises(_StopAfterResolution):
+        dispatch.run_rubric(args)
+
+    assert args.model == HAIKU_SNAPSHOT
+    assert args.judge_model == JUDGE
+    assert not (tmp_path / "runs" / "fixture-alias" / "cli_override_attempt.json").exists()
+
+
+def test_without_the_contract_exact_ids_pass_and_aliases_fail_fast(tmp_path, monkeypatch):
+    """Marketplace bundles ship the skill without contracts/: nothing can validate an
+    exact id there, but an alias still must not reach the API."""
+    runtime = _load("model_runtime")
+    monkeypatch.setattr(
+        runtime, "CAPABILITIES_CONTRACT", tmp_path / "contracts" / "model-capabilities.json"
+    )
+    monkeypatch.delenv("PERSONA_COVERED_MODEL_RETENTION_APPROVED", raising=False)
+
+    assert runtime.resolve_judge_model(JUDGE) == JUDGE
+    with pytest.raises(ValueError, match="model-capabilities.json"):
+        runtime.resolve_persona_model("haiku")
+    with pytest.raises(ValueError, match="30-day retention"):
+        runtime.resolve_judge_model(FABLE)
+
+
 def test_effort_resolution_normalizes_and_rejects_unknown_values(monkeypatch):
     runtime = _load("model_runtime")
     monkeypatch.setenv("PERSONA_JUDGE_EFFORT", " XHIGH ")
