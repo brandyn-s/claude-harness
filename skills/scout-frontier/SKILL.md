@@ -30,7 +30,7 @@ Find techniques that solve the same outcome **a different way** — not the same
 
 > **When to use vs /gather-research**: /gather-research is scoped to AI-agent architecture and audits/updates an existing research baseline. /scout-frontier is domain-agnostic and frames findings as "what becomes possible" relative to an incumbent system.
 
-> **Output grounding (REQUIRED READ)**: before drafting recommendations, read `skills/_shared/output-grounding.md` and apply its three-layer contract (confidence + provenance + counterfactual) to every load-bearing claim. That file is NOT ambient — it was relocated out of `rules/` on 2026-08-26 after measuring EXPOSED=0 over 438 transcripts — so it is in context only if you read it. No hook grades the final answer; skill instructions and final-output evaluation are the controls.
+> **Output grounding (REQUIRED READ)**: before drafting recommendations, read `skills/_shared/output-grounding.md` and apply its three-layer contract (confidence + provenance + counterfactual) to every load-bearing claim. That file is NOT ambient, so it is in context only if you read it. No hook grades the final answer; skill instructions and final-output evaluation are the controls.
 
 ---
 
@@ -67,7 +67,7 @@ The `compatibility.requires` block in this skill's frontmatter lists the canonic
 
 ## Step 0: Extract Constraint Trace
 
-Before profiling the incumbent, decompose the **system + end-state** into a structured constraint trace. The structural idea — represent reasoning as a chain of source-grounded, individually verifiable steps rather than free prose — is borrowed loosely from Bouras, "CrossTrace: A Cross-Domain Dataset of Grounded Scientific Reasoning Traces for Hypothesis Generation" (arXiv:2603.28924, March 2026). Caveat: CrossTrace's reported 99.7% step-grounding / 0% fabrication describe the fidelity of *its own dataset extraction from scientific papers* — they are NOT a property this step inherits, and the paper studies hypothesis-generation training data, not system decomposition. We adopt the *form* (grounded, checkable units), not the metric.
+Before profiling the incumbent, decompose the **system + end-state** into a structured constraint trace. The structural idea — reasoning as a chain of source-grounded, individually verifiable steps rather than free prose — is borrowed loosely from CrossTrace (Bouras, arXiv:2603.28924); we adopt the *form*, not its reported dataset-extraction fidelity metrics, which are not a property this step inherits.
 
 Required input from the user OR derived from the incumbent:
 - **End state**: What success looks like concretely (not abstractly). E.g., "code-graph answers any architectural question on the monolith with ≥90% accuracy."
@@ -149,7 +149,7 @@ Search venues in the priority order from `references/search-venues.md`. Use **al
 
 Default to **issuing many parallel calls in one reasoning step**, not chaining sequentially. Lin et al. (arXiv:2602.07359) measured +7.3pp on BrowseComp from width alone (62.2% with GPT-5-Medium vs 54.9% original GPT-5-High).
 
-**For every priority-1 search round, fire one query per paradigm axis × per provider in parallel** — that's 4 axes × 2-3 providers = **8-12 parallel tool calls per round**, not the 2 calls (Tavily + Exa on a single query) that earlier versions of this skill specified. Firecrawl is the third provider when a research-lab or proceedings page surfaces and warrants deep-crawl.
+**For every priority-1 search round, fire one query per paradigm axis × per provider in parallel** — that's 4 axes × 2-3 providers = **8-12 parallel tool calls per round**. Firecrawl is the third provider when a research-lab or proceedings page surfaces and warrants deep-crawl.
 
 **Per-provider result-size caps (REQUIRED to prevent context blowup):**
 
@@ -207,7 +207,7 @@ When generating queries OR cross-domain analogies OR finding framings, use the d
 
 See `references/verbalized-sampling-template.md` for full prompts (verbatim templates), Critical Gotchas (8 items, lead with these), and integration table mapping each primitive to a /scout-frontier step.
 
-**Caveat:** these primitives produce drafts subject to user verification, not authoritative findings. /scout-frontier operates within the LLM creativity tradeoff curve — combinational variation is reliable; transformational creativity is constrained per multi-source 2024+ evidence (Franceschelli & Musolesi 2026, Padmakumar 2025, Springer 2024) but the boundary is contested (some recent agentic-systems work and HuggingFace community discussion argue the ceiling is extensible). See `~/Documents/knowledge-base/topics/llm-creativity-ceiling.md` and `~/Documents/knowledge-base/topics/knowledge-asymmetric-collaboration.md`.
+**Caveat:** these primitives produce drafts subject to user verification, not authoritative findings — combinational variation is reliable; transformational creativity is constrained, though the boundary is contested. See `~/Documents/knowledge-base/topics/llm-creativity-ceiling.md` and `~/Documents/knowledge-base/topics/knowledge-asymmetric-collaboration.md`.
 
 ### Multilingual sweep (fires once per run, after priorities 1-3)
 
@@ -393,7 +393,7 @@ python3 ~/.claude/skills/scout-frontier/scripts/score_rubric.py \
   ~/.claude/skills/scout-frontier/test-fixtures/<domain>-paradigms.json
 ```
 
-The scorer recomputes distance from the 4 axes for **both** the expected set and the controls, then checks: TPR = 1.0 (no expected finding scores 0), FPR = 0 (no control scores >0), no arithmetic drift between computed and declared distance, and nothing unverifiable (every entry carries axes). Exit 0 = instrument valid; exit 1 = mismatch (investigate before publishing measurements, per `~/.claude/rules/validate-to-improve.md`); exit 2 = malformed fixture. Note: the scorer checks the fixture's *internal* hand-scoring is self-consistent and discriminating — it does not by itself prove a live search run scores correctly; that's what running the skill against the fixture exercises.
+The scorer recomputes distance from the 4 axes for **both** the expected set and the controls, then checks: TPR = 1.0 (no expected finding scores 0), FPR = 0 (no control scores >0), no arithmetic drift between computed and declared distance, and nothing unverifiable (every entry carries axes). Exit 0 = instrument valid; exit 1 = mismatch (investigate before publishing measurements); exit 2 = malformed fixture. Note: the scorer checks the fixture's *internal* hand-scoring is self-consistent and discriminating — it does not by itself prove a live search run scores correctly; that's what running the skill against the fixture exercises.
 
 The bundled unit tests (`tests/test_score_rubric.py`, `tests/test_validate_constraint_trace.py`) cover both instruments; run `python3 -m pytest tests/` from the skill directory.
 
@@ -407,20 +407,7 @@ The bundled unit tests (`tests/test_score_rubric.py`, `tests/test_validate_const
 ```
 Profiles incumbent (graph + traversal + symbol + static-with-incremental). Searches arXiv for "learned call resolution", "datalog code analysis", "incremental name resolution". Searches conference proceedings (ICSE/FSE/POPL recent). Searches industrial: Stack Graphs, Glean, SCIP, Sourcegraph. Surfaces ≥3 paradigm-distinct findings with distance ≥1. User decides which warrant Linear issues against code-graph.
 
-**Example 2: Observability / telemetry storage**
-```
-/scout-frontier observability storage vs our OTel + Athena pipeline
-```
-Profiles incumbent (table + lookup + behavior + streaming). Searches for paradigm-distinct: column-stores (ClickHouse), trace graphs (Tempo's exemplar+span graph model), eBPF-driven runtime indexes, learned anomaly detection on logs. Reports findings grouped by tier.
-
-**Example 3: Code-graph engine improvement (canonical positive — knowledge-asymmetric)**
-```
-/scout-frontier code intelligence engines vs our code-graph engine; user is no longer the
-day-to-day maintainer and can't validate output by reading
-```
-Profiles incumbent. Diversity primitives fire: VS-generated cross-domain queries (5 candidates with probabilities, ordinary-persona attribution), abstraction-then-mapping for adjacent-domain analogies (decompose → abstract → map → translate, NOT end-to-end "make a bio analogy"), factuality filter rejects unsourced tail samples, counterfactual-test downgrades surface-similarity findings. Output: ≥3 paradigm-distinct findings each with confidence + provenance + counterfactual signal so the user can spot-check WHICH parts to verify rather than auditing the whole report.
-
-**Negative example (do NOT use):** "Find me a transcendent novel approach to debugging that no one has thought of before." — That asks for transformational creativity / hyperpolation, which is constrained for LLMs per multi-source 2024+ evidence (see `~/Documents/knowledge-base/topics/llm-creativity-ceiling.md` — tradeoff curve, contested at the boundary). /scout-frontier produces combinational variation at scale, framed against the tradeoff curve, not transcendent novelty. Reframe as: "Find paradigm-distinct debugging approaches across other domains" (combinational + cross-domain), which IS in scope.
+Two more (observability storage; a knowledge-asymmetric code-graph run where the diversity primitives fire) and the negative example ("find a transcendent novel approach" — reframe as combinational + cross-domain): `references/examples.md`.
 
 ---
 
@@ -436,14 +423,3 @@ Profiles incumbent. Diversity primitives fire: VS-generated cross-domain queries
 - ✅ Verification (Step 6) run on all surviving findings: confidence tags, URL health, attribution check, popularity-bias filter, counterfactual analogy (if cross-domain). `⚠ canon` prepended on canonical-citation findings.
 - ✅ Findings grouped by tier (1: dist 3-4, 2: dist 2, 3: dist 1, similar: dist 0)
 - ✅ For new-domain runs: test fixture built first; rubric FP=FN=0 on fixture before publishing findings
-
----
-
-## When NOT to Use This Skill
-
-- **Same-paradigm peer comparison**: use `/scout` — better-implemented peers of the same approach
-- **AI agent architecture audits**: use `/gather-research` — scoped audit of agent-architecture research baseline
-- **Claude Code community patterns**: use `/gather-intel` — Reddit/HN/blogs for Claude Code patterns
-- **Single-topic deep research**: use `/deep-dive` — when you have one specific question to research thoroughly
-- **GitHub config repo discovery**: use `/scout` — that's its scope
-- **Skills registry mining**: use `/scout-skills` — Context7 skill patterns

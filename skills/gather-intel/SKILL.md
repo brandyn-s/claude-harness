@@ -31,7 +31,7 @@ Three phases: **Audit existing** (backward-looking) -> **Gather new** (forward-l
 
 > **Operational note**: Phase A (audit existing) typically yields higher ROI per item than Phase B (search new). The backward-looking audit finds immediately actionable items (specific file + line to change), while new web findings often need further investigation before acting. Don't skip Phase A to rush to Phase B.
 
-> **Dual-skill coordination**: If `gather-research` ran earlier in this session, skip re-reading baseline files 1, 4, 5, 6, 7, 8 (already in context). To check whether it ran, look for any of these signals in the conversation transcript: (a) a tool result that wrote to `claude-code-research-intelligence.md`, (b) an assistant turn that produced the gather-research metadata header (the bullet-list block from `skills/gather-research/references/report-format.md` starting with `**Date**: YYYY-MM-DD` followed by `**Focus area**:` and `**Waves completed**:`), or (c) the user explicitly stated they just ran it. If none of these signals are present, treat this as a standalone run and read the full baseline. When research-first, consume gather-research's findings directly and specifically search for community evidence that validates or contradicts the research findings. Note "research-first run" in the report metadata. See `references/gather-coordination.md` for full coordination protocol.
+> **Dual-skill coordination**: If `gather-research` ran earlier in this session — a tool result wrote `claude-code-research-intelligence.md`, an assistant turn produced its metadata header (the `**Date**: YYYY-MM-DD` / `**Focus area**:` / `**Waves completed**:` block from `skills/gather-research/references/report-format.md`), or the user said so — skip re-reading baseline files 1, 4, 5, 6, 7, 8, consume its findings directly, search specifically for community evidence that validates or contradicts them, and note "research-first run" in the report metadata. Otherwise treat this as a standalone run and read the full baseline. Full protocol: `references/gather-coordination.md`.
 
 > **Focus area**: If the user provided an argument (e.g., `/gather-intel hooks`), narrow ALL searches in Phase B to that focus area. Append the focus terms to every query. In Phase C, evaluate findings specifically against the focus area's role in the architecture.
 
@@ -246,9 +246,7 @@ If Wave 1 produced 5+ high-signal URLs needing deep extraction, dispatch up to 3
 - All URLs are from the same domain (no parallelism benefit)
 - Tavily MCP was unavailable earlier in the session (agents will also fail)
 
-**Agent result limit:** Agent results may be truncated by the Claude Code runtime — the exact ceiling is not documented in this repo (upstream `claude-code` source not vendored here), but observed truncation has occurred around the ~8,000-character range. Treat 8,000 chars as a conservative working budget rather than a verified constant. Instruct agents to return concise summaries (title + 2-3 bullet points per URL), not raw extracted content. If an agent extracts 5 URLs, budget ~1,600 chars per URL.
-
-> **Note:** Agent workers CAN access Tavily because tavily_extract results are returned to the agent's context, and the agent's tool calls go through the parent session's MCP connections via the Agent tool mechanism (different from context: fork). However, if Tavily auth fails for agents, fall back to sequential extraction in the main thread.
+**Agent result limit:** Agent results may be truncated by the runtime (observed around ~8,000 characters; treat that as a working budget, not a verified constant). Instruct agents to return concise summaries (title + 2-3 bullet points per URL), not raw extracted content — ~1,600 chars per URL for 5 URLs. If Tavily auth fails for agents, fall back to sequential extraction in the main thread.
 
 | # | Tool | Query | Target |
 |---|------|-------|--------|
@@ -367,8 +365,6 @@ skip, continue.
 
 ## Step 11: Combined Report
 
-> **Compaction recovery**: If this skill was truncated by compaction, `Read` the full skill at `~/.claude/skills/gather-intel/SKILL.md` and the templates at `references/report-templates.md` before generating the report.
-
 Produce a single report with a **metadata header** and **four sections**. Read `references/report-templates.md` for the full templates, finding format, actionability levels, gap verification gate, and examples.
 
 **Four sections:**
@@ -379,26 +375,12 @@ Produce a single report with a **metadata header** and **four sections**. Read `
 
 ## Measured Efficacy (live arm)
 
-**Verdict: `trim` — measured 2026-05-31, N=3, `claude-opus-4-8`, n=15 (vs fair baseline).**
-The source-authority + adversarial framework was A/B'd vs a strong baseline (same
-model + web_search, no framework) over 15 community claims (existence/currency +
-false-specifics; effectiveness/hype is NOT deterministically gradeable — see
-`harness/PROBLEM.md` §0). Result: the framework is **directionally net-positive**
-(verdict_accuracy 0.956 vs 0.933, refutation_recall 0.952 vs 0.857, grounding 0.878
-vs 0.833) but **every delta is within the N=3 noise floor** (stdev 0.03–0.09), so it
-does not clearly earn its ~5× cost → trim. The one fuzzy "consensus heuristic" claim
-drove all the noise (concrete demo that consensus/effectiveness isn't cleanly
-gradeable). Harness + oracle + frozen results: `skills/gather-intel/harness/`; CI
-gate: `tests/test_gather_intel_efficacy.py`. (Caveat: n=15 directional.)
-
-**Trim candidate (actionable, evidence-gated — not yet removed):** the framework is
-directionally net-POSITIVE but swamped by N=3 noise (stdev 0.03–0.09), so the verdict is
-"not clearly worth ~5× cost," NOT "harmful" — and the deltas point the RIGHT way, so removal
-on this evidence would be backwards (and would violate `eval-shipping-discipline`: behavior
-changes need their own before/after). The path: re-run at higher N (≥10) or a larger corpus
-and compute a paired bootstrap CI on verdict_accuracy / refutation_recall — **if the
-+0.02–0.095 edge clears zero this flips to `keep`**; only if the CI includes zero, trim the
-heaviest ceremony (per-finding adversarial search) with that CI as the evidence.
+**Verdict: `trim` — measured 2026-05-31, N=3, `claude-opus-4-8`, n=15 (vs fair baseline):**
+the source-authority + adversarial framework is directionally net-positive on every
+metric, but every delta is within the N=3 noise floor, so it does not clearly earn its
+~5× cost. Full record, the evidence-gated trim candidate, and the condition that flips
+this to `keep`: `references/measured-efficacy.md`. Harness + frozen results:
+`skills/gather-intel/harness/`; CI gate: `tests/test_gather_intel_efficacy.py`.
 
 ## Success Criteria
 
