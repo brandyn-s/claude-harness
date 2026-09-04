@@ -1,7 +1,6 @@
 """Unit tests for env_loader's secret resolution (Keychain + env var)."""
 from __future__ import annotations
 
-import subprocess
 import sys
 from pathlib import Path
 

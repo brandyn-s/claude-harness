@@ -16,7 +16,9 @@ Usage:
 The script uses only stdlib + math.log for CIs and CMH math — no scipy
 dependency. Trades off some statistical convenience for portability.
 """
-import argparse, json, math
+import argparse
+import json
+import math
 from collections import defaultdict
 from datetime import date
 from pathlib import Path
@@ -122,14 +124,14 @@ def main():
     is_mock = any(r.get("mock") for r in records)
 
     out = []
-    out.append(f"# L3 activation-study analysis")
-    out.append(f"")
+    out.append("# L3 activation-study analysis")
+    out.append("")
     out.append(f"- **Input**: `{args.input}`")
     out.append(f"- **Mode**: {'MOCK (pseudo-random)' if is_mock else 'LIVE'}")
     out.append(f"- **Date**: {date.today().isoformat()}")
     out.append(f"- **Trials**: {n_trials}")
     out.append(f"- **Activated**: {n_activated} ({n_activated/max(n_trials,1):.1%})")
-    out.append(f"")
+    out.append("")
 
     # --- Per-(style, trigger_type) marginal rates ---
     out.append("## Marginal activation rates by (style × trigger_type)")
@@ -190,9 +192,9 @@ def main():
     if ci_lo > SELEZNOV_SONNET_45_OR:
         out.append(f"✓ **H2 SUPPORTED**: 95% CI lower bound ({ci_lo:.2f}) > {SELEZNOV_SONNET_45_OR}")
     elif or_mh > SELEZNOV_SONNET_45_OR:
-        out.append(f"~ **H2 DIRECTIONAL**: point estimate higher but CI does not exclude baseline")
+        out.append("~ **H2 DIRECTIONAL**: point estimate higher but CI does not exclude baseline")
     else:
-        out.append(f"✗ **H2 NOT SUPPORTED**: 4.7 effect ≤ Sonnet 4.5 baseline")
+        out.append("✗ **H2 NOT SUPPORTED**: 4.7 effect ≤ Sonnet 4.5 baseline")
     out.append("")
 
     # --- H3: hook_inject → ≥95% activation on positive triggers ---

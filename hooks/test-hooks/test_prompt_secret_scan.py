@@ -1,5 +1,4 @@
 """Tests for prompt-secret-scan.py (UserPromptSubmit)."""
-import json
 from conftest import run_hook
 
 HOOK = "prompt-secret-scan.py"

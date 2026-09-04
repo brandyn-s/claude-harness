@@ -22,7 +22,6 @@ Exit codes (matched against references/headless.md table):
     1  - other error (state file missing/corrupt)
 """
 
-import json
 import re
 import sys
 from pathlib import Path

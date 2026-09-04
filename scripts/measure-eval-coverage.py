@@ -12,7 +12,9 @@ Usage:
     python3 scripts/measure-eval-coverage.py --json     # machine-readable
     python3 scripts/measure-eval-coverage.py --list-uncovered
 """
-import argparse, json, sys
+import argparse
+import json
+import sys
 from pathlib import Path
 
 import yaml

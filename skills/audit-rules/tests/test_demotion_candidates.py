@@ -28,7 +28,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
 
 REPO = Path(__file__).resolve().parents[3]
 SCRIPT = REPO / "skills" / "audit-rules" / "scripts" / "detect_demotion_candidates.py"

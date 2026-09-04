@@ -132,7 +132,7 @@ def test_calibration_tpr_tnr_above_floor(tmp_path, monkeypatch):
     )
     refusal_rate = refusals / len(fs)
 
-    print(f"\n=== audit-architecture oracle calibration ===")
+    print("\n=== audit-architecture oracle calibration ===")
     print(f"predicate TPR={tpr:.3f} (need >= {MIN_TPR})")
     print(f"predicate TNR={tnr:.3f} (need >= {MIN_TNR})")
     print(f"ERROR-pathway TPR={err_tpr:.3f} (need >= {MIN_ERR_TPR})")

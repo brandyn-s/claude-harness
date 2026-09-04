@@ -24,8 +24,12 @@ Usage:
     audit_history.py diff [--last N]                # default N=2
     audit_history.py summary [--top N]              # default N=10
 """
-import argparse, json, os, subprocess, sys
-from collections import Counter, defaultdict
+import argparse
+import json
+import os
+import subprocess
+import sys
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
@@ -175,20 +179,20 @@ def diff(last_n):
                and prior_codes[c] != latest_codes[c]}
 
     if new_codes:
-        print(f"\nNew finding codes (regression alert):")
+        print("\nNew finding codes (regression alert):")
         for c, n in sorted(new_codes.items()):
             print(f"  {c}: {n} occurrence(s)")
     if gone_codes:
-        print(f"\nResolved finding codes:")
+        print("\nResolved finding codes:")
         for c, n in sorted(gone_codes.items()):
             print(f"  {c}: was {n}, now 0")
     if changed:
-        print(f"\nChanged code counts:")
+        print("\nChanged code counts:")
         for c, (prior_n, latest_n) in sorted(changed.items()):
             arrow = "↑" if latest_n > prior_n else "↓"
             print(f"  {c}: {prior_n} → {latest_n} {arrow}")
     if not (new_codes or gone_codes or changed):
-        print(f"\nNo per-code changes since prior run.")
+        print("\nNo per-code changes since prior run.")
     return 0
 
 

@@ -1,5 +1,4 @@
 """Gather-repos discovery: run 3 dynamic queries + Exa secondary."""
-import json
 import subprocess
 import sys
 

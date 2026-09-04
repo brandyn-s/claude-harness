@@ -8,10 +8,8 @@ silently regress suppression.
 from __future__ import annotations
 
 import importlib.util
-import sys
 from pathlib import Path
 
-import pytest
 
 REPO = Path(__file__).resolve().parents[3]
 SCANNER = REPO / "skills" / "audit-rules" / "references" / "scan_violations.py"

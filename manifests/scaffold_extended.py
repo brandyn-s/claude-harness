@@ -15,10 +15,9 @@ fails if per-topic manifests reappear. Use:
 """
 import argparse
 import json
-import os
 import re
 import sys
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 
 SESSION_DIR = Path.home() / ".claude" / "session-transcripts"

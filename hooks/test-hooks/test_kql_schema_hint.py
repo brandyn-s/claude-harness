@@ -5,7 +5,6 @@ when a hunting query projects columns from a watched Defender table
 without a prior schema lookup in the session.
 """
 import json
-from pathlib import Path
 
 from conftest import run_hook
 

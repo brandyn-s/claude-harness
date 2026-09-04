@@ -155,7 +155,7 @@ def _to_yaml(data: dict) -> str:
     for rule in data.get("rules", []):
         lines.append(f"  - name: {rule['name']}")
         lines.append(f"    path: {rule['path']}")
-        lines.append(f"    forbidden_signatures:")
+        lines.append("    forbidden_signatures:")
         for sig in rule.get("forbidden_signatures", []):
             lines.append(f"      - identifier: {sig['identifier']}")
             keywords_str = ", ".join(sig["keywords"])

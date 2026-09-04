@@ -19,7 +19,11 @@ Usage:
     defaults_history.py diff [--last N]
     defaults_history.py summary [--top N]
 """
-import argparse, json, os, subprocess, sys
+import argparse
+import json
+import os
+import subprocess
+import sys
 from collections import Counter
 from datetime import datetime
 from pathlib import Path

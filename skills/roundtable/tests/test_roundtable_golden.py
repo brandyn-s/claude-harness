@@ -9,8 +9,6 @@ These tests reproduce the file-tree shape (without running adapters)
 and assert the path-selection logic still resolves real files.
 """
 
-import importlib.util
-import os
 import sys
 from pathlib import Path
 

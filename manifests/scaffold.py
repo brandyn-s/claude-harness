@@ -19,7 +19,6 @@ Usage:
 """
 import argparse
 import json
-import os
 import re
 import sys
 from pathlib import Path
@@ -197,7 +196,7 @@ def scaffold_skill(name, dry_run=False):
         "side_effects: []  # TODO: none, writes_files, creates_pr, sends_message, modifies_memory",
         "execution_context: main_thread  # TODO: main_thread, worker, parallel_workers, agent_team",
         f"auth_constraint: {'main_thread_only' if has_remote else 'any'}",
-        f'estimated_turns: "TODO"',
+        'estimated_turns: "TODO"',
         "",
         "preconditions: []  # TODO",
         "guardrails: []  # TODO: hook IDs",
@@ -326,8 +325,8 @@ def scaffold_rule(name, dry_run=False):
         "prohibited_actions: []  # TODO: what must the agent NOT do?",
         "enforcement_coverage: none  # TODO: none, partial, full",
         f"incidents: []  # {incident_count} incident references found in source",
-        f'created_date: "TODO"',
-        f'last_validated: "TODO"',
+        'created_date: "TODO"',
+        'last_validated: "TODO"',
     ]
 
     content = "\n".join(lines) + "\n"

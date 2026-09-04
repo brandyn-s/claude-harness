@@ -52,7 +52,12 @@ Exit codes (without --strict):
     0   checks run (passed or failed)
     2   runner error
 """
-import argparse, json, os, re, subprocess, sys
+import argparse
+import json
+import os
+import re
+import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 

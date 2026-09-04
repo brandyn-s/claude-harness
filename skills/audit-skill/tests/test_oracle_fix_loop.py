@@ -15,12 +15,9 @@ Also exercises the failure-mode classification:
 """
 from __future__ import annotations
 
-import importlib.util
 import json
-import os
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
 import pytest

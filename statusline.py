@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Claude Code status line: context %, cost, duration, model, rate limits."""
-import json, sys, os, subprocess
+import json
+import sys
+import os
+import subprocess
 from pathlib import Path
 
 data = json.load(sys.stdin)

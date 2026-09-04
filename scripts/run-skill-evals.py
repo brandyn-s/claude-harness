@@ -39,7 +39,13 @@ Usage:
     python3 scripts/run-skill-evals.py --skill capture  # run one skill's evals
     python3 scripts/run-skill-evals.py --json
 """
-import argparse, json, operator, re, subprocess, sys, yaml
+import argparse
+import json
+import operator
+import re
+import subprocess
+import sys
+import yaml
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -275,7 +281,7 @@ def main():
         print("No deterministic evals found. Add `deterministic:` blocks to tests/<skill>/*.yaml.")
         sys.exit(0)
 
-    print(f"=== Skill-eval summary ===")
+    print("=== Skill-eval summary ===")
     print(f"  Skills with deterministic evals: {skills_tested}")
     print(f"  Total assertions: {len(all_results)}")
     print(f"  Passing: {len(all_results) - len(fails)}")

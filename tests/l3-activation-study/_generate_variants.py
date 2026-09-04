@@ -104,7 +104,7 @@ prefix_dir.mkdir(parents=True, exist_ok=True)
 for prefix in design["prefix_conditions"]:
     (prefix_dir / f"{prefix['id']}.txt").write_text(prefix["system_prompt"] + "\n")
 
-print(f"Generated:")
+print("Generated:")
 print(f"  {sum(1 for _ in variants_dir.rglob('SKILL.md'))} skill variants in {variants_dir.relative_to(ROOT.parent.parent)}")
 print(f"  {sum(1 for _ in prompts_dir.glob('*.txt'))} trigger prompts in {prompts_dir.relative_to(ROOT.parent.parent)}")
 print(f"  {sum(1 for _ in prefix_dir.glob('*.txt'))} prefix conditions in {prefix_dir.relative_to(ROOT.parent.parent)}")

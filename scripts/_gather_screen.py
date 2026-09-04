@@ -12,7 +12,6 @@ with a usage message so a misuse cannot masquerade as "all UNREACHABLE".
 """
 import subprocess
 import sys
-import json
 
 sys.stdout.reconfigure(encoding="utf-8")
 CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
