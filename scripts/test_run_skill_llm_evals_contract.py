@@ -9,7 +9,12 @@ from types import SimpleNamespace
 
 import pytest
 
+from scripts import model_contracts as ids
+
 REPO = Path(__file__).resolve().parents[1]
+# Ids come from contracts/model-capabilities.json: the flagship a trial requests, the
+# current model a server-side fallback may serve instead, and a third current model.
+FLAGSHIP, OPUS, SONNET = ids.model_id("fable"), ids.model_id("opus"), ids.model_id("sonnet")
 RUNNER = REPO / "scripts" / "run-skill-llm-evals.py"
 
 
@@ -30,10 +35,10 @@ def test_model_must_be_explicit_now_that_settings_pin_nothing():
 
     with pytest.raises(ValueError, match="--model or CLAUDE_MODEL"):
         runner.resolve_requested_model(None, {})
-    assert runner.resolve_requested_model("claude-opus-5", {}) == "claude-opus-5"
+    assert runner.resolve_requested_model(OPUS, {}) == OPUS
     assert runner.resolve_requested_model(
-        None, {"CLAUDE_MODEL": "claude-sonnet-5"}
-    ) == ("claude-sonnet-5")
+        None, {"CLAUDE_MODEL": SONNET}
+    ) == (SONNET)
 
 
 def test_runtime_receipt_separates_requested_and_effective_model():
@@ -41,14 +46,14 @@ def test_runtime_receipt_separates_requested_and_effective_model():
     events = [
         {
             "type": "assistant",
-            "message": {"model": "claude-opus-5", "stop_reason": "refusal"},
+            "message": {"model": OPUS, "stop_reason": "refusal"},
         }
     ]
 
-    receipt = runner.runtime_receipt(events, "claude-fable-5", "2.1.226")
+    receipt = runner.runtime_receipt(events, FLAGSHIP, "2.1.226")
 
-    assert receipt["requested_model"] == "claude-fable-5"
-    assert receipt["effective_model"] == "claude-opus-5"
+    assert receipt["requested_model"] == FLAGSHIP
+    assert receipt["effective_model"] == OPUS
     assert receipt["fallback"] is True
     assert receipt["refusal"] is True
     assert receipt["claude_code_version"] == "2.1.226"
@@ -59,11 +64,11 @@ def test_runtime_receipt_separates_requested_and_effective_model():
 @pytest.mark.parametrize(
     ("exit_code", "effective_model", "stop_reason", "expected_failure"),
     [
-        (2, "claude-fable-5", "end_turn", "exited with code 2"),
-        (0, "claude-fable-5", "refusal", "provider refusal"),
+        (2, FLAGSHIP, "end_turn", "exited with code 2"),
+        (0, FLAGSHIP, "refusal", "provider refusal"),
         (
             0,
-            "claude-sonnet-5",
+            SONNET,
             "end_turn",
             "effective model differed from requested model",
         ),
@@ -100,7 +105,7 @@ def test_runtime_outcomes_fail_even_a_negative_activation_trial(
         {"skill": "capture"},
         {"invocation": {"prompt": "hello", "expected_skill_fires": False}},
         0,
-        "claude-fable-5",
+        FLAGSHIP,
         "2.1.226",
     )
 
@@ -118,7 +123,7 @@ def test_exact_nonrefusal_runtime_can_pass_negative_activation_trial(
     event = {
         "type": "assistant_message",
         "text": "No skill needed.",
-        "message": {"model": "claude-fable-5", "stop_reason": "end_turn"},
+        "message": {"model": FLAGSHIP, "stop_reason": "end_turn"},
     }
     monkeypatch.setattr(runner, "setup_sandbox", lambda _skill: sandbox)
     monkeypatch.setattr(
@@ -133,7 +138,7 @@ def test_exact_nonrefusal_runtime_can_pass_negative_activation_trial(
         {"skill": "capture"},
         {"invocation": {"prompt": "hello", "expected_skill_fires": False}},
         0,
-        "claude-fable-5",
+        FLAGSHIP,
         "2.1.226",
     )
 
@@ -147,7 +152,7 @@ def test_active_tier2_evals_do_not_pin_superseded_opus_models():
         if "l3-activation-study" in path.parts:
             continue
         text = path.read_text(encoding="utf-8")
-        if "model: claude-opus-4-7" in text or "model: claude-opus-4-8" in text:
+        if any(f"model: {superseded}" in text for superseded in ids.superseded_ids()):
             offenders.append(path.relative_to(REPO).as_posix())
 
     assert offenders == []
@@ -161,6 +166,7 @@ def test_l3_opus_4_7_design_remains_explicitly_historical():
         encoding="utf-8"
     )
 
+    # The study was run on Opus 4.7 and its design is frozen history: the literal IS the point.
     assert "Opus 4.7 skill-activation study" in design
     assert "model: claude-opus-4-7" in design
     assert "Pre-registered factorial design" in readme

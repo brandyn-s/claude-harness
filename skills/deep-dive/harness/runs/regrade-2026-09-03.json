@@ -1,20 +1,22 @@
 {
-  "_about": "OFFLINE RE-GRADE (no API calls) of transcripts-20260903T205439Z.json with grade.py at fixture revision d2715b22bf58; the frozen 2026-05-31 results.json is untouched. Reproduce: python3 regrade.py --records <this sample> --run-date <run_date> ...",
+  "_about": "OFFLINE RE-GRADE (no API calls) of sample-records-2026-09-03.json with grade.py at fixture revision 303ee05500ac; the frozen 2026-05-31 results.json is untouched. Reproduce: python3 regrade.py --records <this sample> --run-date <run_date> ...",
   "regrade": {
-    "records_file": "transcripts-20260903T205439Z.json",
-    "records_sha256": "7bed8d7687f6efd716c1094cb9a677bfe60e34814e884670f18dfa6b7b6a5fcf",
+    "records_file": "sample-records-2026-09-03.json",
+    "records_sha256": "068d972d84e248abd04ae1ab215f27713e68216199951ed999b6f4f7f4abbaeb",
     "run_date": "2026-09-03",
     "grader": "grade.py",
-    "fixture_sha": "d2715b22bf58",
+    "fixture_sha": "303ee05500ac",
     "regraded_on": "2026-09-04",
     "frozen_results_sha256": "63c51e333d93927c9cb6a7eea9cf9e9dc8bade4d10145f92c133c448bf0811e9"
   },
   "model": "claude-fable-5-1",
+  "model_catalog": null,
+  "current_model_key": null,
   "arms": "with_skill (3-layer framework) vs baseline (plain + confidence)",
   "run_date": "2026-09-03",
   "n_runs": 3,
   "n_questions": 15,
-  "fixture_sha": "d2715b22bf58",
+  "fixture_sha": "303ee05500ac",
   "cost_ratio": 4.0,
   "metrics": {
     "with_skill": {
@@ -183,6 +185,7 @@
     "transformer-year": {
       "kind": "fact",
       "currency": false,
+      "key_source": "static",
       "with_skill": {
         "correct": [
           true,
@@ -221,6 +224,7 @@
     "rag-acronym": {
       "kind": "fact",
       "currency": false,
+      "key_source": "static",
       "with_skill": {
         "correct": [
           true,
@@ -259,6 +263,7 @@
     "react-authors": {
       "kind": "fact",
       "currency": false,
+      "key_source": "static",
       "with_skill": {
         "correct": [
           true,
@@ -297,6 +302,7 @@
     "mast-modes": {
       "kind": "fact",
       "currency": false,
+      "key_source": "static",
       "with_skill": {
         "correct": [
           true,
@@ -335,6 +341,7 @@
     "truthfulqa-scaling": {
       "kind": "fact",
       "currency": false,
+      "key_source": "static",
       "with_skill": {
         "correct": [
           true,
@@ -373,6 +380,7 @@
     "cot-faithfulness-paper": {
       "kind": "fact",
       "currency": false,
+      "key_source": "static",
       "with_skill": {
         "correct": [
           true,
@@ -411,6 +419,7 @@
     "current-anthropic-model": {
       "kind": "fact",
       "currency": true,
+      "key_source": "dated",
       "with_skill": {
         "correct": [
           true,
@@ -449,6 +458,7 @@
     "current-openai-flagship": {
       "kind": "fact",
       "currency": true,
+      "key_source": "dated",
       "with_skill": {
         "correct": [
           true,
@@ -487,6 +497,7 @@
     "mcp-date": {
       "kind": "fact",
       "currency": true,
+      "key_source": "dated",
       "with_skill": {
         "correct": [
           true,
@@ -525,6 +536,7 @@
     "current-claude-context": {
       "kind": "fact",
       "currency": true,
+      "key_source": "dated",
       "with_skill": {
         "correct": [
           true,
@@ -563,6 +575,7 @@
     "cot-faithfulness-solved": {
       "kind": "false_premise",
       "currency": false,
+      "key_source": "static",
       "with_skill": {
         "correct": [
           true,
@@ -601,6 +614,7 @@
     "agents-always-better": {
       "kind": "false_premise",
       "currency": false,
+      "key_source": "static",
       "with_skill": {
         "correct": [
           true,
@@ -639,6 +653,7 @@
     "holographic-memory": {
       "kind": "false_premise",
       "currency": false,
+      "key_source": "static",
       "with_skill": {
         "correct": [
           true,
@@ -677,6 +692,7 @@
     "anthropic-selfreview-stat": {
       "kind": "false_premise",
       "currency": false,
+      "key_source": "static",
       "with_skill": {
         "correct": [
           true,
@@ -715,6 +731,7 @@
     "constitutional-ai-origin": {
       "kind": "fact",
       "currency": false,
+      "key_source": "static",
       "with_skill": {
         "correct": [
           true,

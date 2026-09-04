@@ -106,21 +106,24 @@ hosted web_search `max_uses=4` (symmetric); `max_tokens=1500`; `claude-opus-4-8`
 Keys: `ANTHROPIC_API_KEY` only (hosted web_search; no grounding fetch needed —
 correctness is key-matched, not URL-grounded).
 
-## 9. Paused at this fixture (2026-09-04) — pending run-time keys
+## 9. Retired at this fixture (2026-09-04)
 
-Status: **paused, not retired.** `run_live.py` prints a notice and refuses a real run
+Status: **retired at this fixture.** `run_live.py` prints a notice and refuses a real run
 without `--acknowledge-retired-fixture`; `--plan-only` keeps working and the receipt
-carries `fixture_status: paused-pending-runtime-keys`.
+carries `fixture_status: retired`.
 
 Reason (`docs/research-skills-root-cause.md` §4, §9 item 1, §12.1): the `current-*`
 questions encode a dated answer key, and the 2026-09-03 `fix` verdict was entirely the
 instrument — a stale currency key plus a rejection-cue miss. Under the corrected grader
 both arms score 180/180 on both dates and the verdict is BLOCKED ON MEASUREMENT: the
-fixture is at ceiling and no calibration signal is left to measure. The currency keys are
-being made run-time-resolved on another branch; until that lands, a run against this
-fixture re-grades the same ceiling.
+fixture is at ceiling and no calibration signal is left to measure. The currency key
+became run-time-resolved the same day (`run_live.py` snapshots the vendor model list
+before any paid call; `grade.catalog_key`; `fixture.json` `key_source: model-catalog`), so
+stale keys are no longer the blocker, but a run against this fixture still re-grades the
+same ceiling, and the harness runs the skill's prompt distillation rather than the
+installed skill.
 
 Unchanged: the frozen 2026-05-31 baseline (`results.json`), its committed sample and
-lineage, and the CI gate in `tests/test_deep_dive_efficacy.py`. Reopen when the run-time
-keys land, together with a harder fixture (questions a searching frontier model gets
-wrong) so calibration has something to discriminate.
+lineage, and the CI gate in `tests/test_deep_dive_efficacy.py`. Reopen with a harder
+fixture (questions a searching frontier model gets wrong) so calibration has something to
+discriminate, run through the installed skill rather than its prompt distillation.

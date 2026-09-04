@@ -49,6 +49,12 @@ def _run_cli(*args: str, env: dict[str, str] | None = None) -> subprocess.Comple
 # Honest MEASURED verdict, pinned (set from results.json after the full N>=3 run).
 EXPECTED_VERDICT = "trim"
 
+# A run's recorded vendor model list (run_live.fetch_model_catalog shape), newest first.
+_SYNTH_CATALOG = [
+    {"id": "claude-synthetic-9", "display_name": "Claude Synthetic 9", "created_at": "2026-08-01T00:00:00+00:00"},
+    {"id": "claude-synthetic-8", "display_name": "Claude Synthetic 8", "created_at": "2026-05-01T00:00:00+00:00"},
+]
+
 
 # ---------- 1. Prove the calibration grader (FP=FN=0) ----------
 
@@ -396,7 +402,7 @@ def test_run_live_refuses_paused_fixture_without_acknowledgement(tmp_path):
                           capture_output=True, env=env, timeout=120, check=False)
     stderr = proc.stderr.decode("utf-8", errors="replace")
     assert proc.returncode == 2, stderr
-    assert "PAUSED pending run-time keys" in stderr
+    assert "RETIRED at this fixture" in stderr
     assert "--acknowledge-retired-fixture" in stderr and "Traceback" not in stderr
     assert not (work / "runs" / "refused.json").exists()
     assert (work / "results.json").read_bytes() == before
@@ -406,16 +412,16 @@ def test_plan_only_reports_fixture_status_without_acknowledgement(tmp_path):
     proc = _run_cli("--historical-reproduction", "--output", str(tmp_path / "plan.json"), "--plan-only")
     assert proc.returncode == 0, proc.stderr
     receipt = json.loads(proc.stdout)
-    assert receipt["fixture_status"] == "paused-pending-runtime-keys"
+    assert receipt["fixture_status"] == "retired"
     assert receipt["fixture_status_since"] == "2026-09-04"
     assert receipt["retired_fixture_acknowledged"] is False
     assert not (tmp_path / "plan.json").exists()
 
 
-def test_harness_docs_record_the_pause():
+def test_harness_docs_record_the_retirement():
     for name in ("README.md", "PROBLEM.md"):
         text = (HARNESS / name).read_text(encoding="utf-8")
-        assert "Paused at this fixture (2026-09-04)" in text, name
+        assert "Retired at this fixture (2026-09-04)" in text, name
         assert "research-skills-root-cause.md" in text and "--acknowledge-retired-fixture" in text, name
 
 
@@ -531,7 +537,7 @@ def test_partial_task_failure_cannot_qualify_or_write_result(tmp_path, monkeypat
 
     monkeypatch.setattr(runner, "_one_task", one_success_one_failure)
     with pytest.raises(runner.RuntimeQualificationError, match="trial provenance qualification failed"):
-        runner.run(n_runs=1, limit=1, workers=1)
+        runner.run(n_runs=1, limit=1, workers=1, model_catalog=_SYNTH_CATALOG)
     assert not runner.RESULTS.exists()
 
 
@@ -562,9 +568,10 @@ def test_synthetic_qualified_run_emits_runtime_and_hashed_receipts(tmp_path, mon
         }
 
     monkeypatch.setattr(runner, "_one_task", successful_task)
-    result = runner.run(n_runs=1, limit=1, workers=1)
+    result = runner.run(n_runs=1, limit=1, workers=1, model_catalog=_SYNTH_CATALOG)
 
     assert result["runtime_receipt"]["qualification_status"] == "QUALIFIED"
+    assert result["runtime_receipt"]["model_catalog"] == _SYNTH_CATALOG
     assert result["runtime_receipt"]["effort"] == "xhigh"
     assert result["runtime_receipt"]["provider"] == "anthropic-api"
     assert result["qualification"]["qualification_status"] == "valid"

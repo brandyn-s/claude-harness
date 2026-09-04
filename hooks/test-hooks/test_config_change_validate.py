@@ -10,6 +10,14 @@ import pytest
 import yaml
 from conftest import run_hook
 
+from scripts import model_contracts as ids
+
+# The provider PREFIX is what these tests exercise; the model ids behind it come from
+# contracts/model-capabilities.json. One literal stays: the verbatim value that
+# misrouted on 2026-08-28.
+FLAGSHIP, OPUS, SONNET = ids.model_id("fable"), ids.model_id("opus"), ids.model_id("sonnet")
+INCIDENT_2026_08_28_MODEL = "us.anthropic.claude-fable-5"
+
 HOOK = "config-change-validate.py"
 MAX_SETTINGS_BYTES = 4 * 1024 * 1024
 MANIFEST = Path(__file__).resolve().parent.parent / "manifests" / "config-change-validate.yaml"
@@ -755,26 +763,26 @@ def _settings_with(tmp_path: Path, **overrides) -> Path:
     "overrides,surface",
     [
         # The exact value that misrouted on 2026-08-28, verbatim.
-        ({"model": "us.anthropic.claude-fable-5"}, "`model`"),
-        ({"model": "us.anthropic.claude-opus-5[1m]"}, "`model`"),
-        ({"model": "us-gov.anthropic.claude-opus-5[1m]"}, "`model`"),
-        ({"model": "eu.anthropic.claude-sonnet-5"}, "`model`"),
-        ({"model": "apac.anthropic.claude-sonnet-5"}, "`model`"),
+        ({"model": INCIDENT_2026_08_28_MODEL}, "`model`"),
+        ({"model": f"us.anthropic.{OPUS}[1m]"}, "`model`"),
+        ({"model": f"us-gov.anthropic.{OPUS}[1m]"}, "`model`"),
+        ({"model": f"eu.anthropic.{SONNET}"}, "`model`"),
+        ({"model": f"apac.anthropic.{SONNET}"}, "`model`"),
         (
             {"model": "arn:aws:bedrock:us-east-2::foundation-model/x"},
             "`model`",
         ),
-        ({"fallbackModel": ["us.anthropic.claude-opus-5[1m]"]}, "`fallbackModel`"),
-        ({"fallbackModel": "us.anthropic.claude-opus-5[1m]"}, "`fallbackModel`"),
+        ({"fallbackModel": [f"us.anthropic.{OPUS}[1m]"]}, "`fallbackModel`"),
+        ({"fallbackModel": f"us.anthropic.{OPUS}[1m]"}, "`fallbackModel`"),
         (
             # The 2026-08-18 env-block vector: no launcher unset can defend
             # against it, because the CLI injects settings env after the
             # launcher subshell scrub runs.
-            {"env": {"ANTHROPIC_DEFAULT_OPUS_MODEL": "us-gov.anthropic.claude-opus-5"}},
+            {"env": {"ANTHROPIC_DEFAULT_OPUS_MODEL": f"us-gov.anthropic.{OPUS}"}},
             "`env.ANTHROPIC_DEFAULT_OPUS_MODEL`",
         ),
         (
-            {"env": {"ANTHROPIC_MODEL": "us.anthropic.claude-opus-5"}},
+            {"env": {"ANTHROPIC_MODEL": f"us.anthropic.{OPUS}"}},
             "`env.ANTHROPIC_MODEL`",
         ),
     ],
@@ -805,7 +813,7 @@ def test_provider_prefixed_model_is_blocked_on_every_settings_source(
 ):
     # local_settings OUTRANK settings.json in the precedence chain, so gating
     # only the user layer would leave the higher-priority surface open.
-    settings = _settings_with(tmp_path, model="us.anthropic.claude-fable-5")
+    settings = _settings_with(tmp_path, model=INCIDENT_2026_08_28_MODEL)
 
     rc, stdout, stderr = run_hook(HOOK, _event(source, str(settings)))
 
@@ -821,15 +829,15 @@ def test_provider_prefixed_model_is_blocked_on_every_settings_source(
     [
         # 1P-format IDs are the CORRECT form and must never be blocked --
         # this is the control that would catch an over-broad prefix match.
-        {"model": "claude-fable-5[1m]"},
-        {"model": "claude-opus-5[1m]"},
-        {"model": "claude-sonnet-5"},
-        {"fallbackModel": ["claude-opus-5[1m]"]},
-        {"env": {"ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5[1m]"}},
+        {"model": f"{FLAGSHIP}[1m]"},
+        {"model": f"{OPUS}[1m]"},
+        {"model": SONNET},
+        {"fallbackModel": [f"{OPUS}[1m]"]},
+        {"env": {"ANTHROPIC_DEFAULT_OPUS_MODEL": f"{OPUS}[1m]"}},
         # A model name that merely CONTAINS a provider token is not prefixed by
         # one; the check must anchor rather than substring-match (the exact
         # error claude-hud's isBedrockModelId makes).
-        {"model": "claude-opus-5-us.anthropic.test"},
+        {"model": f"{OPUS}-us.anthropic.test"},
         # Unrelated env values must not be dragged in by the env scan.
         {"env": {"BASH_MAX_TIMEOUT_MS": "300000"}},
     ],
@@ -870,8 +878,8 @@ def test_env_scan_names_a_deterministic_surface(tmp_path):
     settings = _settings_with(
         tmp_path,
         env={
-            "ZZZ_MODEL": "us.anthropic.claude-opus-5",
-            "AAA_MODEL": "us.anthropic.claude-sonnet-5",
+            "ZZZ_MODEL": f"us.anthropic.{OPUS}",
+            "AAA_MODEL": f"us.anthropic.{SONNET}",
         },
     )
 
@@ -883,13 +891,13 @@ def test_env_scan_names_a_deterministic_surface(tmp_path):
 
 
 def test_model_block_reason_never_echoes_the_offending_value(tmp_path):
-    settings = _settings_with(tmp_path, model="us.anthropic.claude-fable-5")
+    settings = _settings_with(tmp_path, model=INCIDENT_2026_08_28_MODEL)
 
     rc, stdout, _ = run_hook(HOOK, _event("user_settings", str(settings)))
 
     assert rc == 0
     reason = json.loads(stdout)["reason"]
-    assert "us.anthropic.claude-fable-5" not in reason
+    assert INCIDENT_2026_08_28_MODEL not in reason
 
 
 def test_hook_integrity_block_outranks_the_model_block(tmp_path):
@@ -897,7 +905,7 @@ def test_hook_integrity_block_outranks_the_model_block(tmp_path):
     # a caller that only reads the first block must see the more severe one.
     settings = tmp_path / "settings.json"
     settings.write_text(
-        json.dumps({"hooks": {}, "model": "us.anthropic.claude-fable-5"}),
+        json.dumps({"hooks": {}, "model": INCIDENT_2026_08_28_MODEL}),
         encoding="utf-8",
     )
 

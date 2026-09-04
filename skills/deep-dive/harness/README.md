@@ -17,12 +17,14 @@ baseline and the v1 grader-bug correction).
   samples and their offline re-grades.
 - `runs/transcripts-<ts>.json` — gitignored raw per-run records.
 
-## Paused at this fixture (2026-09-04) — pending run-time keys
+## Retired at this fixture (2026-09-04)
 
-The A/B is paused, not retired. The `current-*` answer keys are being made
-run-time-resolved on another branch; until that lands, the corrected grader scores both
-arms 180/180 on both dates and the verdict is BLOCKED ON MEASUREMENT
-(`docs/research-skills-root-cause.md` §4, §12.1; `PROBLEM.md` §9). `run_live.py` prints
-the notice and refuses a real run unless `--acknowledge-retired-fixture` is passed;
-`--plan-only` needs no acknowledgement and its receipt reports
-`fixture_status: paused-pending-runtime-keys`.
+The A/B is retired at this fixture. The `current-anthropic-model` key resolves at run
+time (`run_live.py` snapshots the vendor model list before any paid call;
+`grade.catalog_key` derives the expected terms from it), so stale keys are no longer the
+blocker. The fixture is: the corrected grader scores both arms 180/180 on both dates and
+the verdict is BLOCKED ON MEASUREMENT (`docs/research-skills-root-cause.md` §4, §12.1;
+`PROBLEM.md` §9), and this harness runs the skill's prompt distillation, not the
+installed skill. `run_live.py` prints the notice and refuses a real run unless
+`--acknowledge-retired-fixture` is passed; `--plan-only` needs no acknowledgement and its
+receipt reports `fixture_status: retired`.
