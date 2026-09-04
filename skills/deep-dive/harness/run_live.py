@@ -216,12 +216,45 @@ def _one_task(arm: str, system: str, q: dict) -> dict:
             "_response_provenance": response_provenance}
 
 
-def run(n_runs: int, limit, workers: int) -> dict:
+def _field(obj, name: str):
+    return obj.get(name) if isinstance(obj, dict) else getattr(obj, name, None)
+
+
+def fetch_model_catalog(client) -> list[dict]:
+    """Snapshot the vendor's model list at run start: id, display name, release date; newest first.
+
+    Iterating `client.models.list()` walks every page. The snapshot is recorded in the run
+    receipt and the transcripts so grade.catalog_key derives the `current-anthropic-model`
+    key from what the vendor served THAT DAY, and regrade.py can re-derive it offline.
+    """
+    rows = []
+    for model in client.models.list():
+        created = _field(model, "created_at")
+        rows.append({
+            "id": str(_field(model, "id")),
+            "display_name": str(_field(model, "display_name") or ""),
+            "created_at": created.isoformat() if hasattr(created, "isoformat") else str(created or ""),
+        })
+    if not rows:
+        raise RuntimeQualificationError("vendor model list is empty; cannot derive the current-model key")
+    rows.sort(key=lambda r: r["id"])
+    rows.sort(key=lambda r: r["created_at"], reverse=True)  # stable: newest first, then id
+    return rows
+
+
+def run(n_runs: int, limit, workers: int, *, model_catalog: list[dict]) -> dict:
     assert MODEL is not None, "select a qualification model before running"
     fixture = json.loads(FIXTURE.read_text(encoding="utf-8"))
     qs = fixture["questions"][:limit] if limit else fixture["questions"]
     fixture_sha = sha256(FIXTURE.read_bytes()).hexdigest()[:12]
     RUNS_DIR.mkdir(exist_ok=True)
+    # The key for `current-anthropic-model` is derived from this run's snapshot, not typed.
+    RUN_RECEIPT["model_catalog"] = model_catalog
+    RUN_RECEIPT["current_model_key"] = grade.catalog_key(model_catalog)
+    print(f"  current-anthropic-model key from the vendor model list: "
+          f"{RUN_RECEIPT['current_model_key']['expected_terms']} "
+          f"(newest release {RUN_RECEIPT['current_model_key']['released']}: "
+          f"{', '.join(RUN_RECEIPT['current_model_key']['derived_from'])})")
     per_arm: dict[str, list[dict]] = {a: [] for a in ARMS}
     transcripts = []
     run_date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -248,16 +281,19 @@ def run(n_runs: int, limit, workers: int) -> dict:
                   "was left untouched", file=sys.stderr)
             sys.exit(2)
         for a in ARMS:
-            # run_date selects the dated answer key for currency questions (grade.key_for)
+            # run_date selects the dated answer key for currency questions (grade.key_for);
+            # model_catalog grades `current-anthropic-model` from this run's own snapshot.
             per_arm[a].append(grade.score_run(fixture, [r for r in recs if r["arm"] == a],
-                                              run_date=run_date_str))
+                                              run_date=run_date_str, model_catalog=model_catalog))
         transcripts.append({"run_idx": ri, "records": recs})
         print(f"  run {ri+1}/{n_runs} done ({len(recs)} tasks)")
+    # Both record files carry the snapshot so regrade.py re-derives the same key offline.
     (RUNS_DIR / f"transcripts-{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}.json").write_text(
-        json.dumps(transcripts, indent=2), encoding="utf-8")
+        json.dumps({"model_catalog": model_catalog, "runs": transcripts}, indent=2), encoding="utf-8")
     (RUNS_DIR / f"sample-records-{run_date_str}.json").write_text(
         json.dumps({"_about": "Per-run records sample for "
-                    "test_results_reproducible_from_committed_sample.", "runs": transcripts},
+                    "test_results_reproducible_from_committed_sample.",
+                    "model_catalog": model_catalog, "runs": transcripts},
                    indent=2), encoding="utf-8")
     agg = {a: grade.aggregate_runs(per_arm[a]) for a in ARMS}
     # Phase B: attach paired-bootstrap CI vs baseline for the CI-aware verdict.
@@ -339,6 +375,8 @@ def main(argv=None):
         "refusal_detected": "<unavailable>",
         "truncation_detected": "<unavailable>",
         "stop_outcomes": "<unavailable>",
+        "model_catalog": "<unavailable>",
+        "current_model_key": "<unavailable>",
         "covered_model_retention_required": model in COVERED_MODELS,
         "covered_model_retention_approved": model in COVERED_MODELS and args.approve_covered_model_retention,
         "output_path": str(output),
@@ -353,7 +391,7 @@ def main(argv=None):
     with RUNTIME_LOCK:
         RUNTIME_OBSERVATIONS.clear()
     try:
-        import anthropic  # noqa: F401
+        import anthropic
     except ImportError as e:
         print(f"error: anthropic SDK not importable ({e})", file=sys.stderr)
         print("hint: pip install anthropic, then re-run", file=sys.stderr)
@@ -364,8 +402,17 @@ def main(argv=None):
         print("hint: export ANTHROPIC_API_KEY=... and re-run; results.json was NOT touched", file=sys.stderr)
         return 2
     t0 = time.time()
+    # Snapshot the vendor model list BEFORE any paid call: the currency key derives from it,
+    # and a run that cannot record it would grade against a possibly stale legacy key.
     try:
-        run(args.runs, args.limit, args.workers)
+        model_catalog = fetch_model_catalog(anthropic.Anthropic())
+    except Exception as e:  # SDK/transport/empty-list: nothing has been spent yet
+        print(f"error: could not snapshot the vendor model list ({type(e).__name__}: {e})", file=sys.stderr)
+        print("hint: the current-anthropic-model key derives from this snapshot; no model calls were "
+              "made and the output was NOT written", file=sys.stderr)
+        return 2
+    try:
+        run(args.runs, args.limit, args.workers, model_catalog=model_catalog)
     except RuntimeQualificationError as e:
         print(f"error: {e}", file=sys.stderr)
         return 2

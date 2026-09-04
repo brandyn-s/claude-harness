@@ -49,6 +49,12 @@ def _run_cli(*args: str, env: dict[str, str] | None = None) -> subprocess.Comple
 # Honest MEASURED verdict, pinned (set from results.json after the full N>=3 run).
 EXPECTED_VERDICT = "trim"
 
+# A run's recorded vendor model list (run_live.fetch_model_catalog shape), newest first.
+_SYNTH_CATALOG = [
+    {"id": "claude-synthetic-9", "display_name": "Claude Synthetic 9", "created_at": "2026-08-01T00:00:00+00:00"},
+    {"id": "claude-synthetic-8", "display_name": "Claude Synthetic 8", "created_at": "2026-05-01T00:00:00+00:00"},
+]
+
 
 # ---------- 1. Prove the calibration grader (FP=FN=0) ----------
 
@@ -488,7 +494,7 @@ def test_partial_task_failure_cannot_qualify_or_write_result(tmp_path, monkeypat
 
     monkeypatch.setattr(runner, "_one_task", one_success_one_failure)
     with pytest.raises(runner.RuntimeQualificationError, match="trial provenance qualification failed"):
-        runner.run(n_runs=1, limit=1, workers=1)
+        runner.run(n_runs=1, limit=1, workers=1, model_catalog=_SYNTH_CATALOG)
     assert not runner.RESULTS.exists()
 
 
@@ -519,9 +525,10 @@ def test_synthetic_qualified_run_emits_runtime_and_hashed_receipts(tmp_path, mon
         }
 
     monkeypatch.setattr(runner, "_one_task", successful_task)
-    result = runner.run(n_runs=1, limit=1, workers=1)
+    result = runner.run(n_runs=1, limit=1, workers=1, model_catalog=_SYNTH_CATALOG)
 
     assert result["runtime_receipt"]["qualification_status"] == "QUALIFIED"
+    assert result["runtime_receipt"]["model_catalog"] == _SYNTH_CATALOG
     assert result["runtime_receipt"]["effort"] == "xhigh"
     assert result["runtime_receipt"]["provider"] == "anthropic-api"
     assert result["qualification"]["qualification_status"] == "valid"
