@@ -317,7 +317,7 @@ the **host-matching platform label** (`platform:macos` on macOS, `platform:windo
 on Windows — the label MUST match the host this deployment runs on), the three
 area labels (area:hooks, area:agents, area:mcp), and four high-signal labels:
 `regression` (maintainer-triaged, higher precision than keyword search), `data-loss`,
-`api:bedrock` (our GovCloud lane), and `area:security`. Low-volume labels
+`api:bedrock` (the Bedrock lane, where used), and `area:security`. Low-volume labels
 (regression, data-loss, api:bedrock) are scanned exhaustively; high-volume ones
 (platform, area:security) are triaged by title. For `full` runs, omit the date
 filter and add the most-reacted enhancement query (same reference).
@@ -375,7 +375,7 @@ Also fetch (same reference for literal commands):
   API-surface changes (new endpoints, beta headers, param deprecations) land here first
   in machine-readable form.
 - **MCP spec releases** (`modelcontextprotocol/modelcontextprotocol`) — protocol
-  revisions hit our MCP gateway fleet.
+  revisions hit deployed MCP gateways, where present.
 - **npm dist-tags** for `@anthropic-ai/claude-code` — Anthropic's own `stable` vs
   `latest` designation (one curl). A wide stable/latest gap is a first-party
   known-good-version signal for pinning decisions.
@@ -426,13 +426,13 @@ entries after `{since_date}`:
 4. **AWS Bedrock What's New RSS** (grep Anthropic/Claude) — GovCloud model availability
    never appears in any Anthropic-hosted channel.
 5. **Claude Desktop 3P configuration changelog + M365 connector page** (added
-   2026-07-16) — we run this surface in production (Jamf "Claude 3P" profiles,
-   Bedrock GovCloud, built-in M365 local connector against the GCC High tenant).
-   Watch for: new `managedMcpServers` subfields / built-in `server:` values, M365
-   tool-catalog changes (Outlook mail-folder tools, Teams posting), GCC High/DoD
-   notes, and **silent default flips** on new config keys — deployed profiles
-   inherit vendor defaults for keys they don't set; diff new keys against the
-   deployed plists.
+   2026-07-16) — relevant if you deploy the Desktop 3P surface through an MDM
+   (managed profiles, a Bedrock or other third-party model lane, the built-in
+   M365 local connector). Watch for: new `managedMcpServers` subfields /
+   built-in `server:` values, M365 tool-catalog changes (Outlook mail-folder
+   tools, Teams posting), GCC High/DoD notes, and **silent default flips** on
+   new config keys — deployed profiles inherit vendor defaults for keys they
+   don't set; diff new keys against the deployed plists.
 
 Findings flow into the normal categories (NEW_FEATURE, DEPRECATION, UPDATE_PATTERN).
 Model lifecycle events, parameter deprecations, Admin-API migrations, and Desktop-3P

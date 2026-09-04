@@ -5,9 +5,9 @@ evidence lives here.
 
 ## Step 0 — in-flight prior-session work
 
-- 2026-05-28: the /retro session found the KB repo on
-  `capture/bedrock-bearer-token-jamf-ongoing` with uncommitted work alongside the
-  current session's intune-mde topic. Without the preflight, /capture either
+- 2026-05-28: the /retro session found the KB repo on a prior session's
+  still-open `capture/<topic-slug>-ongoing` branch with uncommitted work alongside
+  the current session's unrelated topic. Without the preflight, /capture either
   hijacks the prior branch (bad) or silently dances around it (what happened —
   worked but wasted turns).
 - 2026-07-28: `kb-capture-20260728` was already taken by a parallel session, on a

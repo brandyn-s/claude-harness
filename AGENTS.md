@@ -98,7 +98,7 @@ python3 scripts/run-tests.py                 # ~3,900 tests, ~10 min
 python3 scripts/run-tests.py -k hooks        # one directory, fast
 ```
 
-Two things about the runner that will otherwise waste your time:
+Three things about the runner that will otherwise waste your time:
 
 - **A root-level `pytest` cannot work here.** Test modules import their own
   `conftest` by name (needs prepend import mode) and two test files share a
@@ -107,6 +107,10 @@ Two things about the runner that will otherwise waste your time:
 - It carries a **known-failing baseline**, gated in both directions. Going over is
   a regression; going *under* means an entry is stale. Both fail. If you fix a
   baselined test, remove its entry.
+- **Running the tests: do it outside the Claude Code Bash sandbox.** Some hook
+  tests write probe files under `hooks/`, open local sockets and call `ps`, all of
+  which the sandbox denies, so a run inside it reports environment-caused
+  failures. Run `python scripts/run-tests.py` from a plain terminal.
 
 ## 6. Invariants — breaking these silently breaks the repo
 

@@ -304,7 +304,7 @@ the file path via -v and read with `getline line < file` inside the
 matching awk block. Same approach unifies the create/replace/append code
 paths (cp file, awk-getline file, cat file).
 
-DETECTED: 2026-05-20 in templates/cui-bedrock-govcloud/jamf/install.sh
+DETECTED: 2026-05-20 in a Jamf-deployed macOS install.sh wrapper
 after three PRs (#933, #935, #937) shipped without a Mac test run. Cost:
 one follow-up PR (#938), Jamf log flush, and re-execution on the test Mac
 before the wrapper deployed successfully.
@@ -561,7 +561,7 @@ the first try.
 
 ## powershell-acl-write-mask
 
-### 2026-05-29 REM051 Claude managed-settings
+### 2026-05-29 Claude managed-settings remediation script
 
 TESTING: validate the logic against a REAL file round-tripped through
 Set-Acl/Get-Acl (mktemp-style temp file) — NEVER an in-memory
