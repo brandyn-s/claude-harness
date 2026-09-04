@@ -224,6 +224,7 @@ def run(n_runs: int, limit, workers: int) -> dict:
     RUNS_DIR.mkdir(exist_ok=True)
     per_arm: dict[str, list[dict]] = {a: [] for a in ARMS}
     transcripts = []
+    run_date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     for ri in range(n_runs):
         tasks = [(a, s, q) for a, s in ARMS.items() for q in qs]
         recs: list[dict] = []
@@ -247,10 +248,11 @@ def run(n_runs: int, limit, workers: int) -> dict:
                   "was left untouched", file=sys.stderr)
             sys.exit(2)
         for a in ARMS:
-            per_arm[a].append(grade.score_run(fixture, [r for r in recs if r["arm"] == a]))
+            # run_date selects the dated answer key for currency questions (grade.key_for)
+            per_arm[a].append(grade.score_run(fixture, [r for r in recs if r["arm"] == a],
+                                              run_date=run_date_str))
         transcripts.append({"run_idx": ri, "records": recs})
         print(f"  run {ri+1}/{n_runs} done ({len(recs)} tasks)")
-    run_date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     (RUNS_DIR / f"transcripts-{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}.json").write_text(
         json.dumps(transcripts, indent=2), encoding="utf-8")
     (RUNS_DIR / f"sample-records-{run_date_str}.json").write_text(

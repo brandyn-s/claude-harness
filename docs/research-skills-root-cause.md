@@ -20,6 +20,12 @@ rejection rationale the arms cannot see. On all five, the "framework arm" is a
 prompt; the skill's multi-wave procedure is never run, so "no lift" is a statement about
 that paragraph, not about the skill.
 
+**Follow-up (same day, section 12).** The offline grader corrections recommended below were
+applied and the 2026-09-03 records were re-graded without any API call. deep-dive: accuracy
+1.0/1.0 on all three runs, calibration discrimination 0.0, verdict BLOCKED ON MEASUREMENT
+(the live `fix` was the instrument). gather-intel: grounding_precision 1.0/1.0, delta 0.0
+(the live delta was the un-groundable claim). evaluate-repos now refuses `--runs` below 3.
+
 ## 1. Verdict table
 
 | Skill | Today (`ab/*.json`) | Frozen 2026-05-31 | Model / skill defect / both | Mechanism | Recommendation |
@@ -321,6 +327,68 @@ Cost 3.0 is the one structural, real ratio among the five.
 Cross-cutting: record token `usage` per call in the runners so `cost_ratio` is measured;
 persist the web_search result blocks (or at least URLs surfaced) so retrieval differences
 can be classified; and treat `ci_verdict` as advisory below n=5.
+
+## 12. Offline grader corrections applied (2026-09-03) and the re-graded verdicts
+
+All changes are offline (no API calls, no fetches); the frozen `results.json` files are
+byte-identical. Every edited fixture carries a `_revisions` lineage entry recording the
+superseded `fixture_sha`, and the CI freshness tests accept any sha in that lineage.
+
+| Skill | Change | Where | Verification |
+|---|---|---|---|
+| deep-dive | Dated answer keys: currency questions carry `keys` with `[valid_from, valid_until]` windows; `grade.key_for` selects by `run_date`; a run date outside every window EXCLUDES the question (`key_expired`) instead of grading it against a stale key. `current-anthropic-model` has an Opus-4.8-era key (verified 2026-05-31, valid through 2026-06-08) and a run-date-relative Mythos-class/Fable-5 key from 2026-06-09 marked `verified: null` (inferred from the run's model id and 6/6 records; not hand-verified) | `skills/deep-dive/harness/fixture.json` (sha `7ffac4dca15f` -> `d2715b22bf58`), `grade.py`, `run_live.py` passes `run_date` | `test_dated_keys_select_by_run_date`, `test_expired_key_excludes_question_instead_of_grading_stale`, `test_fixture_revision_lineage_records_the_frozen_sha` |
+| deep-dive | `_REJECTION_CUES` extended with the observed forms ("premise is false", "premise of the question is false", "no 2025 result", "no result exists", "unsolved", "open problem", "remains an open", ...) plus a narrow leading-negation rule ("None.", "No such ...", "No <year> result ..."); "No, but ..." and "Novel ..." do not match | `grade.py` `rejects_premise` | `test_rejection_cues_cover_observed_2026_09_03_phrasings` (the four verbatim false-failed openings) |
+| deep-dive | `calibration_discrimination` computed over `fact` rows only; `calibration_discrimination_all` keeps the legacy all-kinds view | `grade.py` `score_run` | `test_calibration_discrimination_over_fact_questions_only`, `test_calibration_grader_fp_fn_zero` (updated) |
+| deep-dive | Offline re-grade tool | `skills/deep-dive/harness/regrade.py` | `test_regrade_tool_reproduces_frozen_baseline_from_committed_sample` (all 10 metric cells identical to the frozen `results.json`), `test_regrade_refuses_to_overwrite_frozen_results` |
+| gather-intel | `three-workers-sweetspot` marked `groundable: false` (its `grounding_terms` are the verbatim phrase from one repo; 0/11 supported records grounded across both runs); `score_run` excludes un-groundable claims from the `grounding_precision` denominator (disposition still scored); `run_live._ground` skips the fetch | `skills/gather-intel/harness/fixture.json` (sha `6a017f97d139` -> `0fdf793bdf0f`), `grade.py`, `run_live.py`, `regrade.py`, `README.md` | `test_ungroundable_claim_is_excluded_from_grounding_precision_but_still_scored`, `test_three_workers_sweetspot_is_marked_ungroundable_with_lineage`; the frozen-sample effect (grounding_precision 0.878/0.833 -> 1.0/1.0, other four metrics unchanged) is documented in `_revisions[0].frozen_sample_regrade` and asserted by `test_results_reproducible_from_committed_sample` |
+| evaluate-repos | `run_live.py` refuses `--runs` below `MIN_RUNS = 3` unless `--allow-low-n` is passed; the plan receipt records `n_runs`, `min_runs`, `low_n_override` | `skills/evaluate-repos/harness/run_live.py`, new `harness/README.md`; `scripts/test_historical_live_harness_policy.py` passes the override for runners that declare it | `test_run_live_refuses_runs_below_minimum_without_override`, `test_run_live_allow_low_n_is_recorded_in_the_receipt`, `test_harness_readme_documents_the_minimum_n` |
+
+### 12.1 deep-dive, 2026-09-03 records re-graded (`skills/deep-dive/harness/runs/regrade-2026-09-03.json`)
+
+Source: `runs/transcripts-20260903T205439Z.json` (gitignored; compact copy committed as
+`runs/sample-records-2026-09-03.json`), `run_date` 2026-09-03, `claude-fable-5-1`, N=3.
+
+| Metric | Live grader (`ab/deep-dive.json`) WITH / BASE | Corrected grader WITH / BASE |
+|---|---|---|
+| accuracy | 0.9556 / 0.8889 | **1.0 / 1.0** (45/45 per arm per run; no `key_expired`) |
+| calibration_discrimination | -0.0513 (n=3) / -0.1429 (n=1) | **0.0** (n=2, fact rows: the only non-HIGH fact labels are the two MEDIUMs on `current-openai-flagship`, both correct) / none (baseline has no non-HIGH fact label) |
+| calibration_discrimination_all (legacy view) | n/a | 0.0 (n=3) / 0.0 (n=1): with every answer correct, no label can discriminate |
+| currency_accuracy | 0.9167 / 0.8333 | 1.0 / 1.0 |
+| false_premise_reject_rate | 0.9167 / 0.75 | 1.0 / 1.0 |
+| counterfactual_substantive_rate | 1.0 / n/a | 1.0 / n/a |
+| verdict | `fix` (anti-calibrated) | **BLOCKED ON MEASUREMENT** (95% CI [0.0, 0.0] on accuracy) |
+
+Both `fix` inputs are gone: the "HIGH + wrong" records were the 7 grader-failed correct
+answers, and the non-HIGH bin no longer counts LOW-on-rejection. The frozen 2026-05-31
+sample re-grades to the frozen `results.json` on all 10 metric cells under the corrected
+grader (its verdict label moves `trim` -> BLOCKED only because the CI-aware rule postdates
+the freeze; the metrics do not move).
+
+### 12.2 gather-intel, 2026-09-03 records re-graded (`skills/gather-intel/harness/runs/regrade-2026-09-03.json`)
+
+Source: `runs/transcripts-20260903T211607Z.json` (compact copy committed as
+`runs/sample-records-2026-09-03.json`), `claude-fable-5-1`, N=3.
+
+| Metric | Live grader (`ab/gather-intel.json`) WITH / BASE | Corrected oracle WITH / BASE |
+|---|---|---|
+| grounding_precision | 0.8667 / 0.8 (delta +0.0667) | **1.0 / 1.0 (delta 0.0)** |
+| refutation_recall | 1.0 / 1.0 | 1.0 / 1.0 |
+| fabrication_resistance | 1.0 / 1.0 | 1.0 / 1.0 |
+| true_recall | 0.9333 / 1.0 | 0.9333 / 1.0 (unchanged: `run2/with_skill/three-workers-sweetspot` CONTESTED still counts as a wrong disposition) |
+| verdict_accuracy | 0.9778 / 1.0 | 0.9778 / 1.0 |
+| verdict | BLOCKED (CI [0.0, 0.2]) | BLOCKED (CI [0.0, 0.0]) |
+
+The verdict label is unchanged but its content is not: the live delta was entirely the
+un-groundable claim, and with it out of the denominator the two arms are identical on the
+primary metric. The frozen 2026-05-31 sample under the same oracle: grounding_precision
+0.8778/0.8333 -> 1.0/1.0, the other four metrics unchanged (refutation_recall 0.9524/0.8571,
+fabrication_resistance 1.0/1.0, true_recall 0.9333/1.0, verdict_accuracy 0.9556/0.9333).
+
+### 12.3 Not re-graded
+
+gather-research (already 180/180), triage and evaluate-repos have no grader correction to
+apply; the evaluate-repos change is the `--runs` gate, which is a runner-side guard, so
+its 2026-09-03 N=1 result stands as reported in section 8 and must not be cited.
 
 ## 11. What could not be determined from the records
 

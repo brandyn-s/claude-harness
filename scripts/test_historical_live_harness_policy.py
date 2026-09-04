@@ -131,6 +131,10 @@ def _fake_runtime(
     ]
     if skill_name in LIMITED_HARNESSES:
         args.extend(("--limit", "1"))
+    # Runners that enforce a minimum N (evaluate-repos since 2026-09-03) refuse
+    # --runs 1 unless the smoke is declared as such; the receipt records the override.
+    if "--allow-low-n" in (source_harness / "run_live.py").read_text(encoding="utf-8"):
+        args.append("--allow-low-n")
     env = {
         "ANTHROPIC_API_KEY": "test-only-fake-provider",
         "PYTHONPATH": str(fake_sdk),
