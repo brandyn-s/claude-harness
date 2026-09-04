@@ -95,9 +95,14 @@ the PERIODIC set across both tables above, that every WORKFLOW row still over th
 carries a proposal, and that every WORKFLOW row under the cap records its executed split
 ("Split done").
 
-`scripts/validate-skills.py` does not read the exemption: its C1_length (≤ 510 lines) and
-C1b_token_budget (≤ 4,000 body tokens after frontmatter, since the compaction-continuity
-banner escape was retired 2026-09-03) keep applying to every skill.
+`scripts/validate-skills.py` C1_length (≤ 510 lines) keeps applying to every skill. Its
+C1b_token_budget check was aligned with this policy on 2026-09-04 (environment-residue
+sweep): it imports `SOFT_BODY_CAP` and `body_cap_status` from `scripts/token-audit.py`, so
+the 6,000-token cap is stated once, a skill with `body-cap: exempt` and a reason passes,
+and an exemption without a reason keeps counting, exactly as in the audit. Before that it
+used a private 4,000-token threshold (the compaction-continuity banner escape it once
+offered had been retired 2026-09-03) and failed 36 skills the policy accepted;
+`scripts/test_validate_skills_token_budget.py` pins the alignment.
 
 Descriptions and `when_to_use` were not changed in either pass; the routing eval run against
 them stands.
@@ -126,9 +131,12 @@ ship, agentic-actions-auditor, evaluate-repos and gather-repos are under the sof
 were not classified. The exemption lines add about 45 tokens to each exempt skill (garden
 8,692 → 8,739, and so on); the audit still lists every exempt row.
 
-C1b did not move in either pass: its threshold is 4,000 body tokens, and no relocation
-proposed here targets that (the doc caps are 6,000 / 5,000). Skills whose split took them
-under 510 lines cleared C1_length (mega-distill 529 → 321, api-ingest 534 → 453).
+C1b did not move in either pass: its threshold was then 4,000 body tokens, and no
+relocation proposed here targets that (the doc caps are 6,000 / 5,000). Skills whose split
+took them under 510 lines cleared C1_length (mega-distill 529 → 321, api-ingest 534 → 453).
+After the 2026-09-04 alignment (above) C1b measures the same number as the audit against the
+same 6,000-token cap with the same exemption, so its failure count equals the audit's
+counted-over-cap set: 36 → 5 (distill, supergoal, capture, pr-fix, superplan).
 
 ## WORKFLOW proposals in detail
 

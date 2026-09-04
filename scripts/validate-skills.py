@@ -47,8 +47,9 @@ TIER 2 — EXECUTION (when fired, it does the right thing)
 
 TIER 3 — HYGIENE
   C1. Body ≤510 lines (Anthropic soft cap with 10-line tolerance)
-  C1b. Skills above a conservative 4,000-token chars/4 proxy carry an early
-       post-compaction recovery contract (5,000 per skill / 25,000 combined)
+  C1b. SKILL.md within the corpus soft body cap (scripts/token-audit.py
+       SOFT_BODY_CAP, chars/4 proxy); PERIODIC skills exempt through
+       `metadata: {body-cap: exempt, body-cap-reason: ...}` (docs/skill-cap-decisions.md)
   C2. argument-hint, if declared, has concrete example (>15 chars or empty)
   C3. allowed-tools declared (informational; not Anthropic-required)
 
@@ -86,6 +87,7 @@ Usage:
 """
 import argparse
 import ast
+import importlib.util
 import json
 import re
 import sys
@@ -97,6 +99,26 @@ try:
 except ImportError:
     print("ERROR: PyYAML required (pip install pyyaml)", file=sys.stderr)
     sys.exit(2)
+
+
+def _load_token_audit():
+    """scripts/token-audit.py owns the body-cap policy: SOFT_BODY_CAP, the chars/4
+    estimate and the `metadata.body-cap: exempt` reading (docs/skill-cap-decisions.md).
+    Import it by path (the hyphen blocks a normal import) so C1b states the number
+    and the exemption rule exactly once, in the audit."""
+    path = Path(__file__).with_name("token-audit.py")
+    spec = importlib.util.spec_from_file_location("token_audit", path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+_token_audit = _load_token_audit()
+SOFT_BODY_CAP = _token_audit.SOFT_BODY_CAP
+estimate_tokens = _token_audit.estimate_tokens
+body_cap_status = _token_audit.body_cap_status
 
 # Supported-model API compatibility is evaluated inside executable fenced examples.
 # This avoids turning one model generation's controls into a global ban for older
@@ -711,41 +733,32 @@ def score_skill(skill_dir: Path):
         if eval_count < required:
             notes["D1"] = f"found={eval_count}, need≥{required}"
 
-    # C1b: compaction continuity. Claude Code initially loads the rendered body,
-    # then reattaches only the first 5,000 tokens of each invoked skill after
-    # compaction (25,000 combined, newest-first). chars/4 is deliberately a
-    # conservative structural proxy, not a target-model tokenizer claim. Bodies
-    # above 4,000 proxy tokens need an early recovery contract so a session does
-    # not silently continue after losing tail instructions.
-    body_proxy = (len(body) + 3) // 4
-    compaction_marker = "**Compaction continuity:**"
-    early_body = body[:20_000]
-    marker_position = early_body.find(compaction_marker)
-    recovery_window = (
-        early_body[marker_position : marker_position + 1200]
-        if marker_position >= 0
-        else ""
-    )
-    recovery_is_actionable = (
-        bool(re.search(r"\bre-invoke\b", recovery_window, re.IGNORECASE))
-        and bool(re.search(r"\bstop and ask\b", recovery_window, re.IGNORECASE))
-    )
+    # C1b: body size against the corpus policy (docs/skill-cap-decisions.md). The
+    # whole SKILL.md is measured on the audit's chars/4 proxy against the audit's
+    # SOFT_BODY_CAP, so this check and `scripts/token-audit.py` report the same
+    # number. A PERIODIC skill declares `metadata: {body-cap: exempt,
+    # body-cap-reason: ...}` and passes at any size; an exemption without a
+    # reason keeps counting, as it does in the audit; a WORKFLOW skill over the
+    # cap fails. Until 2026-09-04 this check used a private 4,000-token
+    # threshold with a compaction-banner escape (the banner left every body on
+    # 2026-09-03) and failed 36 skills the policy accepted.
+    body_proxy = estimate_tokens(body)
+    body_cap, body_cap_reason = body_cap_status(fm)
     intentionally_inert = (
         fm.get("disable-model-invocation") is True
         and fm.get("user-invocable") is False
     )
     checks["C1b_token_budget"] = (
-        body_proxy <= 4000 or recovery_is_actionable or intentionally_inert
+        body_proxy <= SOFT_BODY_CAP or body_cap == "exempt" or intentionally_inert
     )
-    if body_proxy > 4000 and not intentionally_inert:
-        notes["C1b"] = (
-            f"body_proxy={body_proxy}; "
-            + (
-                "early compaction recovery contract present"
-                if recovery_is_actionable
-                else "missing actionable early compaction recovery contract"
-            )
-        )
+    if body_proxy > SOFT_BODY_CAP and not intentionally_inert:
+        if body_cap == "exempt":
+            verdict = f"exempt ({body_cap_reason})"
+        elif body_cap == "exempt-missing-reason":
+            verdict = "body-cap: exempt without a body-cap-reason; still counted"
+        else:
+            verdict = "over the soft body cap; split (WORKFLOW) or exempt with a reason (PERIODIC)"
+        notes["C1b"] = f"body_proxy={body_proxy} > {SOFT_BODY_CAP}; {verdict}"
 
     # E1: model-aware API compatibility (keeps the historical check key for
     # report/CI compatibility). Only exact covered-model examples are checked;
