@@ -43,10 +43,14 @@ os.environ["CLAUDE_ENCODING_GUARD_FORCE"] = "1"
 # The legacy guard suite characterizes the author-workstation compatibility
 # profile. Fresh-laptop default tests override this with an explicit empty
 # value and prove that only catastrophic checks remain enabled there.
-os.environ.setdefault("CLAUDE_BASH_POLICY_PACKS", "all")
+# Assigned, not setdefault: the installed operator profile exports
+# CLAUDE_BASH_POLICY_PACKS=delivery into every shell on the owner's machine, and
+# setdefault let that ambient value win, silently changing what 18 guard tests
+# exercised (2026-09-04). The suite's pack set is a contract, not a default.
+os.environ["CLAUDE_BASH_POLICY_PACKS"] = "all"
 # The org guard is configuration (review 2026-09-03); the guard tests keep the
 # historical fixture org so their block/allow assertions are unchanged.
-os.environ.setdefault("CLAUDE_FORBIDDEN_GITHUB_ORGS", "example-technologies")
+os.environ["CLAUDE_FORBIDDEN_GITHUB_ORGS"] = "example-technologies"  # assigned for the same reason
 
 windows_only = pytest.mark.skipif(
     platform.system() != "Windows",
