@@ -11,6 +11,10 @@
     "scripts/hook_exec_form.py",
     "scripts/wire_hooks.py"
   ],
+  "model_contracts": [
+    "scripts/model_contracts.py",
+    "contracts/model-capabilities.json"
+  ],
   "packaged_skills": [
     "gather-intel",
     "gather-repos",
