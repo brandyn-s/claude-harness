@@ -1952,3 +1952,15 @@ def test_residual_risk_registry_holds(entry):
     rc, _stdout, stderr = run_hook(HOOK, make_bash_input(entry["command"]))
     want = 2 if entry["expected"] == "block" else 0
     assert rc == want, (entry["command"], entry["why"], stderr)
+
+
+# ── hermeticity: the operator's live policy packs must not leak into the tests ──
+# 2026-09-04: installing the operator overlay exports CLAUDE_BASH_POLICY_PACKS=delivery
+# into every shell on the machine; conftest used setdefault, so the ambient value won
+# and 18 guard tests that assume the suite's "all" pack set failed. The pins are now
+# assignments; this test fails the moment they regress to setdefault.
+
+def test_conftest_pins_the_policy_packs_regardless_of_ambient_environment():
+    import os as _os
+    assert _os.environ["CLAUDE_BASH_POLICY_PACKS"] == "all"
+    assert _os.environ["CLAUDE_FORBIDDEN_GITHUB_ORGS"] == "example-technologies"
