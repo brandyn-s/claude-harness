@@ -101,8 +101,11 @@ class TestEndToEnd(unittest.TestCase):
         )
         self.assertEqual(proc.returncode, 0, proc.stderr)
 
-    def test_no_deny_rules_is_fail_open(self):
-        # Negative control: a settings file with no deny list must allow.
+    def test_no_deny_rules_still_denies_the_default_secret_paths(self):
+        # 2026-09-04 contract change: the fresh core no longer ships Read() deny
+        # rules (they made Claude Code prompt on unresolvable Bash reads), so the
+        # default secret-path list applies even with an empty deny list. A
+        # non-secret path still passes.
         empty = os.path.join(self._tmp.name, "empty.json")
         with open(empty, "w", encoding="utf-8") as f:
             json.dump({"permissions": {"deny": []}}, f)
@@ -110,13 +113,25 @@ class TestEndToEnd(unittest.TestCase):
             {"tool_name": "Read", "tool_input": {"file_path": "/tmp/claude/anything/.env"}},
             settings_path=empty,
         )
+        self.assertEqual(proc.returncode, 2, proc.stderr)
+        proc = run_hook(
+            {"tool_name": "Read", "tool_input": {"file_path": "/tmp/claude/anything/notes.md"}},
+            settings_path=empty,
+        )
         self.assertEqual(proc.returncode, 0, proc.stderr)
 
-    def test_missing_settings_file_is_fail_open(self):
-        # Fail-open control: unreadable settings path -> allow (documented behavior).
+    def test_missing_settings_file_still_denies_the_default_secret_paths(self):
+        # Rule loading is fail-open (an unreadable settings file adds no rules),
+        # but the default secret-path list does not depend on settings at all.
+        missing = os.path.join(self._tmp.name, "nonexistent.json")
         proc = run_hook(
             {"tool_name": "Read", "tool_input": {"file_path": "/tmp/claude/anything/.env"}},
-            settings_path=os.path.join(self._tmp.name, "nonexistent.json"),
+            settings_path=missing,
+        )
+        self.assertEqual(proc.returncode, 2, proc.stderr)
+        proc = run_hook(
+            {"tool_name": "Read", "tool_input": {"file_path": "/tmp/claude/anything/notes.md"}},
+            settings_path=missing,
         )
         self.assertEqual(proc.returncode, 0, proc.stderr)
 
@@ -135,3 +150,35 @@ class TestEndToEnd(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ── 2026-09-04: static fallback so the fresh core can drop Read() deny rules ──
+# Read() rules in permissions.deny make Claude Code prompt on every Bash command
+# whose read target it cannot resolve (`cd dir && rg x file`), which the owner
+# will not tolerate. The fresh core now enforces the secret paths here (Read tool)
+# and in the sandbox denyRead (Bash) instead, so this hook must not depend on the
+# rules being present.
+
+def _settings_without_read_rules(tmp_path):
+    p = tmp_path / "settings.json"
+    p.write_text(json.dumps({"permissions": {"deny": ["Edit(~/.ssh/**)", "Bash(rm -rf /)"]}}), encoding="utf-8")
+    return str(p)
+
+
+def test_secret_paths_are_denied_without_read_rules_in_settings(tmp_path):
+    settings = _settings_without_read_rules(tmp_path)
+    p = run_hook({"tool_name": "Read", "tool_input": {"file_path": os.path.expanduser("~/.ssh/id_rsa")}}, settings)
+    assert p.returncode == 2, (p.returncode, p.stdout, p.stderr)
+    p = run_hook({"tool_name": "Read", "tool_input": {"file_path": str(tmp_path / "project" / ".env")}}, settings)
+    assert p.returncode == 2, (p.returncode, p.stdout, p.stderr)
+    p = run_hook({"tool_name": "Read", "tool_input": {"file_path": str(tmp_path / "project" / "README.md")}}, settings)
+    assert p.returncode == 0, (p.returncode, p.stdout, p.stderr)
+
+
+def test_env_pattern_override_replaces_the_default_set(tmp_path, monkeypatch):
+    settings = _settings_without_read_rules(tmp_path)
+    monkeypatch.setenv("CLAUDE_READ_DENY_PATTERNS", "**/private-notes.md")
+    p = run_hook({"tool_name": "Read", "tool_input": {"file_path": str(tmp_path / "x" / "private-notes.md")}}, settings)
+    assert p.returncode == 2, (p.returncode, p.stderr)
+    p = run_hook({"tool_name": "Read", "tool_input": {"file_path": os.path.expanduser("~/.ssh/id_rsa")}}, settings)
+    assert p.returncode == 0, "an explicit override replaces the defaults rather than adding to them"

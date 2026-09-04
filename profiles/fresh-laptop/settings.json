@@ -3,13 +3,6 @@
   "permissions": {
     "defaultMode": "acceptEdits",
     "deny": [
-      "Read(~/.ssh/**)",
-      "Read(~/.aws/**)",
-      "Read(**/.env)",
-      "Read(**/.env.*)",
-      "Read(**/credentials.json)",
-      "Read(**/.credentials.json)",
-      "Read(**/secrets.*)",
       "Edit(~/.ssh/**)",
       "Edit(~/.aws/**)",
       "Edit(**/.env)",
@@ -32,7 +25,10 @@
         "~/.ssh",
         "~/.config/gcloud",
         "**/.env",
-        "**/.env.*"
+        "**/.env.*",
+        "**/credentials.json",
+        "**/.credentials.json",
+        "**/secrets.*"
       ]
     }
   },

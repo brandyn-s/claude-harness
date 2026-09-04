@@ -50,6 +50,7 @@ def test_recommended_install_builds_portable_core_in_empty_config(tmp_path: Path
         "bash-pretooluse-dispatcher.py",
         "config-guard.py",
         "result-injection-guard.py",
+        "read-deny-guard.py",
     }
     assert (config / "rules" / "outcome-over-verification.md").is_file()
     assert (config / "rules" / "claude-md-quality.md").is_file()
@@ -68,6 +69,7 @@ def test_recommended_install_builds_portable_core_in_empty_config(tmp_path: Path
         "poll-loop-nudge.py",
         "config-guard.py",
         "result-injection-guard.py",
+        "read-deny-guard.py",
     ):
         assert (config / "hooks" / name).is_file(), name
 

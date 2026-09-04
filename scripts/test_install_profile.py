@@ -76,7 +76,7 @@ def test_apply_appends_permission_lists_instead_of_replacing(tmp_path: Path) -> 
     merged = json.loads(target.read_text(encoding="utf-8"))
     assert "Bash(gitleaks detect *)" in merged["permissions"]["allow"]
     assert "Read(~/.private/**)" in merged["permissions"]["deny"]
-    assert "Read(~/.ssh/**)" in merged["permissions"]["deny"]
+    assert "Edit(~/.ssh/**)" in merged["permissions"]["deny"]
     assert len(merged["permissions"]["deny"]) == len(set(merged["permissions"]["deny"]))
 
 
