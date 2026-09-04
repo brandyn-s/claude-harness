@@ -7,6 +7,8 @@ effort: high
 metadata:
   author: example-security-engineering
   version: "1.0"
+  body-cap: exempt
+  body-cap-reason: "PERIODIC: 30-60-turn study of one builder's repos and PRs producing a KB artifact and PR; no requires_skills edge, install roster, or schedule"
 allowed-tools: Agent AskUserQuestion Bash Edit Glob Grep Read Write mcp__exa__* mcp__memory-search__*
 ---
 

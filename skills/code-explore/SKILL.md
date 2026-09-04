@@ -202,108 +202,11 @@ Use `voyage` + `voyage-context` (both >0.79 MRR on Nix). Avoid Voyage + Jina for
 
 ### Step 1.6: Service/Module Identification Pattern
 
-When Step 1 classifies a query as **Identification** ("what is X", "what
-does X do", "tell me about X"), run this fixed recipe before falling back
-to free-form exploration. The pattern is biased toward COMPLETENESS — it
-eliminates the "I forgot to look at the consumer" class of misses.
-
-**Step A — Discover the surface (graph search, paginated):**
-
-```
-search_graph(name_pattern=".*[Xx].*", project=<proj>, limit=55)
-# If response has has_more=true OR total > limit:
-search_graph(name_pattern=".*[Xx].*", project=<proj>, limit=100, offset=55)
-# Continue paginating until has_more=false. Don't accept "I saw the top 15".
-```
-
-`search_graph` returns nodes degree-ranked by default — the highest-degree
-file is usually the canonical entry point (main.rs / api.rs / config.rs).
-**This is the workhorse step.** Pagination + degree ranking tends to
-surface every important file (publisher, subscriber, lifecycle controller,
-config) by itself for any well-named service.
-
-**Step B — Architecture docs (high-signal, descriptive):**
-
-```
-ls docs/src/architecture/**/*.md          # if present, read service-relevant ones
-grep -rn "X\b" docs/src/architecture/     # named references to the concept
-```
-
-Architecture docs describe the system's CURRENT state. RFCs (typically
-under `docs/src/rfcs/`) describe PLANS — they may or may not be
-implemented. Always prefer architecture docs for "what is X." Treat RFC
-titles as design hints, never as implementation evidence (see Step D).
-
-For ExampleApp, `docs/src/architecture/services/example-service/architecture.md`
-revealed the `torchyd2 → V4L loopback → exampleapp` pipeline that no other
-source surfaced.
-
-**Step C — Cross-service edges (when present, high-value; not always present):**
-
-```
-# HTTP and async cross-service calls touching X
-query_graph(query="MATCH (a)-[r:HTTP_CALLS]->(b) WHERE a.qualified_name =~ '(?i).*X.*' OR b.qualified_name =~ '(?i).*X.*' RETURN a.name, b.name, r.url_path, r.method, r.confidence LIMIT 30")
-
-# USAGE references (variable assignments, callbacks, references in other modules)
-query_graph(query="MATCH (a)-[r:USAGE]->(b) WHERE b.name = 'X_FOO' OR b.name = 'X_BAR' RETURN a.name, a.file_path, b.name LIMIT 30")
-```
-
-When these edges exist, they surface consumers (web clients, sidecars,
-adjacent services) automatically. **But empty results don't mean no
-consumers.** Edge density is uneven across languages and module types:
-Rust services with config-struct USAGE patterns and CLI subprocess
-glue (gandropd → systemctl) often show zero USAGE/CALLS edges to the
-service. ExampleApp is one such case (0 rows for both queries despite real
-consumers existing). When edge queries are empty, fall back to:
-  - architecture docs (Step B)
-  - `grep` for the service name across the repo
-  - the rationale/TODO nodes from search_graph (often surface integration
-    points: see `MoqPlayer.tsx:110` TODO that revealed the local relay
-    plan)
-
-Note: code-graph's Cypher supports `IN [list]` for the multi-name
-case (`WHERE b.name IN ['Foo', 'Bar', 'Baz']`) — added in B1
-(2026-05-07). Regex on `qualified_name` works but returns nothing if
-the edge doesn't exist; explicit name-equality queries (`= 'X' OR =
-'Y'` or the `IN` form) on identifiers found in Step A are more
-reliable than wide regex.
-
-**Step D — Read the canonical source files:**
-
-Read in this order: `Cargo.toml` / `package.json` / `flake.nix` (declares
-deps and ports), then `main.rs` / `index.ts` (entry point), then
-`api.rs` / `routes.ts` (public surface), then `config.rs` (data model),
-then any consumer files surfaced in Steps A-C.
-
-**Step E — Verify before claiming:**
-
-For any claim derived from doc filenames or doc text, grep for an
-implementation reference. If an RFC is `rfc-2025-03-los-blos-video-
-switching.md`, grep for "switching" / "los" / "blos" in source. If an
-architecture doc claims "torchyd2 → V4L loopback → exampleapp", check that
-the configured `video_dev` paths match the loopback device numbers
-declared in `nix/`. Don't carry doc claims into the answer unless code
-references them — flag claims you couldn't fully verify with `⚠️`.
-
-**Anti-patterns:**
-- Stopping after the first 15 graph results when `has_more=true`. The
-  next 40 routinely include the consumer/sidecar/proxy that closes the
-  loop.
-- Treating RFC titles as implementation evidence. RFCs describe planned
-  or design-stage behavior that may or may not exist in code.
-- Treating empty edge-query results as "no consumers exist." Many
-  service relationships in this repo go through CLI subprocesses,
-  V4L loopback, systemd, or NixOS module composition — none of which
-  produce USAGE/CALLS/HTTP_CALLS edges.
-- Trusting `HTTP_CALLS` edge counts on older code-graph versions.
-  Measured 2026-05-07 against PSM: 3 HTTP_CALLS edges total in an
-  80K-node graph, with 2 of 3 being false positives (filesystem path
-  treated as URL, JS file self-loop). Real cross-service HTTP edges
-  (exampleapp → token-server, all VendorRouter client calls, all example-gateway
-  fetch routes) are missing from the graph despite existing in source.
-  Until the extractor is fixed, assume HTTP_CALLS is sparse and fall
-  back to architecture docs + grep for cross-service relationships.
-  Re-baseline this pattern after each code-graph version bump.
+When Step 1 classifies a query as **Identification** ("what is X", "what does X do", "tell me
+about X"), run the fixed, completeness-biased recipe in
+`references/service-module-identification.md` (Step A paginated `search_graph` surface → B
+architecture docs → C cross-service edges → D canonical source files → E verify before claiming,
+plus its anti-patterns) before any free-form exploration.
 
 ### Step 2: Execute primary tool
 
@@ -379,95 +282,10 @@ an unscoped search.
 
 ## Graph Query Quick Reference
 
-### Structure Exploration
-
-Get an overview of what's in the graph:
-```
-get_graph_schema          # Node/edge counts, relationship patterns
-search_graph(label="Module")  # List top-level modules
-search_graph(label="Route")   # List all REST routes
-search_graph(label="Function", name_pattern=".*Handler.*")  # Find by name
-get_code_snippet(qualified_name="project.path.FunctionName")  # Read source
-```
-
-Scope to a directory with `qn_pattern=".*services\\.order\\..*"`.
-
-### Dead Code & Quality Analysis
-
-```
-# Dead code: functions with zero inbound calls (excluding entry points)
-search_graph(label="Function", relationship="CALLS", direction="inbound", max_degree=0, exclude_entry_points=true)
-
-# High fan-out (calling 10+ others — refactor candidates)
-search_graph(label="Function", relationship="CALLS", direction="outbound", min_degree=10)
-
-# High fan-in (called by 10+ others — critical functions)
-search_graph(label="Function", relationship="CALLS", direction="inbound", min_degree=10)
-
-# Files that change together (hidden coupling)
-query_graph(query="MATCH (a)-[r:FILE_CHANGES_WITH]->(b) WHERE r.coupling_score >= 0.5 RETURN a.name, b.name, r.coupling_score ORDER BY r.coupling_score DESC LIMIT 20")
-```
-
-Before deleting dead code candidates, verify with `trace_call_path(direction="inbound", depth=1)` and check for USAGE edges.
-
-### Call Chain Tracing
-
-`trace_call_path` requires an **exact** name. Discover it first:
-```
-search_graph(name_pattern=".*Order.*", label="Function")
-```
-
-Then trace:
-```
-trace_call_path(function_name="ProcessOrder", direction="both", depth=3)
-# Always use direction="both" — "outbound" misses cross-service callers
-
-# Risk-classified impact analysis
-trace_call_path(function_name="ProcessOrder", direction="inbound", depth=3, risk_labels=true)
-# Returns CRITICAL (hop 1), HIGH (hop 2), MEDIUM (hop 3), LOW (hop 4+)
-
-# Git diff blast radius
-detect_changes()                    # All uncommitted changes
-detect_changes(scope="branch", base_branch="main")  # Branch delta
-```
-
-### Cross-Service & Async
-
-```
-# HTTP calls between services
-query_graph(query="MATCH (a)-[r:HTTP_CALLS]->(b) RETURN a.name, b.name, r.url_path, r.confidence LIMIT 20")
-
-# Interface implementations
-query_graph(query="MATCH (s)-[r:OVERRIDE]->(i) WHERE i.name = 'Read' RETURN s.name, i.name LIMIT 20")
-
-# Read references (callbacks, variable assignments)
-query_graph(query="MATCH (a)-[r:USAGE]->(b) WHERE b.name = 'ProcessOrder' RETURN a.name, a.file_path LIMIT 20")
-```
-
-### Key Pitfalls
-
-1. `search_graph(relationship="HTTP_CALLS")` filters nodes by degree — does NOT return edges. Use `query_graph` with Cypher to see actual edges.
-2. `query_graph` caps at 200 rows — COUNT queries silently undercount. Use `search_graph` with degree filters for counting.
-3. `trace_call_path` needs exact names — use `search_graph(name_pattern=...)` first.
-4. `search_graph` with degree filters has no row cap (unlike `query_graph`).
-5. **`WITH ... COUNT(*)` aggregation may silently return raw un-aggregated rows** up to the 200-row cap on older code-graph versions (verified 2026-05-07 against PSM). The query parses but the GROUP BY semantics don't apply — you get 200 raw matches that look like an answer but aren't. To detect: compare returned row count to the source MATCH cardinality; if equal, aggregation didn't engage. Workaround: use `search_graph` with `min_degree`/`max_degree` filters for counting, or post-process raw rows in the caller.
-6. **`IN [list]`, `IS NULL`, `IS NOT NULL` are supported** (B1: 2026-05-07; IS NULL/IS NOT NULL: Plan 3 Phase A 2026-05-06). `WHERE n.name IN ['a', 'b']`, `WHERE n.docstring IS NOT NULL`, and `WHERE n.start_line IS NULL` all work. `IN` lists must be string or number literals; empty lists are rejected at parse time.
-
-> For full Cypher syntax reference, edge types, and node labels: see `~/.claude/skills/codebase-memory-exploring/references/code-graph-reference.md`
-
-## Deep Architecture Review
-
-For "understand this codebase" queries that need a comprehensive structured
-output (not just a quick answer), load the architecture review template at
-`~/.claude/skills/evaluate-repos/references/architecture-review-template.md`.
-
-It provides a Staff Engineer Guide format covering: executive summary, core
-architectural insight, decision log, dependency rationale, tech debt, security
-model, testing strategy, and recommended source file reading order.
-
-Use when: the user asks for a full architecture review, codebase onboarding
-doc, or "explain this entire system to me." Skip for targeted queries.
-(Pattern source: microsoft/skills wiki-onboarding — Context7 registry 2026-04-06)
+Copy-ready `search_graph` / `query_graph` / `trace_call_path` / `detect_changes` recipes for structure
+exploration, dead-code and fan-in/fan-out analysis, call-chain tracing, cross-service edges, plus the
+six known code-graph pitfalls, and the Deep Architecture Review template pointer: see
+`references/graph-query-quick-reference.md`.
 
 ## Success Criteria
 

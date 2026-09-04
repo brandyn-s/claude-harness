@@ -12,6 +12,8 @@ effort: medium
 metadata:
   author: example-security-engineering
   version: "1.0"
+  body-cap: exempt
+  body-cap-reason: "PERIODIC: memory audit-and-prune sweep the session-start consistency module reminds about when overdue, disable-model-invocation, 15-40 turns; no requires_skills edge into it"
 compatibility:
   # Requires memory-search MCP to audit agent memory files.
   requires:

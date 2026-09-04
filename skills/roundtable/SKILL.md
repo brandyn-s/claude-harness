@@ -23,6 +23,8 @@ verified_on: 2026-08-08
 metadata:
   author: example-security-engineering
   version: "2.0"
+  body-cap: exempt
+  body-cap-reason: "PERIODIC: occasional multi-model adversarial review run with a USD budget, 15-40 turns; no requires_skills edge into it"
 effort: high
 ---
 

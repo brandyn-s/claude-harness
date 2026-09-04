@@ -60,9 +60,21 @@ deterministic:
   - body_not_contains: "$HOME/.claude/bin/transcript_condense.py"
   - body_contains: "--max-tokens 180000"
 
-  # --- Corpus-mode instrument-validation gate. Mandatory before acting on
-  # extractor output; without it a broken extractor's results look like findings.
-  - body_contains: "gate:read-before-edit"
+  # --- Corpus-mode instrument-validation gate (`gate:read-before-edit` must surface at
+  # top-tier breadth before acting on extractor output). Corpus Mode moved verbatim to
+  # references/corpus-mode.md on 2026-09-04 (docs/skill-cap-decisions.md); the harness has
+  # no reference-content assertion, so pin the body's route to it and the file's presence.
+  - body_contains: "references/corpus-mode.md"
+  - ref_resolves:
+      - corpus-mode.md
+
+  # --- Queued-turn recovery (2026-09-04 split): the four blind-spot sections live in
+  # references/queued-turn-recovery.md and the REQUIRED post-condense sweep is the bundled,
+  # tested helper (hooks/test-hooks/test_recover_queued_turns.py), invoked from Step 1 —
+  # never an inline heredoc that can fail silently.
+  - body_contains: "scripts/recover_queued_turns.py"
+  - ref_resolves:
+      - queued-turn-recovery.md
 
   # --- Corpus mode keeps its current whole-session extraction prompt; the
   # retired per-chunk census prompt must not be distributed.

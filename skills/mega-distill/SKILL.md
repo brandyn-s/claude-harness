@@ -122,56 +122,14 @@ to **Corpus Mode** below. The single-session path (no `--corpus`) continues here
 
 ---
 
-## Step 0.5 — A turn that TRIGGERED a compaction is not in the slice; read the boundary summary for it
+## Step 0.5 — Queued-turn blind spots (read before trusting the slice's user-turn spine)
 
-**Structural blind spot — NOT a bug to fix in `transcript_condense.py`.** A message the
-user sends WHILE a turn is still running is queued, and if it is what pushes the context
-over the limit, the compaction consumes it: the verbatim turn then exists **nowhere** in
-the transcript as a standalone `type=="user"` record. It survives only as a line item
-inside the boundary record's own generated summary prose (an `isCompactSummary` record
-whose `message.content` is one long string). The condenser is RIGHT not to emit that
-summary — the slice exists precisely to replace it — and emitting user text from the
-boundary record produces a byte-identical slice (`references/run-history.md`). A message
-urgent enough to be sent mid-turn is disproportionately likely to be the session's PIVOT
-— a correction, an objection, a stop — exactly the turn a recovery pass most needs.
-
-**REQUIRED when a slice's user-turn spine ends abruptly, or the arc changes direction
-with no visible cause:** read the boundary record's summary directly and mine its
-enumerated user-message list. Extract the `isCompactSummary` records' `message.content`
-with a small Python script (select `r.get("isCompactSummary")`, print `message.content`).
-
-Treat that list as the ONLY record of those turns. Do NOT conclude "the user said
-nothing between X and Y" from the slice alone — report "the slice has no user turn
-there; the boundary summary enumerates N" and quote the summary.
-
----
-
-### Second blind spot: a MID-TURN user message is dropped as injected context
-
-Distinct mechanism from the boundary case above, same consequence. A message the user
-sends WHILE a turn is running is delivered wrapped (`"The user sent a new message while
-you were working:"`), which `transcript_condense.py` classifies as an **injected context
-message** and DROPS. So it can be present in the live context and ABSENT from the slice —
-the inverse of the boundary case, and invisible unless you look for it.
-
-Worse, the queued-delivery path can strip a turn's ANTECEDENT: a bare `Proceed with X`
-may be the tail of a question you never received, so the slice's spine is the only place
-the question survives.
-
-**REQUIRED before treating a slice's user spine as complete:**
-
-```bash
-# 1. mid-turn messages the condenser dropped
-grep -c "sent a new message while you were working" <transcript>
-# 2. compare the slice's spine to the transcript's own user records
-grep -c "^USER: " <slice>
-```
-
-If the transcript has mid-turn deliveries the slice lacks, extract them from the raw
-transcript and hand them to /distill alongside the slice. Do NOT report a user-turn count
-from the slice as the session's ask count.
-
-(Both shapes verified in one session — `references/run-history.md`.)
+Four delivery shapes leave a user's mid-turn message OUT of the slice: a turn consumed by the
+compaction it triggered (it survives only inside the boundary record's summary), the injected-context
+wrapper the condenser drops, `type=="queue-operation"` records, and `attachment`/`queued_command`
+records. The probes, the required deterministic sweep, and the reporting rules are in
+`references/queued-turn-recovery.md`. Do NOT conclude "the user said nothing between X and Y" from
+the slice alone, and do NOT report the slice `USER:` count as the session's ask count.
 
 ---
 
@@ -239,6 +197,21 @@ largest `slice_NNN.txt` to confirm it's under a window; if it's over, re-run wit
 UTF-8-byte estimate (2.5 bytes/token) over-counts, so this rarely fires — but it's the same
 instrument-soundness discipline the rest of the toolchain uses.
 
+**Queued-turn sweep (REQUIRED after every condense).** Run the bundled helper against the manifest
+just written and hand its output to /distill together with the slice (the four blind spots it closes:
+`references/queued-turn-recovery.md`):
+
+```bash
+python3 "$MEGA_DISTILL_DIR/scripts/recover_queued_turns.py" "$TRANSCRIPT" \
+  --manifest "$RECOVERY_TMP/mega-distill-<session8>/condense-manifest.json" \
+  --output "$RECOVERY_TMP/mega-distill-<session8>/recovered_user_turns.txt"
+```
+
+It prints a JSON summary (`delivery_records`, `dropped_prompts`, `probe_state: verified`,
+`unique_prompts`) on success and fails closed (`UNVERIFIED …`, exit 2) on any shape it cannot verify —
+treat exit 2 as an unverified spine, never as zero dropped turns. State the corrected ask count
+(slice `USER:` count + recovered) explicitly; the slice spine alone UNDERCOUNTS.
+
 ---
 
 ## Step 2 — Hand each slice to /distill with whole-session framing
@@ -296,95 +269,11 @@ apply is never applied).
 
 ## Corpus Mode — cross-session recurrence (`--corpus`)
 
-Single-session mega-distill recovers ONE compacted session for /distill. **Corpus mode answers a
-different question no per-session tool can:** *what friction do I hit REPEATEDLY across many
-sessions?* /distill only ever sees its in-context session; /retrospective and /review-learnings read
-already-distilled artifacts (the lossy <2% projection), not raw transcripts. Raw transcripts are the
-only complete record, and corpus mode is the only thing that mines them across sessions.
-
-**The deliverable is the BREADTH-RANKED recurrence table — not a per-session pile.** "Pattern X
-recurs in N of M sessions," ranked by breadth. A friction in 175/1197 sessions (1-in-7) is a systemic
-habit worth a rule or a hook; 200 occurrences in ONE session is just a bad day. Breadth is the signal,
-and it exists ONLY cross-session. Concatenating per-session lessons would rebuild the retired census
-(2026-06-21 red-team) — corpus mode is anti-census by construction: the ranking IS the diagnosis.
-
-### Layer 1 — Friction spine (deterministic, FULL corpus, no LLM, no token cost)
-
-The cheap fabrication-proof core. Streams every transcript, extracts friction events
-(error `tool_result`s, hook/guard blocks, gate violations, user corrections, compaction boundaries)
-into NORMALIZED SIGNATURES, and aggregates by breadth. Runs over all ~1209 sessions in ~2 seconds.
-
-```bash
-# cohort = ALL transcripts across ALL project dirs (recursive find — NOT a single dir; the corpus
-# spans per-repo/per-tmp project dirs, only ~450 of 1209 live in the main project dir)
-CORPUS_TMP="${TMPDIR:-${TEMP:-/tmp}}/claude-corpus"
-mkdir -p "$CORPUS_TMP"
-find ~/.claude/projects -name '*.jsonl' -type f | sort > "$CORPUS_TMP/cohort.txt"
-python3 ~/.claude/bin/transcript_friction_corpus.py \
-  --cohort "$CORPUS_TMP/cohort.txt" --out-dir "$CORPUS_TMP/friction-run" --min-breadth 2
-# Gate the table (grounding + arithmetic + no-stray): MUST pass before trusting/shipping any of it.
-python3 ~/.claude/bin/transcript_friction_gate.py \
-  --recurrence "$CORPUS_TMP/friction-run/friction_recurrence.json" \
-  --cohort "$CORPUS_TMP/cohort.txt"
-```
-
-**Instrument-validation gate (mandatory before acting on output):** `gate:read-before-edit` MUST
-surface at top-tier breadth (the rules record it as the #1 self-inflicted friction, ~144 fires/14d).
-If a known-positive friction is ABSENT, the extractor is broken — fix it before trusting any row
-(validate-detection-on-known-positives). Also confirm the top signature exceeds ~5-10% breadth (else
-signatures over-split) and the gate exits 0.
-
-### Layer 2 — Semantic lessons (LLM, BOUNDED to >1MB cohort, gated)
-
-The meta-pattern layer distill is prized for (e.g. "optimized completeness over diagnosis") is
-*prose* — it under-clusters by signature, so it needs an LLM, which means cost + fabrication risk →
-bounded + gated. The per-session map prompt is `references/corpus-extract-prompt.md` (extract the FEW
-load-bearing prose lessons per session, NOT a census). Select the cohort, map one extract/session
-(substitute the bundled condenser path and `$CORPUS_TMP` for the prompt's
-`__CONDENSER_PATH__` and `__CORPUS_TMP__` placeholders), assert
-findings-file-count == cohort-count (FLAW-7 completeness gate) BEFORE clustering, cluster by pattern,
-then gate coverage + no-fabrication + recomputed breadth. Bound the semantic layer to the `>1MB`
-cohort (~97 sessions); the friction spine already covers the full corpus. **Always print the coverage
-line** — `Friction: 1209/1209 (100%). Semantic: 97/1209 (>1MB cohort); 1112 smaller sessions covered
-by friction spine only.` No silent truncation.
-
-### Ship: the cluster RANKING prioritizes; /distill JUDGES-AND-WRITES each cluster (NOT a summary)
-
-CRITICAL — this is the step where corpus mode earns its keep or fails. The breadth-ranked cluster
-table is **prioritization input, NOT the deliverable**. Clustering is a LOSSY aggregation — it is the
-INVERSE of distill's per-item judgment: it answers "what recurs" by averaging specifics into a count,
-which is exactly the wrong operation for "fix it". A cluster says "bash-antipattern-reflex, 50/97
-sessions"; the FIX lives in its 56 member-lessons, each carrying a concrete `proposed_fix`. Summarizing
-the cluster emits a frequency report and BURIES the shippable specifics
-(`references/run-history.md`).
-
-So: for each cluster, IN BREADTH-RANK ORDER (highest first — that is all the ranking is for), hand its
-**member-lessons** (not the cluster summary) to /distill's judge-and-write loop, with the cross-session
-breadth supplied as PRIORITIZATION + DEDUP context, and let /distill do what it does per-session:
-
-1. **JUDGE the member-lessons** — distill decides: is this one durable fix or several? what tier? It
-   does NOT treat the cluster as one finding — it reads the N specific `proposed_fix` fields and finds
-   the distinct actionable items the cluster name flattened together (a "bash-antipattern" cluster
-   contains a tail-buffering reflex AND a specific wrong hook-recovery-message AND a pipefail/grep-q
-   gap — three different dispositions).
-2. **DEDUP against `rules/` + memory** (distill Step 1d) — this is load-bearing: many cross-session
-   lessons describe a gap that a LATER session already fixed. Distill's dedup drops the stale ones
-   ("already covered by platform-constraints.md:141, no action") that a cluster summary would have
-   re-reported as open.
-3. **WRITE THE ACTUAL FIX per surviving item** — the concrete artifact, like distill always does:
-   T1 rule edit (exact GUARD/procedure text), T2 memory fact, SKILL step, or a hook-message/code fix.
-   Not "a reminder about X" — the diff. Auto-ship via /ship (branch + PR + auto-merge), same contract
-   as single-session mega-distill Step 3.
-4. **Breadth ≥25% AND already-ruled-but-still-recurring** → this is the one place a cluster-level
-   output is itself the finding: it means a rule exists and is violated under load → PROPOSE hook /
-   middle-tier enforcement (do NOT auto-build a blocking hook: verify-effectiveness HARD-REQUIRES the
-   historical-replay gate, >10% block-rate = DoS; a UserPromptSubmit judgment-reminder needs its fire
-   rate replayed to <~10% before shipping). The corpus run already produced the replay set the
-   build needs. Emit as a ready next step, not an opt-in toggle.
-
-The breadth number NEVER substitutes for the fix. It decides ORDER and informs DEDUP. The fix is always
-distill's per-lesson write. If the output of this step is a table of counts rather than a set of shipped
-diffs, the step FAILED — re-run it through distill's loop.
+A different entry point: a CROSS-SESSION run over a cohort of raw transcripts that ranks friction by
+BREADTH (sessions affected, not occurrences) and hands each cluster's member-lessons, in breadth-rank
+order, to /distill's judge-and-write loop — so the output is shipped diffs, not a table of counts.
+Full procedure (Layer 1 friction spine, Layer 2 bounded semantic lessons, the ship step and its
+instrument-validation gates): `references/corpus-mode.md`.
 
 ---
 
@@ -430,99 +319,3 @@ in context, run /retro" and STOPS. Byte-size alone does not trip the gate (FLAW-
 parts under the 180K estimate, preferring compaction boundaries and falling back to record
 boundaries → /distill each → reconcile duplicate lessons across the split.
 
----
-
-### Third blind spot: a mid-turn message delivered as `type=="queue-operation"`
-
-The Step 0.5 probe above (`grep -c "sent a new message while you were working"`) does not
-find every mid-turn message, and it fails in the most misleading way: on a transcript
-containing this SKILL.md's own text, that grep returns a NONZERO count composed entirely
-of **phantom self-referential hits** while the real message goes unfound. A session pivot
-has been stored as `type=="queue-operation"` records with no wrapper at all
-(`references/run-history.md`).
-
-**REQUIRED — validate the probe against a known-positive, do not merely run it.** Recall a
-message you know you answered, grep the raw transcript for a distinctive phrase, and
-inspect the record `type`:
-
-```bash
-grep -c "<phrase you remember answering>" <transcript>   # present in the transcript?
-grep -c "<phrase you remember answering>" <slice>        # did the slice keep it?
-```
-
-Then print the `type` of each matching record. Any type OTHER than `user` —
-`queue-operation`, `attachment` — is a delivery shape the condenser drops; extract those
-and hand them to `/distill` alongside the slice.
-
-Do NOT report a user-turn count from the slice as the session's ask count, and do NOT
-treat a nonzero wrapper-grep as proof the probe works: filter its hits to real
-`type=="user"` records first, or you are counting this file.
-
-### Fourth blind spot: `attachment` / `queued_command` — and why the phrase-probe misses it
-
-The three probes above all require you to REMEMBER a phrase to grep for. That is the weak
-link: the turns most likely to be dropped are the ones a compaction ate, which are exactly
-the ones you cannot recall a phrase from. **Replace the recall-based probe with a
-deterministic sweep.**
-
-Mid-turn asks are also carried as `type=="attachment"` with
-`attachment.type == "queued_command"`, often with NO `queue-operation` twin — so a probe
-keyed on `queue-operation` (blind spot 3) misses them too, and the phrase-probes found none
-of five dropped asks in the measured session (`references/run-history.md`).
-
-**REQUIRED after every condense — run this; do not grep for a remembered phrase:**
-
-**`attachment.prompt` is NOT always a string** — it is `str` on some records and a
-`list` (of strings, or of `{type, text}` blocks) on others, within the SAME
-transcript. A sweep that assumes `str` dies with
-`AttributeError: 'list' object has no attribute 'split'`, and — the dangerous part —
-wrapping that in the `except Exception: continue` two lines above turns the crash
-into a silent **zero recovered turns**, which reads exactly like a clean sweep.
-Flatten defensively; never `try/except` around the flatten.
-
-```bash
-python3 - "$TRANSCRIPT" "$SLICE" "$OUTDIR/recovered_user_turns.txt" <<'PY'
-import json, sys
-t, s, o = sys.argv[1], sys.argv[2], sys.argv[3]
-sl = open(s, encoding="utf-8", errors="replace").read()
-
-def flat(p):                      # str | list[str] | list[{type,text}] | dict
-    if isinstance(p, str):  return " ".join(p.split())
-    if isinstance(p, list):
-        return " ".join(" ".join(
-            x if isinstance(x, str) else (x.get("text") or "") for x in p).split())
-    if isinstance(p, dict): return " ".join((p.get("text") or "").split())
-    return ""
-
-out, seen = [], set()
-for i, l in enumerate(open(t, errors="replace"), 1):
-    if '"queued_command"' not in l: continue
-    try: r = json.loads(l)
-    except Exception: continue          # malformed LINE only — never the flatten
-    a = r.get("attachment") or {}
-    if a.get("type") != "queued_command": continue
-    p = flat(a.get("prompt"))
-    # task-notifications are machine noise, not user asks; dedup repeated deliveries
-    if not p or p in seen or p.startswith("<task-notification>"): continue
-    seen.add(p)
-    hit = p[:50] in sl
-    print(("IN SLICE " if hit else "DROPPED  "), f"L{i}", p[:200])
-    if not hit: out.append(f"[raw line {i}] {p}")
-open(o, "w", encoding="utf-8").write("\n\n".join(out) + "\n")
-print(f"\nunique prompts: {len(seen)}   DROPPED from slice: {len(out)}")
-PY
-```
-
-Pass **both** the slice and `recovered_user_turns.txt` to `/distill`, and state the
-corrected ask count explicitly (slice `USER:` count + recovered), because the slice
-spine UNDERCOUNTS the session asks and `/distill` will otherwise reason about an arc
-missing its pivots.
-
-**Do NOT report the slice `USER:` count as the session ask count** — measured
-undercounts of 5 and 12 asks, some of which had reshaped the session's rubric
-(`references/run-history.md`).
-
-**Sanity-check the sweep itself before trusting a zero.** A `DROPPED total: 0` on a
-compacted session is more likely a broken sweep than a clean one — confirm the script
-printed a nonzero `unique prompts` count first. That is the same
-validate-on-a-known-positive discipline the rest of this file applies to the condenser.

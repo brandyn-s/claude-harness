@@ -10,6 +10,8 @@ allowed-tools: Bash Edit Glob Grep Read Write mcp__memory-search__memory_search 
 metadata:
   author: example-security-engineering
   version: "2.4"
+  body-cap: exempt
+  body-cap-reason: "PERIODIC: scheduled knowledge-base curation sweep (templates/launchd/com.example.claude.garden.plist), 15-30 turns; no requires_skills edge into it"
 ---
 
 ## garden

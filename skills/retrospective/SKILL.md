@@ -8,6 +8,8 @@ effort: max
 metadata:
   author: example-security-engineering
   version: "1.0"
+  body-cap: exempt
+  body-cap-reason: "PERIODIC: multi-session review report over a time window (48h/7d) that reads the previous retrospective, 30-60 turns; no requires_skills edge into it"
 allowed-tools: AskUserQuestion Bash Glob Grep Read Skill Write mcp__memory-search__memory_search
 ---
 
