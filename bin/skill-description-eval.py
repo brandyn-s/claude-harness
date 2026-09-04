@@ -24,7 +24,13 @@ script produces that evidence in three deterministic-shaped steps:
   report  Per-skill recall, confusion pairs (which skill captured whose
           requests), false-fire rate on the generic requests, overall table.
           Written back into the results file and to
-          skills/_shared/description-eval/README.md.
+          skills/_shared/description-eval/README.md. `--compare OTHER.json`
+          (repeatable) adds a section comparing two runs on the same corpus
+          (recall, false fires, confusion pairs, per-skill deltas, item flips),
+          flagging skills whose listing changed between the runs so a
+          description edit is not read as an effort effect. `--faithful
+          faithful-<date>.json` (from bin/skill-trigger-faithful.py) adds the
+          proxy-vs-faithful section.
 
 Run with the Anthropic SDK supplied by uv (nothing is installed into the venv):
 
@@ -156,6 +162,10 @@ def listing_text(description: str, when_to_use: str) -> str:
     """What the model sees for one skill: description + when_to_use, capped."""
     combined = " ".join(part for part in (description, when_to_use) if part)
     return combined[:LISTING_CHARACTER_CAP]
+
+
+def listing_sha(listing: str) -> str:
+    return hashlib.sha256(listing.encode("utf-8")).hexdigest()[:12]
 
 
 def load_skills(skills_dir: Path = SKILLS_DIR) -> list[dict]:
@@ -454,6 +464,9 @@ def route_corpus(corpus: dict, skills: list[dict], client, model: str = ROUTE_MO
             "finished_at": finished.isoformat(timespec="seconds"),
             "skills": names,
             "system_prompt_sha256": hashlib.sha256(system_text.encode("utf-8")).hexdigest(),
+            # Per-skill listing shas let a later `report --compare` separate an effort
+            # effect from a description edit made between two runs.
+            "listing_shas": {s["name"]: listing_sha(s["listing"]) for s in visible},
             "system_tokens": system_tokens,
             "estimate": estimate,
             "budget_usd": max_cost_usd,
@@ -529,11 +542,234 @@ def compute_report(results: dict) -> dict:
             "misses": misses, "overall": overall}
 
 
+def _run_label(results: dict, name: str) -> dict:
+    meta = results["meta"]
+    usage = meta.get("usage") or {}
+    requests = usage.get("requests") or 0
+    return {
+        "file": name, "model": meta.get("model"), "effort": meta.get("effort"), "date": meta.get("date"),
+        "skills_in_table": len(meta.get("skills") or []), "cost_usd": meta.get("cost_usd", 0.0),
+        "requests": requests,
+        "output_tokens_per_request": (usage.get("output_tokens", 0) / requests) if requests else None,
+    }
+
+
+def compute_comparison(current: dict, baseline: dict, current_name: str, baseline_name: str) -> dict:
+    """Same corpus, two routing runs: what moved between them and why it could have.
+
+    Skills whose listing changed, or that entered/left the model-visible table,
+    are flagged so a per-skill delta is not read as an effort effect. Listing
+    shas are recorded by `route` since the xhigh run; older results files carry
+    them only if backfilled, otherwise `listing_changed` is None (unknown)."""
+    cur_rep = current.get("report") or compute_report(current)
+    base_rep = baseline.get("report") or compute_report(baseline)
+    cur_meta, base_meta = current["meta"], baseline["meta"]
+    cur_table, base_table = set(cur_meta.get("skills") or []), set(base_meta.get("skills") or [])
+    cur_shas, base_shas = cur_meta.get("listing_shas"), base_meta.get("listing_shas")
+    listing_changed = None
+    if cur_shas and base_shas:
+        listing_changed = sorted(n for n in cur_table & base_table if cur_shas.get(n) != base_shas.get(n))
+
+    notes = {}
+    for name in sorted(base_table - cur_table):
+        notes[name] = "hidden from the model in the current run (not in its table)"
+    for name in sorted(cur_table - base_table):
+        notes[name] = "new in the current run's table"
+    for name in listing_changed or []:
+        notes[name] = "listing text changed between runs"
+
+    per_skill = []
+    for name in sorted(set(cur_rep["per_skill"]) | set(base_rep["per_skill"])):
+        c = cur_rep["per_skill"].get(name) or {"hits": 0, "positives": 0, "recall": None}
+        b = base_rep["per_skill"].get(name) or {"hits": 0, "positives": 0, "recall": None}
+        if c["hits"] == b["hits"] and name not in notes:
+            continue
+        per_skill.append({
+            "skill": name, "positives": max(c["positives"], b["positives"]),
+            "baseline_hits": b["hits"], "current_hits": c["hits"],
+            "baseline_recall": b["recall"], "current_recall": c["recall"],
+            "delta_hits": c["hits"] - b["hits"], "note": notes.get(name, ""),
+        })
+    per_skill.sort(key=lambda row: (row["delta_hits"], row["skill"]))
+    like_for_like = [row for row in per_skill if not row["note"]]
+
+    cur_by_id = {r["id"]: r for r in current["routes"]}
+    base_by_id = {r["id"]: r for r in baseline["routes"]}
+    fixed, regressed = [], []
+    for item_id in sorted(set(cur_by_id) & set(base_by_id)):
+        c, b = cur_by_id[item_id], base_by_id[item_id]
+        if c["kind"] != "positive":
+            continue
+        c_ok, b_ok = c["answer"] == c["expected"], b["answer"] == b["expected"]
+        row = {"id": item_id, "expected": c["expected"], "baseline_got": b["answer"], "current_got": c["answer"],
+               "request": c["request"], "note": notes.get(c["expected"], "")}
+        if c_ok and not b_ok:
+            fixed.append(row)
+        elif b_ok and not c_ok:
+            regressed.append(row)
+
+    pairs = {}
+    for label, rep in (("baseline", base_rep), ("current", cur_rep)):
+        for row in rep["confusion"]:
+            pairs.setdefault((row["expected"], row["got"]), {"baseline": 0, "current": 0})[label] = row["count"]
+    confusion = [{"expected": e, "got": g, **counts} for (e, g), counts in pairs.items()]
+    confusion.sort(key=lambda row: (-(row["baseline"] + row["current"]), row["expected"], row["got"]))
+
+    def overall(rep, results):
+        o = rep["overall"]
+        return {"hits": o["hits"], "positives": o["positives"], "micro_recall": o["micro_recall"],
+                "macro_recall": o["macro_recall"], "false_fires": rep["false_fire"]["fired"],
+                "negatives": rep["false_fire"]["negatives"], "refusals": o["refusals"], "errors": o["errors"],
+                "skills_never_hit": o["skills_never_hit"],
+                "false_fire_items": [(i["id"], i["got"]) for i in rep["false_fire"]["fired_items"]]}
+
+    return {
+        "baseline": _run_label(baseline, baseline_name), "current": _run_label(current, current_name),
+        "overall": {"baseline": overall(base_rep, baseline), "current": overall(cur_rep, current)},
+        "table_changes": {"removed_skills": sorted(base_table - cur_table), "added_skills": sorted(cur_table - base_table),
+                          "listing_changed": listing_changed},
+        "per_skill": per_skill,
+        "like_for_like": {"improved": sum(1 for r in like_for_like if r["delta_hits"] > 0),
+                          "regressed": sum(1 for r in like_for_like if r["delta_hits"] < 0),
+                          "unchanged": len(cur_table & base_table) - len(like_for_like)},
+        "confusion": confusion, "fixed": fixed, "regressed": regressed,
+    }
+
+
+def _fmt_tokens(value) -> str:
+    return "n/a" if value is None else f"{value:.0f}"
+
+
+def render_comparison(comp: dict) -> list[str]:
+    b, c = comp["baseline"], comp["current"]
+    ob, oc = comp["overall"]["baseline"], comp["overall"]["current"]
+    lines = [
+        f"## Effort comparison: `{b['effort']}` ({b['file']}) vs `{c['effort']}` ({c['file']})",
+        "",
+        (f"Same corpus routed twice with `{c['model']}`: `{b['file']}` (effort `{b['effort']}`, {b['date']}) "
+         f"against `{c['file']}` (effort `{c['effort']}`, {c['date']})."),
+        "",
+        f"| Metric | {b['effort']} | {c['effort']} |",
+        "|---|---|---|",
+        f"| Skills in the routing table | {b['skills_in_table']} | {c['skills_in_table']} |",
+        (f"| Positives routed correctly (micro recall) | {ob['hits']}/{ob['positives']} ({ob['micro_recall']:.2f}) | "
+         f"{oc['hits']}/{oc['positives']} ({oc['micro_recall']:.2f}) |"),
+        f"| Mean per-skill recall (macro) | {ob['macro_recall']:.2f} | {oc['macro_recall']:.2f} |",
+        f"| False fires on generic requests | {ob['false_fires']}/{ob['negatives']} | {oc['false_fires']}/{oc['negatives']} |",
+        f"| Refusals | {ob['refusals']} | {oc['refusals']} |",
+        f"| Errors | {ob['errors']} | {oc['errors']} |",
+        (f"| Skills never hit | {', '.join(ob['skills_never_hit']) or '-'} | "
+         f"{', '.join(oc['skills_never_hit']) or '-'} |"),
+        (f"| Output tokens per request (incl. thinking) | {_fmt_tokens(b['output_tokens_per_request'])} | "
+         f"{_fmt_tokens(c['output_tokens_per_request'])} |"),
+        f"| Cost of the routing run | ${b['cost_usd']:.2f} | ${c['cost_usd']:.2f} |",
+        "",
+    ]
+    tc = comp["table_changes"]
+    changes = []
+    if tc["removed_skills"]:
+        changes.append(f"hidden from the model since the {b['effort']} run: {', '.join(tc['removed_skills'])}")
+    if tc["added_skills"]:
+        changes.append(f"new in the table: {', '.join(tc['added_skills'])}")
+    if tc["listing_changed"] is None:
+        changes.append("listing shas are not recorded for one run, so description edits between runs cannot be detected")
+    elif tc["listing_changed"]:
+        changes.append(f"listing text edited between runs: {', '.join(tc['listing_changed'])}")
+    lines.append("Routing-table changes between the runs: " + ("; ".join(changes) if changes else "none") + ".")
+    lines.append("Rows carrying a note below are table changes, not effort effects; the like-for-like counts exclude them.")
+    lfl = comp["like_for_like"]
+    lines += ["", (f"Like-for-like skills: {lfl['improved']} improved, {lfl['regressed']} regressed, "
+                   f"{lfl['unchanged']} unchanged."), "",
+              f"### Per-skill deltas (hits out of positives, {b['effort']} -> {c['effort']})", ""]
+    if comp["per_skill"]:
+        lines += [f"| Skill | {b['effort']} | {c['effort']} | Delta | Note |", "|---|---|---|---|---|"]
+        for row in comp["per_skill"]:
+            lines.append(f"| {row['skill']} | {row['baseline_hits']}/{row['positives']} | "
+                         f"{row['current_hits']}/{row['positives']} | {row['delta_hits']:+d} | {row['note']} |")
+    else:
+        lines.append("No skill changed its hit count.")
+    lines += ["", "### Confusion pairs (expected -> got) in either run", ""]
+    if comp["confusion"]:
+        lines += [f"| Expected | Got | {b['effort']} | {c['effort']} |", "|---|---|---|---|"]
+        lines += [f"| {r['expected']} | {r['got']} | {r['baseline']} | {r['current']} |" for r in comp["confusion"]]
+    else:
+        lines.append("None in either run.")
+    for title, rows in ((f"Positives fixed at {c['effort']} ({len(comp['fixed'])})", comp["fixed"]),
+                        (f"Positives regressed at {c['effort']} ({len(comp['regressed'])})", comp["regressed"])):
+        lines += ["", f"### {title}", ""]
+        if rows:
+            lines += [f"| Item | {b['effort']} got | {c['effort']} got | Request |", "|---|---|---|---|"]
+            for r in rows:
+                request = r["request"].replace("|", "\\|")
+                note = f" ({r['note']})" if r["note"] else ""
+                lines.append(f"| {r['id']}{note} | {r['baseline_got']} | {r['current_got']} | {request} |")
+        else:
+            lines.append("None.")
+    lines += ["", "### False fires in either run", ""]
+    ff_rows = sorted(set(ob["false_fire_items"]) | set(oc["false_fire_items"]))
+    if ff_rows:
+        lines += ["| Item | Routed to |", "|---|---|"]
+        lines += [f"| {item} | {got} |" for item, got in ff_rows]
+    else:
+        lines.append(f"None: 0/{ob['negatives']} at {b['effort']} and 0/{oc['negatives']} at {c['effort']}.")
+    return lines + [""]
+
+
+def render_faithful(faithful: dict) -> list[str]:
+    """Proxy-vs-faithful section from bin/skill-trigger-faithful.py's summary."""
+    meta, summary = faithful["meta"], faithful["summary"]
+    labels = summary["proxy_labels"]
+    lines = [
+        "## Proxy vs faithful trigger check",
+        "",
+        (f"`bin/skill-trigger-faithful.py` ran {meta['runs']} real `claude -p` sessions "
+         f"(`claude {meta.get('claude_version', '?')}`, model `{meta.get('model')}`, {meta['date']}) from a "
+         f"project whose `.claude/skills/` symlinks every model-visible skill, with only project settings loaded "
+         f"(`--setting-sources project`), plan mode, `--max-turns {meta.get('max_turns')}`. A run counts as a hit "
+         f"when a `Skill` tool_use naming the expected skill appears in the stream. Hook events seen: "
+         f"{meta.get('hook_events_total', 0)}; runs with errors: {meta.get('errors', 0)}; the Skill tool was "
+         f"available and the expected skill listed in the init message of every run: "
+         f"{'yes' if meta.get('skill_tool_available_in_all_runs') and meta.get('expected_listed_in_all_runs') else 'NO'}."),
+        "",
+        f"Sample: {meta['sample_rule']}",
+        "",
+        "| Skill | Group | " + " | ".join(f"Proxy {lab}" for lab in labels) + " | Faithful | Fired instead |",
+        "|---|---|" + "---|" * len(labels) + "---|---|",
+    ]
+    for row in summary["per_skill"]:
+        proxy_cells = " | ".join(f"{row['proxy_hits'].get(lab, '-')}/{row['positives']}"
+                                 if row["proxy_hits"].get(lab) is not None else "-" for lab in labels)
+        other = ", ".join(row["other_skills_fired"]) or "-"
+        lines.append(f"| {row['skill']} | {row['group']} | {proxy_cells} | {row['faithful_hits']}/{row['positives']} | {other} |")
+    agree = summary["agreement"]
+    lines += ["", (f"Item-level agreement between the `{agree['proxy_label']}` proxy and the faithful runs: "
+                   f"{agree['both_hit']} both hit, {agree['both_miss']} both missed, {agree['proxy_only']} proxy-only, "
+                   f"{agree['faithful_only']} faithful-only (n={agree['n']}, agreement {agree['rate']:.2f})."), ""]
+    first_tools = summary.get("miss_first_tool") or {}
+    if first_tools:
+        described = ", ".join(f"{count} went straight to `{tool}`" if tool != "none" else f"{count} answered in text"
+                              for tool, count in sorted(first_tools.items(), key=lambda kv: (-kv[1], kv[0])))
+        lines += [f"What the misses did instead (first tool call): {described}.", ""]
+    lines += [("Caveats specific to this check: plan mode tells the model to investigate before acting, and the "
+               "scratch project holds only the skill symlinks, so a request that names a repo, PR or file the "
+               "model cannot see invites a look around with Bash first; a hit still had to appear within "
+               f"`--max-turns {meta.get('max_turns')}`. Runs bill the owner's subscription (API key removed from "
+               f"the environment); notional API cost ${meta.get('notional_cost_usd', 0.0):.2f}."), ""]
+    if summary.get("misses"):
+        lines += ["| Item | Expected | Faithful skill calls | Request |", "|---|---|---|---|"]
+        for m in summary["misses"]:
+            request = m["request"].replace("|", "\\|")
+            lines.append(f"| {m['id']} | {m['expected']} | {', '.join(m['skill_calls']) or 'none'} | {request} |")
+        lines.append("")
+    return lines
+
+
 def _fmt_recall(value) -> str:
     return "n/a" if value is None else f"{value:.2f}"
 
 
-def render_readme(report: dict, meta: dict, results_name: str) -> str:
+def render_readme(report: dict, meta: dict, results_name: str, *, comparisons: list[dict] | None = None,
+                  faithful: dict | None = None, command: str | None = None) -> str:
     per, overall, ff = report["per_skill"], report["overall"], report["false_fire"]
     ranked = sorted(per.items(), key=lambda kv: (kv[1]["recall"] if kv[1]["recall"] is not None else -1, kv[0]))
     corpus_meta = meta.get("corpus_meta", {})
@@ -541,7 +777,7 @@ def render_readme(report: dict, meta: dict, results_name: str) -> str:
         "# Skill description trigger-rate eval",
         "",
         (f"Generated by `bin/skill-description-eval.py report` from `{results_name}`. Do not hand-edit; "
-        "re-run the eval to refresh."),
+        "re-run the eval to refresh." + (f" Refresh command: `{command}`." if command else "")),
         "",
         "## Method",
         "",
@@ -601,8 +837,12 @@ def render_readme(report: dict, meta: dict, results_name: str) -> str:
     if ff["fired_items"]:
         lines += ["", "| Request | Routed to |", "|---|---|"]
         lines += [f"| {item['request']} | {item['got']} |" for item in ff["fired_items"]]
+    for comparison in comparisons or []:
+        lines += [""] + render_comparison(comparison)
+    if faithful:
+        lines += [""] + render_faithful(faithful)
     lines += ["", "## Caveats", "",
-              ("- One run per request at low effort; treat single-item differences as noise and "
+              (f"- One run per request at effort `{meta.get('effort')}`; treat single-item differences as noise and "
               "patterns (a skill at 0/3, a pair confused repeatedly) as signal."),
               ("- The router sees only the listing text. In the runtime the model also sees the "
               "conversation, tools, and rules, so absolute rates will differ; relative ranking is the evidence."),
@@ -668,14 +908,30 @@ def cmd_report(args) -> int:
     results = json.loads(results_path.read_text(encoding="utf-8"))
     report = compute_report(results)
     results["report"] = report
+    comparisons, faithful = [], None
+    command = f"bin/skill-description-eval.py report --results {results_path.name}"
+    for compare in args.compare or []:
+        compare_path = Path(compare)
+        baseline = json.loads(compare_path.read_text(encoding="utf-8"))
+        comparisons.append(compute_comparison(results, baseline, results_path.name, compare_path.name))
+        command += f" --compare {compare_path.name}"
+    if comparisons:
+        results["comparisons"] = comparisons
+    if args.faithful:
+        faithful_path = Path(args.faithful)
+        faithful = json.loads(faithful_path.read_text(encoding="utf-8"))
+        command += f" --faithful {faithful_path.name}"
     _write_json(results_path, results)
     readme = Path(args.readme)
     readme.parent.mkdir(parents=True, exist_ok=True)
-    readme.write_text(render_readme(report, results["meta"], results_path.name), encoding="utf-8")
+    readme.write_text(render_readme(report, results["meta"], results_path.name, comparisons=comparisons,
+                                    faithful=faithful, command=command), encoding="utf-8")
     overall = report["overall"]
     log(f"wrote {results_path.name} (report section) and {readme}: micro recall "
         f"{overall['hits']}/{overall['positives']}, macro {overall['macro_recall']:.2f}, "
-        f"false-fire {report['false_fire']['fired']}/{report['false_fire']['negatives']}")
+        f"false-fire {report['false_fire']['fired']}/{report['false_fire']['negatives']}"
+        + (f"; compared against {', '.join(Path(c).name for c in args.compare)}" if args.compare else "")
+        + (f"; faithful section from {Path(args.faithful).name}" if args.faithful else ""))
     return 0
 
 
@@ -708,6 +964,11 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("report", help="compute recall / confusion / false-fire tables")
     p.add_argument("--results", default=None, help="default: newest results-*.json")
     p.add_argument("--readme", default=str(README_PATH))
+    p.add_argument("--compare", action="append", default=None, metavar="RESULTS",
+                   help="another results-*.json on the same corpus (e.g. the low-effort run); repeatable. Adds one "
+                        "comparison section per file and stores them under `comparisons` in --results")
+    p.add_argument("--faithful", default=None,
+                   help="faithful-<date>.json from bin/skill-trigger-faithful.py; adds the proxy-vs-faithful section")
     p.set_defaults(func=cmd_report)
 
     args = parser.parse_args(argv)

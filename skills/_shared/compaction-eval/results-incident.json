@@ -1,0 +1,2041 @@
+{
+  "_about": "MEASURED compaction A/B: baseline (Claude Code default compaction prompt) vs with_priorities (same + hooks/precompact-priorities.py text). Reader answers from the summary only; grade.py scores deterministically. Fixture `incident` (fixture_incident.py). Produced by run_live.py.",
+  "run_date": "2026-09-04",
+  "requested_model": "claude-fable-5-1",
+  "effective_model": "claude-fable-5-1",
+  "effort": {
+    "summarizer": "medium",
+    "reader": "low"
+  },
+  "max_tokens": 16000,
+  "n_runs_requested": 3,
+  "n_runs_paired": 3,
+  "fixture": "incident",
+  "fixture_file": "fixture_incident.py",
+  "fixture_sha": "68d5e4346975",
+  "hook_text_sha": "1027327f407a",
+  "hook_text_bytes": 1557,
+  "arms": {
+    "baseline": {
+      "prompt_sha": "cede0af9d375",
+      "prompt_chars": 5955
+    },
+    "with_priorities": {
+      "prompt_sha": "1eb602426350",
+      "prompt_chars": 7538
+    }
+  },
+  "receipt": {
+    "mode": "current_model",
+    "requested_model": "claude-fable-5-1",
+    "effort": {
+      "summarizer": "medium",
+      "reader": "low"
+    },
+    "max_tokens": 16000,
+    "runs": 3,
+    "arms": [
+      "baseline",
+      "with_priorities"
+    ],
+    "provider": "anthropic-api",
+    "fixture": "incident",
+    "fixture_file": "fixture_incident.py",
+    "fixture_sha": "68d5e4346975",
+    "fixture_turns": 64,
+    "fixture_questions": 22,
+    "hook_text_sha": "1027327f407a",
+    "hook_text_bytes": 1557,
+    "cost_cap_usd": 15.0,
+    "estimate_heuristic": {
+      "model_priced_as": "claude-fable-5-1",
+      "price_per_mtok": {
+        "input": 10.0,
+        "output": 50.0
+      },
+      "transcript_tokens": 18860,
+      "prompt_tokens": {
+        "baseline": 1861,
+        "with_priorities": 2356
+      },
+      "reader_prompt_tokens": 1013,
+      "worst_case_input_tokens": 227889,
+      "worst_case_output_tokens": 192000,
+      "estimated_cost_usd": 11.88
+    },
+    "within_budget": true,
+    "credential_bytes": 108,
+    "output_path": "/private/tmp/claude-review/wt-measure/skills/_shared/compaction-eval/results-incident.json",
+    "estimate_exact_input": {
+      "model_priced_as": "claude-fable-5-1",
+      "price_per_mtok": {
+        "input": 10.0,
+        "output": 50.0
+      },
+      "transcript_tokens": 27089,
+      "prompt_tokens": {
+        "baseline": 1861,
+        "with_priorities": 2356
+      },
+      "reader_prompt_tokens": 1013,
+      "worst_case_input_tokens": 277263,
+      "worst_case_output_tokens": 192000,
+      "estimated_cost_usd": 12.37
+    }
+  },
+  "qualification": {
+    "qualification_lane": "current qualification",
+    "qualification_status": "valid",
+    "requested_model": "claude-fable-5-1",
+    "effective_model": "claude-fable-5-1",
+    "effective_models": [
+      "claude-fable-5-1"
+    ],
+    "model_run_state": "consistent",
+    "fallback_state": "not_used",
+    "refusal_state": "not_refused",
+    "response_state": "received",
+    "trial_count": 12,
+    "trial_provenance_hashes": [
+      "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba",
+      "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba",
+      "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba",
+      "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba",
+      "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba",
+      "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba",
+      "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba",
+      "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba",
+      "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba",
+      "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba",
+      "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba",
+      "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba"
+    ],
+    "grader_config": {
+      "grader": "grade.py",
+      "metric_keys": [
+        "recall",
+        "recall_identifiers",
+        "recall_errors",
+        "recall_questions",
+        "recall_root_causes",
+        "recall_hypotheses",
+        "recall_decisions",
+        "recall_subagent"
+      ],
+      "primary": "recall"
+    },
+    "effort": "medium",
+    "provider": "anthropic-api",
+    "claude_cli_version": "2.1.260 (Claude Code)",
+    "provenance_hash": "805afe819c32e6b5b3823440fb217e7e4c436b9d01572e4317f43f5eafdf865e"
+  },
+  "cost": {
+    "model_priced_as": "claude-fable-5-1",
+    "price_per_mtok": {
+      "input": 10.0,
+      "output": 50.0
+    },
+    "transcript_tokens": 27089,
+    "prompt_tokens": {
+      "baseline": 1861,
+      "with_priorities": 2356
+    },
+    "reader_prompt_tokens": 1013,
+    "worst_case_input_tokens": 277263,
+    "worst_case_output_tokens": 192000,
+    "estimated_cost_usd": 12.37,
+    "actual_usd": 4.8345,
+    "actual_usage": {
+      "input_tokens": 212073,
+      "output_tokens": 54276,
+      "calls": 12
+    }
+  },
+  "metrics": {
+    "baseline": {
+      "n_runs": 3,
+      "recall": {
+        "mean": 0.8788,
+        "min": 0.8182,
+        "max": 0.9091,
+        "stdev": 0.0429,
+        "n": 3,
+        "values": [
+          0.8182,
+          0.9091,
+          0.9091
+        ]
+      },
+      "recall_identifiers": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "recall_errors": {
+        "mean": 0.3333,
+        "min": 0.0,
+        "max": 0.5,
+        "stdev": 0.2357,
+        "n": 3,
+        "values": [
+          0.0,
+          0.5,
+          0.5
+        ]
+      },
+      "recall_questions": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "recall_root_causes": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "recall_hypotheses": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "recall_decisions": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "recall_subagent": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "with_priorities": {
+      "n_runs": 3,
+      "recall": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "ci95": {
+          "low": 0.0909,
+          "high": 0.1818,
+          "excludes_zero": true,
+          "direction": "positive",
+          "n": 3
+        }
+      },
+      "recall_identifiers": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "ci95": {
+          "low": 0.0,
+          "high": 0.0,
+          "excludes_zero": false,
+          "direction": "inconclusive",
+          "n": 3
+        }
+      },
+      "recall_errors": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "ci95": {
+          "low": 0.5,
+          "high": 1.0,
+          "excludes_zero": true,
+          "direction": "positive",
+          "n": 3
+        }
+      },
+      "recall_questions": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "ci95": {
+          "low": 0.0,
+          "high": 0.0,
+          "excludes_zero": false,
+          "direction": "inconclusive",
+          "n": 3
+        }
+      },
+      "recall_root_causes": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "ci95": {
+          "low": 0.0,
+          "high": 0.0,
+          "excludes_zero": false,
+          "direction": "inconclusive",
+          "n": 3
+        }
+      },
+      "recall_hypotheses": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "ci95": {
+          "low": 0.0,
+          "high": 0.0,
+          "excludes_zero": false,
+          "direction": "inconclusive",
+          "n": 3
+        }
+      },
+      "recall_decisions": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "ci95": {
+          "low": 0.0,
+          "high": 0.0,
+          "excludes_zero": false,
+          "direction": "inconclusive",
+          "n": 3
+        }
+      },
+      "recall_subagent": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "ci95": {
+          "low": 0.0,
+          "high": 0.0,
+          "excludes_zero": false,
+          "direction": "inconclusive",
+          "n": 3
+        }
+      }
+    }
+  },
+  "per_category_recall_mean": {
+    "identifiers": {
+      "baseline": 1.0,
+      "with_priorities": 1.0
+    },
+    "errors": {
+      "baseline": 0.3333,
+      "with_priorities": 1.0
+    },
+    "questions": {
+      "baseline": 1.0,
+      "with_priorities": 1.0
+    },
+    "root_causes": {
+      "baseline": 1.0,
+      "with_priorities": 1.0
+    },
+    "hypotheses": {
+      "baseline": 1.0,
+      "with_priorities": 1.0
+    },
+    "decisions": {
+      "baseline": 1.0,
+      "with_priorities": 1.0
+    },
+    "subagent": {
+      "baseline": 1.0,
+      "with_priorities": 1.0
+    }
+  },
+  "per_question_correct_count": {
+    "id1": {
+      "baseline": 3,
+      "with_priorities": 3
+    },
+    "id2": {
+      "baseline": 3,
+      "with_priorities": 3
+    },
+    "id3": {
+      "baseline": 3,
+      "with_priorities": 3
+    },
+    "id4": {
+      "baseline": 3,
+      "with_priorities": 3
+    },
+    "id5": {
+      "baseline": 3,
+      "with_priorities": 3
+    },
+    "id6": {
+      "baseline": 3,
+      "with_priorities": 3
+    },
+    "err1": {
+      "baseline": 2,
+      "with_priorities": 3
+    },
+    "err2": {
+      "baseline": 0,
+      "with_priorities": 3
+    },
+    "err3": {
+      "baseline": 2,
+      "with_priorities": 3
+    },
+    "err4": {
+      "baseline": 0,
+      "with_priorities": 3
+    },
+    "uq1": {
+      "baseline": 3,
+      "with_priorities": 3
+    },
+    "uq2": {
+      "baseline": 3,
+      "with_priorities": 3
+    },
+    "uq3": {
+      "baseline": 3,
+      "with_priorities": 3
+    },
+    "rc1": {
+      "baseline": 3,
+      "with_priorities": 3
+    },
+    "rc2": {
+      "baseline": 3,
+      "with_priorities": 3
+    },
+    "rc3": {
+      "baseline": 3,
+      "with_priorities": 3
+    },
+    "hyp1": {
+      "baseline": 3,
+      "with_priorities": 3
+    },
+    "hyp2": {
+      "baseline": 3,
+      "with_priorities": 3
+    },
+    "dec1": {
+      "baseline": 3,
+      "with_priorities": 3
+    },
+    "dec2": {
+      "baseline": 3,
+      "with_priorities": 3
+    },
+    "dec3": {
+      "baseline": 3,
+      "with_priorities": 3
+    },
+    "sub1": {
+      "baseline": 3,
+      "with_priorities": 3
+    }
+  },
+  "verdict": {
+    "verdict": "keep",
+    "primary_metric": "recall",
+    "ci95": {
+      "low": 0.0909,
+      "high": 0.1818,
+      "excludes_zero": true,
+      "direction": "positive",
+      "n": 3
+    },
+    "reason": "95% CI [0.0909, 0.1818] on recall excludes 0 in the favorable (higher-is-better) direction",
+    "ci_aware": true,
+    "delta_mean": 0.1212
+  },
+  "errors": [],
+  "records": [
+    {
+      "arm": "baseline",
+      "run_idx": 0,
+      "summary_stop_reason": "end_turn",
+      "summary_tag_found": true,
+      "reader_stop_reason": "end_turn",
+      "summary_chars": 9889,
+      "summary": "Summary:\n1. Primary Request and Intent:\n   - Drive the investigation of INC-2417 (CheckoutGateway5xxBudgetBurn) in prod-us-east-1, namespace payments: checkout-gateway ~12% 5xx starting minutes after a deploy at 14:07 UTC.\n   - Constraints stated by user: \"My kube context is the read-only on-call one; helm and gh work.\" \"Last week's INC-2409 was a session-store failover on a different team's service and is unrelated, so ignore it.\"\n   - Provide the error-budget burn rate at page time for the incident channel.\n   - Roll back first (\"Getting customers unblocked comes first; we fix forward once it is green\").\n   - Use Istio outlier detection (option B) for containment, not readiness-on-Redis: \"I do not want a Redis blip to take every pod out of rotation at once.\"\n   - Cap the per-worker Redis pool (option B) rather than just raising maxclients: \"We keep adding replicas and I do not want to rediscover this every time the HPA scales.\"\n   - Check whether the EU cluster (prod-eu-west-1) runs the same worker count.\n   - Park the payments-vendor retry-storm notification question for the postmortem.\n   - User filed SRE-3308 for the readiness gap and on-call log access (follow-ups already tracked).\n2. Key Technical Concepts:\n   - Helm release history/rollback; pending-upgrade release record stored as Secret `sh.helm.release.v1.<name>.v<N>`.\n   - Gunicorn workers (UvicornWorker), per-worker redis-py connection pools; connection budget rule: workers × poolMaxConnections × autoscaling.maxReplicas < Redis maxclients.\n   - Redis `maxclients`, `max number of clients reached`, single-threaded/memory-per-client cost; redis_connected_clients / redis_rejected_connections_total metrics.\n   - SLO burn-rate alerting (1h burn rate 14.6x vs 14.4x page threshold; 30d budget remaining 72%).\n   - Kubernetes readiness/liveness probes; unconditional `/readyz` = no containment.\n   - Istio: ingress gateway `UF,URX` / errno 111 connection refused; sidecar admin `localhost:15000/clusters`; DestinationRule outlierDetection (consecutive5xxErrors, baseEjectionTime, maxEjectionPercent) and connectionPool.\n   - EndpointSlice vs Envoy cluster endpoint comparison; Service port mapping (6390 → targetPort 6379).\n   - Argo CD deploys from main / branch to staging; gh PR checks (lint, unit, helm-lint, staging-deploy, staging-smoke).\n   - Loki log queries via Explore subagent; RBAC limits of oncall-ro role (no pods/log on session-store StatefulSet).\n3. Files and Code Sections:\n   - deploy/helm/checkout-gateway/values-prod.yaml\n     - Trigger of incident at line 95: `workers: 16` (was 4, commit e7c41d09b3f2), `autoscaling.maxReplicas: 20` (was 12). `sessionStore.poolMaxConnections: 20`, `socketTimeoutSeconds: 5`. `SESSION_STORE_URL: \"redis://session-store.payments.svc.cluster.local:6390/0\"` (confirmed correct against Service). replicaCount/minReplicas 12, PDB minAvailable 9, readiness `/readyz`, liveness `/healthz`.\n     - Edited: `sessionStore.poolMaxConnections: 8` plus comment that workers × poolMaxConnections × autoscaling.maxReplicas must stay below the store's maxclients.\n   - deploy/helm/session-store/templates/configmap.yaml\n     - Line 31 `maxclients 256` with comment \"Sized for the original 4-worker gateway deployment.\" Redis on port 6379; sentinel config present.\n     - Edited: `maxclients 4096` with comment naming the budget rule and INC-2417.\n   - services/checkout/config/redis.py\n     - Edited: max_connections 20 → 8 via `settings.session_pool_max`; `socket_connect_timeout 1.0`; `health_check_interval 30`.\n   - services/checkout/api/health.py\n     - Read only. Line 26 `/readyz` returns `{\"status\": \"ok\"}` unconditionally; `/healthz` deliberately never touches dependencies; `dependency_report()` pings store with `timeout=0.3` but is \"NOT wired to any probe\". Third root cause (containment gap); tracked in SRE-3308.\n   - deploy/istio/checkout-gateway-destinationrule.yaml (created)\n     - outlierDetection: consecutive5xxErrors 5, interval 10s, baseEjectionTime 30s, maxEjectionPercent 50; connectionPool.http.http1MaxPendingRequests 256.\n   - incident/INC-2417-status.md (created)\n     - Identified → Monitoring; cause, rollback time, next update in 30 minutes; no customer counts until the postmortem.\n   - Service session-store (read): ports tcp-redis 6390→6379, tcp-sentinel 26379; selector role: primary; ClusterIP 172.20.61.9.\n   - Commit: e7c41d09b3f2 (Marcus Oyelaran, \"perf(gateway): raise gunicorn workers to 16 for the checkout surge\") is the trigger. Fix commit 5a8e21f7c0d3 on branch fix/INC-2417-session-store-budget, PR #942 (https://github.com/example/payments-platform/pull/942).\n4. Errors and fixes:\n   - `helm rollback` → \"UPGRADE FAILED: another operation (install/upgrade/rollback) is in progress\": rev 48 stuck pending-upgrade since 14:31:05 (deploy workflow re-run when alert fired; runner killed at 20-minute job limit). Fixed by `kubectl -n payments delete secret sh.helm.release.v1.checkout-gateway.v48` (nothing from 48 had been applied; pods were still rev 47), then rollback to 46 succeeded.\n   - `kubectl logs session-store-0` → Forbidden for oncall-ro@example.com (pods/log not granted for the StatefulSet). Not fixed; metrics already showed rejections; user tracked as part of SRE-3308.\n   - Hypotheses ruled out: cluster autoscaler draining nodes during rollout (no drain/evict events, 6 nodes Ready); ingress routing to stale pod IPs (sidecar cluster table matched EndpointSlice, all healthy, cx_connect_fail 0). errno 111 attributed to gunicorn arbiter killing timed-out workers and listener briefly closing.\n   - User course corrections: chose rollback over forward fix; chose outlier detection over readiness ping; chose pool cap over raising maxclients only; asked to park vendor question for postmortem.\n5. Problem Solving:\n   - Root causes: (1) worker bump 4→16 at values-prod.yaml:95 quadrupled potential Redis connections (16×20×12 = 3,840 vs 960); (2) hard-coded `maxclients 256` at configmap.yaml:31; (3) unconditional `/readyz` at health.py:26 kept broken pods in rotation for ~40 minutes.\n   - Evidence: session-store-0 at 256 connected clients, 48,913 rejections in 30m; 5xx ratio 12.31%; burn rate 14.6x; budget 72% remaining.\n   - Mitigation: rollback to rev 46 → 5xx 0.41% (normal vendor-decline background), clients 148/256, p95 318ms.\n   - Impact (Loki, 14:07–14:52): 1,731 distinct sessions with ≥1 5xx; 61,204 failed requests (68% POST /checkout/confirm, 18% POST /cart/apply-promo); p95 4.9s vs 310ms; client retry amplification ~1.05x; no gateway→vendor retry loop; logs contain session ids and tenant only, no card data or emails; EU cluster not covered (separate Loki tenant).\n   - Forward fix in PR #942: pool cap 8, maxclients 4096, DestinationRule outlier detection; 84 unit tests pass; both charts lint; all 5 PR checks pass (staging deployed and smoke-tested).\n6. All user messages:\n   - \"I'm on call and just got paged: INC-2417, CheckoutGateway5xxBudgetBurn, in prod-us-east-1 namespace payments. checkout-gateway is returning about 12% 5xx and it started a few minutes after a deploy at 14:07 UTC. Can you drive the investigation? My kube context is the read-only on-call one; helm and gh work. Last week's INC-2409 was a session-store failover on a different team's service and is unrelated, so ignore it.\"\n   - \"Ok. Before we go further: What was the error-budget burn rate when the page fired? I need it for the incident channel.\"\n   - \"Roll back. Getting customers unblocked comes first; we fix forward once it is green.\"\n   - \"B, the outlier detection. I do not want a Redis blip to take every pod out of rotation at once.\"\n   - \"Cap the pool. We keep adding replicas and I do not want to rediscover this every time the HPA scales. Do we need to tell the payments vendor about the retry storm, or will they see it on their side?\"\n   - \"I filed SRE-3308 for the readiness gap and the on-call log access. Can you also check whether the EU cluster runs the same worker count? And park the vendor question for the postmortem, we will answer it there.\"\n7. Pending Tasks:\n   - Check whether prod-eu-west-1 runs the same gunicorn worker count / pool settings (values file for EU; EU Loki tenant was not queried).\n   - Vendor notification question parked for the postmortem (evidence so far: no gateway-side retry loop, ~1.05x client retry amplification; vendor-facing outbound retry counters not yet checked).\n   - PR #942 awaits review/merge to main for Argo CD to deploy to prod (currently only staging).\n   - Ensure any DestinationRule for the session store itself references port 6390, not 6379.\n   - Status page next update due in 30 minutes from the Monitoring post; final customer counts deferred to postmortem.\n8. Current Work:\n   Immediately before this summary, I had confirmed all five PR #942 checks pass (lint 38s, unit 1m04s, helm-lint 22s, staging-deploy 3m41s, staging-smoke 1m12s) and delivered a state-of-incident summary: trigger at values-prod.yaml:95 vs hard-coded limit at configmap.yaml:31; containment failure at health.py:26; production rolled back to revision 46 and healthy; PR #942 carries the pool cap, raised maxclients and DestinationRule. Explicitly listed as still open: \"the EU cluster worker count, and the vendor notification question for the postmortem.\"\n9. Optional Next Step:\n   Per the user's request \"Can you also check whether the EU cluster runs the same worker count?\", and my acknowledgement \"I'll check prod-eu-west-1's values file after the PR checks\", the next step is to read the EU values file (e.g. deploy/helm/checkout-gateway/values-prod-eu.yaml or equivalent) and the EU helm release history to determine whether `gunicorn.workers`, `sessionStore.poolMaxConnections` and the session-store `maxclients` there match the pre- or post-e7c41d09b3f2 values, then report back. Do not act on the vendor question; it is parked for the postmortem.",
+      "answers": {
+        "id1": "INC-2417",
+        "id2": "SRE-3308",
+        "id3": "e7c41d09b3f2",
+        "id4": "5a8e21f7c0d3",
+        "id5": "6390",
+        "id6": "15000",
+        "err1": "UNKNOWN",
+        "err2": "UNKNOWN",
+        "err3": "UPGRADE FAILED: another operation (install/upgrade/rollback) is in progress",
+        "err4": "UNKNOWN",
+        "uq1": "ANSWERED",
+        "uq2": "UNANSWERED",
+        "uq3": "UNANSWERED",
+        "rc1": "deploy/helm/checkout-gateway/values-prod.yaml:95",
+        "rc2": "deploy/helm/session-store/templates/configmap.yaml:31",
+        "rc3": "services/checkout/api/health.py:26",
+        "hyp1": "RULED_OUT",
+        "hyp2": "RULED_OUT",
+        "dec1": "Rollback to revision 46 was chosen first, because getting customers unblocked comes first and the forward fix follows once it is green.",
+        "dec2": "Capping the per-worker pool was chosen (with maxclients also raised), because replicas keep being added and the user did not want to rediscover the problem every time the HPA scales.",
+        "dec3": "Istio outlier detection was chosen, because the user did not want a Redis blip to take every pod out of rotation at once.",
+        "sub1": "1,731"
+      },
+      "scores": {
+        "recall": 0.8181818181818182,
+        "recall_identifiers": 1.0,
+        "recall_errors": 0.0,
+        "recall_questions": 1.0,
+        "recall_root_causes": 1.0,
+        "recall_hypotheses": 1.0,
+        "recall_decisions": 1.0,
+        "recall_subagent": 1.0
+      },
+      "rows": [
+        {
+          "id": "id1",
+          "category": "identifiers",
+          "answer": "INC-2417",
+          "correct": true
+        },
+        {
+          "id": "id2",
+          "category": "identifiers",
+          "answer": "SRE-3308",
+          "correct": true
+        },
+        {
+          "id": "id3",
+          "category": "identifiers",
+          "answer": "e7c41d09b3f2",
+          "correct": true
+        },
+        {
+          "id": "id4",
+          "category": "identifiers",
+          "answer": "5a8e21f7c0d3",
+          "correct": true
+        },
+        {
+          "id": "id5",
+          "category": "identifiers",
+          "answer": "6390",
+          "correct": true
+        },
+        {
+          "id": "id6",
+          "category": "identifiers",
+          "answer": "15000",
+          "correct": true
+        },
+        {
+          "id": "err1",
+          "category": "errors",
+          "answer": "UNKNOWN",
+          "correct": false
+        },
+        {
+          "id": "err2",
+          "category": "errors",
+          "answer": "UNKNOWN",
+          "correct": false
+        },
+        {
+          "id": "err3",
+          "category": "errors",
+          "answer": "UPGRADE FAILED: another operation (install/upgrade/rollback) is in progress",
+          "correct": false
+        },
+        {
+          "id": "err4",
+          "category": "errors",
+          "answer": "UNKNOWN",
+          "correct": false
+        },
+        {
+          "id": "uq1",
+          "category": "questions",
+          "answer": "ANSWERED",
+          "correct": true
+        },
+        {
+          "id": "uq2",
+          "category": "questions",
+          "answer": "UNANSWERED",
+          "correct": true
+        },
+        {
+          "id": "uq3",
+          "category": "questions",
+          "answer": "UNANSWERED",
+          "correct": true
+        },
+        {
+          "id": "rc1",
+          "category": "root_causes",
+          "answer": "deploy/helm/checkout-gateway/values-prod.yaml:95",
+          "correct": true
+        },
+        {
+          "id": "rc2",
+          "category": "root_causes",
+          "answer": "deploy/helm/session-store/templates/configmap.yaml:31",
+          "correct": true
+        },
+        {
+          "id": "rc3",
+          "category": "root_causes",
+          "answer": "services/checkout/api/health.py:26",
+          "correct": true
+        },
+        {
+          "id": "hyp1",
+          "category": "hypotheses",
+          "answer": "RULED_OUT",
+          "correct": true
+        },
+        {
+          "id": "hyp2",
+          "category": "hypotheses",
+          "answer": "RULED_OUT",
+          "correct": true
+        },
+        {
+          "id": "dec1",
+          "category": "decisions",
+          "answer": "Rollback to revision 46 was chosen first, because getting customers unblocked comes first and the forward fix follows once it is green.",
+          "correct": true
+        },
+        {
+          "id": "dec2",
+          "category": "decisions",
+          "answer": "Capping the per-worker pool was chosen (with maxclients also raised), because replicas keep being added and the user did not want to rediscover the problem every time the HPA scales.",
+          "correct": true
+        },
+        {
+          "id": "dec3",
+          "category": "decisions",
+          "answer": "Istio outlier detection was chosen, because the user did not want a Redis blip to take every pod out of rotation at once.",
+          "correct": true
+        },
+        {
+          "id": "sub1",
+          "category": "subagent",
+          "answer": "1,731",
+          "correct": true
+        }
+      ],
+      "usage": {
+        "summary": {
+          "input_tokens": 28964,
+          "output_tokens": 7974
+        },
+        "reader": {
+          "input_tokens": 5188,
+          "output_tokens": 469
+        }
+      },
+      "_response_provenance": [
+        {
+          "requested_model": "claude-fable-5-1",
+          "effective_model": "claude-fable-5-1",
+          "effective_models": [
+            "claude-fable-5-1"
+          ],
+          "provider": "anthropic-api",
+          "fallback_state": "not_used",
+          "refusal_state": "not_refused",
+          "model_run_state": "consistent",
+          "response_state": "received",
+          "stop_reasons": [
+            "end_turn"
+          ],
+          "grader_config": {
+            "grader": "grade.py",
+            "metric_keys": [
+              "recall",
+              "recall_identifiers",
+              "recall_errors",
+              "recall_questions",
+              "recall_root_causes",
+              "recall_hypotheses",
+              "recall_decisions",
+              "recall_subagent"
+            ],
+            "primary": "recall"
+          },
+          "provenance_hash": "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba"
+        },
+        {
+          "requested_model": "claude-fable-5-1",
+          "effective_model": "claude-fable-5-1",
+          "effective_models": [
+            "claude-fable-5-1"
+          ],
+          "provider": "anthropic-api",
+          "fallback_state": "not_used",
+          "refusal_state": "not_refused",
+          "model_run_state": "consistent",
+          "response_state": "received",
+          "stop_reasons": [
+            "end_turn"
+          ],
+          "grader_config": {
+            "grader": "grade.py",
+            "metric_keys": [
+              "recall",
+              "recall_identifiers",
+              "recall_errors",
+              "recall_questions",
+              "recall_root_causes",
+              "recall_hypotheses",
+              "recall_decisions",
+              "recall_subagent"
+            ],
+            "primary": "recall"
+          },
+          "provenance_hash": "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba"
+        }
+      ]
+    },
+    {
+      "arm": "with_priorities",
+      "run_idx": 0,
+      "summary_stop_reason": "end_turn",
+      "summary_tag_found": true,
+      "reader_stop_reason": "end_turn",
+      "summary_chars": 13592,
+      "summary": "Summary:\n1. Primary Request and Intent:\n   - Drive the investigation of INC-2417 (alert CheckoutGateway5xxBudgetBurn) in prod-us-east-1, namespace payments: checkout-gateway returning ~12% 5xx starting a few minutes after a deploy at 14:07 UTC.\n   - Constraints stated by user (verbatim): \"My kube context is the read-only on-call one; helm and gh work.\" and \"Last week's INC-2409 was a session-store failover on a different team's service and is unrelated, so ignore it.\"\n   - Provide the error-budget burn rate at page time for the incident channel.\n   - Roll back first (\"Getting customers unblocked comes first; we fix forward once it is green\"), then fix forward.\n   - Containment via Istio outlier detection (not readiness ping) because a Redis blip must not take every pod out of rotation at once.\n   - Cap the per-worker Redis pool (not just raise maxclients) so the budget holds as the HPA scales.\n   - Check whether the EU cluster (prod-eu-west-1) runs the same worker count.\n   - Park the payments-vendor notification question for the postmortem.\n   - SRE-3308 (filed by user) tracks the readiness gap and on-call log access.\n2. Key Technical Concepts:\n   - Helm releases/history, pending-upgrade release records stored as Secrets (sh.helm.release.v1.<name>.v<N>), helm rollback.\n   - Kubernetes Deployments/ReplicaSets, EndpointSlices, readiness/liveness probes, RBAC (pods/log).\n   - Istio: ingress gateway (payments-gateway in istio-system), Envoy admin /clusters on localhost:15000, response flags UF,URX, DestinationRule outlierDetection and connectionPool.\n   - Redis maxclients, per-gunicorn-worker connection pools (redis-py), socket timeouts; connection budget rule workers × poolMaxConnections × maxReplicas < maxclients.\n   - gunicorn/uvicorn workers, WORKER TIMEOUT arbiter restarts causing brief listener closure (errno 111).\n   - SLO burn-rate alerting (1h burn rate, 30d budget), Prometheus queries, Loki log queries.\n   - Argo CD auto-deploy from main / branch to staging; GitHub PR checks via gh.\n3. Files and Code Sections:\n   - deploy/helm/checkout-gateway/values-prod.yaml\n     - Root cause 1 at line 95: `workers: 16` (was 4) from commit e7c41d09b3f2 (Marcus Oyelaran, Thu Sep 4 13:52:40 2026, \"perf(gateway): raise gunicorn workers to 16 for the checkout surge\"); same commit set `autoscaling.maxReplicas: 20` (was 12). `sessionStore.poolMaxConnections: 20`, `socketTimeoutSeconds: 5`, `healthCheckIntervalSeconds: 30`. Budget: 16 × 20 × 12 = 3,840 possible clients vs 960 before (~200 idle in practice).\n     - Other relevant values: replicaCount 12; image ghcr.io/example/checkout-gateway tag 2026.9.3; `SESSION_STORE_URL: \"redis://session-store.payments.svc.cluster.local:6390/0\"`; gunicorn timeout 30, workerClass uvicorn.workers.UvicornWorker, maxRequests 5000; readinessProbe /readyz period 5 failureThreshold 3; HPA minReplicas 12, target CPU 65%; PDB minAvailable 9; nodeSelector workload: general.\n     - Edited: `sessionStore.poolMaxConnections: 8` plus comment \"workers x poolMaxConnections x autoscaling.maxReplicas must stay below the store's maxclients\".\n   - deploy/helm/session-store/templates/configmap.yaml\n     - Root cause 2 at line 31: `maxclients 256` hard-coded in redis.conf with comment \"Client limits. Sized for the original 4-worker gateway deployment.\" Redis listens on 6379 inside; sentinel monitors session-store-0.session-store 6379 quorum 2.\n     - Edited: `maxclients 4096` with comment naming the budget rule and INC-2417.\n   - services/checkout/api/health.py\n     - Root cause 3 at line 26: `/readyz` returns `{\"status\": \"ok\"}` unconditionally; `/healthz` deliberately never touches dependencies. `dependency_report()` (line 40) does `await store.ping(timeout=0.3)` but is \"NOT wired to any probe\". Not modified (decision B chosen instead).\n   - services/checkout/config/redis.py\n     - Edited: max_connections 20 → 8 via `settings.session_pool_max`; `socket_connect_timeout 1.0`; `health_check_interval 30`.\n   - deploy/istio/checkout-gateway-destinationrule.yaml (created)\n     - DestinationRule for checkout-gateway: outlierDetection consecutive5xxErrors 5, interval 10s, baseEjectionTime 30s, maxEjectionPercent 50; connectionPool.http.http1MaxPendingRequests 256.\n   - incident/INC-2417-status.md (created)\n     - Status page update Identified → Monitoring: cause, rollback time, next update in 30 minutes; no customer counts until the postmortem.\n   - Service session-store (kubectl get svc): ClusterIP 172.20.61.9; ports tcp-redis 6390 → targetPort 6379, tcp-sentinel 26379; selector role: primary. So SESSION_STORE_URL port 6390 is correct and any DestinationRule for the store must name 6390 not 6379.\n   - Helm history: rev 46 Tue Sep 2 15:21:36 2026 chart checkout-gateway-1.40.1 app 2026.9.2 (known good); rev 47 Thu Sep 4 14:07:12 2026 chart 1.41.0 app 2026.9.3; rev 48 Thu Sep 4 14:31:05 2026 pending-upgrade \"Preparing upgrade\".\n   - git log context: 9b0d4e2 chore(helm): bump chart to 1.41.0; b3f5a9c chore(helm): hpa maxReplicas 12; e6d0c4a fix(session): refresh ttl on read.\n4. Errors and fixes:\n   - Application error (verbatim): `redis.exceptions.ConnectionError: max number of clients reached` in logger checkout.session; 503s at 5012/5009/5011 ms (socket timeout 5s); gunicorn `WORKER TIMEOUT (pid:412)` / `(pid:389)` then \"Booting worker with pid: 517/521\". Fixed by rollback; forward fix in PR #942.\n   - Envoy ingress log (verbatim): `\"POST /checkout/confirm HTTP/1.1\" 503 UF,URX upstream connect error or disconnect/reset before headers. reset reason: connection failure, transport failure reason: delayed connect error: 111 - \"-\" 0 91 5004 - \"10.42.0.17\" \"okhttp/4.12.0\" outbound|8080||checkout-gateway.payments.svc.cluster.local`. Explained by worker kills/reboots closing the listener; not stale endpoints.\n   - `Error: UPGRADE FAILED: another operation (install/upgrade/rollback) is in progress` on helm rollback. Cause: revision 48 stuck pending-upgrade since 14:31:05 (deploy workflow re-run when alert fired; runner killed at 20-minute job limit; nothing applied, pods still from 47). Fix: `kubectl -n payments delete secret sh.helm.release.v1.checkout-gateway.v48`, then `helm rollback checkout-gateway 46 -n payments --wait --timeout 5m` → \"Rollback was a success!\".\n   - `Error from server (Forbidden): pods \"session-store-0\" is forbidden: User \"oncall-ro@example.com\" cannot get resource \"pods/log\" in API group \"\" in the namespace \"payments\"` — read-only role lacks pods/log for the session-store StatefulSet. Not blocking (metrics show rejections); tracked in SRE-3308 by user.\n   - User feedback: chose rollback over forward fix; chose outlier detection over readiness ping; chose pool cap over only raising maxclients; told me to park the vendor question and check EU cluster.\n5. Problem Solving:\n   - Confirmed root causes: (1) deploy/helm/checkout-gateway/values-prod.yaml:95 workers 16; (2) deploy/helm/session-store/templates/configmap.yaml:31 maxclients 256; (3) services/checkout/api/health.py:26 unconditional /readyz (containment failure — 12 pods stayed Ready ~40 min).\n   - Ruled out: cluster autoscaler draining nodes during the rollout (events show only normal ReplicaSet swap: scaled up checkout-gateway-7d9f6b8c4 to 12, scaled down checkout-gateway-5b7c8d9e6 to 0; no Evicted/NodeNotReady/drain; 6 workload=general nodes Ready). Ruled out: ingress gateway routing to stale pod IPs from previous ReplicaSet (Envoy cluster table has exactly the 12 EndpointSlice IPs from checkout-gateway-8k2xz, all health_flags healthy, cx_connect_fail 0, cx_active 2, rq_error 37 each; session-store endpoint 10.42.11.20:6379 cx_active 16; DNS checkout-gateway → 172.20.114.203, session-store → 172.20.61.9). Pre-existing promo-engine-6f4b9c8d7-2ndqv BackOff is unrelated.\n   - Metrics at incident: session-store-0 redis_connected_clients 256 (session-store-1/2: 3 each), rejected connections 48,913 in 30m, redis_config_maxclients 256, 5xx ratio 0.1231, 1h burn rate 14.6 (page threshold 14.4x), 30d budget remaining 0.72.\n   - After rollback (5 min): 5xx ratio 0.0041 (normal vendor-decline background), connected clients 148/256, p95 0.318s.\n   - Subagent (Explore, Loki, payments/checkout-gateway 14:07–14:52 UTC, read-only) report: 1731 distinct customer sessions received ≥1 5xx; 61,204 failed requests total; 41,880 POST /checkout/confirm (68%), 11,017 POST /cart/apply-promo (18%), 8,307 across GET /cart, POST /cart/items, GET /checkout/summary; single error class from session layer; p95 4.9s vs 310ms baseline, p50 2.2s; 2,914 requests retried by clients within 2s (User-Agent okhttp and web SDK), retry amplification ≈1.05x; no evidence of a retry loop against the payments vendor from the gateway side; log lines contain session ids and tenant only, no card data or emails; prod-eu-west-1 not queried (separate Loki tenant).\n   - Fix committed 5a8e21f7c0d3 on branch fix/INC-2417-session-store-budget (\"fix(checkout): cap the session-store pool per worker; outlier detection for checkout-gateway (INC-2417)\"); tests `uv run pytest services/checkout/tests -q` → 84 passed in 21.40s; helm lint both charts pass (only icon INFO). PR #942 https://github.com/example/payments-platform/pull/942; checks: lint pass 38s, unit pass 1m04s, helm-lint pass 22s, staging-deploy pass 3m41s, staging-smoke pass 1m12s.\n   - Decisions: rollback (A) vs forward-fix (B) → A, restores service in ~1 min. Readiness ping (A) vs Istio outlier detection (B) → B, per user: \"I do not want a Redis blip to take every pod out of rotation at once.\" maxclients 10000 keep pools (A) vs pool cap 8 + maxclients 4096 + documented rule (B) → B, per user: \"We keep adding replicas and I do not want to rediscover this every time the HPA scales.\"\n6. All user messages:\n   - \"I'm on call and just got paged: INC-2417, CheckoutGateway5xxBudgetBurn, in prod-us-east-1 namespace payments. checkout-gateway is returning about 12% 5xx and it started a few minutes after a deploy at 14:07 UTC. Can you drive the investigation? My kube context is the read-only on-call one; helm and gh work. Last week's INC-2409 was a session-store failover on a different team's service and is unrelated, so ignore it.\" (request; constraints in effect)\n   - \"Ok. Before we go further: What was the error-budget burn rate when the page fired? I need it for the incident channel.\" — ANSWERED (14.6x vs 14.4x threshold; 72% budget remaining; ~28% burned in ~40 min).\n   - \"Roll back. Getting customers unblocked comes first; we fix forward once it is green.\" — done.\n   - \"B, the outlier detection. I do not want a Redis blip to take every pod out of rotation at once.\" — done.\n   - \"Cap the pool. We keep adding replicas and I do not want to rediscover this every time the HPA scales. Do we need to tell the payments vendor about the retry storm, or will they see it on their side?\" — pool cap done; vendor question PARTIALLY ANSWERED (subagent found no gateway-side vendor retry loop, client retry amplification ~1.05x; vendor-facing counters not yet checked) and subsequently parked by the user for the postmortem.\n   - \"I filed SRE-3308 for the readiness gap and the on-call log access. Can you also check whether the EU cluster runs the same worker count? And park the vendor question for the postmortem, we will answer it there.\" — EU question UNANSWERED.\n7. Pending Tasks:\n   - Pending questions:\n     - \"Can you also check whether the EU cluster runs the same worker count?\" (unanswered; prod-eu-west-1 values file not yet read; subagent's Loki tenant did not cover EU)\n     - \"Do we need to tell the payments vendor about the retry storm, or will they see it on their side?\" (partially answered; parked for postmortem by user — do not pursue now)\n   - Check prod-eu-west-1 checkout-gateway values (gunicorn workers, poolMaxConnections, maxReplicas) and the EU session-store maxclients.\n   - PR #942 needs review/merge and production rollout (Argo CD from main); after merge, verify DestinationRule applied and connection counts.\n   - Status page: next update due 30 minutes after incident/INC-2417-status.md was written; page should resolve on next evaluation.\n   - Postmortem items: vendor notification question; SRE-3308 (readiness gap, oncall-ro pods/log RBAC for session-store); customer impact line from subagent (1731 sessions, 61,204 failed requests).\n8. Current Work:\n   Immediately before this summary I had watched PR #942 checks (all five pass, staging serving on the new pool cap) and given a state summary: \"the trigger was the worker bump at deploy/helm/checkout-gateway/values-prod.yaml:95 against the hard-coded client limit at deploy/helm/session-store/templates/configmap.yaml:31; containment failed because of the unconditional readiness at services/checkout/api/health.py:26. Production is rolled back to revision 46 and healthy; PR #942 carries the pool cap, the raised maxclients and the DestinationRule. Still open: the EU cluster worker count, and the vendor notification question for the postmortem.\" I had earlier committed: \"I'll check prod-eu-west-1's values file after the PR checks.\"\n9. Optional Next Step:\n   Check the EU cluster as the user asked: \"Can you also check whether the EU cluster runs the same worker count?\" — read the prod-eu-west-1 values file for checkout-gateway (e.g. deploy/helm/checkout-gateway/values-prod-eu*.yaml or equivalent) for `gunicorn.workers`, `sessionStore.poolMaxConnections`, `autoscaling.maxReplicas`, and the EU session-store `maxclients`, then report whether the same budget violation exists there. Do not pursue the vendor question (parked for postmortem).",
+      "answers": {
+        "id1": "INC-2417",
+        "id2": "SRE-3308",
+        "id3": "e7c41d09b3f2",
+        "id4": "5a8e21f7c0d3",
+        "id5": "6390",
+        "id6": "15000",
+        "err1": "redis.exceptions.ConnectionError: max number of clients reached",
+        "err2": "upstream connect error or disconnect/reset before headers. reset reason: connection failure, transport failure reason: delayed connect error: 111",
+        "err3": "Error: UPGRADE FAILED: another operation (install/upgrade/rollback) is in progress",
+        "err4": "Error from server (Forbidden): pods \"session-store-0\" is forbidden: User \"oncall-ro@example.com\" cannot get resource \"pods/log\" in API group \"\" in the namespace \"payments\"",
+        "uq1": "ANSWERED",
+        "uq2": "UNANSWERED",
+        "uq3": "UNANSWERED",
+        "rc1": "deploy/helm/checkout-gateway/values-prod.yaml:95",
+        "rc2": "deploy/helm/session-store/templates/configmap.yaml:31",
+        "rc3": "services/checkout/api/health.py:26",
+        "hyp1": "RULED_OUT",
+        "hyp2": "RULED_OUT",
+        "dec1": "Rollback to revision 46 was chosen first because it restores service in about a minute and the user said getting customers unblocked comes first, fix forward once green.",
+        "dec2": "Capping the per-worker pool (8) plus raising maxclients to 4096 with a documented budget rule was chosen, because the user did not want to rediscover the limit every time the HPA scales as replicas are added.",
+        "dec3": "Istio outlier detection was chosen over a /readyz session-store ping because the user did not want a Redis blip to take every pod out of rotation at once.",
+        "sub1": "1731"
+      },
+      "scores": {
+        "recall": 1.0,
+        "recall_identifiers": 1.0,
+        "recall_errors": 1.0,
+        "recall_questions": 1.0,
+        "recall_root_causes": 1.0,
+        "recall_hypotheses": 1.0,
+        "recall_decisions": 1.0,
+        "recall_subagent": 1.0
+      },
+      "rows": [
+        {
+          "id": "id1",
+          "category": "identifiers",
+          "answer": "INC-2417",
+          "correct": true
+        },
+        {
+          "id": "id2",
+          "category": "identifiers",
+          "answer": "SRE-3308",
+          "correct": true
+        },
+        {
+          "id": "id3",
+          "category": "identifiers",
+          "answer": "e7c41d09b3f2",
+          "correct": true
+        },
+        {
+          "id": "id4",
+          "category": "identifiers",
+          "answer": "5a8e21f7c0d3",
+          "correct": true
+        },
+        {
+          "id": "id5",
+          "category": "identifiers",
+          "answer": "6390",
+          "correct": true
+        },
+        {
+          "id": "id6",
+          "category": "identifiers",
+          "answer": "15000",
+          "correct": true
+        },
+        {
+          "id": "err1",
+          "category": "errors",
+          "answer": "redis.exceptions.ConnectionError: max number of clients reached",
+          "correct": true
+        },
+        {
+          "id": "err2",
+          "category": "errors",
+          "answer": "upstream connect error or disconnect/reset before headers. reset reason: connection failure, transport failure reason: delayed connect error: 111",
+          "correct": true
+        },
+        {
+          "id": "err3",
+          "category": "errors",
+          "answer": "Error: UPGRADE FAILED: another operation (install/upgrade/rollback) is in progress",
+          "correct": true
+        },
+        {
+          "id": "err4",
+          "category": "errors",
+          "answer": "Error from server (Forbidden): pods \"session-store-0\" is forbidden: User \"oncall-ro@example.com\" cannot get resource \"pods/log\" in API group \"\" in the namespace \"payments\"",
+          "correct": true
+        },
+        {
+          "id": "uq1",
+          "category": "questions",
+          "answer": "ANSWERED",
+          "correct": true
+        },
+        {
+          "id": "uq2",
+          "category": "questions",
+          "answer": "UNANSWERED",
+          "correct": true
+        },
+        {
+          "id": "uq3",
+          "category": "questions",
+          "answer": "UNANSWERED",
+          "correct": true
+        },
+        {
+          "id": "rc1",
+          "category": "root_causes",
+          "answer": "deploy/helm/checkout-gateway/values-prod.yaml:95",
+          "correct": true
+        },
+        {
+          "id": "rc2",
+          "category": "root_causes",
+          "answer": "deploy/helm/session-store/templates/configmap.yaml:31",
+          "correct": true
+        },
+        {
+          "id": "rc3",
+          "category": "root_causes",
+          "answer": "services/checkout/api/health.py:26",
+          "correct": true
+        },
+        {
+          "id": "hyp1",
+          "category": "hypotheses",
+          "answer": "RULED_OUT",
+          "correct": true
+        },
+        {
+          "id": "hyp2",
+          "category": "hypotheses",
+          "answer": "RULED_OUT",
+          "correct": true
+        },
+        {
+          "id": "dec1",
+          "category": "decisions",
+          "answer": "Rollback to revision 46 was chosen first because it restores service in about a minute and the user said getting customers unblocked comes first, fix forward once green.",
+          "correct": true
+        },
+        {
+          "id": "dec2",
+          "category": "decisions",
+          "answer": "Capping the per-worker pool (8) plus raising maxclients to 4096 with a documented budget rule was chosen, because the user did not want to rediscover the limit every time the HPA scales as replicas are added.",
+          "correct": true
+        },
+        {
+          "id": "dec3",
+          "category": "decisions",
+          "answer": "Istio outlier detection was chosen over a /readyz session-store ping because the user did not want a Redis blip to take every pod out of rotation at once.",
+          "correct": true
+        },
+        {
+          "id": "sub1",
+          "category": "subagent",
+          "answer": "1731",
+          "correct": true
+        }
+      ],
+      "usage": {
+        "summary": {
+          "input_tokens": 29500,
+          "output_tokens": 9699
+        },
+        "reader": {
+          "input_tokens": 6844,
+          "output_tokens": 621
+        }
+      },
+      "_response_provenance": [
+        {
+          "requested_model": "claude-fable-5-1",
+          "effective_model": "claude-fable-5-1",
+          "effective_models": [
+            "claude-fable-5-1"
+          ],
+          "provider": "anthropic-api",
+          "fallback_state": "not_used",
+          "refusal_state": "not_refused",
+          "model_run_state": "consistent",
+          "response_state": "received",
+          "stop_reasons": [
+            "end_turn"
+          ],
+          "grader_config": {
+            "grader": "grade.py",
+            "metric_keys": [
+              "recall",
+              "recall_identifiers",
+              "recall_errors",
+              "recall_questions",
+              "recall_root_causes",
+              "recall_hypotheses",
+              "recall_decisions",
+              "recall_subagent"
+            ],
+            "primary": "recall"
+          },
+          "provenance_hash": "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba"
+        },
+        {
+          "requested_model": "claude-fable-5-1",
+          "effective_model": "claude-fable-5-1",
+          "effective_models": [
+            "claude-fable-5-1"
+          ],
+          "provider": "anthropic-api",
+          "fallback_state": "not_used",
+          "refusal_state": "not_refused",
+          "model_run_state": "consistent",
+          "response_state": "received",
+          "stop_reasons": [
+            "end_turn"
+          ],
+          "grader_config": {
+            "grader": "grade.py",
+            "metric_keys": [
+              "recall",
+              "recall_identifiers",
+              "recall_errors",
+              "recall_questions",
+              "recall_root_causes",
+              "recall_hypotheses",
+              "recall_decisions",
+              "recall_subagent"
+            ],
+            "primary": "recall"
+          },
+          "provenance_hash": "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba"
+        }
+      ]
+    },
+    {
+      "arm": "baseline",
+      "run_idx": 1,
+      "summary_stop_reason": "end_turn",
+      "summary_tag_found": true,
+      "reader_stop_reason": "end_turn",
+      "summary_chars": 10301,
+      "summary": "Summary:\n1. Primary Request and Intent:\n   - User (on-call) paged for **INC-2417 CheckoutGateway5xxBudgetBurn**, cluster **prod-us-east-1**, namespace **payments**: checkout-gateway returning ~12% 5xx starting minutes after a deploy at **14:07 UTC**. Asked me to drive the investigation.\n   - Stated constraints: \"My kube context is the read-only on-call one; helm and gh work.\" and \"Last week's INC-2409 was a session-store failover on a different team's service and is unrelated, so ignore it.\"\n   - Asked for the error-budget burn rate at page time for the incident channel.\n   - Decided: \"Roll back. Getting customers unblocked comes first; we fix forward once it is green.\"\n   - Decided containment approach: \"B, the outlier detection. I do not want a Redis blip to take every pod out of rotation at once.\"\n   - Decided forward fix: \"Cap the pool. We keep adding replicas and I do not want to rediscover this every time the HPA scales.\"\n   - Asked whether the payments vendor needs to be told about the retry storm — later said: \"park the vendor question for the postmortem, we will answer it there.\"\n   - Filed SRE-3308 for the readiness gap and on-call log access; asked: \"Can you also check whether the EU cluster runs the same worker count?\"\n2. Key Technical Concepts:\n   - Kubernetes (Deployment/ReplicaSet rollout, EndpointSlices, events, RBAC pods/log), Helm release history & release Secrets (`sh.helm.release.v1.<name>.v<N>`), pending-upgrade lock\n   - Istio: ingress gateway (payments-gateway) access logs (`UF,URX`, errno 111), sidecar admin `localhost:15000/clusters`, DestinationRule outlier detection vs readiness probes for containment\n   - Redis session store: `maxclients`, `redis.exceptions.ConnectionError: max number of clients reached`, per-worker connection pools, connection budget rule **workers × poolMaxConnections × maxReplicas < maxclients**\n   - gunicorn/uvicorn workers, WORKER TIMEOUT caused by workers blocking on 5s socket timeout\n   - Prometheus SLO burn-rate alerting (1h burn rate, 30d budget), Loki log queries, Argo CD auto-deploy of branches to staging\n   - Service port mapping: session-store Service port 6390 → container 6379 (sentinel 26379)\n3. Files and Code Sections:\n   - `deploy/helm/checkout-gateway/values-prod.yaml` (read, then edited)\n     - Root cause #1 at line 95: `workers: 16` (was 4, commit e7c41d09b3f2); `sessionStore.poolMaxConnections: 20`, `socketTimeoutSeconds: 5`; `autoscaling.minReplicas: 12`, `maxReplicas: 20` (was 12); `SESSION_STORE_URL: \"redis://session-store.payments.svc.cluster.local:6390/0\"`; PDB minAvailable 9; probes /healthz and /readyz.\n     - Edit: `sessionStore.poolMaxConnections: 8` plus comment \"workers x poolMaxConnections x autoscaling.maxReplicas must stay below the store's maxclients\".\n   - `deploy/helm/session-store/templates/configmap.yaml` (read, then edited)\n     - Root cause #2 at line 31: `maxclients 256` with comment \"Sized for the original 4-worker gateway deployment.\" redis `port 6379`, sentinel monitors session-store-0.\n     - Edit: `maxclients 4096` with comment naming the budget rule and INC-2417.\n   - `services/checkout/api/health.py` (read)\n     - Root cause #3 at line 26: `/readyz` returns `{\"status\": \"ok\"}` unconditionally; `/healthz` intentionally never touches dependencies; `dependency_report()` pings store with `timeout=0.3` but is \"NOT wired to any probe\".\n   - `services/checkout/config/redis.py` (edited)\n     - max_connections 20 → 8 via `settings.session_pool_max`; `socket_connect_timeout` 1.0; `health_check_interval` 30.\n   - `deploy/istio/checkout-gateway-destinationrule.yaml` (created)\n     - outlierDetection: consecutive5xxErrors 5, interval 10s, baseEjectionTime 30s, maxEjectionPercent 50; connectionPool.http.http1MaxPendingRequests 256. (Note: any DestinationRule targeting the session-store must use port 6390, not 6379.)\n   - `incident/INC-2417-status.md` (created)\n     - Status Identified → Monitoring; cause, rollback time, next update in 30 minutes; no customer counts until the postmortem.\n   - Commit `e7c41d09b3f2` (Marcus Oyelaran, 13:52:40 UTC): \"perf(gateway): raise gunicorn workers to 16 for the checkout surge\" — workers 4→16, maxReplicas 12→20.\n   - Fix commit `5a8e21f7c0d3` on branch `fix/INC-2417-session-store-budget`; PR https://github.com/example/payments-platform/pull/942 (\"fix(checkout): cap the session-store pool per worker; outlier detection for checkout-gateway (INC-2417)\").\n4. Errors and fixes:\n   - `helm rollback checkout-gateway 46` → `Error: UPGRADE FAILED: another operation (install/upgrade/rollback) is in progress`. helm history showed revision 48 `pending-upgrade` since 14:31:05 (\"Preparing upgrade\", never finished). Fixed by deleting the release record Secret `sh.helm.release.v1.checkout-gateway.v48` in namespace payments (pods were still from rev 47, so 48 had applied nothing); rollback then succeeded (\"Rollback was a success!\").\n   - `kubectl logs session-store-0 -n payments` → `Error from server (Forbidden): ... User \"oncall-ro@example.com\" cannot get resource \"pods/log\"` — the read-only role lacks pods/log for the session-store StatefulSet. Not blocking (metrics showed rejections); logged as an access-review follow-up, now tracked in SRE-3308.\n   - Hypotheses ruled out: (a) cluster autoscaler draining nodes during rollout — no eviction/drain/NotReady events, 6 general nodes Ready; (b) ingress routing to stale pod IPs — sidecar cluster table matched EndpointSlice exactly, all healthy, cx_connect_fail 0, DNS correct (checkout-gateway 172.20.114.203, session-store 172.20.61.9). errno 111 refusals attributed to gunicorn workers being killed on timeout and rebooting.\n5. Problem Solving:\n   - Full chain: worker bump 4→16 (12 replicas × 16 workers × pool 20 = 3,840 possible connections vs prior 960) against hard-coded `maxclients 256`; session-store-0 (primary) pinned at 256 clients, 48,913 rejected connections in 30 min; each failed request blocked a worker for the 5s socket timeout → 503s at ~5,0xx ms, WORKER TIMEOUTs; unconditional `/readyz` kept broken pods in rotation for ~40 min.\n   - Metrics at page: 5xx ratio 0.1231; 1h burn rate 14.6x (page threshold 14.4x); 30d budget remaining 72% (~28% burned in ~40 min).\n   - Post-rollback (rev 46): 5xx 0.41% (normal vendor-decline background), connected clients 148/256, p95 318 ms.\n   - Subagent Loki analysis (14:07–14:52 UTC): 1,731 distinct sessions got ≥1 5xx; 61,204 failed requests (68% POST /checkout/confirm, 18% POST /cart/apply-promo, rest GET /cart, POST /cart/items, GET /checkout/summary); single error class; p95 4.9s vs 310ms baseline, p50 2.2s; 2,914 client retries within 2s (~1.05x amplification); no vendor retry loop from gateway side; logs contain only session ids and tenant, no card data or emails; prod-eu-west-1 not queried (separate Loki tenant).\n   - Verification: 84 unit tests passed; helm lint both charts clean; PR #942 checks lint/unit/helm-lint/staging-deploy/staging-smoke all pass; staging running on new pool cap.\n6. All user messages:\n   - \"I'm on call and just got paged: INC-2417, CheckoutGateway5xxBudgetBurn, in prod-us-east-1 namespace payments. checkout-gateway is returning about 12% 5xx and it started a few minutes after a deploy at 14:07 UTC. Can you drive the investigation? My kube context is the read-only on-call one; helm and gh work. Last week's INC-2409 was a session-store failover on a different team's service and is unrelated, so ignore it.\"\n   - \"Ok. Before we go further: What was the error-budget burn rate when the page fired? I need it for the incident channel.\"\n   - \"Roll back. Getting customers unblocked comes first; we fix forward once it is green.\"\n   - \"B, the outlier detection. I do not want a Redis blip to take every pod out of rotation at once.\"\n   - \"Cap the pool. We keep adding replicas and I do not want to rediscover this every time the HPA scales. Do we need to tell the payments vendor about the retry storm, or will they see it on their side?\"\n   - (appended to PR-creation tool result) \"I filed SRE-3308 for the readiness gap and the on-call log access. Can you also check whether the EU cluster runs the same worker count? And park the vendor question for the postmortem, we will answer it there.\"\n7. Pending Tasks:\n   - Check whether the EU cluster (prod-eu-west-1) runs the same worker count / has the same exposure (look at its values file, e.g. a values-prod-eu or equivalent, and its session-store maxclients). Not yet started.\n   - Vendor-notification question: parked for the postmortem per user (partial answer so far: no vendor retry loop from the gateway side, ~1.05x client retry amplification; vendor-facing outbound retry counters not yet examined).\n   - PR #942 awaiting review/merge; production is on rolled-back revision 46 until it lands.\n   - Status page: next update due ~30 minutes after the Monitoring update in incident/INC-2417-status.md.\n   - Readiness gap and on-call pods/log RBAC are tracked in SRE-3308 (user-filed).\n8. Current Work:\n   Immediately before this summary I confirmed the session-store Service mapping (`port: 6390 name tcp-redis → targetPort 6379`, sentinel 26379, selector role: primary), watched PR #942 checks (all five passed), and posted a state-of-incident wrap-up: trigger at deploy/helm/checkout-gateway/values-prod.yaml:95, hard limit at deploy/helm/session-store/templates/configmap.yaml:31, containment failure at services/checkout/api/health.py:26; production rolled back to revision 46 and healthy; PR #942 carries pool cap (8), maxclients 4096 and the DestinationRule. I explicitly listed as \"Still open: the EU cluster worker count, and the vendor notification question for the postmortem.\"\n9. Optional Next Step:\n   Check the EU cluster's checkout-gateway worker count, per the user's request: \"Can you also check whether the EU cluster runs the same worker count?\" I had said: \"I have not looked at the EU cluster yet; the subagent's Loki tenant did not cover it either, so I'll check prod-eu-west-1's values file after the PR checks.\" The PR checks are now green, so the next step is to read the prod-eu-west-1 values file for checkout-gateway (and its session-store maxclients) in the repo to determine whether the same 16-worker / 256-maxclients exposure exists there, using read-only access.",
+      "answers": {
+        "id1": "INC-2417",
+        "id2": "SRE-3308",
+        "id3": "e7c41d09b3f2",
+        "id4": "5a8e21f7c0d3",
+        "id5": "6390",
+        "id6": "15000",
+        "err1": "redis.exceptions.ConnectionError: max number of clients reached",
+        "err2": "UNKNOWN",
+        "err3": "Error: UPGRADE FAILED: another operation (install/upgrade/rollback) is in progress",
+        "err4": "UNKNOWN",
+        "uq1": "ANSWERED",
+        "uq2": "UNANSWERED",
+        "uq3": "UNANSWERED",
+        "rc1": "deploy/helm/checkout-gateway/values-prod.yaml:95",
+        "rc2": "deploy/helm/session-store/templates/configmap.yaml:31",
+        "rc3": "services/checkout/api/health.py:26",
+        "hyp1": "RULED_OUT",
+        "hyp2": "RULED_OUT",
+        "dec1": "Rollback to revision 46 was chosen first, because getting customers unblocked comes first and the fix-forward happens once it is green.",
+        "dec2": "Capping the per-worker pool (poolMaxConnections 20 -> 8, alongside raising maxclients to 4096) was chosen, because replicas keep being added and the user did not want to rediscover the problem every time the HPA scales.",
+        "dec3": "Istio outlier detection (DestinationRule) was chosen, because the user did not want a Redis blip to take every pod out of rotation at once as a /readyz dependency check would.",
+        "sub1": "1,731"
+      },
+      "scores": {
+        "recall": 0.9090909090909091,
+        "recall_identifiers": 1.0,
+        "recall_errors": 0.5,
+        "recall_questions": 1.0,
+        "recall_root_causes": 1.0,
+        "recall_hypotheses": 1.0,
+        "recall_decisions": 1.0,
+        "recall_subagent": 1.0
+      },
+      "rows": [
+        {
+          "id": "id1",
+          "category": "identifiers",
+          "answer": "INC-2417",
+          "correct": true
+        },
+        {
+          "id": "id2",
+          "category": "identifiers",
+          "answer": "SRE-3308",
+          "correct": true
+        },
+        {
+          "id": "id3",
+          "category": "identifiers",
+          "answer": "e7c41d09b3f2",
+          "correct": true
+        },
+        {
+          "id": "id4",
+          "category": "identifiers",
+          "answer": "5a8e21f7c0d3",
+          "correct": true
+        },
+        {
+          "id": "id5",
+          "category": "identifiers",
+          "answer": "6390",
+          "correct": true
+        },
+        {
+          "id": "id6",
+          "category": "identifiers",
+          "answer": "15000",
+          "correct": true
+        },
+        {
+          "id": "err1",
+          "category": "errors",
+          "answer": "redis.exceptions.ConnectionError: max number of clients reached",
+          "correct": true
+        },
+        {
+          "id": "err2",
+          "category": "errors",
+          "answer": "UNKNOWN",
+          "correct": false
+        },
+        {
+          "id": "err3",
+          "category": "errors",
+          "answer": "Error: UPGRADE FAILED: another operation (install/upgrade/rollback) is in progress",
+          "correct": true
+        },
+        {
+          "id": "err4",
+          "category": "errors",
+          "answer": "UNKNOWN",
+          "correct": false
+        },
+        {
+          "id": "uq1",
+          "category": "questions",
+          "answer": "ANSWERED",
+          "correct": true
+        },
+        {
+          "id": "uq2",
+          "category": "questions",
+          "answer": "UNANSWERED",
+          "correct": true
+        },
+        {
+          "id": "uq3",
+          "category": "questions",
+          "answer": "UNANSWERED",
+          "correct": true
+        },
+        {
+          "id": "rc1",
+          "category": "root_causes",
+          "answer": "deploy/helm/checkout-gateway/values-prod.yaml:95",
+          "correct": true
+        },
+        {
+          "id": "rc2",
+          "category": "root_causes",
+          "answer": "deploy/helm/session-store/templates/configmap.yaml:31",
+          "correct": true
+        },
+        {
+          "id": "rc3",
+          "category": "root_causes",
+          "answer": "services/checkout/api/health.py:26",
+          "correct": true
+        },
+        {
+          "id": "hyp1",
+          "category": "hypotheses",
+          "answer": "RULED_OUT",
+          "correct": true
+        },
+        {
+          "id": "hyp2",
+          "category": "hypotheses",
+          "answer": "RULED_OUT",
+          "correct": true
+        },
+        {
+          "id": "dec1",
+          "category": "decisions",
+          "answer": "Rollback to revision 46 was chosen first, because getting customers unblocked comes first and the fix-forward happens once it is green.",
+          "correct": true
+        },
+        {
+          "id": "dec2",
+          "category": "decisions",
+          "answer": "Capping the per-worker pool (poolMaxConnections 20 -> 8, alongside raising maxclients to 4096) was chosen, because replicas keep being added and the user did not want to rediscover the problem every time the HPA scales.",
+          "correct": true
+        },
+        {
+          "id": "dec3",
+          "category": "decisions",
+          "answer": "Istio outlier detection (DestinationRule) was chosen, because the user did not want a Redis blip to take every pod out of rotation at once as a /readyz dependency check would.",
+          "correct": true
+        },
+        {
+          "id": "sub1",
+          "category": "subagent",
+          "answer": "1,731",
+          "correct": true
+        }
+      ],
+      "usage": {
+        "summary": {
+          "input_tokens": 28964,
+          "output_tokens": 7424
+        },
+        "reader": {
+          "input_tokens": 5335,
+          "output_tokens": 529
+        }
+      },
+      "_response_provenance": [
+        {
+          "requested_model": "claude-fable-5-1",
+          "effective_model": "claude-fable-5-1",
+          "effective_models": [
+            "claude-fable-5-1"
+          ],
+          "provider": "anthropic-api",
+          "fallback_state": "not_used",
+          "refusal_state": "not_refused",
+          "model_run_state": "consistent",
+          "response_state": "received",
+          "stop_reasons": [
+            "end_turn"
+          ],
+          "grader_config": {
+            "grader": "grade.py",
+            "metric_keys": [
+              "recall",
+              "recall_identifiers",
+              "recall_errors",
+              "recall_questions",
+              "recall_root_causes",
+              "recall_hypotheses",
+              "recall_decisions",
+              "recall_subagent"
+            ],
+            "primary": "recall"
+          },
+          "provenance_hash": "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba"
+        },
+        {
+          "requested_model": "claude-fable-5-1",
+          "effective_model": "claude-fable-5-1",
+          "effective_models": [
+            "claude-fable-5-1"
+          ],
+          "provider": "anthropic-api",
+          "fallback_state": "not_used",
+          "refusal_state": "not_refused",
+          "model_run_state": "consistent",
+          "response_state": "received",
+          "stop_reasons": [
+            "end_turn"
+          ],
+          "grader_config": {
+            "grader": "grade.py",
+            "metric_keys": [
+              "recall",
+              "recall_identifiers",
+              "recall_errors",
+              "recall_questions",
+              "recall_root_causes",
+              "recall_hypotheses",
+              "recall_decisions",
+              "recall_subagent"
+            ],
+            "primary": "recall"
+          },
+          "provenance_hash": "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba"
+        }
+      ]
+    },
+    {
+      "arm": "with_priorities",
+      "run_idx": 1,
+      "summary_stop_reason": "end_turn",
+      "summary_tag_found": true,
+      "reader_stop_reason": "end_turn",
+      "summary_chars": 13768,
+      "summary": "Summary:\n1. Primary Request and Intent:\n   - Drive the investigation of INC-2417 (alert CheckoutGateway5xxBudgetBurn) in cluster prod-us-east-1, namespace payments: checkout-gateway returning ~12% 5xx starting a few minutes after a deploy at 14:07 UTC.\n   - Constraints stated by user: \"My kube context is the read-only on-call one; helm and gh work.\" (identity: oncall-ro@example.com). \"Last week's INC-2409 was a session-store failover on a different team's service and is unrelated, so ignore it.\"\n   - Provide the error-budget burn rate at page time for the incident channel.\n   - Roll back first (\"Getting customers unblocked comes first; we fix forward once it is green\"), then fix forward.\n   - Containment via Istio outlier detection (not readiness on a shared dependency).\n   - Cap the per-worker Redis pool so the connection budget holds as the HPA scales.\n   - Check whether the EU cluster (prod-eu-west-1) runs the same worker count.\n   - Park the payments-vendor notification question for the postmortem.\n   - Status page: no customer counts until the postmortem.\n2. Key Technical Concepts:\n   - Helm release history / pending-upgrade lock stored as Secrets `sh.helm.release.v1.<name>.v<N>`; Argo CD applies values-prod.yaml from main, branches auto-deploy to staging.\n   - gunicorn (uvicorn.workers.UvicornWorker) worker count × per-worker redis-py connection pool × replica count vs Redis `maxclients`. Budget rule: workers × poolMaxConnections × autoscaling.maxReplicas < maxclients.\n   - Redis session store: 3-member StatefulSet with Sentinel, single primary (session-store-0), Service port 6390 → containerPort 6379, sentinel 26379, selector role: primary.\n   - Istio: ingress gateway `payments-gateway` in istio-system, sidecar admin port 15000 `/clusters`, DestinationRule outlierDetection for per-pod ejection; envoy response flags UF,URX, errno 111 (connection refused).\n   - Kubernetes readiness vs liveness; unconditional /readyz kept broken pods in endpoints.\n   - Prometheus at http://prometheus.monitoring.svc:9090 (redis_connected_clients, redis_rejected_connections_total, redis_config_maxclients, SLO burn-rate recording rules); Loki for log analytics (per-cluster tenants).\n   - HPA scaling (minReplicas 12, maxReplicas 20 in the bad release), PDB minAvailable 9.\n3. Files and Code Sections:\n   - deploy/helm/checkout-gateway/values-prod.yaml\n      - Root cause #1 at line 95: `workers: 16` (was 4), from commit e7c41d09b3f2 \"perf(gateway): raise gunicorn workers to 16 for the checkout surge\" (Marcus Oyelaran, Thu Sep 4 13:52:40 2026); same commit changed `autoscaling.maxReplicas: 12` → `20`. Also relevant: `sessionStore.poolMaxConnections: 20`, `socketTimeoutSeconds: 5`, `healthCheckIntervalSeconds: 30`, `gunicorn.timeout: 30`, `SESSION_STORE_URL: \"redis://session-store.payments.svc.cluster.local:6390/0\"`, image ghcr.io/example/checkout-gateway tag 2026.9.3, replicaCount 12, nodeSelector workload: general.\n      - Arithmetic: 16 × 20 × 12 = 3,840 possible connections (previous 4 workers → 960; in practice ~200 idle).\n      - Edited (forward fix): `sessionStore.poolMaxConnections: 8`, with comment \"workers x poolMaxConnections x autoscaling.maxReplicas must stay below the store's maxclients\".\n   - deploy/helm/session-store/templates/configmap.yaml\n      - Root cause #2 at line 31: `maxclients 256` with comment `# Client limits. Sized for the original 4-worker gateway deployment.` Redis binds port 6379.\n      - Edited: `maxclients 256` → `4096`; comment names the budget rule and INC-2417.\n   - services/checkout/api/health.py\n      - Root cause #3 (containment failure) at line 26: `/readyz` returns `{\"status\": \"ok\"}` unconditionally; `/healthz` intentionally never touches dependencies; `dependency_report()` (line 40) pings the store with `store.ping(timeout=0.3)` but is \"NOT wired to any probe\". Not modified (user chose Istio outlier detection instead; readiness gap tracked in SRE-3308).\n   - services/checkout/config/redis.py\n      - Edited: max_connections 20 → 8 via `settings.session_pool_max`; `socket_connect_timeout` 1.0; `health_check_interval` 30.\n   - deploy/istio/checkout-gateway-destinationrule.yaml (created)\n      - DestinationRule for checkout-gateway: outlierDetection consecutive5xxErrors 5, interval 10s, baseEjectionTime 30s, maxEjectionPercent 50; connectionPool.http.http1MaxPendingRequests 256.\n      - Note recorded later: any DestinationRule referencing the session store must name port 6390 (Service port), not 6379 (container port).\n   - incident/INC-2417-status.md (created)\n      - Status page update Identified → Monitoring: cause, rollback time, next update in 30 minutes; no customer counts until the postmortem.\n   - Read-only inspections: session-store Service (ClusterIP 172.20.61.9; tcp-redis 6390→6379; tcp-sentinel 26379; selector role: primary); git log (other recent commits: 9b0d4e2 chore(helm): bump chart to 1.41.0, 3f7a1c8 stackable promo codes, c2e8d5f fraud retry jitter, 71b6e9d runbook, d84c2f1 istio 1.24 sidecars, 4a9e7b3 idempotency key on /confirm, e6d0c4a refresh ttl on read, b3f5a9c hpa maxReplicas 12, 0c7e2d9 pdf receipts).\n4. Errors and fixes:\n   - Application error (verbatim): `redis.exceptions.ConnectionError: max number of clients reached` on every failed request; 503s at 5012ms/5009ms/5011ms (5 s socket timeout); gunicorn `CRITICAL ... WORKER TIMEOUT (pid:412)` / `(pid:389)` followed by \"Booting worker with pid: 517/521\". Fixed by rollback; forward fix in PR #942.\n   - Ingress envoy log (verbatim): `\"POST /checkout/confirm HTTP/1.1\" 503 UF,URX upstream connect error or disconnect/reset before headers. reset reason: connection failure, transport failure reason: delayed connect error: 111 - \"-\" 0 91 5004 - \"10.42.0.17\" \"okhttp/4.12.0\" outbound|8080||checkout-gateway.payments.svc.cluster.local`. Attributed to workers killed by the gunicorn arbiter with the listener briefly closed; resolves with the pool fix.\n   - `Error: UPGRADE FAILED: another operation (install/upgrade/rollback) is in progress` on `helm rollback checkout-gateway 46`: revision 48 stuck `pending-upgrade` since Thu Sep 4 14:31:05 2026 (\"Preparing upgrade\", chart 1.41.0 app 2026.9.3) from a re-run deploy workflow whose runner was killed at the 20-minute job limit. Fixed by `kubectl -n payments delete secret sh.helm.release.v1.checkout-gateway.v48` (pods were still from rev 47, nothing applied), then rollback succeeded: \"Rollback was a success! Happy Helming!\"\n   - `Error from server (Forbidden): pods \"session-store-0\" is forbidden: User \"oncall-ro@example.com\" cannot get resource \"pods/log\" in API group \"\" in the namespace \"payments\"` — read-only on-call role lacks pods/log for the session-store StatefulSet. Not blocking (metrics show rejections); user filed SRE-3308 covering this and the readiness gap.\n   - User feedback shaping approach: chose rollback over forward-fix; chose outlier detection over readiness ping (\"I do not want a Redis blip to take every pod out of rotation at once\"); chose pool cap over just raising maxclients (\"We keep adding replicas and I do not want to rediscover this every time the HPA scales\"); vendor question parked for postmortem.\n5. Problem Solving:\n   - Confirmed root causes: (1) deploy/helm/checkout-gateway/values-prod.yaml:95 `workers: 16`; (2) deploy/helm/session-store/templates/configmap.yaml:31 `maxclients 256`; (3) services/checkout/api/health.py:26 unconditional `/readyz`.\n   - Ruled out: cluster autoscaler draining nodes during the rollout (no Evicted/NodeNotReady/drain events; only ReplicaSet swap 7d9f6b8c4 up to 12 / 5b7c8d9e6 down to 0 at 14:07; all 6 `workload=general` nodes Ready). Ruled out: ingress gateway routing to stale pod IPs from the previous ReplicaSet (sidecar cluster table held exactly the 12 EndpointSlice IPs, all `health_flags::healthy`, `cx_connect_fail::0`, `rq_error::37` each; `dig` checkout-gateway → 172.20.114.203, session-store → 172.20.61.9; session-store endpoint 10.42.11.20:6379 cx_active 16).\n   - Unrelated noise: promo-engine-6f4b9c8d7-2ndqv BackOff (1 restart, predates incident); ledger-sync-cron completed.\n   - Metrics at page time: session-store-0 redis_connected_clients 256 (session-store-1/-2: 3 each), increase(redis_rejected_connections_total[30m]) 48913, redis_config_maxclients 256, 5xx ratio 0.1231, 1h burn rate 14.6 (page threshold 14.4x), 30d budget remaining 0.72 (~28% burned in ~40 min).\n   - After rollback to revision 46 (+5 min): 5xx ratio 0.0041 (normal background of vendor declines), connected clients 148/256, p95 0.318 s.\n   - Subagent (Explore, read-only Loki, payments/checkout-gateway 14:07–14:52 UTC) report, primary evidence: 1731 distinct customer sessions received ≥1 5xx; 61,204 failed requests total; 41,880 POST /checkout/confirm (68%), 11,017 POST /cart/apply-promo (18%), 8,307 across GET /cart, POST /cart/items, GET /checkout/summary; single error class from session layer; p95 4.9s vs 310ms baseline, p50 2.2s; 2,914 requests retried by clients within 2s (User-Agent okhttp and web SDK), retry amplification ~1.05x; no evidence of a retry loop against the payments vendor from the gateway side; log lines contain session ids and tenant only, no card data or emails; prod-eu-west-1 NOT queried (separate Loki tenant).\n   - Verification: `uv run pytest services/checkout/tests -q` → 84 passed in 21.40s; helm lint both charts clean (only \"icon is recommended\"). PR #942 checks: lint pass 38s, unit pass 1m04s, helm-lint pass 22s, staging-deploy pass 3m41s, staging-smoke pass 1m12s.\n   - Commit 5a8e21f7c0d3 on branch fix/INC-2417-session-store-budget, message \"fix(checkout): cap the session-store pool per worker; outlier detection for checkout-gateway (INC-2417)\"; PR https://github.com/example/payments-platform/pull/942.\n6. All user messages:\n   - \"I'm on call and just got paged: INC-2417, CheckoutGateway5xxBudgetBurn, in prod-us-east-1 namespace payments. checkout-gateway is returning about 12% 5xx and it started a few minutes after a deploy at 14:07 UTC. Can you drive the investigation? My kube context is the read-only on-call one; helm and gh work. Last week's INC-2409 was a session-store failover on a different team's service and is unrelated, so ignore it.\" (request; constraints preserved verbatim above)\n   - \"Ok. Before we go further: What was the error-budget burn rate when the page fired? I need it for the incident channel.\" — ANSWERED (14.6x 1h vs 14.4x threshold; 72% budget remaining).\n   - \"Roll back. Getting customers unblocked comes first; we fix forward once it is green.\" — done.\n   - \"B, the outlier detection. I do not want a Redis blip to take every pod out of rotation at once.\" — done (DestinationRule written).\n   - \"Cap the pool. We keep adding replicas and I do not want to rediscover this every time the HPA scales. Do we need to tell the payments vendor about the retry storm, or will they see it on their side?\" — pool cap done; vendor question PARTIALLY ANSWERED (subagent: no gateway-side vendor retry loop, client retry amplification ~1.05x; vendor-facing outbound counters never checked), then user parked it.\n   - \"I filed SRE-3308 for the readiness gap and the on-call log access. Can you also check whether the EU cluster runs the same worker count? And park the vendor question for the postmortem, we will answer it there.\" — EU cluster question UNANSWERED; vendor question parked per user.\n7. Pending Tasks:\n   - Pending questions:\n     - \"Can you also check whether the EU cluster runs the same worker count?\" — unanswered; need to inspect the prod-eu-west-1 values file (e.g. deploy/helm/checkout-gateway/values-prod-eu*.yaml or equivalent) for `gunicorn.workers`, `sessionStore.poolMaxConnections`, `autoscaling.maxReplicas`, and the EU session-store `maxclients`.\n     - \"Do we need to tell the payments vendor about the retry storm, or will they see it on their side?\" — parked for the postmortem at user's request; still need gateway outbound vendor retry counters (VENDOR_RETRY_MAX 3, backoff 250ms) to answer fully.\n   - PR #942 awaits review/merge and production deploy via Argo CD (prod currently on rolled-back revision 46, workers 4).\n   - Status page next update due 30 minutes after incident/INC-2417-status.md was written; no customer counts until postmortem.\n   - Verify the DestinationRule references the correct session-store port (6390, not 6379) if any store-facing rule exists.\n   - SRE-3308 (filed by user): readiness gap in health.py, on-call RBAC for pods/log on session-store.\n   - Postmortem inputs gathered: burn rate, subagent impact numbers, three root causes, two ruled-out hypotheses.\n8. Current Work:\n   Immediately before the summary request I had confirmed all five PR #942 checks passed and posted an incident state summary: trigger at deploy/helm/checkout-gateway/values-prod.yaml:95 against hard-coded limit at deploy/helm/session-store/templates/configmap.yaml:31; containment failure at services/checkout/api/health.py:26; production rolled back to revision 46 and healthy; PR #942 carries pool cap (8), maxclients 4096 and the checkout-gateway DestinationRule. Stated as still open: \"the EU cluster worker count, and the vendor notification question for the postmortem.\"\n9. Optional Next Step:\n   Check the EU cluster configuration per the user's request: \"Can you also check whether the EU cluster runs the same worker count?\" — locate the prod-eu-west-1 values file for checkout-gateway (and the EU session-store maxclients), compare `gunicorn.workers`, `sessionStore.poolMaxConnections`, and `autoscaling.maxReplicas` against the budget rule, and report whether the EU cluster is exposed to the same failure (the Loki subagent did not cover prod-eu-west-1). Do not act on the vendor question; it is parked for the postmortem.",
+      "answers": {
+        "id1": "INC-2417",
+        "id2": "SRE-3308",
+        "id3": "e7c41d09b3f2",
+        "id4": "5a8e21f7c0d3",
+        "id5": "6390",
+        "id6": "15000",
+        "err1": "redis.exceptions.ConnectionError: max number of clients reached",
+        "err2": "upstream connect error or disconnect/reset before headers. reset reason: connection failure, transport failure reason: delayed connect error: 111",
+        "err3": "Error: UPGRADE FAILED: another operation (install/upgrade/rollback) is in progress",
+        "err4": "Error from server (Forbidden): pods \"session-store-0\" is forbidden: User \"oncall-ro@example.com\" cannot get resource \"pods/log\" in API group \"\" in the namespace \"payments\"",
+        "uq1": "ANSWERED",
+        "uq2": "UNANSWERED",
+        "uq3": "UNANSWERED",
+        "rc1": "deploy/helm/checkout-gateway/values-prod.yaml:95",
+        "rc2": "deploy/helm/session-store/templates/configmap.yaml:31",
+        "rc3": "services/checkout/api/health.py:26",
+        "hyp1": "RULED_OUT",
+        "hyp2": "RULED_OUT",
+        "dec1": "Rollback to revision 46 first, because getting customers unblocked comes first and the fix forward happens once it is green.",
+        "dec2": "Capping the per-worker pool (to 8, alongside raising maxclients), because replicas keep being added and the user did not want to rediscover the problem every time the HPA scales.",
+        "dec3": "Istio outlier detection, because the user did not want a Redis blip to take every pod out of rotation at once.",
+        "sub1": "1731"
+      },
+      "scores": {
+        "recall": 1.0,
+        "recall_identifiers": 1.0,
+        "recall_errors": 1.0,
+        "recall_questions": 1.0,
+        "recall_root_causes": 1.0,
+        "recall_hypotheses": 1.0,
+        "recall_decisions": 1.0,
+        "recall_subagent": 1.0
+      },
+      "rows": [
+        {
+          "id": "id1",
+          "category": "identifiers",
+          "answer": "INC-2417",
+          "correct": true
+        },
+        {
+          "id": "id2",
+          "category": "identifiers",
+          "answer": "SRE-3308",
+          "correct": true
+        },
+        {
+          "id": "id3",
+          "category": "identifiers",
+          "answer": "e7c41d09b3f2",
+          "correct": true
+        },
+        {
+          "id": "id4",
+          "category": "identifiers",
+          "answer": "5a8e21f7c0d3",
+          "correct": true
+        },
+        {
+          "id": "id5",
+          "category": "identifiers",
+          "answer": "6390",
+          "correct": true
+        },
+        {
+          "id": "id6",
+          "category": "identifiers",
+          "answer": "15000",
+          "correct": true
+        },
+        {
+          "id": "err1",
+          "category": "errors",
+          "answer": "redis.exceptions.ConnectionError: max number of clients reached",
+          "correct": true
+        },
+        {
+          "id": "err2",
+          "category": "errors",
+          "answer": "upstream connect error or disconnect/reset before headers. reset reason: connection failure, transport failure reason: delayed connect error: 111",
+          "correct": true
+        },
+        {
+          "id": "err3",
+          "category": "errors",
+          "answer": "Error: UPGRADE FAILED: another operation (install/upgrade/rollback) is in progress",
+          "correct": true
+        },
+        {
+          "id": "err4",
+          "category": "errors",
+          "answer": "Error from server (Forbidden): pods \"session-store-0\" is forbidden: User \"oncall-ro@example.com\" cannot get resource \"pods/log\" in API group \"\" in the namespace \"payments\"",
+          "correct": true
+        },
+        {
+          "id": "uq1",
+          "category": "questions",
+          "answer": "ANSWERED",
+          "correct": true
+        },
+        {
+          "id": "uq2",
+          "category": "questions",
+          "answer": "UNANSWERED",
+          "correct": true
+        },
+        {
+          "id": "uq3",
+          "category": "questions",
+          "answer": "UNANSWERED",
+          "correct": true
+        },
+        {
+          "id": "rc1",
+          "category": "root_causes",
+          "answer": "deploy/helm/checkout-gateway/values-prod.yaml:95",
+          "correct": true
+        },
+        {
+          "id": "rc2",
+          "category": "root_causes",
+          "answer": "deploy/helm/session-store/templates/configmap.yaml:31",
+          "correct": true
+        },
+        {
+          "id": "rc3",
+          "category": "root_causes",
+          "answer": "services/checkout/api/health.py:26",
+          "correct": true
+        },
+        {
+          "id": "hyp1",
+          "category": "hypotheses",
+          "answer": "RULED_OUT",
+          "correct": true
+        },
+        {
+          "id": "hyp2",
+          "category": "hypotheses",
+          "answer": "RULED_OUT",
+          "correct": true
+        },
+        {
+          "id": "dec1",
+          "category": "decisions",
+          "answer": "Rollback to revision 46 first, because getting customers unblocked comes first and the fix forward happens once it is green.",
+          "correct": true
+        },
+        {
+          "id": "dec2",
+          "category": "decisions",
+          "answer": "Capping the per-worker pool (to 8, alongside raising maxclients), because replicas keep being added and the user did not want to rediscover the problem every time the HPA scales.",
+          "correct": true
+        },
+        {
+          "id": "dec3",
+          "category": "decisions",
+          "answer": "Istio outlier detection, because the user did not want a Redis blip to take every pod out of rotation at once.",
+          "correct": true
+        },
+        {
+          "id": "sub1",
+          "category": "subagent",
+          "answer": "1731",
+          "correct": true
+        }
+      ],
+      "usage": {
+        "summary": {
+          "input_tokens": 29500,
+          "output_tokens": 9948
+        },
+        "reader": {
+          "input_tokens": 6870,
+          "output_tokens": 584
+        }
+      },
+      "_response_provenance": [
+        {
+          "requested_model": "claude-fable-5-1",
+          "effective_model": "claude-fable-5-1",
+          "effective_models": [
+            "claude-fable-5-1"
+          ],
+          "provider": "anthropic-api",
+          "fallback_state": "not_used",
+          "refusal_state": "not_refused",
+          "model_run_state": "consistent",
+          "response_state": "received",
+          "stop_reasons": [
+            "end_turn"
+          ],
+          "grader_config": {
+            "grader": "grade.py",
+            "metric_keys": [
+              "recall",
+              "recall_identifiers",
+              "recall_errors",
+              "recall_questions",
+              "recall_root_causes",
+              "recall_hypotheses",
+              "recall_decisions",
+              "recall_subagent"
+            ],
+            "primary": "recall"
+          },
+          "provenance_hash": "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba"
+        },
+        {
+          "requested_model": "claude-fable-5-1",
+          "effective_model": "claude-fable-5-1",
+          "effective_models": [
+            "claude-fable-5-1"
+          ],
+          "provider": "anthropic-api",
+          "fallback_state": "not_used",
+          "refusal_state": "not_refused",
+          "model_run_state": "consistent",
+          "response_state": "received",
+          "stop_reasons": [
+            "end_turn"
+          ],
+          "grader_config": {
+            "grader": "grade.py",
+            "metric_keys": [
+              "recall",
+              "recall_identifiers",
+              "recall_errors",
+              "recall_questions",
+              "recall_root_causes",
+              "recall_hypotheses",
+              "recall_decisions",
+              "recall_subagent"
+            ],
+            "primary": "recall"
+          },
+          "provenance_hash": "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba"
+        }
+      ]
+    },
+    {
+      "arm": "baseline",
+      "run_idx": 2,
+      "summary_stop_reason": "end_turn",
+      "summary_tag_found": true,
+      "reader_stop_reason": "end_turn",
+      "summary_chars": 11122,
+      "summary": "Summary:\n1. Primary Request and Intent:\n   - User is on call for INC-2417 (alert CheckoutGateway5xxBudgetBurn) in cluster prod-us-east-1, namespace `payments`. checkout-gateway was returning ~12% 5xx beginning minutes after a deploy at 14:07 UTC. User asked me to drive the investigation.\n   - Constraints stated verbatim: \"My kube context is the read-only on-call one; helm and gh work.\" and \"Last week's INC-2409 was a session-store failover on a different team's service and is unrelated, so ignore it.\"\n   - User asked for the error-budget burn rate at page time for the incident channel.\n   - User chose rollback over forward fix: \"Roll back. Getting customers unblocked comes first; we fix forward once it is green.\"\n   - User chose Istio outlier detection over a readiness-probe dependency check: \"B, the outlier detection. I do not want a Redis blip to take every pod out of rotation at once.\"\n   - User chose capping the per-worker Redis pool: \"Cap the pool. We keep adding replicas and I do not want to rediscover this every time the HPA scales.\"\n   - User asked whether the payments vendor needs to be told about the retry storm; later said to \"park the vendor question for the postmortem, we will answer it there.\"\n   - User filed SRE-3308 for the readiness gap and the on-call log access, and asked: \"Can you also check whether the EU cluster runs the same worker count?\"\n2. Key Technical Concepts:\n   - Kubernetes (Deployments/ReplicaSets, StatefulSet, EndpointSlice, Services with port→targetPort mapping, events, RBAC pods/log permissions)\n   - Helm release history, `pending-upgrade` stuck state, release records stored as Secrets `sh.helm.release.v1.<name>.v<N>`, `helm rollback`\n   - Redis `maxclients` limit, `redis.exceptions.ConnectionError: max number of clients reached`, per-worker connection pools; connection budget rule: workers × poolMaxConnections × maxReplicas < maxclients\n   - gunicorn with UvicornWorker: worker count, WORKER TIMEOUT / arbiter reboot causing transient connection refused (errno 111)\n   - Istio/Envoy: ingress gateway `UF,URX` 503s, sidecar admin `localhost:15000/clusters`, DestinationRule outlierDetection (consecutive5xxErrors, interval, baseEjectionTime, maxEjectionPercent), connectionPool.http.http1MaxPendingRequests\n   - SLO error-budget burn rate (1h burn 14.6x vs 14.4x page threshold), Prometheus queries, Loki log queries\n   - Argo CD auto-deploys branches to staging; GitHub PR checks (lint, unit, helm-lint, staging-deploy, staging-smoke)\n   - Readiness probe design: dependency checks on a shared store cause fleet-wide ejection vs. per-pod outlier ejection\n3. Files and Code Sections:\n   - `deploy/helm/checkout-gateway/values-prod.yaml`\n      - Root-cause trigger at line 95 (`workers: 16`, was 4) from commit e7c41d09b3f2 (\"perf(gateway): raise gunicorn workers to 16 for the checkout surge\", Marcus Oyelaran, Sep 4 13:52:40 UTC); also `autoscaling.maxReplicas: 20` (was 12), `minReplicas: 12`.\n      - Relevant existing values: `SESSION_STORE_URL: \"redis://session-store.payments.svc.cluster.local:6390/0\"`, `sessionStore.poolMaxConnections: 20`, `socketTimeoutSeconds: 5`, `healthCheckIntervalSeconds: 30`, `gunicorn.timeout: 30`, `workerClass: uvicorn.workers.UvicornWorker`, PDB `minAvailable: 9`, `nodeSelector: workload: general`.\n      - Edited: `sessionStore.poolMaxConnections: 8` with comment \"workers x poolMaxConnections x autoscaling.maxReplicas must stay below the store's maxclients\".\n   - `deploy/helm/session-store/templates/configmap.yaml`\n      - Line 31 `maxclients 256` with comment \"Sized for the original 4-worker gateway deployment.\" Redis listens on 6379 in container; sentinel monitors session-store-0 with quorum 2.\n      - Edited: `maxclients 4096` with comment naming the budget rule and INC-2417.\n   - `services/checkout/api/health.py`\n      - Third root cause at line 26: `/readyz` returns `{\"status\": \"ok\"}` unconditionally; `/healthz` deliberately never touches dependencies; `dependency_report()` pings `store.ping(timeout=0.3)` but is \"NOT wired to any probe\". Not modified (user chose outlier detection instead; readiness gap tracked in SRE-3308).\n   - `services/checkout/config/redis.py`\n      - Edited: `max_connections` 20 → 8 via `settings.session_pool_max`; `socket_connect_timeout 1.0`; `health_check_interval 30`.\n   - `deploy/istio/checkout-gateway-destinationrule.yaml` (created)\n      - outlierDetection: consecutive5xxErrors 5, interval 10s, baseEjectionTime 30s, maxEjectionPercent 50; connectionPool.http.http1MaxPendingRequests 256. Targets checkout-gateway (port 8080). Note: any DestinationRule for the session store must name port 6390 (Service port), not 6379.\n   - `incident/INC-2417-status.md` (created)\n      - Status page update Identified → Monitoring: cause, rollback time, next update in 30 minutes; explicitly no customer counts until the postmortem.\n   - Observed (not edited): `kubectl get svc session-store` — ClusterIP 172.20.61.9, ports `tcp-redis 6390→6379`, `tcp-sentinel 26379→26379`, selector includes `role: primary`.\n   - Git: branch `fix/INC-2417-session-store-budget`, commit `5a8e21f7c0d3` \"fix(checkout): cap the session-store pool per worker; outlier detection for checkout-gateway (INC-2417)\", PR https://github.com/example/payments-platform/pull/942.\n4. Errors and fixes:\n   - `helm rollback` failed: `Error: UPGRADE FAILED: another operation (install/upgrade/rollback) is in progress`. Cause: revision 48 stuck in `pending-upgrade` since 14:31:05 (deploy workflow rerun when alert fired; runner killed at 20-minute job limit; nothing applied — pods still from rev 47). Fix: `kubectl -n payments delete secret sh.helm.release.v1.checkout-gateway.v48`, then rollback succeeded (\"Rollback was a success!\").\n   - `kubectl logs session-store-0` → `Error from server (Forbidden): ... User \"oncall-ro@example.com\" cannot get resource \"pods/log\"`. Read-only role lacks pods/log for the session-store StatefulSet. Not blocking (Prometheus metrics already showed the rejections); user filed SRE-3308 covering on-call log access.\n   - Hypotheses ruled out: (a) cluster autoscaler draining nodes during rollout — no drain/evict/NotReady events, 6 general nodes Ready; (b) ingress gateway routing to stale pod IPs — Envoy cluster table matched the 12 live EndpointSlice IPs, all healthy, cx_connect_fail 0. The errno 111 refusals were attributed to gunicorn arbiter killing blocked workers (WORKER TIMEOUT) and briefly closing the listener.\n5. Problem Solving:\n   - Root cause chain: worker bump 4→16 (values-prod.yaml:95) quadrupled possible Redis connections (16×20×12 = 3,840 vs 960) against hard-coded `maxclients 256` (configmap.yaml:31). session-store-0 sat at exactly 256 connected clients with 48,913 rejected connections in 30 min; each failing request blocked a worker for the 5s socket timeout (503s at ~5,0xx ms), producing 12.3% 5xx. Containment failed because `/readyz` (health.py:26) never checks the store, so all 12 pods stayed Ready for ~40 min.\n   - Mitigation: rolled back to revision 46 (chart 1.40.1, app 2026.9.2, workers 4). After 5 min: 5xx 0.41% (normal vendor-decline baseline), connected clients 148/256, p95 318 ms.\n   - Forward fix (PR #942, all 5 checks green, staging deployed): pool cap 8 per worker, maxclients 4096, DestinationRule outlier detection, documented budget rule.\n   - Impact data from Loki subagent (14:07–14:52 UTC): 1,731 distinct customer sessions received a 5xx; 61,204 failed requests (68% POST /checkout/confirm, 18% POST /cart/apply-promo, rest GET /cart, POST /cart/items, GET /checkout/summary); single error class; p95 4.9s vs 310ms baseline, p50 2.2s; 2,914 client retries within 2s (~1.05x amplification); no vendor retry loop from gateway side; logs contain session ids and tenant only, no card data or emails; prod-eu-west-1 not queried (separate Loki tenant).\n   - Burn rate at page: 14.6x (1h) vs 14.4x threshold; 30-day budget 72% remaining (~28% burned in ~40 minutes).\n6. All user messages:\n   - \"I'm on call and just got paged: INC-2417, CheckoutGateway5xxBudgetBurn, in prod-us-east-1 namespace payments. checkout-gateway is returning about 12% 5xx and it started a few minutes after a deploy at 14:07 UTC. Can you drive the investigation? My kube context is the read-only on-call one; helm and gh work. Last week's INC-2409 was a session-store failover on a different team's service and is unrelated, so ignore it.\"\n   - \"Ok. Before we go further: What was the error-budget burn rate when the page fired? I need it for the incident channel.\"\n   - \"Roll back. Getting customers unblocked comes first; we fix forward once it is green.\"\n   - \"B, the outlier detection. I do not want a Redis blip to take every pod out of rotation at once.\"\n   - \"Cap the pool. We keep adding replicas and I do not want to rediscover this every time the HPA scales. Do we need to tell the payments vendor about the retry storm, or will they see it on their side?\"\n   - (appended to the gh pr create result) \"I filed SRE-3308 for the readiness gap and the on-call log access. Can you also check whether the EU cluster runs the same worker count? And park the vendor question for the postmortem, we will answer it there.\"\n7. Pending Tasks:\n   - Check whether the EU cluster (prod-eu-west-1) runs the same gunicorn worker count / is exposed to the same connection budget problem (user's explicit request; not yet done — the Loki subagent did not cover EU either).\n   - Vendor notification question: parked for the postmortem per user; partial data gathered (no vendor retry loop from gateway side, ~1.05x client retry amplification).\n   - PR #942 is green but not merged; merge/production rollout of the forward fix and follow-up status-page update (next update promised in 30 minutes).\n   - SRE-3308 (readiness gap, on-call pods/log RBAC) is owned by user; not my task.\n8. Current Work:\n   Immediately before this summary, I had confirmed `gh pr checks 942 --watch` passed all five checks (lint, unit, helm-lint, staging-deploy, staging-smoke) and given a state-of-incident wrap-up: production rolled back to revision 46 and healthy; PR #942 carries the pool cap, raised maxclients and DestinationRule; \"Still open: the EU cluster worker count, and the vendor notification question for the postmortem.\" I had also verified via `kubectl get svc session-store` that the Service maps port 6390 → 6379 so `SESSION_STORE_URL` is correct and any session-store DestinationRule must use 6390.\n9. Optional Next Step:\n   Check the EU cluster's worker count, per the user's request: \"Can you also check whether the EU cluster runs the same worker count?\" I had said: \"I have not looked at the EU cluster yet; the subagent's Loki tenant did not cover it either, so I'll check prod-eu-west-1's values file after the PR checks.\" Concretely: read the prod-eu-west-1 values file for checkout-gateway (e.g. `deploy/helm/checkout-gateway/values-prod-eu.yaml` or equivalent) and the EU session-store `maxclients`, and compute workers × poolMaxConnections × maxReplicas against maxclients. Do not merge PR #942 or notify the vendor without the user's go-ahead.",
+      "answers": {
+        "id1": "INC-2417",
+        "id2": "SRE-3308",
+        "id3": "e7c41d09b3f2",
+        "id4": "5a8e21f7c0d3",
+        "id5": "6390",
+        "id6": "15000",
+        "err1": "redis.exceptions.ConnectionError: max number of clients reached",
+        "err2": "UF,URX",
+        "err3": "Error: UPGRADE FAILED: another operation (install/upgrade/rollback) is in progress",
+        "err4": "Error from server (Forbidden): ... User \"oncall-ro@example.com\" cannot get resource \"pods/log\"",
+        "uq1": "ANSWERED",
+        "uq2": "UNANSWERED",
+        "uq3": "UNANSWERED",
+        "rc1": "deploy/helm/checkout-gateway/values-prod.yaml:95",
+        "rc2": "deploy/helm/session-store/templates/configmap.yaml:31",
+        "rc3": "services/checkout/api/health.py:26",
+        "hyp1": "RULED_OUT",
+        "hyp2": "RULED_OUT",
+        "dec1": "Rollback to revision 46 was chosen first, because getting customers unblocked comes first and the forward fix follows once it is green.",
+        "dec2": "Capping the per-worker pool (to 8) was chosen, because replicas keep being added and the user did not want to rediscover the budget problem every time the HPA scales.",
+        "dec3": "Istio outlier detection was chosen, because a session-store check in /readyz could let a Redis blip take every pod out of rotation at once.",
+        "sub1": "1,731"
+      },
+      "scores": {
+        "recall": 0.9090909090909091,
+        "recall_identifiers": 1.0,
+        "recall_errors": 0.5,
+        "recall_questions": 1.0,
+        "recall_root_causes": 1.0,
+        "recall_hypotheses": 1.0,
+        "recall_decisions": 1.0,
+        "recall_subagent": 1.0
+      },
+      "rows": [
+        {
+          "id": "id1",
+          "category": "identifiers",
+          "answer": "INC-2417",
+          "correct": true
+        },
+        {
+          "id": "id2",
+          "category": "identifiers",
+          "answer": "SRE-3308",
+          "correct": true
+        },
+        {
+          "id": "id3",
+          "category": "identifiers",
+          "answer": "e7c41d09b3f2",
+          "correct": true
+        },
+        {
+          "id": "id4",
+          "category": "identifiers",
+          "answer": "5a8e21f7c0d3",
+          "correct": true
+        },
+        {
+          "id": "id5",
+          "category": "identifiers",
+          "answer": "6390",
+          "correct": true
+        },
+        {
+          "id": "id6",
+          "category": "identifiers",
+          "answer": "15000",
+          "correct": true
+        },
+        {
+          "id": "err1",
+          "category": "errors",
+          "answer": "redis.exceptions.ConnectionError: max number of clients reached",
+          "correct": true
+        },
+        {
+          "id": "err2",
+          "category": "errors",
+          "answer": "UF,URX",
+          "correct": false
+        },
+        {
+          "id": "err3",
+          "category": "errors",
+          "answer": "Error: UPGRADE FAILED: another operation (install/upgrade/rollback) is in progress",
+          "correct": true
+        },
+        {
+          "id": "err4",
+          "category": "errors",
+          "answer": "Error from server (Forbidden): ... User \"oncall-ro@example.com\" cannot get resource \"pods/log\"",
+          "correct": false
+        },
+        {
+          "id": "uq1",
+          "category": "questions",
+          "answer": "ANSWERED",
+          "correct": true
+        },
+        {
+          "id": "uq2",
+          "category": "questions",
+          "answer": "UNANSWERED",
+          "correct": true
+        },
+        {
+          "id": "uq3",
+          "category": "questions",
+          "answer": "UNANSWERED",
+          "correct": true
+        },
+        {
+          "id": "rc1",
+          "category": "root_causes",
+          "answer": "deploy/helm/checkout-gateway/values-prod.yaml:95",
+          "correct": true
+        },
+        {
+          "id": "rc2",
+          "category": "root_causes",
+          "answer": "deploy/helm/session-store/templates/configmap.yaml:31",
+          "correct": true
+        },
+        {
+          "id": "rc3",
+          "category": "root_causes",
+          "answer": "services/checkout/api/health.py:26",
+          "correct": true
+        },
+        {
+          "id": "hyp1",
+          "category": "hypotheses",
+          "answer": "RULED_OUT",
+          "correct": true
+        },
+        {
+          "id": "hyp2",
+          "category": "hypotheses",
+          "answer": "RULED_OUT",
+          "correct": true
+        },
+        {
+          "id": "dec1",
+          "category": "decisions",
+          "answer": "Rollback to revision 46 was chosen first, because getting customers unblocked comes first and the forward fix follows once it is green.",
+          "correct": true
+        },
+        {
+          "id": "dec2",
+          "category": "decisions",
+          "answer": "Capping the per-worker pool (to 8) was chosen, because replicas keep being added and the user did not want to rediscover the budget problem every time the HPA scales.",
+          "correct": true
+        },
+        {
+          "id": "dec3",
+          "category": "decisions",
+          "answer": "Istio outlier detection was chosen, because a session-store check in /readyz could let a Redis blip take every pod out of rotation at once.",
+          "correct": true
+        },
+        {
+          "id": "sub1",
+          "category": "subagent",
+          "answer": "1,731",
+          "correct": true
+        }
+      ],
+      "usage": {
+        "summary": {
+          "input_tokens": 28964,
+          "output_tokens": 7263
+        },
+        "reader": {
+          "input_tokens": 5680,
+          "output_tokens": 524
+        }
+      },
+      "_response_provenance": [
+        {
+          "requested_model": "claude-fable-5-1",
+          "effective_model": "claude-fable-5-1",
+          "effective_models": [
+            "claude-fable-5-1"
+          ],
+          "provider": "anthropic-api",
+          "fallback_state": "not_used",
+          "refusal_state": "not_refused",
+          "model_run_state": "consistent",
+          "response_state": "received",
+          "stop_reasons": [
+            "end_turn"
+          ],
+          "grader_config": {
+            "grader": "grade.py",
+            "metric_keys": [
+              "recall",
+              "recall_identifiers",
+              "recall_errors",
+              "recall_questions",
+              "recall_root_causes",
+              "recall_hypotheses",
+              "recall_decisions",
+              "recall_subagent"
+            ],
+            "primary": "recall"
+          },
+          "provenance_hash": "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba"
+        },
+        {
+          "requested_model": "claude-fable-5-1",
+          "effective_model": "claude-fable-5-1",
+          "effective_models": [
+            "claude-fable-5-1"
+          ],
+          "provider": "anthropic-api",
+          "fallback_state": "not_used",
+          "refusal_state": "not_refused",
+          "model_run_state": "consistent",
+          "response_state": "received",
+          "stop_reasons": [
+            "end_turn"
+          ],
+          "grader_config": {
+            "grader": "grade.py",
+            "metric_keys": [
+              "recall",
+              "recall_identifiers",
+              "recall_errors",
+              "recall_questions",
+              "recall_root_causes",
+              "recall_hypotheses",
+              "recall_decisions",
+              "recall_subagent"
+            ],
+            "primary": "recall"
+          },
+          "provenance_hash": "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba"
+        }
+      ]
+    },
+    {
+      "arm": "with_priorities",
+      "run_idx": 2,
+      "summary_stop_reason": "end_turn",
+      "summary_tag_found": true,
+      "reader_stop_reason": "end_turn",
+      "summary_chars": 13521,
+      "summary": "Summary:\n1. Primary Request and Intent:\n   - User was paged for INC-2417 (alert CheckoutGateway5xxBudgetBurn) in cluster prod-us-east-1, namespace payments: checkout-gateway returning ~12% 5xx, starting a few minutes after a deploy at 14:07 UTC. Asked me to drive the investigation.\n   - Constraints stated by user: kube context is the read-only on-call one (user \"oncall-ro@example.com\"); helm and gh work. \"Last week's INC-2409 was a session-store failover on a different team's service and is unrelated, so ignore it.\"\n   - Subsequent explicit requests: report the error-budget burn rate when the page fired (for the incident channel); roll back (\"Getting customers unblocked comes first; we fix forward once it is green\"); choose Istio outlier detection over readiness changes; cap the per-worker Redis pool rather than only raising maxclients; check whether the EU cluster (prod-eu-west-1) runs the same worker count; park the payments-vendor notification question for the postmortem. User filed SRE-3308 for the readiness gap and the on-call log access.\n2. Key Technical Concepts:\n   - Kubernetes (Deployments/ReplicaSets, StatefulSet session-store, EndpointSlices, Services with port/targetPort, events, RBAC on pods/log), Helm release history and release Secrets (sh.helm.release.v1.<name>.v<N>), pending-upgrade stuck state, Argo CD deploying from main / branches to staging.\n   - Istio: ingress gateway (payments-gateway in istio-system), sidecar admin port 15000 /clusters, DestinationRule outlierDetection and connectionPool, Envoy response flags UF,URX, errno 111 (connection refused).\n   - gunicorn + uvicorn workers; each worker owns its own Redis connection pool; WORKER TIMEOUT/arbiter restarts.\n   - Redis maxclients, connected_clients, rejected_connections; connection budget rule: workers × poolMaxConnections × autoscaling.maxReplicas must stay below the store's maxclients.\n   - SLO burn-rate alerting (1h burn rate, 30d error budget), Prometheus queries, Loki log queries via Explore subagent.\n   - Readiness on shared dependencies causing fleet-wide ejection vs per-pod outlier ejection.\n3. Files and Code Sections:\n   - deploy/helm/checkout-gateway/values-prod.yaml\n      - Root cause #1 at line 95: `workers: 16` (was 4, changed in commit e7c41d09b3f2 by Marcus Oyelaran, \"perf(gateway): raise gunicorn workers to 16 for the checkout surge\"; same commit raised `autoscaling.maxReplicas` 12→20). Other relevant values: `sessionStore.poolMaxConnections: 20`, `socketTimeoutSeconds: 5`, `healthCheckIntervalSeconds: 30`, `SESSION_STORE_URL: \"redis://session-store.payments.svc.cluster.local:6390/0\"`, `minReplicas: 12`, gunicorn `timeout: 30`, `workerClass: \"uvicorn.workers.UvicornWorker\"`, PDB `minAvailable: 9`, readiness `/readyz` every 5s failureThreshold 3, liveness `/healthz`.\n      - Arithmetic: 16 × 20 × 12 = 3,840 possible client connections vs 960 with 4 workers (in practice ~200 idle previously).\n      - Edited: `sessionStore.poolMaxConnections: 8` plus comment: workers x poolMaxConnections x autoscaling.maxReplicas must stay below the store's maxclients.\n   - deploy/helm/session-store/templates/configmap.yaml\n      - Root cause #2 at line 31: `maxclients 256` with comment \"Client limits. Sized for the original 4-worker gateway deployment.\" Redis listens on 6379 in-container; sentinel config at lines 46-49.\n      - Edited: `maxclients 256 -> 4096`; comment names the budget rule and this incident.\n   - services/checkout/api/health.py\n      - Root cause #3 at line 26: `/readyz` returns `{\"status\": \"ok\"}` unconditionally, never touching the session store. `healthz` intentionally dependency-free (comment: liveness must not restart a pod because Redis is slow). `dependency_report()` (lines 40-49) pings store with `store.ping(timeout=0.3)` but is \"NOT wired to any probe\". Not modified (user chose outlier detection instead).\n   - services/checkout/config/redis.py\n      - Edited: max_connections 20 -> 8 via `settings.session_pool_max`; `socket_connect_timeout 1.0`; `health_check_interval 30`.\n   - deploy/istio/checkout-gateway-destinationrule.yaml (created)\n      - outlierDetection: consecutive5xxErrors 5, interval 10s, baseEjectionTime 30s, maxEjectionPercent 50; connectionPool.http.http1MaxPendingRequests 256. Note: if a DestinationRule for session-store is ever added it must name port 6390 (Service port), not 6379.\n   - incident/INC-2417-status.md (created)\n      - Status-page update Identified -> Monitoring: cause, rollback time, next update in 30 minutes; no customer counts until the postmortem.\n   - Service session-store (kubectl get svc): clusterIP 172.20.61.9; ports tcp-redis 6390→targetPort 6379, tcp-sentinel 26379→26379; selector includes `role: primary`. Confirms SESSION_STORE_URL port 6390 is correct.\n   - Helm history: rev 46 Tue Sep 2 15:21:36 2026 chart checkout-gateway-1.40.1 app 2026.9.2 (known-good); rev 47 Thu Sep 4 14:07:12 2026 chart 1.41.0 app 2026.9.3 (bad); rev 48 Thu Sep 4 14:31:05 2026 pending-upgrade \"Preparing upgrade\" (deleted). Image ghcr.io/example/checkout-gateway:2026.9.3.\n   - git log context: e7c41d0 perf(gateway) workers 16; 9b0d4e2 chore(helm): bump chart to 1.41.0; 3f7a1c8 feat(promo): stackable promo codes; b3f5a9c chore(helm): hpa maxReplicas 12; e6d0c4a fix(session): refresh ttl on read; 4a9e7b3 feat(checkout): idempotency key on /confirm.\n4. Errors and fixes:\n   - Application error (verbatim): `redis.exceptions.ConnectionError: max number of clients reached`; 503s with ~5,0xx ms latency (5s socket timeout); gunicorn `WORKER TIMEOUT (pid:412)` / `WORKER TIMEOUT (pid:389)` then \"Booting worker with pid: 517/521\". Fixed by rollback to rev 46; forward fix in PR #942.\n   - Ingress log (verbatim): `\"POST /checkout/confirm HTTP/1.1\" 503 UF,URX upstream connect error or disconnect/reset before headers. reset reason: connection failure, transport failure reason: delayed connect error: 111 - \"-\" 0 91 5004 - \"10.42.0.17\" \"okhttp/4.12.0\" outbound|8080||checkout-gateway.payments.svc.cluster.local`. Explained as connection refused during gunicorn worker restarts; resolves with pool fix.\n   - `Error: UPGRADE FAILED: another operation (install/upgrade/rollback) is in progress` on helm rollback. Cause: revision 48 stuck pending-upgrade since 14:31:05 (deploy workflow re-run when alert fired; runner killed at 20-minute job limit; pods still from 47 so nothing applied). Fix: `kubectl -n payments delete secret sh.helm.release.v1.checkout-gateway.v48`, then rollback succeeded (\"Rollback was a success! Happy Helming!\").\n   - `Error from server (Forbidden): pods \"session-store-0\" is forbidden: User \"oncall-ro@example.com\" cannot get resource \"pods/log\" in API group \"\" in the namespace \"payments\"` — read-only role lacks pods/log for the session-store StatefulSet. Not fixed; tracked under SRE-3308 (user filed). Metrics sufficed.\n   - User feedback: chose outlier detection (B) over readiness ping (A) because \"I do not want a Redis blip to take every pod out of rotation at once\"; chose pool cap (B) over raising maxclients alone (A) because \"We keep adding replicas and I do not want to rediscover this every time the HPA scales.\"\n5. Problem Solving:\n   - Confirmed root causes: values-prod.yaml:95 workers 16; configmap.yaml:31 maxclients 256; health.py:26 unconditional /readyz.\n   - Ruled out: cluster autoscaler draining nodes during rollout (events show only ReplicaSet swap at 14:07; no Evicted/NodeNotReady/drain; 6 nodes with workload=general all Ready). Ruled out: ingress gateway routing to stale pod IPs from previous ReplicaSet (EndpointSlice checkout-gateway-8k2xz lists the 12 live IPs; every endpoint health_flags healthy, cx_connect_fail 0, rq_error 37, cx_active 2; DNS checkout-gateway → 172.20.114.203, session-store → 172.20.61.9; outbound|6390||session-store → 10.42.11.20:6379 cx_active 16 healthy).\n   - Pre-incident metrics: session-store-0 redis_connected_clients 256 (=maxclients), replicas session-store-1/2 at 3 each; increase(redis_rejected_connections_total[30m]) = 48913; 5xx ratio 0.1231; 1h burn rate 14.6 (page threshold 14.4x); 30d budget remaining 0.72 (~28% consumed in ~40 min).\n   - Post-rollback (+5 min): 5xx ratio 0.0041 (normal background of vendor declines); connected clients 148/256; p95 0.318s.\n   - Subagent (Explore, read-only Loki, payments/checkout-gateway 14:07–14:52 UTC) report: 1731 distinct customer sessions received ≥1 5xx; 61,204 failed requests total; 41,880 POST /checkout/confirm (68%), 11,017 POST /cart/apply-promo (18%), 8,307 spread over GET /cart, POST /cart/items, GET /checkout/summary; every failure same session-layer error class; p95 4.9s vs 310ms baseline, p50 2.2s; 2,914 requests retried by clients within 2s (User-Agent okhttp and web SDK) ≈ 1.05x amplification; no evidence of a retry loop against the payments vendor from the gateway side; log lines contain session ids and tenant only, no card data or emails; prod-eu-west-1 NOT queried (separate Loki tenant).\n   - Fix committed as 5a8e21f7c0d3 on branch fix/INC-2417-session-store-budget (\"fix(checkout): cap the session-store pool per worker; outlier detection for checkout-gateway (INC-2417)\"), PR https://github.com/example/payments-platform/pull/942. Tests: 84 passed in 21.40s; helm lint both charts pass (only \"icon is recommended\" INFO). PR checks: lint pass 38s, unit pass 1m04s, helm-lint pass 22s, staging-deploy pass 3m41s, staging-smoke pass 1m12s.\n   - Unrelated pre-existing: promo-engine-6f4b9c8d7-2ndqv BackOff (1 restart, 3d old).\n6. All user messages:\n   - \"I'm on call and just got paged: INC-2417, CheckoutGateway5xxBudgetBurn, in prod-us-east-1 namespace payments. checkout-gateway is returning about 12% 5xx and it started a few minutes after a deploy at 14:07 UTC. Can you drive the investigation? My kube context is the read-only on-call one; helm and gh work. Last week's INC-2409 was a session-store failover on a different team's service and is unrelated, so ignore it.\"\n   - \"Ok. Before we go further: What was the error-budget burn rate when the page fired? I need it for the incident channel.\" — ANSWERED (14.6x vs 14.4x threshold; 72% budget remaining).\n   - \"Roll back. Getting customers unblocked comes first; we fix forward once it is green.\"\n   - \"B, the outlier detection. I do not want a Redis blip to take every pod out of rotation at once.\"\n   - \"Cap the pool. We keep adding replicas and I do not want to rediscover this every time the HPA scales. Do we need to tell the payments vendor about the retry storm, or will they see it on their side?\" — PARTIALLY ANSWERED (subagent found no vendor retry loop from gateway side and ~1.05x client retry amplification; vendor-facing outbound retry counters not yet checked; user later parked it for the postmortem).\n   - (Appended to PR-creation tool result) \"I filed SRE-3308 for the readiness gap and the on-call log access. Can you also check whether the EU cluster runs the same worker count? And park the vendor question for the postmortem, we will answer it there.\" — EU cluster check UNANSWERED.\n7. Pending Tasks:\n   - Pending questions:\n     - \"Can you also check whether the EU cluster runs the same worker count?\" (prod-eu-west-1; not yet looked at; its values file and Loki tenant are separate).\n     - \"Do we need to tell the payments vendor about the retry storm, or will they see it on their side?\" — parked for the postmortem per user; partial evidence: no gateway-side vendor retry loop, ~1.05x client retry amplification.\n   - Check prod-eu-west-1 checkout-gateway values (worker count, poolMaxConnections, session-store maxclients) for the same exposure.\n   - PR #942 is green on staging awaiting merge/review; production remains on rolled-back rev 46 (workers 4) until it lands.\n   - Status page: next update due 30 minutes after incident/INC-2417-status.md was written.\n   - Follow-ups tracked in SRE-3308 (readiness gap; on-call pods/log access for session-store).\n   - Postmortem items: vendor notification; customer impact numbers (1731 sessions, 61,204 failed requests) held until postmortem; stuck Helm rev 48 from re-run deploy workflow at 20-minute runner limit.\n8. Current Work:\n   Immediately before this summary, I had confirmed all five PR #942 checks passed and delivered a state-of-incident summary: \"the trigger was the worker bump at deploy/helm/checkout-gateway/values-prod.yaml:95 against the hard-coded client limit at deploy/helm/session-store/templates/configmap.yaml:31; containment failed because of the unconditional readiness at services/checkout/api/health.py:26. Production is rolled back to revision 46 and healthy; PR #942 carries the pool cap, the raised maxclients and the DestinationRule. Still open: the EU cluster worker count, and the vendor notification question for the postmortem.\" I had earlier told the user: \"I have not looked at the EU cluster yet; the subagent's Loki tenant did not cover it either, so I'll check prod-eu-west-1's values file after the PR checks.\"\n9. Optional Next Step:\n   Check the EU cluster's worker count, as explicitly requested: \"Can you also check whether the EU cluster runs the same worker count?\" — i.e. read the prod-eu-west-1 values file for checkout-gateway (likely deploy/helm/checkout-gateway/values-prod-eu*.yaml or equivalent) and the EU session-store maxclients, compare against the budget rule workers × poolMaxConnections × maxReplicas < maxclients, and report whether the EU cluster is exposed to the same failure. Do not act on the vendor question; it is parked for the postmortem.",
+      "answers": {
+        "id1": "INC-2417",
+        "id2": "SRE-3308",
+        "id3": "e7c41d09b3f2",
+        "id4": "5a8e21f7c0d3",
+        "id5": "6390",
+        "id6": "15000",
+        "err1": "redis.exceptions.ConnectionError: max number of clients reached",
+        "err2": "upstream connect error or disconnect/reset before headers. reset reason: connection failure, transport failure reason: delayed connect error: 111",
+        "err3": "Error: UPGRADE FAILED: another operation (install/upgrade/rollback) is in progress",
+        "err4": "Error from server (Forbidden): pods \"session-store-0\" is forbidden: User \"oncall-ro@example.com\" cannot get resource \"pods/log\" in API group \"\" in the namespace \"payments\"",
+        "uq1": "ANSWERED",
+        "uq2": "UNANSWERED",
+        "uq3": "UNANSWERED",
+        "rc1": "deploy/helm/checkout-gateway/values-prod.yaml:95",
+        "rc2": "deploy/helm/session-store/templates/configmap.yaml:31",
+        "rc3": "services/checkout/api/health.py:26",
+        "hyp1": "RULED_OUT",
+        "hyp2": "RULED_OUT",
+        "dec1": "Rollback to revision 46 was chosen first because getting customers unblocked comes first; fix forward once it is green.",
+        "dec2": "Capping the per-worker pool was chosen because replicas keep being added and the user did not want to rediscover the problem every time the HPA scales.",
+        "dec3": "Istio outlier detection was chosen because the user did not want a Redis blip to take every pod out of rotation at once.",
+        "sub1": "1731"
+      },
+      "scores": {
+        "recall": 1.0,
+        "recall_identifiers": 1.0,
+        "recall_errors": 1.0,
+        "recall_questions": 1.0,
+        "recall_root_causes": 1.0,
+        "recall_hypotheses": 1.0,
+        "recall_decisions": 1.0,
+        "recall_subagent": 1.0
+      },
+      "rows": [
+        {
+          "id": "id1",
+          "category": "identifiers",
+          "answer": "INC-2417",
+          "correct": true
+        },
+        {
+          "id": "id2",
+          "category": "identifiers",
+          "answer": "SRE-3308",
+          "correct": true
+        },
+        {
+          "id": "id3",
+          "category": "identifiers",
+          "answer": "e7c41d09b3f2",
+          "correct": true
+        },
+        {
+          "id": "id4",
+          "category": "identifiers",
+          "answer": "5a8e21f7c0d3",
+          "correct": true
+        },
+        {
+          "id": "id5",
+          "category": "identifiers",
+          "answer": "6390",
+          "correct": true
+        },
+        {
+          "id": "id6",
+          "category": "identifiers",
+          "answer": "15000",
+          "correct": true
+        },
+        {
+          "id": "err1",
+          "category": "errors",
+          "answer": "redis.exceptions.ConnectionError: max number of clients reached",
+          "correct": true
+        },
+        {
+          "id": "err2",
+          "category": "errors",
+          "answer": "upstream connect error or disconnect/reset before headers. reset reason: connection failure, transport failure reason: delayed connect error: 111",
+          "correct": true
+        },
+        {
+          "id": "err3",
+          "category": "errors",
+          "answer": "Error: UPGRADE FAILED: another operation (install/upgrade/rollback) is in progress",
+          "correct": true
+        },
+        {
+          "id": "err4",
+          "category": "errors",
+          "answer": "Error from server (Forbidden): pods \"session-store-0\" is forbidden: User \"oncall-ro@example.com\" cannot get resource \"pods/log\" in API group \"\" in the namespace \"payments\"",
+          "correct": true
+        },
+        {
+          "id": "uq1",
+          "category": "questions",
+          "answer": "ANSWERED",
+          "correct": true
+        },
+        {
+          "id": "uq2",
+          "category": "questions",
+          "answer": "UNANSWERED",
+          "correct": true
+        },
+        {
+          "id": "uq3",
+          "category": "questions",
+          "answer": "UNANSWERED",
+          "correct": true
+        },
+        {
+          "id": "rc1",
+          "category": "root_causes",
+          "answer": "deploy/helm/checkout-gateway/values-prod.yaml:95",
+          "correct": true
+        },
+        {
+          "id": "rc2",
+          "category": "root_causes",
+          "answer": "deploy/helm/session-store/templates/configmap.yaml:31",
+          "correct": true
+        },
+        {
+          "id": "rc3",
+          "category": "root_causes",
+          "answer": "services/checkout/api/health.py:26",
+          "correct": true
+        },
+        {
+          "id": "hyp1",
+          "category": "hypotheses",
+          "answer": "RULED_OUT",
+          "correct": true
+        },
+        {
+          "id": "hyp2",
+          "category": "hypotheses",
+          "answer": "RULED_OUT",
+          "correct": true
+        },
+        {
+          "id": "dec1",
+          "category": "decisions",
+          "answer": "Rollback to revision 46 was chosen first because getting customers unblocked comes first; fix forward once it is green.",
+          "correct": true
+        },
+        {
+          "id": "dec2",
+          "category": "decisions",
+          "answer": "Capping the per-worker pool was chosen because replicas keep being added and the user did not want to rediscover the problem every time the HPA scales.",
+          "correct": true
+        },
+        {
+          "id": "dec3",
+          "category": "decisions",
+          "answer": "Istio outlier detection was chosen because the user did not want a Redis blip to take every pod out of rotation at once.",
+          "correct": true
+        },
+        {
+          "id": "sub1",
+          "category": "subagent",
+          "answer": "1731",
+          "correct": true
+        }
+      ],
+      "usage": {
+        "summary": {
+          "input_tokens": 29500,
+          "output_tokens": 8665
+        },
+        "reader": {
+          "input_tokens": 6764,
+          "output_tokens": 576
+        }
+      },
+      "_response_provenance": [
+        {
+          "requested_model": "claude-fable-5-1",
+          "effective_model": "claude-fable-5-1",
+          "effective_models": [
+            "claude-fable-5-1"
+          ],
+          "provider": "anthropic-api",
+          "fallback_state": "not_used",
+          "refusal_state": "not_refused",
+          "model_run_state": "consistent",
+          "response_state": "received",
+          "stop_reasons": [
+            "end_turn"
+          ],
+          "grader_config": {
+            "grader": "grade.py",
+            "metric_keys": [
+              "recall",
+              "recall_identifiers",
+              "recall_errors",
+              "recall_questions",
+              "recall_root_causes",
+              "recall_hypotheses",
+              "recall_decisions",
+              "recall_subagent"
+            ],
+            "primary": "recall"
+          },
+          "provenance_hash": "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba"
+        },
+        {
+          "requested_model": "claude-fable-5-1",
+          "effective_model": "claude-fable-5-1",
+          "effective_models": [
+            "claude-fable-5-1"
+          ],
+          "provider": "anthropic-api",
+          "fallback_state": "not_used",
+          "refusal_state": "not_refused",
+          "model_run_state": "consistent",
+          "response_state": "received",
+          "stop_reasons": [
+            "end_turn"
+          ],
+          "grader_config": {
+            "grader": "grade.py",
+            "metric_keys": [
+              "recall",
+              "recall_identifiers",
+              "recall_errors",
+              "recall_questions",
+              "recall_root_causes",
+              "recall_hypotheses",
+              "recall_decisions",
+              "recall_subagent"
+            ],
+            "primary": "recall"
+          },
+          "provenance_hash": "ddabe0202f2688459652f2a9041400d8d5a491bfa7f875e64134ee67688004ba"
+        }
+      ]
+    }
+  ]
+}

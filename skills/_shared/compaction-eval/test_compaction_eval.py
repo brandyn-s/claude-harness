@@ -249,7 +249,7 @@ def test_aggregate_and_ci_verdict_shapes():
 
 def test_grader_and_fixture_import_no_network_modules():
     banned = {"anthropic", "urllib", "http", "socket", "requests", "httpx", "httpx2", "ssl", "subprocess"}
-    for name in ("grade.py", "fixture.py", "compact_prompt.py"):
+    for name in ("grade.py", "fixture.py", "fixture_incident.py", "compact_prompt.py", "combine_results.py"):
         tree = ast.parse((HERE / name).read_text(encoding="utf-8"))
         imported = set()
         for node in ast.walk(tree):
@@ -455,3 +455,188 @@ def test_committed_results_are_reproducible_from_their_own_records():
 def run_live_sha(text: str) -> str:
     import hashlib
     return hashlib.sha256(text.encode("utf-8")).hexdigest()[:12]
+
+
+# ------------------------------------------------------ incident fixture ----
+
+incident_mod = _load("ce_fixture_incident", HERE / "fixture_incident.py")
+combine_mod = _load("ce_combine", HERE / "combine_results.py")
+FX2 = incident_mod.build_fixture()
+TEXT2 = incident_mod.transcript_text(FX2)
+BY_ID2 = {q["id"]: q for q in FX2["questions"]}
+RESULTS_INCIDENT = HERE / "results-incident.json"
+
+
+def test_incident_fixture_is_deterministic_across_processes():
+    shas = []
+    for seed in ("1", "2"):
+        proc = subprocess.run(
+            [sys.executable, "-c",
+             "import importlib.util,sys; s=importlib.util.spec_from_file_location('f', sys.argv[1]); "
+             "m=importlib.util.module_from_spec(s); s.loader.exec_module(m); print(m.fixture_sha(m.build_fixture()))",
+             str(HERE / "fixture_incident.py")],
+            capture_output=True, text=True, timeout=60, env={**os.environ, "PYTHONHASHSEED": seed})
+        assert proc.returncode == 0, proc.stderr
+        shas.append(proc.stdout.strip())
+    assert shas[0] == shas[1] == incident_mod.fixture_sha(FX2), shas
+
+
+def test_incident_transcript_has_the_same_shape_as_the_coding_one():
+    roles = [t["role"] for t in FX2["transcript"]]
+    assert 55 <= len(roles) <= 70, len(roles)
+    assert roles[0] == "user"
+    assert all(roles[i] != roles[i - 1] for i in range(1, len(roles))), "roles must alternate"
+    assert all(t["content"].strip() for t in FX2["transcript"])
+    assert len(TEXT2) >= 45_000, f"{len(TEXT2)} chars is too thin to exercise compaction"
+
+
+def test_incident_planted_fact_counts_match_the_brief_and_the_coding_fixture():
+    cats = {}
+    for q in FX2["questions"]:
+        cats[q["category"]] = cats.get(q["category"], 0) + 1
+    assert cats == {"identifiers": 6, "errors": 4, "questions": 3, "root_causes": 3,
+                    "hypotheses": 2, "decisions": 3, "subagent": 1}
+    assert len(FX2["questions"]) == 22
+    # Same questionnaire shape as fixture.py: ids, categories and match kinds line up one-to-one,
+    # so grade.py and the reader prompt need no per-fixture branches.
+    assert [(q["id"], q["category"], q["match"]) for q in FX2["questions"]] == \
+        [(q["id"], q["category"], q["match"]) for q in FX["questions"]]
+    planted = FX2["planted"]
+    assert len(planted["identifiers"]) == 6 and len(planted["errors"]) == 4
+    assert len(planted["questions"]["unanswered"]) == 2 and len(planted["questions"]["answered"]) == 1
+    assert len(planted["root_causes"]) == 3 and len(planted["ruled_out"]) == 2
+    assert len(planted["decisions"]) == 3
+    assert incident_mod.CATEGORIES == fixture_mod.CATEGORIES == grade.CATEGORIES
+
+
+def test_incident_every_literal_answer_appears_in_the_transcript():
+    for q in FX2["questions"]:
+        if q["match"] in ("contains", "sha", "number", "verbatim", "fileline"):
+            assert any(a in TEXT2 for a in q["answers"]), (q["id"], q["answers"])
+    for question in FX2["planted"]["questions"]["answered"] + FX2["planted"]["questions"]["unanswered"]:
+        assert question in TEXT2
+    for hyp in FX2["planted"]["ruled_out"]:
+        assert hyp in TEXT2 and "ruled out" in TEXT2.lower()
+    for rc in FX2["planted"]["root_causes"]:
+        _, _, line = rc.rpartition(":")
+        assert f"{int(line):>6}\t" in TEXT2, f"{rc}: the file read must show line {line}"
+
+
+def test_incident_subagent_number_appears_only_in_the_subagent_report():
+    n = FX2["planted"]["subagent_only_number"]
+    hits = [t for t in FX2["transcript"] if re.search(r"(?<!\d)" + n + r"(?!\d)", t["content"])]
+    assert len(hits) == 1, [h["content"][:80] for h in hits]
+    assert "Explore agent report" in hits[0]["content"]
+    assert hits[0]["role"] == "user"
+
+
+def test_incident_distractors_are_present():
+    assert incident_mod.TICKET_DISTRACTOR in TEXT2 and incident_mod.TICKET_DISTRACTOR != incident_mod.TICKET_MAIN
+    assert "6379" in TEXT2 and incident_mod.PORT_SESSION_STORE != "6379"
+    assert "9090" in TEXT2 and incident_mod.PORT_ENVOY_ADMIN not in ("9090", "8080")
+    other_shas = [sha for sha, _ in incident_mod._GIT_LOG if sha != incident_mod.SHA_DEPLOY]
+    assert other_shas and all(sha[:7] in TEXT2 for sha in other_shas)
+
+
+def test_incident_and_coding_fixtures_share_no_planted_literal():
+    assert incident_mod.fixture_sha(FX2) != fixture_mod.fixture_sha(FX)
+    lit1 = set(FX["planted"]["identifiers"]) | set(FX["planted"]["errors"]) | set(FX["planted"]["root_causes"])
+    lit2 = set(FX2["planted"]["identifiers"]) | set(FX2["planted"]["errors"]) | set(FX2["planted"]["root_causes"])
+    assert not (lit1 & lit2)
+
+
+def _perfect_answers_for(fx: dict) -> dict[str, str]:
+    return {q["id"]: (f"{q['answers'][0]} because {q['reason_any'][0]}" if q["match"] == "decision"
+                      else q["answers"][0]) for q in fx["questions"]}
+
+
+def test_incident_perfect_and_unknown_answers_grade_like_the_coding_fixture():
+    scored = grade.score_run(FX2, _perfect_answers_for(FX2))
+    assert scored["recall"] == 1.0
+    for cat in grade.CATEGORIES:
+        assert scored[f"recall_{cat}"] == 1.0, cat
+    assert grade.score_run(FX2, {q["id"]: "UNKNOWN" for q in FX2["questions"]})["recall"] == 0.0
+
+
+def test_incident_decision_grading_rejects_the_wrong_choice():
+    assert grade.grade_answer(BY_ID2["dec1"], "Rolled back to revision 46 first, to restore service for customers")
+    assert not grade.grade_answer(BY_ID2["dec1"], "chose the forward fix because it restores service")
+    assert not grade.grade_answer(BY_ID2["dec1"], "rollback")                     # no reason
+    assert grade.grade_answer(BY_ID2["dec2"],
+                              "Capped the per-worker pool at 8 so connections stay bounded regardless of HPA scale")
+    assert not grade.grade_answer(BY_ID2["dec2"], "chose to raise maxclients alone because the budget was too small")
+    assert grade.grade_answer(BY_ID2["dec3"],
+                              "Istio outlier detection: readiness on a shared dependency would eject the whole fleet (cascading)")
+    assert not grade.grade_answer(BY_ID2["dec3"], "chose the readiness check because it is a cascading-safe mesh feature")
+    assert grade.grade_answer(BY_ID2["id5"], "6390") and not grade.grade_answer(BY_ID2["id5"], "6379")
+    assert grade.grade_answer(BY_ID2["rc1"], "values-prod.yaml:95") and not grade.grade_answer(BY_ID2["rc1"], "values-prod.yaml:88")
+
+
+def test_incident_fixture_cli_writes_json(tmp_path):
+    out = tmp_path / "fx2.json"
+    proc = subprocess.run([sys.executable, str(HERE / "fixture_incident.py"), "--write", str(out)],
+                          capture_output=True, text=True, timeout=60)
+    assert proc.returncode == 0, proc.stderr
+    assert len(json.loads(out.read_text(encoding="utf-8"))["questions"]) == 22
+
+
+def test_run_live_fixture_flag_selects_the_transcript(tmp_path):
+    proc = _plan(tmp_path, "--fixture", "incident")
+    assert proc.returncode == 0, proc.stderr
+    receipt = json.loads(proc.stdout)
+    assert receipt["fixture"] == "incident" and receipt["fixture_file"] == "fixture_incident.py"
+    assert receipt["fixture_sha"] == incident_mod.fixture_sha(FX2)
+    assert receipt["fixture_turns"] == len(FX2["transcript"]) and receipt["fixture_questions"] == 22
+    assert receipt["within_budget"] is True
+    default = json.loads(_plan(tmp_path).stdout)
+    assert default["fixture"] == "coding" and default["fixture_sha"] == fixture_mod.fixture_sha(FX)
+    bad = _plan(tmp_path, "--fixture", "nonexistent")
+    assert bad.returncode != 0 and "invalid choice" in bad.stderr
+
+
+def _fake_results(fixture: str, sha: str, baseline: list[float], withp: list[float]) -> dict:
+    records = []
+    for ri, (b, w) in enumerate(zip(baseline, withp)):
+        for arm, recall in (("baseline", b), ("with_priorities", w)):
+            records.append({"arm": arm, "run_idx": ri,
+                            "scores": {"recall": recall, **{f"recall_{c}": recall for c in grade.CATEGORIES}}})
+    return {"fixture": fixture, "fixture_sha": sha, "run_date": "2026-09-04", "records": records,
+            "verdict": {"verdict": "keep"}, "cost": {"actual_usd": 1.0}}
+
+
+def test_combine_results_pools_paired_deltas_across_fixtures():
+    a = _fake_results("coding", "aaaaaaaaaaaa", [0.8, 0.9, 0.9], [1.0, 1.0, 0.95])
+    b = _fake_results("incident", "bbbbbbbbbbbb", [0.7, 0.75, 0.8], [0.9, 0.9, 0.85])
+    combined = combine_mod.combine([("a.json", a), ("b.json", b)])
+    assert [f["fixture"] for f in combined["per_fixture"]] == ["coding", "incident"]
+    assert combined["pooled"]["n_paired"] == 6 and combined["pooled"]["fixtures"] == 2
+    deltas = [0.2, 0.1, 0.05, 0.2, 0.15, 0.05]
+    assert combined["pooled"]["delta_mean"] == pytest.approx(sum(deltas) / len(deltas), abs=1e-6)
+    assert combined["pooled"]["verdict"] == "keep" and combined["pooled"]["excludes_zero"] is True
+    assert combined["pooled"]["runs_where_with_priorities_below_baseline"] == 0
+    flat = _fake_results("incident", "cccccccccccc", [0.9, 0.9, 0.9], [0.9, 0.9, 0.9])
+    assert combine_mod.combine([("c.json", flat)])["pooled"]["verdict"] == "BLOCKED ON MEASUREMENT"
+    md = combine_mod.render_markdown(combined)
+    assert "| **pooled** | 6 |" in md and "| coding (`aaaaaaaaaaaa`) | 3 |" in md
+
+
+@pytest.mark.skipif(not RESULTS.exists(), reason="no committed results.json yet")
+def test_combine_reproduces_the_committed_single_fixture_verdict():
+    data = json.loads(RESULTS.read_text(encoding="utf-8"))
+    combined = combine_mod.combine([("results.json", data)])
+    assert combined["pooled"]["verdict"] == data["verdict"]["verdict"]
+    assert combined["pooled"]["delta_mean"] == pytest.approx(data["verdict"]["delta_mean"], abs=1e-3)
+    assert combined["pooled"]["ci95"][0] == pytest.approx(data["verdict"]["ci95"]["low"], abs=1e-3)
+
+
+@pytest.mark.skipif(not RESULTS_INCIDENT.exists(), reason="no committed results-incident.json yet")
+def test_committed_incident_results_are_reproducible_from_their_own_records():
+    data = json.loads(RESULTS_INCIDENT.read_text(encoding="utf-8"))
+    assert data["fixture"] == "incident"
+    assert data["fixture_sha"] == incident_mod.fixture_sha(FX2), "incident fixture changed since the run; re-run"
+    assert data["hook_text_sha"] == run_live_sha(hook.PRIORITIES), "hook text changed since the run; re-run"
+    for rec in data["records"]:
+        rescored = grade.score_run(FX2, rec["answers"])
+        assert rescored["recall"] == pytest.approx(rec["scores"]["recall"]), (rec["arm"], rec["run_idx"])
+    assert data["verdict"]["verdict"] in ("keep", "trim", "BLOCKED ON MEASUREMENT")
+    assert data["cost"]["actual_usd"] <= data["receipt"]["cost_cap_usd"]

@@ -52,7 +52,12 @@ Usage:
   uv run --with anthropic python3 skills/_shared/compaction-eval/run_live.py \\
       --runs 3 --model claude-fable-5-1 --max-tokens 4000 \\
       --output skills/_shared/compaction-eval/results.json
-Env: ANTHROPIC_API_KEY only.
+  uv run --with anthropic python3 skills/_shared/compaction-eval/run_live.py \\
+      --fixture incident --runs 3 --model claude-fable-5-1 \\
+      --output skills/_shared/compaction-eval/results-incident.json
+Env: ANTHROPIC_API_KEY only. --fixture selects the planted-fact transcript (coding,
+the default, or incident); combine_results.py pools the paired deltas of several
+results files into one CI.
 """
 from __future__ import annotations
 
@@ -88,7 +93,20 @@ def _load(name: str, path: Path):
     return mod
 
 
-fixture_mod = _load("compaction_eval_fixture", HERE / "fixture.py")
+# Two planted-fact fixtures with the same question shape (22 questions, 7 categories):
+# `coding` is fixture.py (a flaky-test debugging session), `incident` is
+# fixture_incident.py (a production 5xx incident on Kubernetes). --fixture picks one;
+# the results file records which, and RESULTS.md reports both plus the pooled CI.
+FIXTURES = {"coding": "fixture.py", "incident": "fixture_incident.py"}
+DEFAULT_FIXTURE = "coding"
+FIXTURE_NAME = DEFAULT_FIXTURE
+
+
+def load_fixture_module(name: str):
+    return _load(f"compaction_eval_fixture_{name}", HERE / FIXTURES[name])
+
+
+fixture_mod = load_fixture_module(DEFAULT_FIXTURE)
 grade = _load("compaction_eval_grade", HERE / "grade.py")
 compact_prompt = _load("compaction_eval_prompt", HERE / "compact_prompt.py")
 PRIORITIES: str = _load("precompact_priorities_hook", HOOK_PATH).PRIORITIES
@@ -303,15 +321,18 @@ def run(n_runs: int, workers: int, output: Path, receipt: dict, cost_cap: float)
     qualification = qualification_metadata(
         requested_model=MODEL, effort=EFFORT, provider=PROVIDER, trial_provenance=trial_provenance,
         grader_config=GRADER_CONFIG,
-        config_paths=[Path(__file__), HERE / "fixture.py", HERE / "grade.py", HERE / "compact_prompt.py", HOOK_PATH])
+        config_paths=[Path(__file__), HERE / FIXTURES[FIXTURE_NAME], HERE / "grade.py", HERE / "compact_prompt.py",
+                      HOOK_PATH])
     results = {
         "_about": "MEASURED compaction A/B: baseline (Claude Code default compaction prompt) vs "
                   "with_priorities (same + hooks/precompact-priorities.py text). Reader answers from the "
-                  "summary only; grade.py scores deterministically. Produced by run_live.py.",
+                  f"summary only; grade.py scores deterministically. Fixture `{FIXTURE_NAME}` "
+                  f"({FIXTURES[FIXTURE_NAME]}). Produced by run_live.py.",
         "run_date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
         "requested_model": MODEL, "effective_model": qualification["effective_model"],
         "effort": {"summarizer": EFFORT, "reader": READER_EFFORT}, "max_tokens": MAX_TOKENS,
         "n_runs_requested": n_runs, "n_runs_paired": len(complete_runs),
+        "fixture": FIXTURE_NAME, "fixture_file": FIXTURES[FIXTURE_NAME],
         "fixture_sha": fixture_mod.fixture_sha(fixture), "hook_text_sha": _sha(PRIORITIES),
         "hook_text_bytes": len(PRIORITIES.encode("utf-8")),
         "arms": {a: {"prompt_sha": _sha(p), "prompt_chars": len(p)} for a, p in ARMS.items()},
@@ -330,9 +351,11 @@ def run(n_runs: int, workers: int, output: Path, receipt: dict, cost_cap: float)
 
 
 def main(argv=None) -> int:
-    global MODEL, EFFORT, MAX_TOKENS
+    global MODEL, EFFORT, MAX_TOKENS, FIXTURE_NAME, fixture_mod
     ap = argparse.ArgumentParser(description="compaction-priorities live A/B (recall after compaction)")
     ap.add_argument("--output", type=Path, required=True)
+    ap.add_argument("--fixture", choices=sorted(FIXTURES), default=DEFAULT_FIXTURE,
+                    help="planted-fact transcript to summarize: coding (fixture.py) or incident (fixture_incident.py)")
     ap.add_argument("--plan-only", action="store_true", help="print the receipt and cost estimate; no network")
     ap.add_argument("--runs", type=int, default=DEFAULT_RUNS)
     ap.add_argument("--max-tokens", type=int, default=DEFAULT_MAX_TOKENS,
@@ -349,6 +372,8 @@ def main(argv=None) -> int:
         ap.error("--runs must be >= 1")
     output = args.output.expanduser().resolve()
     MODEL, EFFORT, MAX_TOKENS = args.model, args.effort, args.max_tokens
+    FIXTURE_NAME = args.fixture
+    fixture_mod = load_fixture_module(FIXTURE_NAME)
 
     fixture = fixture_mod.build_fixture()
     transcript_tokens = _approx_tokens(fixture_mod.transcript_text(fixture))
@@ -359,6 +384,7 @@ def main(argv=None) -> int:
     receipt = {
         "mode": "current_model", "requested_model": MODEL, "effort": {"summarizer": EFFORT, "reader": READER_EFFORT},
         "max_tokens": MAX_TOKENS, "runs": args.runs, "arms": list(ARMS), "provider": PROVIDER,
+        "fixture": FIXTURE_NAME, "fixture_file": FIXTURES[FIXTURE_NAME],
         "fixture_sha": fixture_mod.fixture_sha(fixture), "fixture_turns": len(fixture["transcript"]),
         "fixture_questions": len(fixture["questions"]), "hook_text_sha": _sha(PRIORITIES),
         "hook_text_bytes": len(PRIORITIES.encode("utf-8")), "cost_cap_usd": args.max_cost_usd,

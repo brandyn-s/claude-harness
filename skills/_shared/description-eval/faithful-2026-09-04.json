@@ -1,0 +1,1846 @@
+{
+  "meta": {
+    "date": "2026-09-04",
+    "started_at": "2026-09-04T04:56:35+00:00",
+    "finished_at": "2026-09-04T04:56:35+00:00",
+    "claude_version": "2.1.260 (Claude Code)",
+    "claude_bin": "~/.local/bin/claude",
+    "model": "claude-fable-5-1",
+    "max_turns": 2,
+    "permission_mode": "plan",
+    "setting_sources": "project",
+    "project": "/tmp/claude-review/faithful",
+    "setup": {
+      "project": "/tmp/claude-review/faithful",
+      "skills_linked": 77,
+      "stale_links_removed": [],
+      "settings_json_present": false,
+      "claude_md_present": false
+    },
+    "argv_template": [
+      "claude",
+      "-p",
+      "<request>",
+      "--output-format",
+      "stream-json",
+      "--verbose",
+      "--max-turns",
+      "2",
+      "--permission-mode",
+      "plan",
+      "--setting-sources",
+      "project",
+      "--no-session-persistence",
+      "--strict-mcp-config",
+      "--include-hook-events",
+      "--model",
+      "claude-fable-5-1",
+      "--max-budget-usd",
+      "3.00"
+    ],
+    "env_removed": [
+      "ANTHROPIC_API_KEY",
+      "ANTHROPIC_AUTH_TOKEN"
+    ],
+    "sample_rule": "5 model-visible skills with the lowest proxy recall in results-2026-09-04.json (ties: fewer hits, then name) and 5 skills with perfect proxy recall that captured no other skill's request, taken evenly across the alphabetical list; skills hidden from the model are excluded",
+    "corpus": "/private/tmp/claude-review/wt-measure/skills/_shared/description-eval/corpus.json",
+    "sample_from": "skills/_shared/description-eval/results-2026-09-04.json",
+    "proxies": [
+      {
+        "label": "low",
+        "path": "skills/_shared/description-eval/results-2026-09-04.json",
+        "effort": "low"
+      },
+      {
+        "label": "low-current",
+        "path": "skills/_shared/description-eval/results-2026-09-04-low-current-table.json",
+        "effort": "low"
+      },
+      {
+        "label": "xhigh",
+        "path": "skills/_shared/description-eval/results-2026-09-04-xhigh.json",
+        "effort": "xhigh"
+      }
+    ],
+    "runs": 30,
+    "planned": 30,
+    "errors": 0,
+    "resumed_from_saved_streams": 30,
+    "stopped_early": null,
+    "hook_events_total": 0,
+    "skill_tool_available_in_all_runs": true,
+    "expected_listed_in_all_runs": true,
+    "notional_cost_usd": 7.9742,
+    "billing": "owner's Claude Code subscription (API key removed from the environment)"
+  },
+  "sample": {
+    "weakest": [
+      "search-axis-rotate",
+      "capture",
+      "codebase-memory-quality",
+      "codeql",
+      "legacy-code-tdd"
+    ],
+    "strong": [
+      "absorb",
+      "differential-review",
+      "interview",
+      "semgrep-rule-creator",
+      "work"
+    ],
+    "excluded_not_visible": [
+      "red-team-axes"
+    ],
+    "rule": "5 model-visible skills with the lowest proxy recall in results-2026-09-04.json (ties: fewer hits, then name) and 5 skills with perfect proxy recall that captured no other skill's request, taken evenly across the alphabetical list; skills hidden from the model are excluded"
+  },
+  "runs": [
+    {
+      "id": "absorb-1",
+      "expected": "absorb",
+      "request": "Can you dig into how antirez structures his commits and see if there's anything worth stealing for how we work?",
+      "triggered": true,
+      "skill_calls": [
+        "absorb"
+      ],
+      "tool_calls": [
+        "Skill",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 27807,
+        "total_cost_usd": 0.39549225000000005,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 26,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/absorb-1.jsonl",
+      "failed": false
+    },
+    {
+      "id": "absorb-2",
+      "expected": "absorb",
+      "request": "I keep hearing mitchellh has a great engineering workflow — go look at his public repos and PRs and tell me concretely what I should change in our rules/hooks based on real evidence from his code, not just vague impressions.",
+      "triggered": true,
+      "skill_calls": [
+        "absorb"
+      ],
+      "tool_calls": [
+        "Skill",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 20512,
+        "total_cost_usd": 0.36997235000000006,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 24,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/absorb-2.jsonl",
+      "failed": false
+    },
+    {
+      "id": "absorb-3",
+      "expected": "absorb",
+      "request": "There's a dev named bcherny whose CLAUDE.md and automation setup I admire — pull apart what he actually does differently and figure out if any of it should get folded into our own config.",
+      "triggered": true,
+      "skill_calls": [
+        "absorb"
+      ],
+      "tool_calls": [
+        "Skill",
+        "Bash",
+        "Bash",
+        "Bash",
+        "Bash",
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 41391,
+        "total_cost_usd": 0.45051675,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 36,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/absorb-3.jsonl",
+      "failed": false
+    },
+    {
+      "id": "capture-1",
+      "expected": "capture",
+      "request": "We just spent an hour tracking down that OBO token bug and figured out the real fix — can you save this to the knowledge base before I forget the details?",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 16559,
+        "total_cost_usd": 0.253979,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 12,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/capture-1.jsonl",
+      "failed": false
+    },
+    {
+      "id": "capture-2",
+      "expected": "capture",
+      "request": "I want to wrap up this session by writing what we learned about the gateway retry logic into a topic page and getting a PR opened for it, following the usual git flow with auto-merge.",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 16794,
+        "total_cost_usd": 0.24822122500000005,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 12,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/capture-2.jsonl",
+      "failed": false
+    },
+    {
+      "id": "capture-3",
+      "expected": "capture",
+      "request": "Before I close this out, make sure the insight from today's debugging (and the fact that the old blind-spot we had documented is actually fixed now) gets reflected properly in our shared notes repo, not just left in this chat.",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 14961,
+        "total_cost_usd": 0.23970505000000003,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 11,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/capture-3.jsonl",
+      "failed": false
+    },
+    {
+      "id": "codebase-memory-quality-1",
+      "expected": "codebase-memory-quality",
+      "request": "Can you find any unused functions in our mcp-servers repo that are safe to delete?",
+      "triggered": true,
+      "skill_calls": [
+        "codebase-memory-quality"
+      ],
+      "tool_calls": [
+        "Skill",
+        "ToolSearch"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 13224,
+        "total_cost_usd": 0.26800880000000005,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 16,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/codebase-memory-quality-1.jsonl",
+      "failed": false
+    },
+    {
+      "id": "codebase-memory-quality-2",
+      "expected": "codebase-memory-quality",
+      "request": "We've got a legacy service module that's grown huge over time and I suspect a lot of dead code and overly complex functions are hiding in there — can you scan it and give me a prioritized list of what to clean up first?",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 25120,
+        "total_cost_usd": 0.23091035000000004,
+        "stop_reason": "tool_use",
+        "permission_denials": 1
+      },
+      "events": 14,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/codebase-memory-quality-2.jsonl",
+      "failed": false
+    },
+    {
+      "id": "codebase-memory-quality-3",
+      "expected": "codebase-memory-quality",
+      "request": "I want to know if there are files in our codebase that always get modified together even though they live in totally different folders, since that might mean there's some hidden dependency we don't know about.",
+      "triggered": true,
+      "skill_calls": [
+        "codebase-memory-quality"
+      ],
+      "tool_calls": [
+        "Skill",
+        "ToolSearch",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 15812,
+        "total_cost_usd": 0.2754198,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 18,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/codebase-memory-quality-3.jsonl",
+      "failed": false
+    },
+    {
+      "id": "codeql-1",
+      "expected": "codeql",
+      "request": "Can you run a full CodeQL security scan on this repo and show me what vulnerabilities it finds?",
+      "triggered": true,
+      "skill_calls": [
+        "codeql"
+      ],
+      "tool_calls": [
+        "Skill",
+        "Bash",
+        "Bash",
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 21214,
+        "total_cost_usd": 0.35529592500000007,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 21,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/codeql-1.jsonl",
+      "failed": false
+    },
+    {
+      "id": "codeql-2",
+      "expected": "codeql",
+      "request": "We just added a bunch of new Go microservices plus GitHub Actions workflows to our repo, and I want a thorough vulnerability audit covering both the code and the CI pipelines before our release next week.",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 12707,
+        "total_cost_usd": 0.23092850000000004,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 13,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/codeql-2.jsonl",
+      "failed": false
+    },
+    {
+      "id": "codeql-3",
+      "expected": "codeql",
+      "request": "I need deep interprocedural taint-tracking analysis on our Java codebase to catch injection bugs that simple pattern matching would miss — set up whatever's needed and give me a findings report.",
+      "triggered": true,
+      "skill_calls": [
+        "codeql"
+      ],
+      "tool_calls": [
+        "Skill",
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 21176,
+        "total_cost_usd": 0.34693375000000004,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 18,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/codeql-3.jsonl",
+      "failed": false
+    },
+    {
+      "id": "differential-review-1",
+      "expected": "differential-review",
+      "request": "Can you do a security review of this PR before I merge it? It touches our auth middleware.",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "Bash",
+        "Bash",
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 17966,
+        "total_cost_usd": 0.25399065,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 19,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/differential-review-1.jsonl",
+      "failed": false
+    },
+    {
+      "id": "differential-review-2",
+      "expected": "differential-review",
+      "request": "We just refactored the payment webhook handler to add a new retry mechanism, and I want someone to check the diff against main for anything an attacker could exploit — especially around the external API calls we added. Can you generate a written report I can share with the team?",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 11106,
+        "total_cost_usd": 0.22826832500000002,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 10,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/differential-review-2.jsonl",
+      "failed": false
+    },
+    {
+      "id": "differential-review-3",
+      "expected": "differential-review",
+      "request": "Before I ship this branch, walk through what changed and flag anything sketchy, like removed validation or new places where user input flows into a sink.",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 13600,
+        "total_cost_usd": 0.22721712500000002,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 13,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/differential-review-3.jsonl",
+      "failed": false
+    },
+    {
+      "id": "interview-1",
+      "expected": "interview",
+      "request": "Before I start executing this migration plan, can you poke holes in it and find what I'm missing?",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 14468,
+        "total_cost_usd": 0.23435792500000002,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 13,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/interview-1.jsonl",
+      "failed": false
+    },
+    {
+      "id": "interview-2",
+      "expected": "interview",
+      "request": "I just got a 9-step deployment plan from superplan for rolling out changes across our repos, but I want someone to really grill it for hidden assumptions and failure modes before we commit any changes — like what happens if step 4 fails halfway through, or if a step's output isn't what the next step expects.",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 17646,
+        "total_cost_usd": 0.25680722500000003,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 14,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/interview-2.jsonl",
+      "failed": false
+    },
+    {
+      "id": "interview-3",
+      "expected": "interview",
+      "request": "Can you stress-test this new architecture proposal I'm about to send to my team, checking for gaps, ordering issues, and things I might've missed, before I ship it?",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 13471,
+        "total_cost_usd": 0.23871132500000003,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 13,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/interview-3.jsonl",
+      "failed": false
+    },
+    {
+      "id": "legacy-code-tdd-1",
+      "expected": "legacy-code-tdd",
+      "request": "I've inherited this 2000-line billing module with zero test coverage and need to refactor it without breaking anything—how should I approach adding tests first?",
+      "triggered": true,
+      "skill_calls": [
+        "legacy-code-tdd"
+      ],
+      "tool_calls": [
+        "Bash",
+        "Skill",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 14972,
+        "total_cost_usd": 0.246995925,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 21,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/legacy-code-tdd-1.jsonl",
+      "failed": false
+    },
+    {
+      "id": "legacy-code-tdd-2",
+      "expected": "legacy-code-tdd",
+      "request": "We're building a new multi-service feature and I want to prove the whole stack—UI to database—works before fleshing out any real logic. What should the first slice look like?",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "success",
+        "is_error": false,
+        "num_turns": 2,
+        "duration_ms": 27406,
+        "total_cost_usd": 0.28764362500000007,
+        "stop_reason": "end_turn",
+        "permission_denials": 0
+      },
+      "events": 14,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/legacy-code-tdd-2.jsonl",
+      "failed": false
+    },
+    {
+      "id": "legacy-code-tdd-3",
+      "expected": "legacy-code-tdd",
+      "request": "Our mutation testing tool reported a mutant as 'caught' and someone wants to delete the related guard clause because of it, but I'm suspicious the harness might be lying—can you help me verify this before we act on it?",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 12809,
+        "total_cost_usd": 0.23117742500000005,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 13,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/legacy-code-tdd-3.jsonl",
+      "failed": false
+    },
+    {
+      "id": "search-axis-rotate-1",
+      "expected": "search-axis-rotate",
+      "request": "I've rewritten this jailbreak prompt like 10 different ways and it still gets refused every time — feels like I've hit a wall, what should I try next?",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "success",
+        "is_error": false,
+        "num_turns": 1,
+        "duration_ms": 13133,
+        "total_cost_usd": 0.2708148,
+        "stop_reason": "end_turn",
+        "permission_denials": 0
+      },
+      "events": 9,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/search-axis-rotate-1.jsonl",
+      "failed": false
+    },
+    {
+      "id": "search-axis-rotate-2",
+      "expected": "search-axis-rotate",
+      "request": "We've been tuning hyperparameters for two weeks and our recall metric hasn't budged in the last four experiments. I have a list of everything we changed — can you help me figure out if we're actually stuck or just hammering the wrong knob?",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 11800,
+        "total_cost_usd": 0.22895895000000005,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 11,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/search-axis-rotate-2.jsonl",
+      "failed": false
+    },
+    {
+      "id": "search-axis-rotate-3",
+      "expected": "search-axis-rotate",
+      "request": "My fuzzing campaign keeps generating the same style of test case and coverage flatlined — before I conclude the target is unbreakable, help me figure out what I haven't actually tried yet.",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 18031,
+        "total_cost_usd": 0.14688642500000001,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 18,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/search-axis-rotate-3.jsonl",
+      "failed": false
+    },
+    {
+      "id": "semgrep-rule-creator-1",
+      "expected": "semgrep-rule-creator",
+      "request": "We need a Semgrep rule that flags any use of eval() with user-controlled input in our Python codebase, with proper tests so it doesn't false-positive on safe literals.",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 16591,
+        "total_cost_usd": 0.236720875,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 18,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/semgrep-rule-creator-1.jsonl",
+      "failed": false
+    },
+    {
+      "id": "semgrep-rule-creator-2",
+      "expected": "semgrep-rule-creator",
+      "request": "Our security team found we're building shell commands with unsanitized request params passed to os.system, and I want to write a custom static analysis rule so CI catches this pattern going forward, including test cases for both vulnerable and sanitized code.",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 19640,
+        "total_cost_usd": 0.24154125000000004,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 13,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/semgrep-rule-creator-2.jsonl",
+      "failed": false
+    },
+    {
+      "id": "semgrep-rule-creator-3",
+      "expected": "semgrep-rule-creator",
+      "request": "Can you help me set up a check that flags any of our internal API route handlers that don't have the auth decorator applied, so we catch missing authentication before merge?",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 26507,
+        "total_cost_usd": 0.228890425,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 13,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/semgrep-rule-creator-3.jsonl",
+      "failed": false
+    },
+    {
+      "id": "work-1",
+      "expected": "work",
+      "request": "I need to start working on the mcp-servers repo but I think another Claude session might already be poking around in there — set me up so we don't collide.",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "ListAgents",
+        "Bash",
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 20868,
+        "total_cost_usd": 0.277731225,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 19,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/work-1.jsonl",
+      "failed": false
+    },
+    {
+      "id": "work-2",
+      "expected": "work",
+      "request": "I just got that empty-push warning while trying to push to code-graph, and I suspect it's because another session moved HEAD out from under me. Can you get me a clean isolated spot to work from before I start committing again?",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 17938,
+        "total_cost_usd": 0.23858262500000002,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 11,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/work-2.jsonl",
+      "failed": false
+    },
+    {
+      "id": "work-3",
+      "expected": "work",
+      "request": "Before I dive into a multi-commit feature in the knowledge-base repo, give me my own separate branch and working directory so nothing I do interferes with anyone else's session.",
+      "triggered": false,
+      "skill_calls": [],
+      "tool_calls": [
+        "Bash",
+        "Bash"
+      ],
+      "hook_events": 0,
+      "hook_event_samples": [],
+      "expected_listed_in_init": true,
+      "init": {
+        "model": "claude-fable-5-1",
+        "permissionMode": "plan",
+        "claude_code_version": "2.1.260",
+        "apiKeySource": "/login managed key",
+        "mcp_servers": 0,
+        "agents": 5,
+        "plugins": 0
+      },
+      "init_counts": {
+        "tools": 25,
+        "slash_commands": 125,
+        "skills": 93
+      },
+      "skill_tool_available": true,
+      "result": {
+        "subtype": "error_max_turns",
+        "is_error": true,
+        "num_turns": 3,
+        "duration_ms": 12936,
+        "total_cost_usd": 0.233510075,
+        "stop_reason": "tool_use",
+        "permission_denials": 0
+      },
+      "events": 14,
+      "malformed_lines": 0,
+      "exit_code": null,
+      "timed_out": false,
+      "elapsed_s": 0.0,
+      "resumed_from_saved_stream": true,
+      "stderr_tail": "",
+      "stream": "/tmp/claude-review/faithful/streams/work-3.jsonl",
+      "failed": false
+    }
+  ],
+  "summary": {
+    "proxy_labels": [
+      "low",
+      "low-current",
+      "xhigh"
+    ],
+    "per_skill": [
+      {
+        "skill": "search-axis-rotate",
+        "group": "weakest",
+        "positives": 3,
+        "faithful_hits": 0,
+        "failed_runs": 0,
+        "proxy_hits": {
+          "low": 1,
+          "low-current": 3,
+          "xhigh": 2
+        },
+        "other_skills_fired": []
+      },
+      {
+        "skill": "capture",
+        "group": "weakest",
+        "positives": 3,
+        "faithful_hits": 0,
+        "failed_runs": 0,
+        "proxy_hits": {
+          "low": 2,
+          "low-current": 2,
+          "xhigh": 2
+        },
+        "other_skills_fired": []
+      },
+      {
+        "skill": "codebase-memory-quality",
+        "group": "weakest",
+        "positives": 3,
+        "faithful_hits": 2,
+        "failed_runs": 0,
+        "proxy_hits": {
+          "low": 2,
+          "low-current": 3,
+          "xhigh": 3
+        },
+        "other_skills_fired": []
+      },
+      {
+        "skill": "codeql",
+        "group": "weakest",
+        "positives": 3,
+        "faithful_hits": 2,
+        "failed_runs": 0,
+        "proxy_hits": {
+          "low": 2,
+          "low-current": 2,
+          "xhigh": 2
+        },
+        "other_skills_fired": []
+      },
+      {
+        "skill": "legacy-code-tdd",
+        "group": "weakest",
+        "positives": 3,
+        "faithful_hits": 1,
+        "failed_runs": 0,
+        "proxy_hits": {
+          "low": 2,
+          "low-current": 3,
+          "xhigh": 3
+        },
+        "other_skills_fired": []
+      },
+      {
+        "skill": "absorb",
+        "group": "strong",
+        "positives": 3,
+        "faithful_hits": 3,
+        "failed_runs": 0,
+        "proxy_hits": {
+          "low": 3,
+          "low-current": 3,
+          "xhigh": 3
+        },
+        "other_skills_fired": []
+      },
+      {
+        "skill": "differential-review",
+        "group": "strong",
+        "positives": 3,
+        "faithful_hits": 0,
+        "failed_runs": 0,
+        "proxy_hits": {
+          "low": 3,
+          "low-current": 3,
+          "xhigh": 3
+        },
+        "other_skills_fired": []
+      },
+      {
+        "skill": "interview",
+        "group": "strong",
+        "positives": 3,
+        "faithful_hits": 0,
+        "failed_runs": 0,
+        "proxy_hits": {
+          "low": 3,
+          "low-current": 3,
+          "xhigh": 3
+        },
+        "other_skills_fired": []
+      },
+      {
+        "skill": "semgrep-rule-creator",
+        "group": "strong",
+        "positives": 3,
+        "faithful_hits": 0,
+        "failed_runs": 0,
+        "proxy_hits": {
+          "low": 3,
+          "low-current": 3,
+          "xhigh": 3
+        },
+        "other_skills_fired": []
+      },
+      {
+        "skill": "work",
+        "group": "strong",
+        "positives": 3,
+        "faithful_hits": 0,
+        "failed_runs": 0,
+        "proxy_hits": {
+          "low": 3,
+          "low-current": 3,
+          "xhigh": 3
+        },
+        "other_skills_fired": []
+      }
+    ],
+    "agreement": {
+      "proxy_label": "xhigh",
+      "n": 30,
+      "both_hit": 8,
+      "both_miss": 3,
+      "proxy_only": 19,
+      "faithful_only": 0,
+      "rate": 0.3667
+    },
+    "misses": [
+      {
+        "id": "capture-1",
+        "expected": "capture",
+        "skill_calls": [],
+        "request": "We just spent an hour tracking down that OBO token bug and figured out the real fix — can you save this to the knowledge base before I forget the details?",
+        "failed": false
+      },
+      {
+        "id": "capture-2",
+        "expected": "capture",
+        "skill_calls": [],
+        "request": "I want to wrap up this session by writing what we learned about the gateway retry logic into a topic page and getting a PR opened for it, following the usual git flow with auto-merge.",
+        "failed": false
+      },
+      {
+        "id": "capture-3",
+        "expected": "capture",
+        "skill_calls": [],
+        "request": "Before I close this out, make sure the insight from today's debugging (and the fact that the old blind-spot we had documented is actually fixed now) gets reflected properly in our shared notes repo, not just left in this chat.",
+        "failed": false
+      },
+      {
+        "id": "codebase-memory-quality-2",
+        "expected": "codebase-memory-quality",
+        "skill_calls": [],
+        "request": "We've got a legacy service module that's grown huge over time and I suspect a lot of dead code and overly complex functions are hiding in there — can you scan it and give me a prioritized list of what to clean up first?",
+        "failed": false
+      },
+      {
+        "id": "codeql-2",
+        "expected": "codeql",
+        "skill_calls": [],
+        "request": "We just added a bunch of new Go microservices plus GitHub Actions workflows to our repo, and I want a thorough vulnerability audit covering both the code and the CI pipelines before our release next week.",
+        "failed": false
+      },
+      {
+        "id": "differential-review-1",
+        "expected": "differential-review",
+        "skill_calls": [],
+        "request": "Can you do a security review of this PR before I merge it? It touches our auth middleware.",
+        "failed": false
+      },
+      {
+        "id": "differential-review-2",
+        "expected": "differential-review",
+        "skill_calls": [],
+        "request": "We just refactored the payment webhook handler to add a new retry mechanism, and I want someone to check the diff against main for anything an attacker could exploit — especially around the external API calls we added. Can you generate a written report I can share with the team?",
+        "failed": false
+      },
+      {
+        "id": "differential-review-3",
+        "expected": "differential-review",
+        "skill_calls": [],
+        "request": "Before I ship this branch, walk through what changed and flag anything sketchy, like removed validation or new places where user input flows into a sink.",
+        "failed": false
+      },
+      {
+        "id": "interview-1",
+        "expected": "interview",
+        "skill_calls": [],
+        "request": "Before I start executing this migration plan, can you poke holes in it and find what I'm missing?",
+        "failed": false
+      },
+      {
+        "id": "interview-2",
+        "expected": "interview",
+        "skill_calls": [],
+        "request": "I just got a 9-step deployment plan from superplan for rolling out changes across our repos, but I want someone to really grill it for hidden assumptions and failure modes before we commit any changes — like what happens if step 4 fails halfway through, or if a step's output isn't what the next step expects.",
+        "failed": false
+      },
+      {
+        "id": "interview-3",
+        "expected": "interview",
+        "skill_calls": [],
+        "request": "Can you stress-test this new architecture proposal I'm about to send to my team, checking for gaps, ordering issues, and things I might've missed, before I ship it?",
+        "failed": false
+      },
+      {
+        "id": "legacy-code-tdd-2",
+        "expected": "legacy-code-tdd",
+        "skill_calls": [],
+        "request": "We're building a new multi-service feature and I want to prove the whole stack—UI to database—works before fleshing out any real logic. What should the first slice look like?",
+        "failed": false
+      },
+      {
+        "id": "legacy-code-tdd-3",
+        "expected": "legacy-code-tdd",
+        "skill_calls": [],
+        "request": "Our mutation testing tool reported a mutant as 'caught' and someone wants to delete the related guard clause because of it, but I'm suspicious the harness might be lying—can you help me verify this before we act on it?",
+        "failed": false
+      },
+      {
+        "id": "search-axis-rotate-1",
+        "expected": "search-axis-rotate",
+        "skill_calls": [],
+        "request": "I've rewritten this jailbreak prompt like 10 different ways and it still gets refused every time — feels like I've hit a wall, what should I try next?",
+        "failed": false
+      },
+      {
+        "id": "search-axis-rotate-2",
+        "expected": "search-axis-rotate",
+        "skill_calls": [],
+        "request": "We've been tuning hyperparameters for two weeks and our recall metric hasn't budged in the last four experiments. I have a list of everything we changed — can you help me figure out if we're actually stuck or just hammering the wrong knob?",
+        "failed": false
+      },
+      {
+        "id": "search-axis-rotate-3",
+        "expected": "search-axis-rotate",
+        "skill_calls": [],
+        "request": "My fuzzing campaign keeps generating the same style of test case and coverage flatlined — before I conclude the target is unbreakable, help me figure out what I haven't actually tried yet.",
+        "failed": false
+      },
+      {
+        "id": "semgrep-rule-creator-1",
+        "expected": "semgrep-rule-creator",
+        "skill_calls": [],
+        "request": "We need a Semgrep rule that flags any use of eval() with user-controlled input in our Python codebase, with proper tests so it doesn't false-positive on safe literals.",
+        "failed": false
+      },
+      {
+        "id": "semgrep-rule-creator-2",
+        "expected": "semgrep-rule-creator",
+        "skill_calls": [],
+        "request": "Our security team found we're building shell commands with unsanitized request params passed to os.system, and I want to write a custom static analysis rule so CI catches this pattern going forward, including test cases for both vulnerable and sanitized code.",
+        "failed": false
+      },
+      {
+        "id": "semgrep-rule-creator-3",
+        "expected": "semgrep-rule-creator",
+        "skill_calls": [],
+        "request": "Can you help me set up a check that flags any of our internal API route handlers that don't have the auth decorator applied, so we catch missing authentication before merge?",
+        "failed": false
+      },
+      {
+        "id": "work-1",
+        "expected": "work",
+        "skill_calls": [],
+        "request": "I need to start working on the mcp-servers repo but I think another Claude session might already be poking around in there — set me up so we don't collide.",
+        "failed": false
+      },
+      {
+        "id": "work-2",
+        "expected": "work",
+        "skill_calls": [],
+        "request": "I just got that empty-push warning while trying to push to code-graph, and I suspect it's because another session moved HEAD out from under me. Can you get me a clean isolated spot to work from before I start committing again?",
+        "failed": false
+      },
+      {
+        "id": "work-3",
+        "expected": "work",
+        "skill_calls": [],
+        "request": "Before I dive into a multi-commit feature in the knowledge-base repo, give me my own separate branch and working directory so nothing I do interferes with anyone else's session.",
+        "failed": false
+      }
+    ],
+    "miss_first_tool": {
+      "Bash": 20,
+      "none": 1,
+      "ListAgents": 1
+    },
+    "faithful_hits": 8,
+    "runs": 30
+  }
+}
