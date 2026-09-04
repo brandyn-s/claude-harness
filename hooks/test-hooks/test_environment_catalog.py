@@ -17,10 +17,9 @@ FIXTURE = HOOKS_DIR / "test-hooks" / "fixtures" / "environment-catalog.json"
 DEFAULT = HOOKS_DIR.parent / "contracts" / "environment-catalog.json"
 EXAMPLE = HOOKS_DIR.parent / "contracts" / "environment-catalog.example.json"
 
-if str(HOOKS_DIR) not in sys.path:
-    sys.path.insert(0, str(HOOKS_DIR))
+sys.path.insert(0, str(HOOKS_DIR))
 
-import _environment_catalog as cat  # noqa: E402
+import _environment_catalog as cat
 
 
 def _write(path: Path, data) -> Path:
