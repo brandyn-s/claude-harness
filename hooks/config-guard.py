@@ -118,8 +118,8 @@ def check(hook_input):
             parsed = json.loads(content)
             hooks_val = parsed.get("hooks", None)
             empty_hooks = isinstance(hooks_val, dict) and len(hooks_val) == 0
-        except (json.JSONDecodeError, Exception):
-            pass
+        except (json.JSONDecodeError, Exception):  # noqa: S110, BLE001 -- fail-open: the regex check above is the primary detector
+            pass  # fail-open: unparseable content cannot be confirmed as an empty-hooks write
     if empty_hooks:
         msg = (
             "[config-guard] BLOCKED: Detected empty hooks object in settings edit. "

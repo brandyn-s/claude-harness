@@ -776,7 +776,7 @@ def _audit_log(action, reason, command):
             audit_dir, f"bash-tail-buffering-{now.strftime('%Y-%m-%d')}.jsonl")
         with open(path, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry) + "\n")
-    except Exception:
+    except Exception:  # noqa: S110, BLE001 -- fail-open: audit logging must never fail the guard
         pass  # never fail the guard for audit logging
 
 

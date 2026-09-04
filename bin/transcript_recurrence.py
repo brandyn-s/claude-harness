@@ -36,8 +36,8 @@ def _load_records(src):
                 with open(os.path.join(src, fn), encoding="utf-8") as fh:
                     try:
                         yield json.load(fh)
-                    except Exception:
-                        continue
+                    except Exception:  # noqa: S112, BLE001 -- report tooling: skip unreadable record files
+                        continue  # skip unreadable record
     else:
         with open(src, encoding="utf-8") as fh:
             for raw in fh:
@@ -46,8 +46,8 @@ def _load_records(src):
                     continue
                 try:
                     yield json.loads(raw)
-                except Exception:
-                    continue
+                except Exception:  # noqa: S112, BLE001 -- report tooling: skip unparseable JSONL lines
+                    continue  # skip unparseable line
 
 
 def aggregate(records, min_breadth=2):

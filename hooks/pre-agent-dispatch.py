@@ -168,8 +168,8 @@ def check_file_overlap(prompt):
             _ACTIVE_AGENTS_FILE.write_text(
                 json.dumps(active, indent=2), encoding="utf-8"
             )
-    except Exception:
-        pass
+    except Exception:  # noqa: S110, BLE001 -- fail-open: overlap tracking is advisory; never block a dispatch
+        pass  # fail-open: overlap warnings degrade, dispatch proceeds
 
     if overlapping:
         files_str = ", ".join(f[0] for f in overlapping[:3])
@@ -424,8 +424,8 @@ def provision_subagent_worktree(tool_input, prompt, session_id, cwd):
                 "[pre-agent-dispatch] worktree-isolation: unexpected error; "
                 "proceeding without isolation.\n"
             )
-        except Exception:
-            pass
+        except Exception:  # noqa: S110, BLE001 -- fail-open: even the fallback notice must not raise
+            pass  # fail-open: the notice is best-effort
         return None
 
 
@@ -479,13 +479,13 @@ def main():
                 "pre-agent-dispatch", "auth_check",
                 f"manifest-first: providers={manifest_providers}",
             )
-        except Exception:
-            pass
+        except Exception:  # noqa: S110, BLE001 -- fail-open: telemetry must never break the dispatch
+            pass  # fail-open: telemetry only
     else:
         # Fallback: keyword regex for prompts that don't match a skill name
         matches = AUTH_MCP_KEYWORDS.findall(prompt)
         if matches:
-            unique = sorted(set(m.lower() for m in matches))
+            unique = sorted({m.lower() for m in matches})
             try:
                 from manifest_metrics import log_manifest_query
                 log_manifest_query(
@@ -493,8 +493,8 @@ def main():
                     f"keyword-fallback: keywords={list(unique)}",
                     used_fallback=True,
                 )
-            except Exception:
-                pass
+            except Exception:  # noqa: S110, BLE001 -- fail-open: telemetry must never break the dispatch
+                pass  # fail-open: telemetry only
             warnings.append(
                 f"Auth warning: This task references authenticated MCPs ({', '.join(unique)}). "
                 "Sub-agents cannot authenticate to remote MCP servers - they appear as 'anonymous'. "

@@ -149,7 +149,7 @@ def _identity() -> dict:
         gitdir = g("rev-parse", "--absolute-git-dir")
         common = g("rev-parse", "--path-format=absolute", "--git-common-dir")
         ident["is_worktree"] = bool(gitdir and common and gitdir != common)
-    except Exception:
+    except Exception:  # noqa: S110, BLE001 -- fail-open: identity capture must never fail a run
         # Identity capture must never fail a run.
         pass
     return ident

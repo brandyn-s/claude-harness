@@ -30,8 +30,8 @@ def collate(lessons_dir):
         sid = fn[len("lessons_"):-len(".json")]
         try:
             d = json.load(open(os.path.join(lessons_dir, fn), encoding="utf-8"))
-        except Exception:
-            continue
+        except Exception:  # noqa: S112, BLE001 -- report tooling: skip unreadable lessons files
+            continue  # skip unreadable lessons file
         lessons = d.get("lessons", []) if isinstance(d, dict) else (d if isinstance(d, list) else [])
         sessions.add(sid)
         for i, le in enumerate(lessons):

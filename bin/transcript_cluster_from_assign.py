@@ -42,7 +42,7 @@ def build(assign, lessons_by_key):
         clusters.append({
             "name": name,
             "pattern": f"Cross-session recurring {dominant_kind or 'pattern'}: {name} "
-                       f"(spans {len(set(k.split('::')[0] for k in keys))} sessions, {len(keys)} lessons)",
+                       f"(spans {len({k.split('::')[0] for k in keys})} sessions, {len(keys)} lessons)",
             "root_cause": root,
             "proposed_fix": fix,
             "tier_hint": tiers.most_common(1)[0][0] if tiers else "none",
@@ -68,7 +68,7 @@ def main():
     json.dump(result, open(args.out, "w", encoding="utf-8"), indent=2)
     print(f"built {len(result['clusters'])} clusters from {len(assign)} assignments -> {args.out}")
     for c in result["clusters"][:15]:
-        n_sessions = len(set(k.split("::")[0] for k in c["members"]))
+        n_sessions = len({k.split("::")[0] for k in c["members"]})
         print(f"  {n_sessions:>3} sessions  {len(c['members']):>4} lessons  {c['name']}")
 
 

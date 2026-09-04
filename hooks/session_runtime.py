@@ -16,7 +16,6 @@ from pathlib import Path
 
 from atomic_write import atomic_write
 
-
 SEED_SCHEMA_VERSION = 1
 UNKNOWN = "runtime-unknown"
 MAX_FIELD_CHARS = 8192

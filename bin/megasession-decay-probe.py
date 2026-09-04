@@ -15,8 +15,8 @@ E13 step 1 (observational); the full ACON-vs-fixed-threshold A/B is the follow-o
 
 Usage: python3 bin/megasession-decay-probe.py [days] [min_turns]
 """
-import json
 import glob
+import json
 import os
 import sys
 import time
@@ -57,8 +57,8 @@ for f in files:
                     continue
                 try:
                     r = json.loads(line)
-                except Exception:
-                    continue
+                except Exception:  # noqa: S112, BLE001 -- best-effort probe: skip unparseable JSONL lines
+                    continue  # skip unparseable line
                 t = r.get("type")
                 msg = r.get("message") or {}
                 if t == "assistant":
@@ -77,8 +77,8 @@ for f in files:
                         for b in c:
                             if isinstance(b, dict) and b.get("type") == "tool_result" and b.get("is_error"):
                                 rows[last][1] = True
-    except Exception:
-        continue
+    except Exception:  # noqa: S112, BLE001 -- best-effort probe: skip unreadable transcripts
+        continue  # skip unreadable transcript
     if aturns >= MINTURNS:
         mega += 1
         for bk, err in rows:

@@ -119,8 +119,8 @@ def scan(path: Path) -> Facts:
                 continue
             try:
                 rec = json.loads(s)
-            except Exception:
-                continue
+            except Exception:  # noqa: S112, BLE001 -- best-effort report: skip unparseable JSONL lines
+                continue  # skip unparseable line
             if rec.get("isCompactSummary") is True:
                 f.compacted = True
             msg = rec.get("message") or {}

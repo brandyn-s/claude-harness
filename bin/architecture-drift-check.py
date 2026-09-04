@@ -114,7 +114,7 @@ def wired_hooks(settings_text):
     return wired
 
 
-_HOOKS_HEADING_RE = re.compile(r"^## (?:Layer 5\b|\d+\.\s*Hooks\b).*$", re.M)
+_HOOKS_HEADING_RE = re.compile(r"^## (?:Layer 5\b|\d+\.\s*Hooks\b).*$", re.MULTILINE)
 
 
 def _hooks_section(arch):
@@ -128,7 +128,7 @@ def _hooks_section(arch):
     if not m:
         return ""
     start = m.end()
-    nxt = re.compile(r"^(?:## |### Rules\b)", re.M).search(arch, start)
+    nxt = re.compile(r"^(?:## |### Rules\b)", re.MULTILINE).search(arch, start)
     return arch[start:nxt.start()] if nxt else arch[start:]
 
 
@@ -147,7 +147,7 @@ def readme_documented_hooks(readme):
     """Hooks listed in hooks/README.md's inventory tables. ARCHITECTURE.md is a
     representative table by design; the README is the full registry, so a hook
     documented there is documented."""
-    return set(re.findall(r'^\|\s*`([a-z0-9-]+\.py)`', readme, re.M))
+    return set(re.findall(r'^\|\s*`([a-z0-9-]+\.py)`', readme, re.MULTILINE))
 
 
 # ── Check B: curated settings the doc states as the CURRENT value ──
@@ -252,8 +252,8 @@ def _tracked_topic_count():
             capture_output=True, timeout=10)
         if out.returncode == 0:
             return len([l for l in out.stdout.decode("utf-8").splitlines() if l.strip()])
-    except Exception:
-        pass
+    except Exception:  # noqa: S110, BLE001 -- fail-open: fall back to the glob count when git is unavailable
+        pass  # fall back to the glob count below
     return _count("agent-memory/topics/*.md")
 
 
@@ -742,7 +742,7 @@ def main():
     settings = json.loads(settings_text)
 
     hard, advisory = [], []
-    readme_path = ROOT / "hooks" / "README.md" if "ROOT" in globals() else Path(__file__).resolve().parents[1] / "hooks" / "README.md"
+    readme_path = ROOT / "hooks" / "README.md" if "ROOT" in globals() else Path(__file__).resolve().parents[1] / "hooks" / "README.md"  # noqa: F821 -- ROOT is only evaluated when a caller injects it into module globals (guarded by the globals() check)
     readme_text = readme_path.read_text(encoding="utf-8") if readme_path.exists() else ""
     h, a = check_hooks(arch, settings_text, readme_text); hard += h; advisory += a
     hard += check_settings(arch, settings)

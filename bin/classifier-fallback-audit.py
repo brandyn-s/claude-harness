@@ -14,12 +14,12 @@ So "security-keyword present" is a LOWER BOUND on classifier-driven fallback
 
 Usage: python3 bin/classifier-fallback-audit.py [days] [project_dir]
 """
-import json
 import glob
+import json
 import os
+import re
 import sys
 import time
-import re
 from collections import Counter
 
 DAYS = int(sys.argv[1]) if len(sys.argv) > 1 else 14
@@ -33,7 +33,7 @@ SEC = re.compile(
     r"pentest|red[ -]?team|offensive|shellcode|reverse shell|privilege escalation|"
     r"lateral movement|\bioc\b|yara|sigma rule|mitre|att&ck|exfil\w*|\bsbom\b|owasp|"
     r"injection|\bxss\b|\bsqli\b|\brce\b|\bcsrf\b|\bssrf\b|cwe-\d+|threat model|"
-    r"prompt injection|jailbreak|decrypt|cyber)\b", re.I)
+    r"prompt injection|jailbreak|decrypt|cyber)\b", re.IGNORECASE)
 
 
 def user_text(content):
@@ -67,8 +67,8 @@ for f in files:
                     continue
                 try:
                     r = json.loads(line)
-                except Exception:
-                    continue
+                except Exception:  # noqa: S112, BLE001 -- best-effort probe: skip unparseable JSONL lines
+                    continue  # skip unparseable line
                 t = r.get("type")
                 msg = r.get("message") or {}
                 if t == "user":
@@ -89,8 +89,8 @@ for f in files:
                         transitions.append(
                             (sid, last_user[:160].replace("\n", " "), bool(SEC.search(last_user))))
                     prev = m
-    except Exception:
-        continue
+    except Exception:  # noqa: S112, BLE001 -- best-effort probe: skip unreadable transcripts
+        continue  # skip unreadable transcript
     nonsynth = {x for x in seen if not x.startswith("<")}
     if nonsynth == {"claude-opus-4-8"}:
         whole_opus += 1

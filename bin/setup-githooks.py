@@ -29,8 +29,8 @@ def main():
     subprocess.check_call(
         ["git", "-C", repo, "config", "core.hooksPath", ".githooks"]
     )
-    print(f"ok: core.hooksPath set to .githooks (this clone)")
-    print(f"    pre-commit will now block on marketplace drift.")
+    print("ok: core.hooksPath set to .githooks (this clone)")
+    print("    pre-commit will now block on marketplace drift.")
 
 
 if __name__ == "__main__":

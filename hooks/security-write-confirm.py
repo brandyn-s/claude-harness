@@ -304,8 +304,8 @@ def _log(tool_name, operation, warned):
     try:
         from manifest_metrics import log_advisory_warning
         log_advisory_warning("security-write-confirm", tool_name, operation or "", warned=warned)
-    except Exception:
-        pass
+    except Exception:  # noqa: S110, BLE001 -- fail-open: telemetry must never break the advisory
+        pass  # fail-open: telemetry only
 
 
 def main():
@@ -408,8 +408,8 @@ def main():
         log_advisory_warning("security-write-confirm", tool_name, operation or "", warned=True,
                              session_id=_sid)
         increment_warning("security-write-confirm", session_id=_sid)
-    except Exception:
-        pass
+    except Exception:  # noqa: S110, BLE001 -- fail-open: telemetry must never break the advisory
+        pass  # fail-open: telemetry only
 
     # ADVISORY ONLY (reverted 2026-07-31 on operator instruction).
     #

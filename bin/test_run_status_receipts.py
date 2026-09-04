@@ -42,21 +42,21 @@ def runs(tmp_path, monkeypatch):
 def ns(**kw):
     import argparse
 
-    base = dict(
-        id="r1",
-        phase=None,
-        detail=None,
-        pct=None,
-        summary=None,
-        reason=None,
-        task_id=None,
-        log=None,
-        artifact=None,
-        verify_cmd=None,
-        verified_by=None,
-        force=False,
-        exit_code=None,
-    )
+    base = {
+        "id": "r1",
+        "phase": None,
+        "detail": None,
+        "pct": None,
+        "summary": None,
+        "reason": None,
+        "task_id": None,
+        "log": None,
+        "artifact": None,
+        "verify_cmd": None,
+        "verified_by": None,
+        "force": False,
+        "exit_code": None,
+    }
     base.update(kw)
     return argparse.Namespace(**base)
 

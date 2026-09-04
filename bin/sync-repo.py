@@ -272,7 +272,7 @@ def discover_managed_repos() -> list[tuple[str, Path]]:
 
 def _run_git(repo_dir: Path, *args, timeout: int = 30) -> subprocess.CompletedProcess:
     """Run a git command with Windows window suppression."""
-    kwargs = dict(capture_output=True, text=True, timeout=timeout)
+    kwargs = {"capture_output": True, "text": True, "timeout": timeout}
     if sys.platform == "win32":
         kwargs["creationflags"] = 0x08000000  # CREATE_NO_WINDOW
         si = subprocess.STARTUPINFO()

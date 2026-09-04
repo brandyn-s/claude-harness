@@ -80,12 +80,12 @@ def rule_scope_text(rule: str) -> str | None:
         if not path.is_file():
             continue
         text = path.read_text(encoding="utf-8", errors="replace")
-        m = re.search(r"@scope\s+(.+?)(?=\n@|\n#|\n\n)", text, re.S)
+        m = re.search(r"@scope\s+(.+?)(?=\n@|\n#|\n\n)", text, re.DOTALL)
         return " ".join(m.group(1).split()) if m else ""
     return None
 
 
-def scope_is_bound_to_owner_skills(c: "Candidate") -> bool | None:
+def scope_is_bound_to_owner_skills(c: Candidate) -> bool | None:
     """True only when the rule's OWN @scope enumerates every owner skill.
 
     THIS IS THE GUARD THAT MAKES `skill_scoped` PROVABLE RATHER THAN DECLARED, and it
@@ -234,8 +234,8 @@ def scan(path: Path, cands: list[Candidate]) -> Facts:
                 continue
             try:
                 rec = json.loads(s)
-            except Exception:
-                continue
+            except Exception:  # noqa: S112, BLE001 -- best-effort report: skip unparseable JSONL lines
+                continue  # skip unparseable line
             msg = rec.get("message") or {}
             content = msg.get("content")
 

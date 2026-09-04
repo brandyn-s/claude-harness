@@ -9,7 +9,6 @@ from __future__ import annotations
 import re
 from collections.abc import Iterable
 
-
 PACK_ORDER = ("delivery", "portability", "workflow")
 
 POLICY_PACKS: dict[str, dict[str, tuple[str, ...]]] = {

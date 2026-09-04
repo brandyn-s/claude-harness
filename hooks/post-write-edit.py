@@ -347,8 +347,8 @@ def check_ruff_lint(file_path):
                 )
     except FileNotFoundError:
         pass
-    except Exception:
-        pass
+    except Exception:  # noqa: S110, BLE001 -- fail-open: the ruff advisory must never break the write
+        pass  # fail-open: advisory only
 
 
 _SECRET_PATTERNS = [

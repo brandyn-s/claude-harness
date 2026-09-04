@@ -33,8 +33,8 @@ def parse_file(path):
         for line in fh:
             try:
                 r = json.loads(line)
-            except Exception:
-                continue
+            except Exception:  # noqa: S112, BLE001 -- report tooling: skip unparseable transcript lines
+                continue  # skip unparseable line
             msg = r.get("message") or {}
             t = r.get("type")
             if t == "assistant":

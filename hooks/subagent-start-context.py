@@ -99,26 +99,23 @@ def main():
     filenames = []
 
     # Method 1: explicit "Load topics:" in prompt
-    source = "none"
     match = TOPIC_PATTERN.search(prompt)
     if match:
         raw = match.group(1)
         filenames = [f.strip() for f in raw.split(",") if f.strip()]
-        source = "explicit"
 
     # Method 2: manifest-derived topics from skill name in prompt
     if not filenames:
         filenames = _topics_from_manifest(prompt)
         if filenames:
-            source = "manifest-fallback"
             try:
                 from manifest_metrics import log_manifest_query
                 log_manifest_query(
                     "subagent-start-context", "topic_fallback",
                     f"manifest-derived topics={filenames}",
                 )
-            except Exception:
-                pass
+            except Exception:  # noqa: S110, BLE001 -- fail-open: telemetry must never break the dispatch
+                pass  # fail-open: telemetry only
 
     # The CHILD-SIDE REPORTING CONTRACT ships on EVERY dispatch, before any topic.
     #
@@ -150,8 +147,8 @@ def main():
             try:
                 content = topic_path.read_text(encoding="utf-8").strip()
                 sections.append(f"--- {fname} ---\n{content}")
-            except Exception:
-                pass
+            except Exception:  # noqa: S110, BLE001 -- fail-open: an unreadable topic is skipped, never fatal
+                pass  # fail-open: skip the unreadable topic
 
     # Also always include recent-sessions.md for episodic memory
     recent = TOPICS_DIR / "recent-sessions.md"
@@ -159,8 +156,8 @@ def main():
         try:
             content = recent.read_text(encoding="utf-8").strip()
             sections.append(f"--- recent-sessions.md ---\n{content}")
-        except Exception:
-            pass
+        except Exception:  # noqa: S110, BLE001 -- fail-open: an unreadable topic is skipped, never fatal
+            pass  # fail-open: skip the unreadable topic
 
     # DELIVERY BUDGET ENFORCEMENT. Mirrors auto-topic-loader.py: emit only whole
     # sections that fit and replace the rest with an explicit NOT DELIVERED pointer.

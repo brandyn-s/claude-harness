@@ -1703,24 +1703,20 @@ def _load_known_tools():
         _KNOWN_TOOLS_CACHE[key] = (phantoms, reals)
         return _KNOWN_TOOLS_CACHE[key]
     section = None
-    current_phantom = None
     for line in path.read_text(encoding="utf-8").splitlines():
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):
             continue
         if stripped == "known_phantom:":
             section = "phantom"
-            current_phantom = None
             continue
         if stripped == "known_real:":
             section = "real"
-            current_phantom = None
             continue
         if section == "phantom":
             if stripped.startswith("- name:"):
                 name = stripped[len("- name:"):].strip().strip("'\"")
                 phantoms.add(name)
-                current_phantom = name
             elif stripped.startswith("- "):
                 # Bare-name entry
                 name = stripped[2:].strip().strip("'\"")
@@ -2079,7 +2075,6 @@ def _audit_cross_platform(skill_dir, md_text):
     findings = []
     scripts_dir = skill_dir / "scripts"
     skill_md_path = skill_dir / "SKILL.md"
-    skill_name = skill_dir.name
 
     # C1: Python scripts import POSIX-only modules without fallback.
     # C4: Python source uses literal "$HOME/..." strings — shell-style
@@ -3295,7 +3290,7 @@ def main(argv):
             args.remove(f)
         elif f.startswith("--fix="):
             raw = f.split("=", 1)[1]
-            fix_codes = set(c.strip().upper() for c in raw.split(",") if c.strip())
+            fix_codes = {c.strip().upper() for c in raw.split(",") if c.strip()}
             args.remove(f)
         elif f == "--fix":
             fix_codes = {"C5", "C7"}

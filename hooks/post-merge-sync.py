@@ -219,8 +219,8 @@ def _stash_and_rebase(repo_path):
             local_ahead = int(r.stdout.strip())
             if local_ahead > 0:
                 diverged = True
-    except Exception:
-        pass
+    except Exception:  # noqa: S110, BLE001 -- fail-open: unknown divergence takes the conservative rebase path
+        pass  # fail-open: diverged stays False -> non-destructive rebase path
 
     if diverged:
         # Local main has commits not on remote. The intent here is to
@@ -367,6 +367,7 @@ def _update_auto_merge_marker(command, cwd, tool_result):
                     # disabling the lost-commits push-guard this marker backs.
                     atomic_write(_AUTO_MERGE_MARKER, json.dumps(markers))
             except Exception:
+                # TODO(review): a silent marker-write failure disarms the push-after-auto-merge guard in bash-security-guard.py (RC2: PR #421 lost 6 commits); this should probably surface (stderr/systemMessage) instead of passing silently
                 pass
 
     # PR was actually merged — clear the marker for the branch
@@ -380,8 +381,8 @@ def _update_auto_merge_marker(command, cwd, tool_result):
                 # just completed — the queued auto-merge has fired.
                 if markers:
                     atomic_write(_AUTO_MERGE_MARKER, json.dumps({}))
-        except Exception:
-            pass
+        except Exception:  # noqa: S110, BLE001 -- fail-open: a stale marker only makes the push guard over-warn
+            pass  # fail-open: stale marker only over-warns; never block the sync
 
 
 # ── MAIN ─────────────────────────────────────────────────────────────
@@ -482,7 +483,7 @@ def main():
             )
             json.dump(_advisory(msg), sys.stdout)
             sys.exit(0)
-    except Exception:
+    except Exception:  # noqa: S110, BLE001 -- fail-open: the dirty-tree pre-check is advisory to the sync
         pass  # If the check itself fails, proceed with sync
 
     # Run the post-merge sync sequence under git lock
@@ -602,7 +603,7 @@ def main():
                                         f"prune gone branches: {preserved} PRESERVED "
                                         "(unmerged local commits)"
                                     )
-                    except Exception:
+                    except Exception:  # noqa: S110, BLE001 -- fail-open: opportunistic cleanup never blocks the sync
                         pass  # Cleanup is opportunistic; never block the merge sync
     except TimeoutError:
         results.append(
@@ -637,8 +638,8 @@ def main():
                         capture_output=True, text=True, encoding="utf-8",
                         cwd=cwd, timeout=5, creationflags=CREATE_NO_WINDOW,
                     )
-                except Exception:
-                    pass
+                except Exception:  # noqa: S110, BLE001 -- fail-open: per-file artifact cleanup is best-effort
+                    pass  # fail-open: best-effort per-file cleanup
             if hook_artifacts:
                 results.append(f"Auto-cleaned {len(hook_artifacts)} hook artifact(s)")
     except Exception:
@@ -655,8 +656,8 @@ def main():
             results.append(
                 f"WARNING: Conflict markers detected: {conflict_check.stdout.strip()[:200]}"
             )
-    except Exception:
-        pass
+    except Exception:  # noqa: S110, BLE001 -- fail-open: the conflict-marker scan is advisory
+        pass  # fail-open: advisory scan only
 
     try:
         branch = subprocess.run(

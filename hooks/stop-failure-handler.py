@@ -115,7 +115,7 @@ def main():
         os.makedirs(os.path.dirname(log_path), exist_ok=True)
         with open(log_path, "a", encoding="utf-8") as f:
             f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
-    except Exception:
+    except Exception:  # noqa: S110, BLE001 -- fail-open: logging must never fail the hook
         pass  # Never fail the hook due to logging issues
 
     # Discarded by the runtime; emitted for anyone running the hook by hand.
@@ -126,6 +126,6 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except Exception:
-        pass
+    except Exception:  # noqa: S110, BLE001 -- fail-open: a Stop hook must never fail the session
+        pass  # fail-open: never fail the session on a handler error
     sys.exit(0)

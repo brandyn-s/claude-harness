@@ -22,11 +22,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from atomic_write import atomic_write
 from session_runtime import (
     bounded as _bounded,
+)
+from session_runtime import (
     initial_runtime_provenance,
     read_session_start_seed,
     safe_session_filename,
 )
-
 
 SCHEMA_VERSION = 3
 
@@ -73,7 +74,7 @@ def main() -> int:
         if not isinstance(event, dict):
             event = {}
         write_receipt(event)
-    except Exception:
+    except Exception:  # noqa: S110, BLE001 -- fail-open: receipt capture is observability only
         # Receipt capture is observability, never a reason to block exit.
         pass
     return 0

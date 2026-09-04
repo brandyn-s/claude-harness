@@ -354,7 +354,7 @@ def _log(branch, fired):
         from manifest_metrics import log_advisory_warning
 
         log_advisory_warning("zsh-dialect-guard", "Bash", branch, warned=fired)
-    except Exception:
+    except Exception:  # noqa: S110, BLE001 -- fail-open: telemetry must never break the guard
         pass  # telemetry must never break the guard
 
 

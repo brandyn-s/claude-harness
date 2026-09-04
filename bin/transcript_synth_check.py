@@ -47,8 +47,8 @@ def main():
             in_grounds.add(i["ground"])
         for m in i.get("merged_from", []):
             in_grounds.add(m)
-    out_grounds = set(f["ground"] for f in findings if f.get("ground"))
-    merged = set(m for f in findings for m in f.get("merged_from", []))
+    out_grounds = {f["ground"] for f in findings if f.get("ground")}
+    merged = {m for f in findings for m in f.get("merged_from", [])}
     accounted = out_grounds | merged
 
     dropped = sorted(in_grounds - accounted)            # COVERAGE violations
