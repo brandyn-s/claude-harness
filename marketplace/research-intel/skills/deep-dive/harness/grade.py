@@ -30,6 +30,13 @@ rerun exposed three instrument defects, corrected here without touching the froz
      discrimination negative by construction. `calibration_discrimination` is now
      computed over `fact` rows; `calibration_discrimination_all` keeps the legacy
      all-kinds view for comparison.
+
+Revision 2026-09-04: the `current-anthropic-model` key is no longer typed by hand.
+run_live.py snapshots the vendor's model list at run start (`model_catalog`, newest
+first) and records it in the run receipt and the transcripts; `catalog_key` derives the
+expected terms from the newest release's display name, so the key is whatever the vendor
+served THAT DAY and re-grading stays offline. The dated `keys` remain only as the fallback
+for records made before snapshots existed (the second window is marked `legacy`).
 """
 from __future__ import annotations
 
@@ -101,15 +108,59 @@ def rejects_premise(answer_text: str) -> bool:
     return any(cue in hay for cue in _REJECTION_CUES)
 
 
-def key_for(question: dict, run_date: str | None) -> dict | None:
+def catalog_key(model_catalog: list[dict]) -> dict:
+    """Answer key derived from the run's own snapshot of the vendor model list.
+
+    The snapshot (run_live.fetch_model_catalog) holds {id, display_name, created_at}
+    per model. The key's expected terms are the display-name tokens of every model
+    released on the NEWEST date, minus the vendor word: "Claude Fable 5.1" gives
+    ["fable 5.1", "fable"], and a paired launch (Fable + Mythos on one day) names both.
+    No hand-typed world fact is involved, so the key cannot go stale between fixture
+    revisions. Assumption: the newest release is the most capable family; if a lower
+    tier ships later, `derived_from` in the recorded key shows it and the question must
+    be re-keyed by hand.
+    """
+    rows = [m for m in model_catalog if isinstance(m, dict) and m.get("id")]
+    if not rows:
+        raise ValueError("model catalog is empty; cannot derive the current-model key")
+    newest_date = max(str(m.get("created_at") or "")[:10] for m in rows)
+    newest = sorted((m for m in rows if str(m.get("created_at") or "")[:10] == newest_date),
+                    key=lambda m: m["id"])
+    terms: list[str] = []
+    for m in newest:
+        name = normalize_text(str(m.get("display_name") or ""))
+        if not name:  # fall back to the id: claude-fable-5-1 -> "fable 5 1"
+            name = normalize_text(m["id"].removeprefix("claude-").replace("-", " "))
+        words = [w for w in name.split() if w != "claude"]
+        for term in (" ".join(words), " ".join(w for w in words if w.isalpha())):
+            if term and term not in terms:
+                terms.append(term)
+    return {"source": "model-catalog", "derived_from": [m["id"] for m in newest],
+            "released": newest_date, "verified": None,
+            "expected_terms": terms, "wrong_terms": []}
+
+
+def key_source(question: dict, model_catalog: list[dict] | None = None) -> str:
+    """Which key path grades this question: model-catalog, dated (legacy fallback) or static."""
+    if question.get("key_source") == "model-catalog" and model_catalog:
+        return "model-catalog"
+    return "dated" if question.get("keys") else "static"
+
+
+def key_for(question: dict, run_date: str | None, model_catalog: list[dict] | None = None) -> dict | None:
     """Select the answer key in force on `run_date`.
 
     Questions without `keys` use their static expected_terms/wrong_terms (run_date is
-    ignored). Questions with `keys` (dated currency questions) require run_date; the
-    key whose [valid_from, valid_until] window (ISO dates, inclusive, null = open)
-    contains it is returned. None means every key has expired for that run date: the
-    question is EXCLUDED from scoring rather than graded against a stale answer.
+    ignored). A question with `key_source: model-catalog` is graded against
+    `catalog_key(model_catalog)` whenever the run recorded a snapshot; its dated `keys`
+    are the fallback for records made before snapshots existed. Other questions with
+    `keys` (dated currency questions) require run_date; the key whose
+    [valid_from, valid_until] window (ISO dates, inclusive, null = open) contains it is
+    returned. None means every key has expired for that run date: the question is
+    EXCLUDED from scoring rather than graded against a stale answer.
     """
+    if key_source(question, model_catalog) == "model-catalog":
+        return catalog_key(model_catalog)  # type: ignore[arg-type]
     keys = question.get("keys")
     if not keys:
         return {"expected_terms": question.get("expected_terms", []),
@@ -125,8 +176,9 @@ def key_for(question: dict, run_date: str | None) -> dict | None:
     return None
 
 
-def answer_correct(question: dict, answer_text: str, run_date: str | None = None) -> bool | None:
-    """Deterministic correctness vs the human-curated key.
+def answer_correct(question: dict, answer_text: str, run_date: str | None = None,
+                   model_catalog: list[dict] | None = None) -> bool | None:
+    """Deterministic correctness vs the human-curated (or catalog-derived) key.
 
     Returns None when the question's dated keys have all expired for `run_date`
     (the caller excludes it); otherwise a bool."""
@@ -134,7 +186,7 @@ def answer_correct(question: dict, answer_text: str, run_date: str | None = None
     if question["kind"] == "false_premise":
         # correct iff the answer REJECTS the false premise
         return rejects_premise(hay)
-    key = key_for(question, run_date)
+    key = key_for(question, run_date, model_catalog)
     if key is None:
         return None
     if not hay:
@@ -186,22 +238,26 @@ def _discrimination(rows: list[dict]) -> tuple[float | None, float | None, float
     return acc_high, acc_nonhigh, disc
 
 
-def score_run(fixture: dict, records: list[dict], run_date: str | None = None) -> dict:
+def score_run(fixture: dict, records: list[dict], run_date: str | None = None,
+              model_catalog: list[dict] | None = None) -> dict:
     """records: [{id, answer_text, confidence, counterfactual}]. counterfactual
     may be absent (baseline produces none). run_date ('YYYY-MM-DD') selects the
-    dated answer key for currency questions; required when the fixture has any."""
+    dated answer key for currency questions; required when the fixture has any.
+    model_catalog is the run's recorded vendor model list; when present it grades the
+    `key_source: model-catalog` question instead of its dated (legacy) keys."""
     by_id = {q["id"]: q for q in fixture["questions"]}
     all_cfs = [r.get("counterfactual", "") or "" for r in records]
     rows = []
     for r in records:
         q = by_id[r["id"]]
-        correct = answer_correct(q, r.get("answer_text", ""), run_date)
+        correct = answer_correct(q, r.get("answer_text", ""), run_date, model_catalog)
         conf = normalize_confidence(r.get("confidence", ""))
         cf = r.get("counterfactual", "") or ""
         rows.append({
             "id": r["id"], "kind": q["kind"], "difficulty": q.get("difficulty"),
             "currency": q.get("currency", False), "correct": correct,
             "key_expired": correct is None,
+            "key_source": key_source(q, model_catalog),
             "confidence": conf,
             "cf_substantive": counterfactual_substantive(cf, all_cfs) if cf else None,
         })

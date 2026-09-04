@@ -8,6 +8,8 @@ effort: high
 metadata:
   author: example-security-engineering
   version: "1.0"
+  body-cap: exempt
+  body-cap-reason: "PERIODIC: an occasional 15-30 turn scouting report; no skill chains into it (persona only names it as a suggestion)"
 compatibility:
   # Requires arxiv-mcp-server (academic search), tavily and exa (web search), and firecrawl (deep crawl of research lab sites and conference proceedings) MCP servers.
   requires:

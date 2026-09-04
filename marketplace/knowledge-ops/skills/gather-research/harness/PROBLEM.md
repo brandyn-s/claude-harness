@@ -168,3 +168,21 @@ and reach the same verdict (Phase-9 auditability).
   why the design uses first-party web_search + plain HTTP — making `run_live.py`
   reproducible for anyone with just an Anthropic key.
 - **Cost:** ~`n_claims × 2 arms × n_runs` Opus calls with web_search (~90 at N=3).
+
+## 9. Retired at this fixture (2026-09-04)
+
+This A/B is retired at the current fixture. `run_live.py` prints a notice and refuses a
+real run without `--acknowledge-retired-fixture`; `--plan-only` keeps working and the
+receipt carries `fixture_status: retired`.
+
+Reason (`docs/research-skills-root-cause.md` §6): both arms score 180/180 on Opus 4.8
+(2026-05-31) and on Fable 5.1 (2026-09-03) — 45/45 verdicts correct per run, 5/5
+supported records grounded, 0 issues. The arms differ only in vocabulary (UNCHARTED with no
+citations vs FALSE with citations on the 3 fabricated claims), which the binary metric does
+not score. Two full runs (~180 web-search calls) produced zero bits about the framework:
+the fixture has no discriminating power for a searching frontier model of either
+generation.
+
+Unchanged: the frozen 2026-05-31 baseline, its committed sample, and the CI gate. Reopen
+only with a fixture on which the baseline is below 1.0 (subtle CONTESTED cases, claims
+inside the 12-month window) and a label-level accuracy metric so the taxonomy is graded.

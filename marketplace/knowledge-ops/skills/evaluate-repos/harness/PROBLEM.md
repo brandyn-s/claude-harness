@@ -120,3 +120,23 @@ No web_search (pure reasoning); `max_tokens` 700/call; `claude-opus-4-8` (no tem
 
 ## 8. Provenance
 Keys: `ANTHROPIC_API_KEY` only. Cost: n_patterns × (1 + 3) × n_runs calls (~168 at N=3).
+
+## 9. Retired at this fixture (2026-09-04)
+
+This A/B is retired at the current fixture. `run_live.py` prints a notice and refuses a
+real run without `--acknowledge-retired-fixture`; `--plan-only` keeps working and the
+receipt carries `fixture_status: retired`.
+
+Reason (`docs/research-skills-root-cause.md` §8): the framework arm is an LLM
+auto-synthesis of the advocate/skeptic arguments — the proxy `SKILL.md` forbids ("NEVER
+auto-synthesize the adopt/reject decision with an LLM"; the human is the decider). The
+harness therefore measures something the skill never does, and does not score the
+arguments the skill actually ships. On top of that, 5 of the 7 should_reject dispositions
+rest on internal experiments the arms cannot see, and the 2026-09-03 `fix` was one record
+at N=1 (now refused by `MIN_RUNS = 3`).
+
+Unchanged: the frozen 2026-05-31 baseline (`fix`, the over-dismissal guard measurement in
+§5), its committed sample, and the CI gate. Reopen only by changing the measured unit to
+the arguments (does the advocate cite a real coverage gap; does the skeptic name a concrete
+blocker) with a human-label oracle, scoring should_reject only where the rationale is
+public.

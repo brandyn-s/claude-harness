@@ -41,7 +41,7 @@
       "name": "planning-toolkit",
       "source": "./marketplace/planning-toolkit",
       "description": "Design-before-code and ship-safely workflow skills \u2014 architecture planning, adversarial review, prompt refinement, companions to the superpowers plugin for evidence-first design, hypothesis-driven debugging, legacy-code TDD and risk-tiered review, ship/PR lifecycle, PR cleanup, Claude API guardrails, and bulk scripting.",
-      "version": "1.1.36",
+      "version": "1.1.37",
       "license": "MIT",
       "repository": "https://github.com/brandyn-s/claude-harness",
       "keywords": [
@@ -66,7 +66,7 @@
       "name": "security-scanner",
       "source": "./marketplace/security-scanner",
       "description": "Static analysis, threat modeling, compliance, and breach response \u2014 Semgrep, CodeQL, false positive verification, differential review, threat modeling, STIG/SRG assessment and verification, dependabot triage, and vendor breach response.",
-      "version": "1.1.14",
+      "version": "1.1.15",
       "license": "MIT",
       "repository": "https://github.com/brandyn-s/claude-harness",
       "keywords": [
@@ -97,7 +97,7 @@
       "name": "knowledge-ops",
       "source": "./marketplace/knowledge-ops",
       "description": "Session knowledge, admin, and record-keeping \u2014 extract learnings, capture decisions, curate a knowledge base, retrospectives, review learnings, validate changes, healthchecks, claim verification, Claude and OpenAI monitoring/admin/cost, cross-provider AI monitoring, Linear status posting, Obsidian sync, workspace provisioning, weekly engineering updates, manifest generation, cross-tool investigation, and GitHub repo sync.",
-      "version": "1.1.57",
+      "version": "1.1.58",
       "license": "MIT",
       "repository": "https://github.com/brandyn-s/claude-harness",
       "keywords": [
@@ -122,7 +122,7 @@
       "name": "code-intelligence",
       "source": "./marketplace/code-intelligence",
       "description": "Codebase exploration, analysis, API docs, and debugging \u2014 semantic search, structural graph queries, call chain tracing, dead code detection, Rust hierarchical documentation, MCP server diagnostics, API doc ingestion, and MCP forge (build/audit/deploy).",
-      "version": "1.1.19",
+      "version": "1.1.20",
       "license": "MIT",
       "repository": "https://github.com/brandyn-s/claude-harness",
       "keywords": [
@@ -136,7 +136,7 @@
       "name": "research-intel",
       "source": "./marketplace/research-intel",
       "description": "Intelligence gathering skills \u2014 community patterns, repo discovery, Claude Code changelog tracking, research papers, developer profile analysis, deep research with multi-source discrepancy flagging, and internal Slack/Linear/Confluence intel.",
-      "version": "1.1.30",
+      "version": "1.1.31",
       "license": "MIT",
       "repository": "https://github.com/brandyn-s/claude-harness",
       "keywords": [

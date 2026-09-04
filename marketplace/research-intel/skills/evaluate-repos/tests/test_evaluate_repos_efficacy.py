@@ -161,6 +161,7 @@ def _run_live_copy(tmp_path: Path, fixture_text: str) -> subprocess.CompletedPro
     return subprocess.run([sys.executable, str(tmp_path / "run_live.py"),
                            "--historical-reproduction", "--output", str(tmp_path / "runs" / "test.json"),
                            "--runs", "1", "--allow-low-n",  # smoke: below MIN_RUNS on purpose
+                           "--acknowledge-retired-fixture",  # retired 2026-09-04; these tests probe the run path behind the gate
                            "--workers", "2"], capture_output=True, env=env, timeout=120)
 
 
@@ -223,3 +224,37 @@ def test_harness_readme_documents_the_minimum_n():
     text = (HARNESS / "README.md").read_text(encoding="utf-8")
     assert "--runs 1" in text and "--allow-low-n" in text
     assert "minimum" in text.lower() and "2026-09-03" in text
+
+
+# ---------- 5. Retired fixture (2026-09-04): a real run needs an explicit acknowledgement ----------
+
+def test_run_live_refuses_retired_fixture_without_acknowledgement(tmp_path):
+    """docs/research-skills-root-cause.md section 8: the harness measures an auto-synthesis proxy
+    the skill forbids. A real run prints the notice, refuses, and writes nothing."""
+    for name in ("run_live.py", "grade.py", "results.json", "fixture.json"):
+        shutil.copy(HARNESS / name, tmp_path / name)
+    env = {k: v for k, v in os.environ.items() if not k.upper().startswith("ANTHROPIC")}
+    proc = subprocess.run([sys.executable, str(tmp_path / "run_live.py"),
+                           "--historical-reproduction", "--output", str(tmp_path / "runs" / "refused.json"),
+                           "--runs", "3"], capture_output=True, text=True, env=env, timeout=120)
+    assert proc.returncode == 2, proc.stdout + proc.stderr
+    assert "RETIRED (2026-09-04)" in proc.stderr
+    assert "--acknowledge-retired-fixture" in proc.stderr and "Traceback" not in proc.stderr
+    assert not (tmp_path / "runs" / "refused.json").exists()
+    assert (tmp_path / "results.json").read_bytes() == (HARNESS / "results.json").read_bytes()
+
+
+def test_plan_only_reports_fixture_status_without_acknowledgement(tmp_path):
+    proc = _plan(tmp_path)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    receipt = json.loads(proc.stdout)
+    assert receipt["fixture_status"] == "retired"
+    assert receipt["fixture_status_since"] == "2026-09-04"
+    assert receipt["retired_fixture_acknowledged"] is False
+
+
+def test_harness_docs_record_the_retirement():
+    for name in ("README.md", "PROBLEM.md"):
+        text = (HARNESS / name).read_text(encoding="utf-8")
+        assert "Retired at this fixture (2026-09-04)" in text, name
+        assert "research-skills-root-cause.md" in text and "--acknowledge-retired-fixture" in text, name
