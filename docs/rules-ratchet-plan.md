@@ -187,6 +187,39 @@ Ambient 179,347 → 168,359 B. Every block moved verbatim; each leaves its direc
 directive text (REQUIRED lines, GUARDs, imperatives); reaching the table's 3,500/5,000 B
 targets needs step 8 (kernel compaction), which rewrites directives and is a judgment step.
 
+## Executed 2026-09-04 on `feat/rules-ratchet-step2b`: the next four, dated narrative only
+
+Base 05956d3 (PR #11). First, the gap that PR found: `scripts/test_incident_anchors.py`
+resolved `Full: incidents#` pointers in `rules/*.md` only, while `docs/rule-reference/*.md`
+carries 246 of the same pointers. One resolver (`_dangling`) now runs over both
+directories (`POINTER_SOURCES`); a negative control appends a wrong anchor to a temp
+copy of a reference doc and expects exactly that report. Measured: 246 reference
+pointers, 0 dangling.
+
+| Rule | Before | After | Blocks | Anchors in `rules/incidents/<rule>.md` |
+|---|---:|---:|---:|---|
+| verify-before-assuming | 10,413 | 9,912 | 3 | `2026-08-12-slack-audit-catalog-largest-group-unread` (check 3b INCIDENT), `2026-08-15-five-defects-off-a-70-commit-behind-copy` (check 5b), `2026-08-15-one-call-probe-both-directions` (closing GUARD citation) |
+| git-hygiene | 9,823 | 9,823 | 0 | none. The only dated text is a provenance stamp (`Measured 2026-08-23.`, STEP_6) and a two-date citation (`2 occurrences (2026-08-14, 2026-08-24); both in the reference.`); each is shorter than the pointer that would replace it. The table's 4,889 narr B is detector N counting the whole STEP and FORBIDDEN paragraphs because each contains one date |
+| check-before-change | 9,811 | 9,095 | 2 | `2026-08-12-unsatisfiable-iam-condition-third-occurrence` (check 8b narrative plus the closing sentence's dated clause), `2026-08-24-blanket-sweep-broke-data-dir-and-js-key` (Forbidden shortcuts) |
+| diagnose-before-fix | 9,686 | 8,680 | 4 | `2026-08-14-escalated-for-admin-role-before-recall` (check 2), `2026-08-26-waf-403-two-independent-rules-live` (check 4), `2026-08-24-fallback-chain-fix-gated-off-by-enum` (check 7), existing `2026-08-29-emit-the-discriminator` (Forbidden shortcuts) |
+
+Ambient 168,160 → 165,937 B (−2,223; PR #11 had taken it from 168,359 to 168,160 in
+between). Every block moved verbatim. Where a directive and its dated clause shared one
+sentence (check-before-change 8b's closing sentence and the blanket-sweep bullet), the
+sentence went to incidents whole and the rule kept the directive half closed with a
+period. Oracle per rule, `extract` before and `verify --also rules/incidents` after:
+1,608/1,608, 1,605/1,605 and 1,599/1,599 literals present, 0 lost, no allow-drop (the
+count falls as moved literals leave the rule tier). Three negative ledger rows: −501,
+−716, −1,006.
+
+The yield is 2,223 B against the sequence table's ≈20,500 for these four rules because
+detector N counts a whole paragraph when it carries one date, and in these files the
+dates sit inside numbered checks, STEP and FORBIDDEN blocks whose other sentences are
+directives. What remains is directive text, which is step 8 (kernel compaction, a
+judgment step), not relocation. Kept as undated directives: verify-before-assuming
+check 4's release-notes paragraph and check 7b; check-before-change 3b; git-hygiene
+STEP_4's wrong-base mechanism sentence (already a pointer to the reference).
+
 ## Next eight, by expected bytes freed per unit of judgment
 
 1. **platform-constraints.md** 16,526 → ~3,500 — 78% dated narrative (12,934 B), 14 incidents anchors already exist, five hooks cover its guard, encoding and secret lines.

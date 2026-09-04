@@ -21,6 +21,13 @@ A `"Full: incidents#anchor"` occurrence inside a `Pointer shorthand:` line is a
 worked EXAMPLE of the convention, not a pointer. Excluded — otherwise the check
 demands an anchor literally named `anchor`, which is the false-positive that
 would get this test demoted to advisory and then ignored.
+
+The same pointers live in `docs/rule-reference/*.md` (246 of them, measured
+2026-09-04) and nothing scanned that directory until PR #11 noticed; a reference doc
+can therefore point at an anchor that was renamed under it. `POINTER_SOURCES` names
+every directory whose pointers must resolve, and `_dangling` is the single resolver
+that both the real corpus and the negative controls run through, so "the directory
+is covered" is asserted rather than assumed.
 """
 import re
 import unicodedata
@@ -29,6 +36,9 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 RULES = REPO / "rules"
 INCIDENTS = RULES / "incidents"
+RULE_REFERENCE = REPO / "docs" / "rule-reference"
+# Every directory whose top-level *.md may carry `Full: incidents#<anchor>` pointers.
+POINTER_SOURCES = (RULES, RULE_REFERENCE)
 
 POINTER = re.compile(r"Full:\s*incidents#([\w./-]+)")
 DOC_EXAMPLE = re.compile(r"Pointer shorthand|shorthand:")
@@ -61,24 +71,35 @@ def _all_anchors() -> dict[str, set[str]]:
     return {p.stem: _exposed(p) for p in INCIDENTS.glob("*.md")}
 
 
+def _dangling(sources, cache: dict[str, set[str]]) -> tuple[int, list[str]]:
+    """(pointers seen, unresolved pointers) over the top-level *.md of each source dir.
+
+    A pointer resolves against the incidents file of the same stem first, then any
+    incidents file (cross-file pointers are legitimate). Labels carry the parent
+    directory so a rules/ hit and a rule-reference/ hit read differently.
+    """
+    dangling: list[str] = []
+    total = 0
+    for source in sources:
+        for doc in sorted(Path(source).glob("*.md")):
+            for line in doc.read_text(encoding="utf-8").splitlines():
+                if DOC_EXAMPLE.search(line):
+                    continue
+                for raw in POINTER.findall(line):
+                    total += 1
+                    a = raw.rstrip("./").lower()
+                    if a in cache.get(doc.stem, set()):
+                        continue
+                    if any(a in v for v in cache.values()):
+                        continue  # cross-file pointer, still resolvable
+                    dangling.append(f"{doc.parent.name}/{doc.name} -> #{raw}")
+    return total, dangling
+
+
 def test_every_incident_pointer_resolves():
     if not INCIDENTS.is_dir():
         return  # corpus absent (fresh checkout) — not a defect
-    cache = _all_anchors()
-    dangling = []
-    total = 0
-    for rule in sorted(RULES.glob("*.md")):
-        for line in rule.read_text(encoding="utf-8").splitlines():
-            if DOC_EXAMPLE.search(line):
-                continue
-            for raw in POINTER.findall(line):
-                total += 1
-                a = raw.rstrip("./").lower()
-                if a in cache.get(rule.stem, set()):
-                    continue
-                if any(a in v for v in cache.values()):
-                    continue  # cross-file pointer, still resolvable
-                dangling.append(f"{rule.name} -> #{raw}")
+    total, dangling = _dangling(POINTER_SOURCES, _all_anchors())
     assert not dangling, (
         f"{len(dangling)} of {total} incident pointers resolve to no heading and "
         f"no <a id=> in any rules/incidents/*.md.\n"
@@ -104,3 +125,26 @@ def test_doc_example_lines_are_excluded():
     line = '# Pointer shorthand: "Full: incidents#anchor" = rules/incidents/git-hygiene.md'
     assert POINTER.search(line), "pattern should still match the literal"
     assert DOC_EXAMPLE.search(line), "but the line must be recognised as documentation"
+
+
+def test_rule_reference_pointers_are_checked():
+    """docs/rule-reference/*.md points into the same incidents files (246 pointers
+    measured 2026-09-04) but was never scanned; PR #11 found the gap."""
+    assert RULE_REFERENCE in POINTER_SOURCES
+    assert any(RULE_REFERENCE.glob("*.md")), "reference corpus went missing"
+
+
+def test_check_would_catch_a_broken_pointer_in_a_reference_doc(tmp_path):
+    """Negative control for the docs path: a deliberately wrong anchor appended to a
+    copy of a reference doc must be reported, and the copy's real pointers must not."""
+    ref = tmp_path / "rule-reference"
+    ref.mkdir()
+    source = RULE_REFERENCE / "verify-before-assuming.md"
+    bogus = "definitely-not-an-anchor-2026-09-04"
+    (ref / source.name).write_text(
+        source.read_text(encoding="utf-8") + f"\n#   Full: incidents#{bogus}\n",
+        encoding="utf-8",
+    )
+    total, dangling = _dangling((ref,), _all_anchors())
+    assert total > 1, "the copy's own pointers were not scanned"
+    assert dangling == [f"rule-reference/{source.name} -> #{bogus}"]

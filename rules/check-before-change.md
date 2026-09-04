@@ -85,21 +85,13 @@ INVARIANT verify_deployed_state_before_recommending
    narrower ALLOW.** Before adding any `Condition` to a statement, confirm every action
    in that statement supports every condition key used. A key the action does not
    publish never matches, so the statement can never authorize anything — and `plan`,
-   `apply`, and the whole unit suite stay green because only a real invoke fails.
-   PROMOTED to ambient on the THIRD occurrence. `agent-memory/topics/aws-infra-s3.md`
-   already carries this as "An unsatisfiable CONDITION is a DENY — and knowing the
-   pattern is not checking against it (2026-08-02)", which itself records re-stating
-   the mechanism in a comment and then reproducing it one statement over. On
-   2026-08-12 it recurred again: `StringLike s3:prefix` on a statement granting
-   `s3:GetBucketLocation` (an action with no `s3:prefix` key) denied Athena's
-   output-location preflight, so the FIRST scheduled run of a new lane died with
-   `Unable to verify/create output bucket`. Known offenders seen here: `s3:prefix` on
-   anything but `s3:ListBucket`; `cloudwatch:namespace` on a metric READ
-   (`GetMetricStatistics`); `ArnEquals ecs:cluster` on cluster-independent
-   `ecs:DescribeTaskDefinition`. Split the conditioned and unconditioned actions into
-   separate statements, and prefer copying a sibling statement PROVEN in production over
-   deriving a "tighter" one — the 2026-08-12 instance was a re-derivation of a working
-   sibling that had no condition.
+   `apply`, and the whole unit suite stay green because only a real invoke fails. Known
+   offenders seen here: `s3:prefix` on anything but `s3:ListBucket`;
+   `cloudwatch:namespace` on a metric READ (`GetMetricStatistics`);
+   `ArnEquals ecs:cluster` on cluster-independent `ecs:DescribeTaskDefinition`. Split
+   the conditioned and unconditioned actions into separate statements, and prefer
+   copying a sibling statement PROVEN in production over deriving a "tighter" one.
+   Full: incidents#2026-08-12-unsatisfiable-iam-condition-third-occurrence
 
 9. **Controls and signals.** Before keying a control/alarm on a surface, grep every
    writer, prove it is populated in healthy operation, measure it live, and prefer a
@@ -127,10 +119,9 @@ INVARIANT verify_deployed_state_before_recommending
   pre-formatter anchors.
 - Running a blanket text substitution (date/window/name sweeps) without excluding
   IDENTIFIER AND PATH contexts. A swept literal inside `os.path.join`, a dir name,
-  or a JS data key is a consumer, not prose: one sweep pair broke a builder's
-  DATA_DIR into a nonexistent dir and another blanked whole report sections via a
-  renamed JS key (2026-08-24 ×2). Anchor sweeps per-site or filter path-bearing
-  lines, then re-run the render/consumer gate.
+  or a JS data key is a consumer, not prose. Anchor sweeps per-site or filter
+  path-bearing lines, then re-run the render/consumer gate.
+  Full: incidents#2026-08-24-blanket-sweep-broke-data-dir-and-js-key
 - Recommending already-shipped work, duplicating an open/recently merged change, or
   probing for twins using only identifiers from your proposed implementation.
 - Changing a server/API/field contract after finding only the first consumer.

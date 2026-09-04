@@ -43,12 +43,7 @@ INVARIANT docs_consensus_is_not_evidence_source_code_is
    the most expensive way to discover that. GUARD pattern="I've exhausted the levers,
    I need an admin role" or "this is blocked pending access": run
    `memory_search(component + symptom)` FIRST and say what it returned. NO EXCEPTIONS.
-   INCIDENT 2026-08-14: escalated for an admin role in a GovCloud account to reach an
-   untried Bedrock lever. The operator replied "we've done this before for other
-   accounts"; the memory search that comment triggered returned a topic file naming the
-   exact missing step (the entitlement does not auto-propagate cross-partition and must
-   be created explicitly). The recall cost one tool call and would have avoided the
-   escalation entirely.
+   Full: incidents#2026-08-14-escalated-for-admin-role-before-recall
 3. **Compare with a working baseline.** Locate last-good logs/config/run/transcript.
    Test every suspected anomaly against it and diff event sequences; present in both
    means background, while the missing next event may be the signal. Before suggesting
@@ -59,12 +54,10 @@ INVARIANT docs_consensus_is_not_evidence_source_code_is
    compare each instance's input telemetry. Threshold failure: read the last green
    metric and compare equivalent pipelines, not just verdicts. REFUTING one hypothesis
    does not IDENTIFY the cause: a control can block for INDEPENDENT reasons, and the
-   first one you disprove hides the rest. Measured 2026-08-26 -- a WAF 403 on an upload:
-   "too big" was refuted by a 141-byte probe, then "markup only" was refuted by a
-   20,000-byte plain-text probe. BOTH rules were live (XSS-any-size AND an 8192-byte
-   cap), so the obvious fix for the second, base64, would have shipped and still 403'd.
+   first one you disprove hides the rest.
    Vary each axis independently to EXHAUSTION before designing the fix, and pin the
    threshold (8000 passed, 8192 blocked) rather than inferring it.
+   Full: incidents#2026-08-26-waf-403-two-independent-rules-live
 5. **Classify runtime state.** A long batch is not wedged until process liveness, CPU,
    write delta over at least one full batch period, and network I/O agree. A platform
    classifier/model outage is not a command bug: stop identical retries, try one
@@ -81,11 +74,8 @@ INVARIANT docs_consensus_is_not_evidence_source_code_is
    For a value resolved through a FALLBACK CHAIN (`a ?? b ?? default`), fixing the
    producer of one source is not the mechanism proof: grep who SETS every
    earlier-precedence source in the failing path and confirm your fixed value is
-   actually consumed there. Measured 2026-08-24: a gateway /v1/models fix shipped
-   through a full protected release while LibreChat's hardcoded FetchTokenConfig
-   enum gated the fetched value off for this endpoint — the 32K-default symptom
-   reproduced unchanged and a second release (static config, the branch that
-   bypasses the gate) was required.
+   actually consumed there.
+   Full: incidents#2026-08-24-fallback-chain-fix-gated-off-by-enum
 8. **Measure expected versus observed.** Compute the expected improvement. If observed
    impact is below `0.3 × expected`, continue end-to-end profiling for a compounding
    bug; "better than before" is not the expected fix.
@@ -133,12 +123,11 @@ INVARIANT docs_consensus_is_not_evidence_source_code_is
   checks merely because no fix was requested.
 
 - Forming a third hypothesis about a collapsed error path instead of emitting the FIELD
-  that splits it (`error_type`, the failing assertion, the resolved target). Measured
-  2026-08-29: 4 hours and 3 wrong fixes on one flat string; one `error_type` field named
-  the cause on the next run. Relatedly, a probe that passes while the real lane fails,
-  unchanged by fixes, IS the finding — diff the two call paths for their first difference
-  (origin, region, account, identity, base revision) before theorising further about the
-  subject. (`incidents#2026-08-29-emit-the-discriminator`.)
+  that splits it (`error_type`, the failing assertion, the resolved target). Relatedly,
+  a probe that passes while the real lane fails, unchanged by fixes, IS the finding —
+  diff the two call paths for their first difference (origin, region, account, identity,
+  base revision) before theorising further about the subject.
+  Full: incidents#2026-08-29-emit-the-discriminator
 
 Load the archived reference when a domain-specific playbook is needed; do not return its
 incident narratives to the always-loaded contract.
