@@ -107,6 +107,12 @@ PLUGINS = [
             ("hooks/hook_input.py", "hooks/hook_input.py"),
             ("hooks/atomic_write.py", "hooks/atomic_write.py"),
             ("hooks/manifest_metrics.py", "hooks/manifest_metrics.py"),
+            # post-failure-guide reads its pattern files and hints from the
+            # environment catalog through this loader; without it the bundled
+            # hook fails on import (check_hook_import_containment catches it).
+            # The loader falls back to empty sections when no catalog exists,
+            # and reads the operator's ~/.claude/environment-catalog.json.
+            ("hooks/_environment_catalog.py", "hooks/_environment_catalog.py"),
             # Root rules/ are standalone configuration, not a recognized
             # plugin component. They remain available through install.sh and
             # manual copy; do not ship inert files in the cached plugin.
