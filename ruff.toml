@@ -1,0 +1,6 @@
+# Pins the lint target so `ruff check` means the same thing on every machine and ruff
+# version. Rule selection stays ruff's default set (the 2026-09-04 cleanup was measured
+# against it); generated marketplace bundles are copies of hooks/ and skills/ and are
+# never linted directly.
+target-version = "py311"
+extend-exclude = ["marketplace", "**/node_modules", "**/__pycache__"]
