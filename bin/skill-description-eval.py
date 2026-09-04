@@ -715,53 +715,105 @@ def render_comparison(comp: dict) -> list[str]:
     return lines + [""]
 
 
-def render_faithful(faithful: dict) -> list[str]:
-    """Proxy-vs-faithful section from bin/skill-trigger-faithful.py's summary."""
-    meta, summary = faithful["meta"], faithful["summary"]
-    labels = summary["proxy_labels"]
+def _faithful_mode(meta: dict) -> str:
+    return f"{meta.get('permission_mode') or 'plan'} mode"
+
+
+def _describe_faithful_run(faithful: dict) -> str:
+    meta = faithful["meta"]
+    setup = meta.get("setup") or {}
+    flags = [f"`--setting-sources project`", f"`--max-turns {meta.get('max_turns')}`"]
+    if meta.get("permission_mode", "plan") != "default":
+        flags.append(f"`--permission-mode {meta.get('permission_mode', 'plan')}`")
+    else:
+        flags.append("no `--permission-mode` flag (the CLI's default mode"
+                     + (f", reported as `{'/'.join(meta['permission_mode_reported'])}`"
+                        if meta.get("permission_mode_reported") else "") + ")")
+    if meta.get("allowed_tools"):
+        flags.append(f"`--allowedTools {meta['allowed_tools']}`")
+    if meta.get("permission_prompts"):
+        flags.append(f"`--permission-prompts {meta['permission_prompts']}`")
+    checks = (f"hook events {meta.get('hook_events_total', 0)}, run errors {meta.get('errors', 0)}, Skill tool available "
+              f"and expected skill listed in every init message: "
+              f"{'yes' if meta.get('skill_tool_available_in_all_runs') and meta.get('expected_listed_in_all_runs') else 'NO'}")
+    if meta.get("permission_denials_total") is not None:
+        checks += f", permission denials {meta['permission_denials_total']}"
+    return (f"**{_faithful_mode(meta)}** (`{faithful.get('_file', '?')}`, {meta['date']}): {meta['runs']} sessions, "
+            f"`claude {meta.get('claude_version', '?')}`, model `{meta.get('model')}`, project `{meta.get('project')}` "
+            f"({setup.get('skills_linked', '?')} skills symlinked), {', '.join(flags)}. Checks: {checks}. "
+            f"Notional API cost ${meta.get('notional_cost_usd', 0.0):.2f} (billed to the subscription).")
+
+
+def render_faithful(faithful_runs: list[dict]) -> list[str]:
+    """Proxy-vs-faithful section from one or more bin/skill-trigger-faithful.py results
+    (one faithful column per run, labelled by its permission mode)."""
+    runs = list(faithful_runs)
+    labels = runs[-1]["summary"]["proxy_labels"]
+    modes = [_faithful_mode(f["meta"]) for f in runs]
     lines = [
         "## Proxy vs faithful trigger check",
         "",
-        (f"`bin/skill-trigger-faithful.py` ran {meta['runs']} real `claude -p` sessions "
-         f"(`claude {meta.get('claude_version', '?')}`, model `{meta.get('model')}`, {meta['date']}) from a "
-         f"project whose `.claude/skills/` symlinks every model-visible skill, with only project settings loaded "
-         f"(`--setting-sources project`), plan mode, `--max-turns {meta.get('max_turns')}`. A run counts as a hit "
-         f"when a `Skill` tool_use naming the expected skill appears in the stream. Hook events seen: "
-         f"{meta.get('hook_events_total', 0)}; runs with errors: {meta.get('errors', 0)}; the Skill tool was "
-         f"available and the expected skill listed in the init message of every run: "
-         f"{'yes' if meta.get('skill_tool_available_in_all_runs') and meta.get('expected_listed_in_all_runs') else 'NO'}."),
+        ("Each faithful run sends the sampled corpus requests through real `claude -p` sessions from a project whose "
+         "`.claude/skills/` symlinks every model-visible skill, with only project settings loaded. A run counts as a "
+         "hit when a `Skill` tool_use naming the expected skill appears in the stream."),
         "",
-        f"Sample: {meta['sample_rule']}",
-        "",
-        "| Skill | Group | " + " | ".join(f"Proxy {lab}" for lab in labels) + " | Faithful | Fired instead |",
-        "|---|---|" + "---|" * len(labels) + "---|---|",
     ]
-    for row in summary["per_skill"]:
-        proxy_cells = " | ".join(f"{row['proxy_hits'].get(lab, '-')}/{row['positives']}"
-                                 if row["proxy_hits"].get(lab) is not None else "-" for lab in labels)
-        other = ", ".join(row["other_skills_fired"]) or "-"
-        lines.append(f"| {row['skill']} | {row['group']} | {proxy_cells} | {row['faithful_hits']}/{row['positives']} | {other} |")
-    agree = summary["agreement"]
-    lines += ["", (f"Item-level agreement between the `{agree['proxy_label']}` proxy and the faithful runs: "
+    lines += [f"- {_describe_faithful_run(f)}" for f in runs]
+    lines += ["", f"Sample: {runs[-1]['meta']['sample_rule']}", "",
+              "| Skill | Group | " + " | ".join(f"Proxy {lab}" for lab in labels) + " | "
+              + " | ".join(f"Faithful {m}" for m in modes) + " | Fired instead |",
+              "|---|---|" + "---|" * (len(labels) + len(modes)) + "---|"]
+    by_run = [{row["skill"]: row for row in f["summary"]["per_skill"]} for f in runs]
+    totals_proxy = {lab: 0 for lab in labels}
+    totals_faithful = [0] * len(runs)
+    positives_total = 0
+    for row in runs[-1]["summary"]["per_skill"]:
+        name = row["skill"]
+        proxy_cells = []
+        for lab in labels:
+            hits = row["proxy_hits"].get(lab)
+            proxy_cells.append(f"{hits}/{row['positives']}" if hits is not None else "-")
+            totals_proxy[lab] += hits or 0
+        faithful_cells, fired = [], []
+        for i, (mode, rows) in enumerate(zip(modes, by_run)):
+            r = rows.get(name)
+            if r is None:
+                faithful_cells.append("-")
+                continue
+            faithful_cells.append(f"{r['faithful_hits']}/{r['positives']}")
+            totals_faithful[i] += r["faithful_hits"]
+            if r["other_skills_fired"]:
+                fired.append(f"{mode}: {', '.join(r['other_skills_fired'])}")
+        positives_total += row["positives"]
+        lines.append(f"| {name} | {row['group']} | " + " | ".join(proxy_cells) + " | " + " | ".join(faithful_cells)
+                     + f" | {'; '.join(fired) or '-'} |")
+    lines.append("| **total** | | " + " | ".join(f"{totals_proxy[lab]}/{positives_total}" for lab in labels) + " | "
+                 + " | ".join(f"{t}/{positives_total}" for t in totals_faithful) + " | |")
+    for f, mode in zip(runs, modes):
+        meta, summary = f["meta"], f["summary"]
+        agree = summary["agreement"]
+        lines += ["", f"### {mode}", "",
+                  (f"Item-level agreement between the `{agree['proxy_label']}` proxy and these runs: "
                    f"{agree['both_hit']} both hit, {agree['both_miss']} both missed, {agree['proxy_only']} proxy-only, "
-                   f"{agree['faithful_only']} faithful-only (n={agree['n']}, agreement {agree['rate']:.2f})."), ""]
-    first_tools = summary.get("miss_first_tool") or {}
-    if first_tools:
-        described = ", ".join(f"{count} went straight to `{tool}`" if tool != "none" else f"{count} answered in text"
-                              for tool, count in sorted(first_tools.items(), key=lambda kv: (-kv[1], kv[0])))
-        lines += [f"What the misses did instead (first tool call): {described}.", ""]
-    lines += [("Caveats specific to this check: plan mode tells the model to investigate before acting, and the "
-               "scratch project holds only the skill symlinks, so a request that names a repo, PR or file the "
-               "model cannot see invites a look around with Bash first; a hit still had to appear within "
-               f"`--max-turns {meta.get('max_turns')}`. Runs bill the owner's subscription (API key removed from "
-               f"the environment); notional API cost ${meta.get('notional_cost_usd', 0.0):.2f}."), ""]
-    if summary.get("misses"):
-        lines += ["| Item | Expected | Faithful skill calls | Request |", "|---|---|---|---|"]
-        for m in summary["misses"]:
-            request = m["request"].replace("|", "\\|")
-            lines.append(f"| {m['id']} | {m['expected']} | {', '.join(m['skill_calls']) or 'none'} | {request} |")
-        lines.append("")
-    return lines
+                   f"{agree['faithful_only']} faithful-only (n={agree['n']}, agreement {agree['rate']:.2f}).")]
+        first_tools = summary.get("miss_first_tool") or {}
+        if first_tools:
+            described = ", ".join(f"{count} went straight to `{tool}`" if tool != "none" else f"{count} answered in text"
+                                  for tool, count in sorted(first_tools.items(), key=lambda kv: (-kv[1], kv[0])))
+            lines += ["", f"What the misses did instead (first tool call): {described}."]
+        if meta.get("permission_mode", "plan") == "plan":
+            lines += ["", ("Caveat: plan mode tells the model to investigate before acting, so a request that names a "
+                           "repo, PR or file the model cannot see invites a look around first; a hit still had to appear "
+                           f"within `--max-turns {meta.get('max_turns')}`.")]
+        else:
+            lines += ["", ("Caveat: the model may act here, and anything outside the allow-list is denied automatically "
+                           f"rather than prompted; a hit still had to appear within `--max-turns {meta.get('max_turns')}`.")]
+        if summary.get("misses"):
+            lines += ["", "| Item | Expected | Faithful skill calls | Request |", "|---|---|---|---|"]
+            for m in summary["misses"]:
+                request = m["request"].replace("|", "\\|")
+                lines.append(f"| {m['id']} | {m['expected']} | {', '.join(m['skill_calls']) or 'none'} | {request} |")
+    return lines + [""]
 
 
 def _fmt_recall(value) -> str:
@@ -769,7 +821,7 @@ def _fmt_recall(value) -> str:
 
 
 def render_readme(report: dict, meta: dict, results_name: str, *, comparisons: list[dict] | None = None,
-                  faithful: dict | None = None, command: str | None = None) -> str:
+                  faithful: list[dict] | None = None, command: str | None = None) -> str:
     per, overall, ff = report["per_skill"], report["overall"], report["false_fire"]
     ranked = sorted(per.items(), key=lambda kv: (kv[1]["recall"] if kv[1]["recall"] is not None else -1, kv[0]))
     corpus_meta = meta.get("corpus_meta", {})
@@ -917,9 +969,11 @@ def cmd_report(args) -> int:
         command += f" --compare {compare_path.name}"
     if comparisons:
         results["comparisons"] = comparisons
-    if args.faithful:
-        faithful_path = Path(args.faithful)
-        faithful = json.loads(faithful_path.read_text(encoding="utf-8"))
+    for faithful_file in args.faithful or []:
+        faithful_path = Path(faithful_file)
+        loaded = json.loads(faithful_path.read_text(encoding="utf-8"))
+        loaded["_file"] = faithful_path.name
+        faithful = (faithful or []) + [loaded]
         command += f" --faithful {faithful_path.name}"
     _write_json(results_path, results)
     readme = Path(args.readme)
@@ -931,7 +985,7 @@ def cmd_report(args) -> int:
         f"{overall['hits']}/{overall['positives']}, macro {overall['macro_recall']:.2f}, "
         f"false-fire {report['false_fire']['fired']}/{report['false_fire']['negatives']}"
         + (f"; compared against {', '.join(Path(c).name for c in args.compare)}" if args.compare else "")
-        + (f"; faithful section from {Path(args.faithful).name}" if args.faithful else ""))
+        + (f"; faithful section from {', '.join(Path(f).name for f in args.faithful)}" if args.faithful else ""))
     return 0
 
 
@@ -967,8 +1021,9 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--compare", action="append", default=None, metavar="RESULTS",
                    help="another results-*.json on the same corpus (e.g. the low-effort run); repeatable. Adds one "
                         "comparison section per file and stores them under `comparisons` in --results")
-    p.add_argument("--faithful", default=None,
-                   help="faithful-<date>.json from bin/skill-trigger-faithful.py; adds the proxy-vs-faithful section")
+    p.add_argument("--faithful", action="append", default=None, metavar="FAITHFUL",
+                   help="faithful-<date>.json from bin/skill-trigger-faithful.py; repeatable (one column per run, "
+                        "labelled by permission mode); adds the proxy-vs-faithful section")
     p.set_defaults(func=cmd_report)
 
     args = parser.parse_args(argv)

@@ -368,3 +368,43 @@ def test_report_cli_writes_results_and_readme(tmp_path):
     written = json.loads(results_path.read_text(encoding="utf-8"))
     assert written["report"]["overall"]["hits"] == 5
     assert "| gamma | 3 | 0 | 0.00 |" in readme.read_text(encoding="utf-8")
+
+
+# --------------------------------------------------------------------------- faithful section
+
+def _faithful_run(mode: str, hits: dict[str, int], first_tool: dict[str, int], **meta_extra) -> dict:
+    per_skill = [{"skill": name, "group": "weakest" if name == "alpha" else "strong", "positives": 3,
+                  "faithful_hits": n, "failed_runs": 0, "proxy_hits": {"low": 2 if name == "alpha" else 3, "xhigh": 3},
+                  "other_skills_fired": ["retro"] if name == "beta" and n < 3 else []} for name, n in hits.items()]
+    misses = [{"id": f"{name}-{k}", "expected": name, "skill_calls": [], "request": f"please {name} {k}", "failed": False}
+              for name, n in hits.items() for k in range(n + 1, 4)]
+    return {"_file": f"faithful-{mode}.json",
+            "meta": {"date": "2026-09-04", "runs": 6, "errors": 0, "hook_events_total": 0, "max_turns": 2,
+                     "claude_version": "2.1.260", "model": "claude-fable-5-1", "project": "/tmp/p",
+                     "setup": {"skills_linked": 77}, "sample_rule": "rule", "permission_mode": mode,
+                     "skill_tool_available_in_all_runs": True, "expected_listed_in_all_runs": True,
+                     "notional_cost_usd": 1.5, **meta_extra},
+            "summary": {"proxy_labels": ["low", "xhigh"], "per_skill": per_skill, "misses": misses,
+                        "miss_first_tool": first_tool,
+                        "agreement": {"proxy_label": "xhigh", "n": 6, "both_hit": sum(hits.values()), "both_miss": 0,
+                                      "proxy_only": 6 - sum(hits.values()), "faithful_only": 0,
+                                      "rate": sum(hits.values()) / 6}}}
+
+
+def test_render_faithful_puts_one_column_per_permission_mode():
+    plan = _faithful_run("plan", {"alpha": 1, "beta": 0}, {"Bash": 5})
+    default = _faithful_run("default", {"alpha": 2, "beta": 1}, {"Bash": 2, "none": 1},
+                            allowed_tools="Read,Skill", permission_prompts="none", permission_denials_total=4,
+                            permission_mode_reported=["default"])
+    text = "\n".join(sde.render_faithful([plan, default]))
+    assert "| Skill | Group | Proxy low | Proxy xhigh | Faithful plan mode | Faithful default mode | Fired instead |" in text
+    assert "| alpha | weakest | 2/3 | 3/3 | 1/3 | 2/3 | - |" in text
+    assert "| beta | strong | 3/3 | 3/3 | 0/3 | 1/3 | plan mode: retro; default mode: retro |" in text
+    assert "| **total** | | 5/6 | 6/6 | 1/6 | 3/6 | |" in text
+    assert "### plan mode" in text and "### default mode" in text
+    assert "5 went straight to `Bash`" in text and "1 answered in text" in text
+    assert "`--allowedTools Read,Skill`" in text and "permission denials 4" in text
+    assert "no `--permission-mode` flag" in text and "reported as `default`" in text
+    assert "| beta-3 | beta | none | please beta 3 |" in text
+    single = "\n".join(sde.render_faithful([plan]))
+    assert "| Faithful plan mode | Fired instead |" in single and "default mode" not in single
