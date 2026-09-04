@@ -121,13 +121,43 @@ Every remaining hook that settings.json wires, so `bin/architecture-drift-check.
 | `mcp-truncation-signal-guard.py` | PostToolUse(mcp__.*) | Advisory PostToolUse guard: surface MCP truncation signals on the main thread | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
 | `nessus-to-md.py` | PreToolUse(Read) | PreToolUse hook for Read: Auto-convert .nessus (Tenable XML) to Markdown | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
 | `pr-duplicate-preflight.py` | PreToolUse(Bash) | PreToolUse:Bash — BLOCK `gh pr create` when one of YOUR open PRs already | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
-| `security-write-confirm.py` | PreToolUse(mcp__.*) | PreToolUse hook: require user confirmation before security write operations | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
+| `security-write-confirm.py` | PreToolUse(mcp__.*) | Surfaces MCP write operations against the servers the environment catalog marks security-sensitive (advisory systemMessage; neither prompts nor blocks) | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. Servers, labels and write indicators come from the catalog's `security_write_confirm` section. |
 | `skill-ref-validator.py` | PostToolUse(Write\|Edit) | PostToolUse hook for Edit|Write: warn on dead hook/script refs in SKILL.md | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
 | `staged-additions-guard.py` | PreToolUse(Bash) | PreToolUse:Bash — BLOCK `git commit` when staged ADDITIONS coexist with | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
 | `stale-checkout-before-analysis.py` | PreToolUse(Read\|Grep\|Glob) | PreToolUse:Read|Grep|Glob — advise when analysis reads a BEHIND checkout | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
 | `worktree-remove-snapshot.py` | WorktreeRemove | WorktreeRemove: snapshot uncommitted work before a worktree disappears | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
 | `write-edit-dispatcher.py` | PreToolUse(Write\|Edit) | Consolidated PreToolUse:Write|Edit dispatcher | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
 | `xlsx-to-md.py` | PreToolUse(Read) | PreToolUse hook for Read: Auto-convert .xlsx workbooks to Markdown | Documented 2026-09-04 when the drift check's hooks-section parser was fixed; see the source docstring for the full rationale. |
+
+## Environment catalog
+
+Several advisory hooks act on names that belong to an environment, not to the
+harness: which MCP servers are security-sensitive and what to call them
+(`security-write-confirm.py`); which topic file each server prefix or learning
+keyword routes to (`auto-topic-loader.py`, `subagent-stop.py`); which
+`*-patterns.md` file documents a server's failures (`post-failure-guide.py`);
+which remote MCPs need main-thread auth and which repos need worktree isolation
+(`pre-agent-dispatch.py`); which servers the consistency check expects; which
+repos to fast-forward or index-check (`session_start_modules/repo_sync.py`,
+`index_staleness.py`); and which checkout `session-start.py` watches for a
+concurrent session. None of that is in Python. `hooks/_environment_catalog.py`
+reads it at run time from, in merge order:
+
+1. `contracts/environment-catalog.json` -- the shipped default. Every section is
+   empty, so each of these hooks is a clean no-op until it is configured.
+2. `~/.claude/environment-catalog.json` (or `$CLAUDE_CONFIG_DIR/environment-catalog.json`)
+   -- your values. `install.sh` seeds it from the default and never overwrites it.
+3. The file named by `CLAUDE_ENVIRONMENT_CATALOG` -- an explicit override. The
+   test suite points it at `hooks/test-hooks/fixtures/environment-catalog.json`.
+
+A layer that defines a section replaces that section wholesale; a section it
+omits is inherited. The shape, with placeholder names in every section, is
+`contracts/environment-catalog.example.json`. A malformed layer is skipped with
+one stderr line: these hooks are advisory and never fail closed on their own
+configuration. `hooks/test-hooks/test_environment_catalog_guard.py` keeps vendor
+and server names out of the converted sources; `hooks/protected-repos.json`
+(read by the Bash dispatcher and `worktree-enforcement.py`) is the older data
+file of the same kind and stays as it is.
 
 ## Design Principles
 

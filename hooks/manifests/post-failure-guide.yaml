@@ -10,7 +10,8 @@ enforces:
 blocks_patterns: []
 injects: failure_guidance
 modifies: null
-depends_on_files: []
+depends_on_files:
+  - contracts/environment-catalog.json
 depends_on_env: []
 exit_codes:
   "0": "Guidance injected"

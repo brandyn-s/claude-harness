@@ -323,6 +323,12 @@ install_hooks() {
     chmod +x "$dest_dir/run-hook"
     ok "Copied ${#hooks[@]} hook files to $dest_dir/"
 
+    # The author-workstation bundle ships catalog-reading hooks (session-start,
+    # post-failure-guide); give them a catalog to read.
+    if [[ "$choice" == "2" ]]; then
+        install_environment_catalog
+    fi
+
     # Auto-wire hooks into settings.json
     if [[ ${#hook_configs[@]} -gt 0 ]]; then
         if ask_yn "Auto-wire hooks into settings.json?" "y"; then
@@ -378,6 +384,29 @@ install_agent_memory() {
     else
         info "Skipping agent-memory — skills will use source-repo fallback paths"
     fi
+}
+
+install_environment_catalog() {
+    # The advisory hooks (security-write-confirm, auto-topic-loader,
+    # subagent-stop, post-failure-guide, pre-agent-dispatch, session-start and
+    # its modules) read the environment they act on -- MCP server names, topic
+    # routes, failure-pattern files, repo paths -- from
+    # $CLAUDE_DIR/environment-catalog.json through hooks/_environment_catalog.py,
+    # never from Python. Seed that file ONCE from the shipped empty default; the
+    # operator's copy holds their real values and is never overwritten (an
+    # upgrade must not blank a filled-in catalog).
+    local dest="$CLAUDE_DIR/environment-catalog.json"
+    local src="$SCRIPT_DIR/contracts/environment-catalog.json"
+    if [[ -f "$dest" ]]; then
+        info "Keeping existing $dest (never overwritten; shape: contracts/environment-catalog.example.json)"
+        return
+    fi
+    if [[ ! -f "$src" ]]; then
+        warn "Missing $src (incomplete checkout?) -- environment catalog not seeded"
+        return
+    fi
+    cp "$src" "$dest"
+    ok "Seeded $dest (every section empty; fill it from contracts/environment-catalog.example.json)"
 }
 
 install_architecture_doc() {
@@ -509,6 +538,13 @@ if ask_yn "Install the recommended fresh-laptop core? (2 rules + 4 deterministic
         ok "Fresh-laptop core installed (2 rules + 4 hook registrations)"
     fi
     fi  # idempotency guard
+
+    # Operator overlay: seed the environment catalog the advisory hooks read.
+    # Outside the idempotency guard on purpose -- declining the starter upgrade
+    # must not skip a file that is only ever created, never overwritten.
+    if (( operator_selected )); then
+        install_environment_catalog
+    fi
 
     hook_configs=(
         'PreToolUse|Bash|PowerShell|bash-pretooluse-dispatcher.py|30'
