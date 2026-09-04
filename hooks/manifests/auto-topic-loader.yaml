@@ -9,7 +9,8 @@ enforces: []
 blocks_patterns: []
 injects: "additionalContext with the topic file: whole when it fits 8,000 chars, otherwise summary + matching sections + a one-line pointer to the file"
 modifies: null
-depends_on_files: []
+depends_on_files:
+  - contracts/environment-catalog.json
 depends_on_env:
   - CLAUDE_SESSION_ID
 exit_codes:
