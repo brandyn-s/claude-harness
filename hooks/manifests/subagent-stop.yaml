@@ -10,7 +10,8 @@ enforces:
 blocks_patterns: []
 injects: null
 modifies: null
-depends_on_files: []
+depends_on_files:
+  - contracts/environment-catalog.json
 depends_on_env: []
 exit_codes:
   "0": "Subagent stop logged"

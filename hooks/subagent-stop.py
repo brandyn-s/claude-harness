@@ -19,8 +19,9 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-# Atomic write helper
+# Atomic write helper and the environment catalog live next to this hook.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
+from _environment_catalog import load_section
 from atomic_write import atomic_write
 
 # Windows defaults stderr to cp1252; reconfigure to utf-8 so any non-ASCII in
@@ -52,8 +53,8 @@ LEARNING_MARKERS = re.compile(
 # so agent prose ABOUT those skills - lessons tables, routing arrows, retro
 # narration, prior auto-captures it re-quotes - trips LEARNING_MARKERS. These
 # shapes are unambiguously skill output. Pollution incidents this guards
-# against: msgraph.md (2026-05-28), airlock.md / infrastructure.md (60+
-# duplicated distill-table rows, 2026-06-07), and a SECOND wave (2026-06-12/13
+# against: one topic file (2026-05-28), two more (60+ duplicated distill-table
+# rows, 2026-06-07), and a SECOND wave across three topics (2026-06-12/13,
 # slack.md / architecture.md / infrastructure.md) where the agent emitted
 # distill/retro analysis in shapes the colon-only tier cell + arrow-to-
 # [confirmed] patterns missed: pipe-delimited tier cells (`| T5 |`), routing
@@ -76,32 +77,17 @@ SKILL_META_OUTPUT = re.compile(
     re.IGNORECASE,
 )
 
-# Map keywords in learnings to topic files. ORDER MATTERS: specific
-# compound keywords precede the generic ones they contain ("code-graph"
-# and "msgraph" before "graph") — first match wins in detect_topic.
+# Map keywords in learnings to topic files: the `topic_routes.by_keyword`
+# section of the environment catalog (hooks/_environment_catalog.py). Topic
+# files are environment content, so the keywords that route to them are
+# environment data; an empty map means nothing is captured. ORDER MATTERS:
+# list specific compound keywords before the generic ones they contain
+# ("code-graph" before "graph") — first match wins in detect_topic, and JSON
+# object order is preserved.
 KEYWORD_TO_TOPIC = {
-    "code-graph": "code-graph-dev.md",
-    "msgraph": "msgraph.md",
-    "crowdstrike": "crowdstrike.md",
-    "falcon": "crowdstrike.md",
-    "tenable": "tenable.md",
-    "airlock": "airlock.md",
-    "graph": "msgraph.md",
-    "entra": "msgraph.md",
-    "ramp": "ramp.md",
-    "linear": "linear.md",
-    "confluence": "confluence.md",
-    "tailscale": "tailscale.md",
-    "slack": "slack.md",
-    "terraform": "infrastructure.md",
-    "ecs": "infrastructure.md",
-    "docker": "infrastructure.md",
-    "github": "infrastructure.md",
-    "powershell": "runbook.md",
-    "azure": "runbook.md",
-    "skill": "architecture.md",
-    "hook": "architecture.md",
-    "plugin": "architecture.md",
+    str(keyword): str(topic)
+    for keyword, topic in (load_section("topic_routes").get("by_keyword") or {}).items()
+    if isinstance(keyword, str) and isinstance(topic, str) and keyword and topic
 }
 
 
@@ -110,8 +96,8 @@ def detect_topic(text):
 
     Keywords match on a LEFT word boundary only (not preceded by a word
     char or hyphen): bare-substring matching routed every "code-graph"
-    learning to msgraph.md because "graph" is a substring (2026-06-12
-    pollution). The right side stays unguarded so plurals still match
+    learning to the graph-API topic because "graph" is a substring
+    (2026-06-12 pollution). The right side stays unguarded so plurals still match
     ("skills", "hooks", "graphs"). Compound keys like "code-graph" are
     listed before the generic keys they contain; dict order is the
     priority order.
@@ -125,9 +111,9 @@ def detect_topic(text):
 
 # Maximum bytes of captured learning text to write to a topic file. Bounds
 # the worst case if a learning marker accidentally appears inside a large
-# string (e.g., a quoted error message). Prevents the 2026-05-28
-# msgraph.md pollution recurrence where a 26 KB hook-event payload was
-# appended verbatim.
+# string (e.g., a quoted error message). Prevents the 2026-05-28 topic
+# pollution recurrence where a 26 KB hook-event payload was appended
+# verbatim.
 LEARNING_SNIPPET_MAX_CHARS = 800
 
 # Every entry header used to be the hardcoded literal "Worker learning" -
@@ -174,7 +160,7 @@ def _extract_message_text(entry):
     user message IS the dispatch prompt (skill body + ARGUMENTS), which
     routinely quotes [observed]/[confirmed] vocabulary. Capturing it echoes
     the orchestrator's instructions into topic files as fake "learnings"
-    (2026-06-12 msgraph.md pollution: a /ship agent's ARGUMENTS string was
+    (2026-06-12 topic pollution: a /ship agent's ARGUMENTS string was
     appended verbatim). Learnings are what the agent SAID, not what it was
     told.
     """
@@ -545,7 +531,7 @@ def main():
                         # Dedup: every SubagentStop re-reads the full (growing)
                         # transcript, so without this the same snippet is
                         # re-appended on each stop - the 60+ duplicate blocks in
-                        # the 2026-06-07 airlock.md pollution. Skip if present.
+                        # the 2026-06-07 topic pollution. Skip if present.
                         if learning.strip() and learning.strip() in existing:
                             continue
                         atomic_write(topic_path, existing + entry)
