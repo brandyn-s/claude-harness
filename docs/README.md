@@ -21,6 +21,7 @@ time as an evaluator and the other is a historical record.
 | [sandbox-evaluation.md](sandbox-evaluation.md) | Evaluation of sandboxing options. |
 | [live-arm-measurement-plan.md](live-arm-measurement-plan.md) | Measurement design for a live A/B arm. |
 | [code-architecture-review-2026-06-07.md](code-architecture-review-2026-06-07.md) | A dated architecture review. |
+| [research-skills-root-cause.md](research-skills-root-cause.md) | Why the five research skills showed no A/B lift on Opus 4.8 or Fable 5.1: grader artifacts, fixture ceilings, noise, and a proxy the skill forbids; per-skill recommendations. |
 
 ## What is deliberately not here
 
