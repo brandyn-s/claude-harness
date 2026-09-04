@@ -60,8 +60,9 @@ The baseline-freshness gate checks the **KB tree**; `code_freshness()` checks
 the **code being run** — a stale checkout has executed old scripts against a
 fixed-upstream problem before ([references/run-history.md](references/run-history.md)).
 
-Both `diff_channels.py` and `reconcile_observed.py` run
-`code_freshness()` at startup: **STALE refuses (exit 2)** and prints the fix;
+Both `diff_channels.py` and `reconcile_observed.py --probe` run
+`code_freshness()` at startup (an offline `--observed` re-diff is exempt — it
+touches no live instrument): **STALE refuses (exit 2)** and prints the fix;
 UNKNOWN (non-git copy, failed fetch) warns and proceeds — unlike the baseline
 gate, code legitimately runs from non-git copies, and the baseline gate is the
 one protecting writes. When refused, run from a detached worktree of
@@ -136,7 +137,7 @@ git tree, failed fetch) is not fresh — a check whose instrument failed proves 
 | `CLEAN` | fact-set identical to baseline | nothing |
 | `DRIFT` | real additions/removals | → Step 3, becomes a finding |
 | `TRIGGER_FIRED` | a prose Watching trigger deviated (a load-bearing sentence vanished, or a forbidden token appeared — e.g. a `/v1/` path on an inference-hooks page) | → Step 3, a real vendor state change. The trigger's `note` says why it matters. These encode the Watching-table rows that used to be hand-checked each run (two hand-grep false zeros in run 6 alone). |
-| `OBSERVED_ONLY` | the baseline holds values from OUR telemetry that the docs never listed; they are held out of the docs diff | **informational, not a problem.** Only `reconcile_observed.py`'s Athena leg can verify them |
+| `OBSERVED_ONLY` | the baseline holds values learned from an observed inventory (Step 2c) that the docs never listed; they are held out of the docs diff | **informational, not a problem.** Only `reconcile_observed.py --observed` can verify them |
 | `NO_BASELINE` | first sight of this extractor | → Step 6, establish it **this run** |
 | `INSTRUMENT_BLIND` | extraction fell below `min_expected` | **DETECTOR BUG** → Step 2b. Never report as "the vendor removed everything." |
 | `CHANNEL_DEAD` | fetch returned but the liveness marker is absent | page moved/rewritten → re-derive the URL before trusting any diff |
@@ -148,14 +149,15 @@ plausible phenomenon is a detection bug until proven otherwise.
 
 ### A `REMOVED` row on a RECONCILED baseline: check provenance before grading it
 
-This tool reads ONE source (the docs). Step 2c merges a SECOND (our telemetry) into
-the same baseline files; per-value `observed_values` and the `OBSERVED_ONLY` verdict
-keep those values out of the docs diff (before that, every observed-only value
-reported REMOVED forever — [references/run-history.md](references/run-history.md)).
-A held-out value is **unchecked by this tool by design**, and both current ones back
-*closed-set* detector predicates, so only the Athena leg can catch a rename of them.
-Never "fix" a phantom removal by deleting the value — that re-opens the blindness
-Step 2c exists to close. Mechanics, and what to do when a baseline has
+This tool reads ONE source (the docs). Step 2c merges a SECOND (an observed
+inventory of what the deployment actually emits) into the same baseline files;
+per-value `observed_values` and the `OBSERVED_ONLY` verdict keep those values out
+of the docs diff (before that, every observed-only value reported REMOVED forever —
+[references/run-history.md](references/run-history.md)). A held-out value is
+**unchecked by this tool by design**, and both current ones back *closed-set*
+detector predicates, so only the observed leg can catch a rename of them. Never
+"fix" a phantom removal by deleting the value — that re-opens the blindness Step
+2c exists to close. Mechanics, and what to do when a baseline has
 `observed_source` but no `observed_values`: `references/adding-a-channel.md`.
 
 ### Step 2b: Fix a blind extractor in the same run
@@ -186,55 +188,54 @@ if they were endpoints. Anchor on the vendor's own declaration form —
 
 ---
 
-## Step 2c: Reconcile against LIVE data (MANDATORY when AWS is reachable)
+## Step 2c: Reconcile against LIVE data (MANDATORY when keys or an observed inventory are present)
 
-Step 2 asks the vendor. This step asks **our own pipeline** — the only source that
+Step 2 asks the vendor. This step asks **what actually happens** — the live API,
+and an inventory of what our deployment actually emitted — the only sources that
 can reveal a surface the docs omit (see *What "authoritative" means here*).
 
 ```bash
-# Full: observed inventory + canned Watching checks + reachability probes.
-# --watch is the standard form: it runs the Desktop-vocabulary, credential-pair,
-# and retention-sweep lake checks that were hand-run (and hand-broken) before.
-python3 scripts/reconcile_observed.py --kb <kb-dir> --probe --watch \
-  --save-observed /tmp/claude/observed-<date>.json
+# Probe leg: read-only GETs against the admin / analytics / rate-limit channels,
+# keyed from the Keychain. No key = SKIPPED_NO_KEY (an instrument gap), never
+# "unreachable"; every leg skipped = exit 2.
+python3 scripts/reconcile_observed.py --kb <kb-dir> --probe --json /tmp/claude/probe-<date>.json
 
-# No AWS credentials? Probes only (Keychain keys, no Athena):
-python3 scripts/reconcile_observed.py --kb <kb-dir> --probe-only
-
-# Offline re-diff of a previously saved inventory. `--observed` READS the file
-# `--save-observed` wrote (it is an INPUT — a nonexistent path is a clear
-# error, not a crash, since 2026-08-22):
+# Observed leg: an inventory of what the deployment actually emitted.
 python3 scripts/reconcile_observed.py --kb <kb-dir> --observed observed.json
 
-# The scan grew past the poll budget? Raise it -- do NOT read a timeout as "no data":
-python3 scripts/reconcile_observed.py --kb <kb-dir> --probe --timeout 1800
+# Merge UNDOCUMENTED values into their baselines with per-value provenance:
+python3 scripts/reconcile_observed.py --kb <kb-dir> --observed observed.json \
+  --update-baseline --run-date <YYYY-MM-DD>
 ```
 
-All Athena queries in a run go as **one concurrent batch** (start all, poll
-all): wall-clock is ~max of the scans, not their sum. The `--timeout` budget is
-shared by the whole batch.
+**The observed inventory is a plain JSON file** — `{"<baseline-key>": ["value", ...]}`,
+keyed by extractor key (`otel-events`, `activity-types`, `cc-analytics-fields`, ...).
+Produce it from whatever holds the deployment's data: an OTel backend's distinct
+event names, a Compliance-feed export's distinct activity types, an analytics
+export's field names. The producer is out of scope for this skill; the file format
+is the contract, and it is what keeps the script runnable (and testable) with no
+credentials. Three rules the script enforces or depends on:
 
-**`--watch` verdicts:** a MISSING baselined Desktop type (a rename — the only
-detectable signature) alarms; a credential-pair threshold crossing
-(≥100 events or ≥20 principals) alarms; an UNKNOWN retention-sweep
-`skip_reason` (especially `settings_invalid_key_set`, the #41458 signature)
-alarms. The fleet-norm `period_days=30/used_default=true` deliberately does
-NOT (finding #23's correction). New unbaselined Desktop types are REPORTED
-for reading, never auto-alarmed — check appearances by reading names
-(finding #22). Lake naming/columns: `references/athena-lake-contract.md`.
-
-**A timeout is not "no data" — recover it.** Budget is `DEFAULT_ATHENA_TIMEOUT_S`
-(900 s; the largest scan runs ~460 s). On timeout the query is usually **still
-RUNNING**: the error prints its id and poll command. Never let a timeout stand as a
-live-leg result — it is the only leg that sees what the docs omit.
+- **Scope the census to one product and a bounded window before exporting.** The
+  `otel-events` baseline documents Claude *Code*; an inventory that mixes in
+  Claude Desktop's vocabulary reports every `desktop_*` name UNDOCUMENTED and, with
+  `--update-baseline`, files another product's vocabulary under this one. An
+  unbounded distinct-name census once returned 12,431 "events", most of them log
+  lines ([references/run-history.md](references/run-history.md)).
+- **A value that cannot be an identifier is not a fact.** Anything with a space or
+  over 80 characters is dropped and COUNTED on stderr, never written to a baseline.
+- **Bare OTel event names are normalised to the documented form** (`api_error` →
+  `claude_code.api_error`) before comparison; a raw set difference would report
+  every observed event UNDOCUMENTED.
 
 **Read these verdicts correctly — they are not symmetric:**
 
 | Verdict | Meaning | Action |
 |---|---|---|
-| `UNDOCUMENTED` | live in our data, absent from the baseline | **the detector is blind to it.** Add to the baseline; consider whether it warrants a detector. |
+| `UNDOCUMENTED` | observed, absent from the baseline | **the detector is blind to it.** Add to the baseline; consider whether it warrants a detector. |
 | `DOC_ONLY` | documented, never observed in our org | **informational, NOT a gap.** A type the product supports but we never generate is not leverage left on the table — counting it as a gap inflates every coverage denominator. |
-| `RECONCILED` | observed ⊆ baseline | nothing to do. |
+| `RECONCILED` | observed set equals the baseline | nothing to do. |
+| `NO_BASELINE` | no baseline file for that key | establish it with the differ first (Step 6); an inventory cannot be graded against nothing. |
 
 Two hard rules on the probe leg:
 
@@ -250,8 +251,14 @@ Two hard rules on the probe leg:
    reports `SKIPPED_NO_KEY` (an instrument gap) and never as unreachable.
 
 If `--update-baseline` is passed, `UNDOCUMENTED` values are merged into their
-baselines and the file records `observed_source` — provenance matters, because a
-value learned from our telemetry is not a vendor claim.
+baselines with per-value provenance (`observed_values`, `observed_source`) — a
+value learned from observed data is not a vendor claim, and the docs differ holds
+those values out of its comparison (`OBSERVED_ONLY`). Re-run without the flag
+afterwards and expect exit 0.
+
+**Exit codes:** `0` reconciled/informational · `1` UNDOCUMENTED found · `2`
+instrument problem (no leg requested, unreadable inventory, every probe skipped
+for want of a key, stale code on the probe leg).
 
 ---
 
@@ -558,10 +565,11 @@ Two rules keep it honest:
   pages say? A filter returns a subset of what it was pointed at, so the differ is
   structurally incapable of finding anything the docs OMIT — live activity types
   and an already-consumed OTel event have sat outside the baselines that way
-  ([references/run-history.md](references/run-history.md)). **Our own telemetry is
-  the second authoritative source**, and for "what does this org actually emit" it
-  is the better one: docs describe the product, telemetry describes us. Run
-  `scripts/reconcile_observed.py` (Step 2c) so the diff is bidirectional.
+  ([references/run-history.md](references/run-history.md)). **An inventory of what
+  our deployment actually emits is the second authoritative source**, and for
+  "what does this org actually emit" it is the better one: docs describe the
+  product, the observed inventory describes us. Run
+  `scripts/reconcile_observed.py --observed` (Step 2c) so the diff is bidirectional.
 - **There is no machine-readable spec to fall back on.** The OpenAPI candidates
   404 and the official SDK's `api.md` declares no Admin, Analytics, or Compliance
   paths, so doc prose genuinely is the only vendor source for our surfaces. That
@@ -586,9 +594,6 @@ vendor changes), and what a real drift run looks like — are in
 
 - `references/channel-map.md` — what each channel is, and the extractor rationale
 - `references/adding-a-channel.md` — how to add a channel or extractor safely
-- `references/athena-lake-contract.md` — lake naming/columns the queries assume
-  (bare event names, `sweep_*` columns, `principal`; read BEFORE hand-authoring
-  any Athena query)
 - `references/run-history.md` — dated measurements behind the rules above
 - `scripts/diff_channels.py` — compatibility shim; the ENGINE lives at
   `skills/_shared/endpoint-drift/diff_engine.py` and has a second consumer,
@@ -597,6 +602,10 @@ vendor changes), and what a real drift run looks like — are in
 - `scripts/channel_specs.py` — the channel + extractor + trigger registry
   (data, not logic; dataclasses import from `_shared/endpoint-drift/spec_types.py`)
 - `tests/test_diff_channels.py` — fixture tests that prove the differ before use
+- `scripts/reconcile_observed.py` — Step 2c: the Keychain-keyed probe leg and the
+  `--observed` inventory leg (a plain JSON contract; no data-store dependency)
+- `tests/test_reconcile_observed.py` — the probe-safety contract (GET only, 400 =
+  REACHABLE, missing key = SKIPPED) and the inventory contract, with no credentials
 
 **Extractor authoring rule:** never guard an open vocabulary with a closed
 alternation (five extractors shared that one defect —

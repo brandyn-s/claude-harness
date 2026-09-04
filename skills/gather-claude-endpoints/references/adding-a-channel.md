@@ -99,10 +99,10 @@ no detector, because it reports confidently either way.
 
 ## Baseline provenance — two sources, one file
 
-`diff_channels.py` reads the **docs**. `reconcile_observed.py` (Step 2c) merges
-what **our telemetry** observes into the *same* baseline files. Those two sources
-disagree by construction: a value only Athena sees can never appear in a docs
-extraction.
+`diff_channels.py` reads the **docs**. `reconcile_observed.py --observed` (Step 2c)
+merges what an **observed inventory** of the deployment reports into the *same*
+baseline files. Those two sources disagree by construction: a value only the
+observed inventory sees can never appear in a docs extraction.
 
 Baselines therefore carry per-value provenance:
 
@@ -110,7 +110,7 @@ Baselines therefore carry per-value provenance:
 {
   "values": ["...", "claude_code.subagent_completed"],
   "observed_values": ["claude_code.subagent_completed"],
-  "observed_source": "docs + live-observed reconciliation"
+  "observed_source": "docs + observed-inventory reconciliation"
 }
 ```
 
@@ -134,10 +134,10 @@ diffed. Rules that follow from that, each with a test in `test_diff_channels.py`
 
 **What a held-out value costs.** It is unchecked by this tool, permanently. Both
 current ones (`claude_code.subagent_completed`, and 24 activity types incl.
-`claude_file_uploaded`) feed **closed-set** predicates in live detectors
-(`otel_channel_detect.py:125`, `activity_signal_detect.py:64`) — a vendor rename
-*breaks* those rather than being absorbed, and only the Athena leg can notice. That
-is why "observed-only staleness" is a Watching trigger and not a diff.
+`claude_file_uploaded`) feed **closed-set** predicates in live detectors downstream
+— a vendor rename *breaks* those rather than being absorbed, and only the observed
+leg (a fresh inventory diffed with `--observed`) can notice. That is why
+"observed-only staleness" is a Watching trigger and not a diff.
 
 ## The baseline you diff must be the NEWEST one, not just a valid one
 
