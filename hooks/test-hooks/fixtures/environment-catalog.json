@@ -1,0 +1,172 @@
+{
+  "_comment": "Test fixture: the environment the hook tests assert against (the values the hooks hard-coded before 2026-09-04). conftest.py points CLAUDE_ENVIRONMENT_CATALOG here for every test and subprocess. Vendor names are allowed in this file; they are not allowed in hook sources (test_environment_catalog_guard.py).",
+  "schema_version": 1,
+  "security_write_confirm": {
+    "servers": {
+      "mcp__remote-crowdstrike__": {
+        "label": "CrowdStrike",
+        "write_indicators": ["assign", "close", "update", "create", "delete", "contain", "uncontain", "hide", "suppress", "add", "remove", "set", "block", "approve", "deny", "modify", "edit", "patch"]
+      },
+      "mcp__remote-airlock__": {
+        "label": "Airlock",
+        "write_indicators": ["block", "approve", "deny", "add", "remove", "update", "create", "delete", "modify", "set"]
+      },
+      "mcp__remote-tenable__": {
+        "label": "Tenable",
+        "write_indicators": ["launch", "create", "update", "delete", "modify", "scan", "schedule", "pause", "resume", "stop"]
+      },
+      "mcp__remote-msgraph__": {
+        "label": "MS Graph",
+        "write_indicators": ["mutate", "create", "update", "delete", "patch", "add", "remove", "set", "assign", "revoke"]
+      },
+      "mcp__msgraph__": {
+        "label": "MS Graph",
+        "write_indicators": ["mutate", "create", "update", "delete", "patch", "add", "remove", "set", "assign", "revoke"]
+      },
+      "mcp__slack-user__": {
+        "label": "Slack",
+        "write_indicators": ["send_message", "send", "add_message", "post", "update_message", "delete_message", "set_channel_topic", "set_channel_purpose", "add_reaction", "schedule_message", "create_canvas", "update_canvas"]
+      },
+      "mcp__linear-server__": {
+        "label": "Linear",
+        "write_indicators": ["save_issue", "save_status_update", "save_comment", "save_project", "save_milestone", "save_customer", "save_customer_need", "save_initiative", "save_document", "create_issue_label", "create_attachment", "create_record_comment", "delete_attachment", "delete_comment", "delete_customer", "delete_customer_need", "delete_status_update", "create_issue", "update_issue"]
+      },
+      "mcp__remote-tailscale__": {
+        "label": "Tailscale",
+        "write_indicators": ["set_", "update_", "create_", "delete_", "accept_", "resend_", "revoke", "rotate", "authorize", "expire"]
+      },
+      "mcp__tailscale__": {
+        "label": "Tailscale",
+        "write_indicators": ["set_", "update_", "create_", "delete_", "accept_", "resend_", "revoke", "rotate", "authorize", "expire"]
+      },
+      "mcp__remote-confluence__": {
+        "label": "Confluence",
+        "write_indicators": ["create", "update", "delete"]
+      },
+      "mcp__confluence__": {
+        "label": "Confluence",
+        "write_indicators": ["create", "update", "delete"]
+      },
+      "mcp__netcloud__": {
+        "label": "NetCloud",
+        "write_indicators": ["create_", "update_", "delete_", "reboot"]
+      },
+      "mcp__compliance-access-framework__": {
+        "label": "Access Framework",
+        "write_indicators": ["create", "invite", "link", "sync", "assign", "add", "register", "provision", "remove", "update"]
+      }
+    },
+    "operation_rules": [
+      {
+        "label": "Slack",
+        "op_prefix": "slack_",
+        "write_indicators_from": ["mcp__slack-user__"]
+      },
+      {
+        "label": "Ramp",
+        "op_prefix": "ramp_",
+        "write_indicators": ["edit_", "approve", "lock_or_unlock", "activate", "repayment", "match_user"]
+      },
+      {
+        "label": "Linear",
+        "op_names": ["save_issue", "save_status_update", "save_comment", "save_project", "save_milestone", "save_customer", "save_customer_need", "save_initiative", "save_document", "create_issue_label", "create_attachment", "create_record_comment", "delete_attachment", "delete_comment", "delete_customer", "delete_customer_need", "delete_status_update"],
+        "write_indicators_from": ["mcp__linear-server__"]
+      }
+    ],
+    "wrapper_tools": {
+      "mcp__msgraph__call_tool": {"label": "MS Graph", "write_indicators_from": ["mcp__msgraph__"]},
+      "mcp__remote-msgraph__call_tool": {"label": "MS Graph", "write_indicators_from": ["mcp__remote-msgraph__"]},
+      "mcp__tenable__call_tool": {"label": "Tenable", "write_indicators_from": ["mcp__remote-tenable__"]},
+      "mcp__airlock__call_tool": {"label": "Airlock", "write_indicators_from": ["mcp__remote-airlock__"]},
+      "mcp__security-remix__execute_tool": {
+        "label": "Security Remix",
+        "write_indicators_from": ["mcp__remote-crowdstrike__", "mcp__remote-airlock__", "mcp__remote-tenable__", "mcp__msgraph__"]
+      }
+    }
+  },
+  "topic_routes": {
+    "by_tool_prefix": {
+      "mcp__crowdstrike__": "crowdstrike.md",
+      "mcp__tenable__": "tenable.md",
+      "mcp__airlock__": "airlock.md",
+      "mcp__msgraph__": "msgraph.md",
+      "mcp__confluence__": "confluence.md",
+      "mcp__tailscale__": "tailscale.md",
+      "mcp__security-remix__": "security.md",
+      "mcp__slack-user__": "slack.md",
+      "mcp__linear-server__": "linear.md",
+      "mcp__azure-automation__": "azure-automation-hub.md",
+      "mcp__netcloud__": "netcloud.md",
+      "mcp__hologram__": "hologram.md",
+      "mcp__firecrawl__": "firecrawl.md"
+    },
+    "by_keyword": {
+      "code-graph": "code-graph-dev.md",
+      "msgraph": "msgraph.md",
+      "crowdstrike": "crowdstrike.md",
+      "falcon": "crowdstrike.md",
+      "tenable": "tenable.md",
+      "airlock": "airlock.md",
+      "graph": "msgraph.md",
+      "entra": "msgraph.md",
+      "ramp": "ramp.md",
+      "linear": "linear.md",
+      "confluence": "confluence.md",
+      "tailscale": "tailscale.md",
+      "slack": "slack.md",
+      "terraform": "infrastructure.md",
+      "ecs": "infrastructure.md",
+      "docker": "infrastructure.md",
+      "github": "infrastructure.md",
+      "powershell": "runbook.md",
+      "azure": "runbook.md",
+      "skill": "architecture.md",
+      "hook": "architecture.md",
+      "plugin": "architecture.md"
+    }
+  },
+  "failure_patterns": {
+    "servers": {
+      "crowdstrike": "crowdstrike-patterns.md",
+      "tenable": "tenable-patterns.md",
+      "airlock": "airlock-patterns.md",
+      "msgraph": "msgraph-patterns.md",
+      "confluence": "confluence-fedramp-patterns.md",
+      "tailscale": "tailscale-patterns.md",
+      "slack": "slack-patterns.md",
+      "ramp": "ramp-patterns.md",
+      "linear": "linear-server-patterns.md",
+      "tavily": "tavily-patterns.md",
+      "github": "github-patterns.md",
+      "playwright": "playwright-patterns.md",
+      "prowler": "prowler-patterns.md",
+      "litellm": "litellm-patterns.md"
+    },
+    "hints": {
+      "LIMIT": "Ramp SQL has ~100-row limit, use LIMIT/OFFSET or GROUP BY"
+    }
+  },
+  "agent_dispatch": {
+    "auth_mcp_keywords": ["crowdstrike", "falcon", "tenable", "airlock", "msgraph", "graph_request", "graph_mutate", "remote-tenable", "remote-crowdstrike", "remote-airlock", "security-remix"],
+    "protected_repo_paths": ["documents/github/mcp-servers", "documents/github/mcp-infra", "documents/github/code-search", "documents/github/code-graph", "documents/knowledge-base", ".claude"]
+  },
+  "expected_servers": [
+    "arxiv-mcp-server", "ashby", "aws-athena", "azure-automation", "claude-compliance", "claude_platform",
+    "code-graph", "code-search", "context7-docs", "exa", "hologram", "lucid-admin", "memory-search",
+    "netcloud", "remote-tailscale", "slack-user", "websets",
+    "lucid-mcp", "prowler", "ramp", "remote-airlock", "remote-ashby", "remote-confluence",
+    "remote-crowdstrike", "remote-lever", "remote-msgraph", "remote-tenable", "security-remix",
+    "awslabs.billing-cost-management-mcp-server", "compliance-access-framework", "firecrawl",
+    "linear-server", "mailbox-mcp", "tavily", "xai"
+  ],
+  "repo_paths": {
+    "claude-config": {"path": "~/.claude", "session_sync": true},
+    "knowledge-base": {"path": "~/Documents/knowledge-base", "session_sync": true},
+    "mcp-servers": "~/Documents/GitHub/mcp-servers",
+    "mcp-infra": "~/Documents/GitHub/mcp-infra",
+    "code-search": "~/Documents/GitHub/code-search"
+  },
+  "session_start": {
+    "config_repo": {"label": "claude-config", "path": "~/.claude"}
+  }
+}
