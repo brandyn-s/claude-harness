@@ -41,6 +41,7 @@ CONVERTED = [
     "session_start_modules/repo_sync.py",
     "session_start_modules/index_staleness.py",
     "session_start_modules/code_search_stale_project_guard.py",
+    "session_start_modules/env_loader.py",
 ]
 
 # Vendor / gateway server names, topic files and author repo paths. Matched

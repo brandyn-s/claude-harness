@@ -168,5 +168,24 @@
   },
   "session_start": {
     "config_repo": {"label": "claude-config", "path": "~/.claude"}
+  },
+  "env_exports": {
+    "_comment": "The variables env_loader.py hard-coded before 2026-09-04 (PYTHON_EXE carried a Windows AppData interpreter path there when os.name == 'nt'; a Windows catalog can say %LOCALAPPDATA%/Programs/Python/Python312/python.exe).",
+    "values": {
+      "PYTHON_EXE": "python3",
+      "AIRLOCK_SERVER": "airlock.example.internal:3129",
+      "AIRLOCK_BLOCKLIST_GLOBAL": "0000000000",
+      "CS_BASE_URL": "api.laggar.gcw.crowdstrike.com",
+      "CS_HYGIENE": "~/Documents/CrowdStrike/cs_hygiene.py",
+      "TENABLE_URL": "https://fedcloud.tenable.com",
+      "GRAPH_TENANT": "11111111-1111-1111-1111-111111111111",
+      "GRAPH_CLOUD": "gcchigh",
+      "CMMC_DIR": "~/Documents/CMMC/assessment",
+      "STIG_LIB": "~/Downloads/U_SRG-STIG_Library_October_2025",
+      "RAMP_SQL_LIMIT": "100",
+      "CONFLUENCE_SPACES": "EXAMPLE,DOCS",
+      "CONFLUENCE_EMAIL": "security@example.com"
+    },
+    "secrets": ["CONFLUENCE_API_TOKEN"]
   }
 }

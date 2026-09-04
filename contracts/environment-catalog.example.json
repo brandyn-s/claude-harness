@@ -93,5 +93,16 @@
   },
   "session_start": {
     "config_repo": {"label": "claude-settings", "path": "~/.claude"}
+  },
+  "env_exports": {
+    "_comment": "Variables session_start_modules/env_loader.py exports into every session via CLAUDE_ENV_FILE. `~` and `$VAR` expand at write time. secrets holds NAMES only: each resolves from an already-set variable, then the macOS Keychain (bin/keychain-seed).",
+    "values": {
+      "EDR_BASE_URL": "https://api.edr.example.com",
+      "SCANNER_URL": "https://scanner.example.com",
+      "DIRECTORY_TENANT": "00000000-0000-0000-0000-000000000000",
+      "ASSESSMENT_DIR": "~/Documents/assessments",
+      "WIKI_SPACES": "DOCS,RUNBOOKS"
+    },
+    "secrets": ["WIKI_API_TOKEN"]
   }
 }

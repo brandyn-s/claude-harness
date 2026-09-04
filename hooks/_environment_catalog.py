@@ -29,6 +29,9 @@ Sections (see contracts/environment-catalog.example.json for every one in use):
   repo_paths               friendly name -> path (string) or
                            {"path": ..., "session_sync": bool}
   session_start            config_repo: {"label": ..., "path": ...} or null
+  env_exports              values (NAME -> value written to CLAUDE_ENV_FILE at
+                           session start; `~` and `$VAR` expand) and secrets
+                           (variable NAMES resolved at write time, never values)
 
 Fail-open by design: these hooks are advisory, so a missing layer is skipped
 silently, a malformed or mistyped one is skipped with a one-line stderr note,
@@ -57,6 +60,7 @@ SECTIONS: dict[str, type] = {
     "expected_servers": list,
     "repo_paths": dict,
     "session_start": dict,
+    "env_exports": dict,
 }
 
 _HERE = Path(__file__).resolve().parent
