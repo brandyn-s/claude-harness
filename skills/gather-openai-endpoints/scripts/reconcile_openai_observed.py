@@ -4,9 +4,9 @@
 The docs differ (diff_openai_channels.py) asks the vendor's public pages; this
 script asks the live APIs and (optionally) our own monitor's inventory — the
 only sources that can reveal a surface the docs omit. It is the OpenAI
-counterpart of gather-claude-endpoints/scripts/reconcile_observed.py, with the
-Athena leg replaced by (a) a bounded keyed probe set and (b) a generic
---observed JSON input extracted from the OpenAI Monitor pipeline.
+counterpart of gather-claude-endpoints/scripts/reconcile_observed.py: (a) a
+bounded keyed probe set and (b) a generic --observed JSON input extracted from
+the OpenAI Monitor pipeline.
 
 Probe leg (--probe):
   - GET only, limit=1, ~12 requests total. probe_endpoint() raises UnsafeProbe

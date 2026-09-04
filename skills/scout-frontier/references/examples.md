@@ -5,7 +5,7 @@ Example 1 (code intelligence engines vs our code-graph) stays in SKILL.md.
 ### Example 2: Observability / telemetry storage
 
 ```
-/scout-frontier observability storage vs our OTel + Athena pipeline
+/scout-frontier observability storage vs an OTel + Athena pipeline
 ```
 
 Profiles incumbent (table + lookup + behavior + streaming). Searches for paradigm-distinct: column-stores (ClickHouse), trace graphs (Tempo's exemplar+span graph model), eBPF-driven runtime indexes, learned anomaly detection on logs. Reports findings grouped by tier.

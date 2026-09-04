@@ -78,7 +78,6 @@ Load only topic context required by the delegated task. Common routes:
 - Security, STIG, alerts, vulnerabilities: `security.md` and the named tool.
 - AWS, Terraform, ECS, CI/CD: `infrastructure.md`.
 - Identity, Entra, Microsoft Graph: `msgraph.md`.
-- Claude usage, transcripts, OTel: `claude-monitoring.md`.
 - Skills, hooks, rules, Claude Code config: `architecture.md`.
 - Slack, Linear, Box, Confluence, Tailscale: the matching topic file.
 

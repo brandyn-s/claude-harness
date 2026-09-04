@@ -69,10 +69,10 @@ OTEL = ChannelSpec(
             # ANY single-segment token, which filed the 4 single-segment TRACE
             # SPAN names (claude_code.{tool,hook,llm_request,interaction}) as
             # events — measured 2026-08-22: the events baseline said "30, all
-            # documented" while the reconcile's Athena leg observed only 26,
-            # and the 4 "documented-but-unobserved" were exactly those spans
-            # (spans land in cowork_otel_traces, never in event_name). The
-            # declaration marker yields the observed 26 precisely.
+            # documented" while the observed inventory held only 26, and the 4
+            # "documented-but-unobserved" were exactly those spans (a span is a
+            # trace signal; it never appears as an event name). The declaration
+            # marker yields the observed 26 precisely.
             pattern=r"\*\*Event Name\*\*:\s*`(claude_code\.[a-z_]+)`",
             min_expected=20,
             note="Event types are the audit-grade surface. New event = new detection opportunity.",
@@ -81,9 +81,9 @@ OTEL = ChannelSpec(
             key="otel-trace-spans",
             # The span vocabulary from the traces (beta) section, declared as
             # bold-backtick headings (`**`claude_code.tool.execution`**`).
-            # Separate fact-set on purpose: 1,444,269 spans are live in
-            # cowork_otel_traces (finding #4, retracted), and a span rename is
-            # invisible to both the metrics and events sets. Measured
+            # Separate fact-set on purpose: 1,444,269 spans were live in a
+            # deployment's trace sink (finding #4, retracted), and a span rename
+            # is invisible to both the metrics and events sets. Measured
             # 2026-08-22: 6 values, pairwise disjoint with both other sets.
             pattern=r"^\*\*`(claude_code\.[a-z_.]+)`\*\*",
             min_expected=4,

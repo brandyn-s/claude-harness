@@ -14,6 +14,8 @@ must_happen:
 - Every finding carries exactly one verdict from ADOPT/TRIAL/DEFER/REJECT
 - Baselines are refreshed only AFTER drift is graded
 - Nothing is auto-written except baseline files
+- Step 2c reads a plain JSON inventory (an object of baseline-key to value list) and/or runs Keychain-keyed GET probes; nothing in the skill queries a data store
+- A missing Keychain key reports SKIPPED_NO_KEY (an instrument gap), never "unreachable"
 deterministic:
 - frontmatter_equals:
     name: gather-claude-endpoints
@@ -36,5 +38,15 @@ deterministic:
   - Never scope to one module
   - Verdict
   - Worked example
+  # observed leg (Step 2c) -- a file contract replaced the data-store query leg 2026-09-04
+  - '--observed'
+  - UNDOCUMENTED
+  - DOC_ONLY
+  - SKIPPED_NO_KEY
+  - UnsafeProbe
+- body_not_contains:
+  - Athena
+- script_exists: scripts/reconcile_observed.py
+- script_runs: python3 scripts/reconcile_observed.py --help
 - references_resolve: true
 - examples_count: '>=2'

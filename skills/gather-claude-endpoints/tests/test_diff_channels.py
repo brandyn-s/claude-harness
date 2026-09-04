@@ -108,7 +108,7 @@ def test_metrics_events_and_spans_are_pairwise_disjoint_fact_sets():
     Spans are the set that DID leak before 2026-08-22: the events pattern
     captured any single-segment token, filing claude_code.{tool,hook,
     llm_request,interaction} as events (baseline said 30 'all documented';
-    Athena observed 26 — the 4 unobserved were exactly the spans)."""
+    the observed inventory held 26 — the 4 unobserved were exactly the spans)."""
     metrics = dc.extract(FIXTURE_OTEL, _relaxed("otel-metrics"))
     events = dc.extract(FIXTURE_OTEL, _relaxed("otel-events"))
     spans = dc.extract(FIXTURE_OTEL, _relaxed("otel-trace-spans"))
@@ -282,7 +282,7 @@ def test_observed_only_value_is_not_reported_removed(tmp_path):
     relaxed = _otel_events_only(BY_KEY["otel"])
     dc.process(relaxed, tmp_path, fx, "2026-07-27", update=True)
 
-    # Simulate reconcile_observed.py merging a value only Athena can see.
+    # Simulate reconcile_observed.py merging a value only an observed inventory can see.
     bp = dc.baseline_path(tmp_path, "otel-events")
     data = json.loads(bp.read_text())
     data["values"] = sorted(data["values"] + ["claude_code.subagent_completed"])
@@ -722,7 +722,7 @@ def test_sources_log_reports_channels_with_no_row(tmp_path):
 
 # --- code freshness gate (run 6) ----------------------------------------------
 # Run 6 initially executed a 143-commit-stale ~/.claude and reproduced the exact
-# Athena-budget bug PR #1960 had already fixed. Same fake-git approach as the
+# reconcile-leg budget bug PR #1960 had already fixed. Same fake-git approach as the
 # baseline gate's tests.
 
 
