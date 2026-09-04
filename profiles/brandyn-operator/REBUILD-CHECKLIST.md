@@ -11,27 +11,20 @@ authenticated, `uv`, `rg`, `jq`, `gitleaks`, `semgrep`, `trivy`, `node`.
 
 ## 0. Secrets
 
-The operator keychain `backup-cli` holds items whose service name is the bare
-variable name (`TAVILY_API_KEY`). The session-start loader accepts that form
-since 2026-09-03; `bin/keychain-seed` still writes `claude/<NAME>`, and both
-resolve. Two housekeeping steps first:
+API keys live in the **login keychain** as bare-named generic passwords
+(`ANTHROPIC_API_KEY`, `TAVILY_API_KEY`, `EXA_API_KEY`, `FIRECRAWL_API_KEY`, ...).
+The former custom `backup-cli` keychain is retired: a keychain file in Downloads
+or iCloud Drive wanders, syncs, and locks itself to non-interactive callers
+(2026-09-03). Verify presence with metadata only; never print a value:
 
 ```bash
-# The keychain file is in ~/Downloads, which cleanup tools and sync clients treat as disposable.
-mv ~/Downloads/backup-cli.keychain-db ~/Library/Keychains/
-security list-keychains -d user -s \
-  ~/Library/Keychains/login.keychain-db \
-  ~/Library/Keychains/backup-cli.keychain-db
-security list-keychains -d user                     # both paths listed
-
-# Metadata only; never print a value into a transcript.
-for k in EXA_API_KEY FIRECRAWL_API_KEY TAVILY_API_KEY XAI_API_KEY ANTHROPIC_API_KEY VOYAGE_API_KEY; do
+for k in ANTHROPIC_API_KEY TAVILY_API_KEY EXA_API_KEY FIRECRAWL_API_KEY; do
   security find-generic-password -s "$k" >/dev/null 2>&1 && echo "present: $k" || echo "ABSENT:  $k"
 done
 ```
 
-`OPENAI_API_KEY` is absent. Roundtable requires it; gather-vendor and
-scout-skills use it for their GPT legs. Add it only if you want those.
+Hooks and harnesses read keys with `security find-generic-password -s NAME -w`
+into the subprocess environment only.
 
 ## 1. The harness checkout
 
@@ -158,6 +151,14 @@ macOS TCC gates `~/Documents`; grant the terminal access when prompted, and
 keep both clones out of iCloud sync.
 
 ## 5. Skills
+
+Invoke the skills you rely on **explicitly**. The 2026-09-04 faithful trigger check
+ran 30 real sessions and the model reached the expected skill by description in
+only 8 of them, preferring to act directly; description routing is a convenience,
+not a contract. Name the skill: `/superplan`, `/validate-changes`, `/ship`,
+`/capture`, `/distill`, `/semgrep`, `/threat-model`, `/interview`, and put the
+same list in a project's `CLAUDE.md` where that project's work depends on them.
+
 
 From inside a Claude Code session:
 

@@ -1,4 +1,6 @@
-"""PreToolUse:Read hook: deterministically enforce Read(...) permissions.deny rules.
+"""PreToolUse:Read hook: deterministically deny Read-tool access to secret paths.
+
+Enforces a static default list plus any Read(...) permissions.deny rules present.
 
 Compensating control for anthropics/claude-code #88795 (+ #88770): on v2.1.239
 with defaultMode "auto", Read-tool deny rules in settings.json are silently not
@@ -30,6 +32,23 @@ import sys
 DEFAULT_SETTINGS_FILES = [
     os.path.expanduser("~/.claude/settings.json"),
     os.path.expanduser("~/.claude/settings.local.json"),
+]
+
+# Static fallback (2026-09-04). Read() rules in permissions.deny make Claude Code
+# prompt on every Bash command whose read target it cannot resolve before running
+# (`cd dir && rg pattern file`), so the fresh-laptop profile no longer ships them.
+# The Bash side is covered by the sandbox's filesystem.denyRead; this list covers
+# the Read tool. Any Read() rules that DO exist in settings are still honoured in
+# addition. CLAUDE_READ_DENY_PATTERNS (os.pathsep-separated) replaces the defaults.
+DEFAULT_READ_DENY_PATTERNS = [
+    "~/.ssh/**",
+    "~/.aws/**",
+    "~/.config/gcloud/**",
+    "**/.env",
+    "**/.env.*",
+    "**/credentials.json",
+    "**/.credentials.json",
+    "**/secrets.*",
 ]
 
 
@@ -91,6 +110,11 @@ def load_read_deny_patterns():
         for rule in deny:
             if isinstance(rule, str) and rule.startswith("Read(") and rule.endswith(")"):
                 patterns.append(rule[5:-1].strip())
+    override = os.environ.get("CLAUDE_READ_DENY_PATTERNS")
+    if override:
+        patterns.extend(p for p in override.split(os.pathsep) if p)
+    else:
+        patterns.extend(DEFAULT_READ_DENY_PATTERNS)
     return patterns
 
 
@@ -138,9 +162,9 @@ def main():
         for pat in patterns:
             if path_matches(file_path, pat):
                 print(
-                    f"[read-deny-guard] BLOCKED: {file_path} matches permissions.deny rule "
-                    f"Read({pat}). Deny rules are not enforced by the permission engine "
-                    "on this build (claude-code #88795); this hook enforces them. "
+                    f"[read-deny-guard] BLOCKED: {file_path} matches secret-path pattern "
+                    f"Read({pat}). The fresh core enforces its secret-path list here (Read "
+                    "tool) and in the sandbox (Bash) instead of shipping Read() deny rules that prompt. "
                     "If this file is genuinely needed, ask the user for explicit "
                     "approval and access it through an approved path.",
                     file=sys.stderr,

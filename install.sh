@@ -256,10 +256,11 @@ install_hooks() {
     local hook_dirs=()
     local hook_configs=()
     case "$choice" in
-        1) hooks=("${DISPATCHER_HOOKS[@]}" config-guard.py result-injection-guard.py protected-repos.json)
+        1) hooks=("${DISPATCHER_HOOKS[@]}" config-guard.py result-injection-guard.py read-deny-guard.py protected-repos.json)
            hook_configs=(
                'PreToolUse|Bash|PowerShell|bash-pretooluse-dispatcher.py|30'
                'PreToolUse|Write|Edit|config-guard.py|30'
+               'PreToolUse|Read|read-deny-guard.py|30'
                'PostToolUse|mcp__.*|result-injection-guard.py|30'
            ) ;;
         2) hooks=(loop-detector.py result-injection-guard.py "${DISPATCHER_HOOKS[@]}"
@@ -438,7 +439,7 @@ fi
 ensure_runtime_floor
 
 # Quick install option
-if ask_yn "Install the recommended fresh-laptop core? (2 rules + 3 deterministic hooks)" "y"; then
+if ask_yn "Install the recommended fresh-laptop core? (2 rules + 4 deterministic hooks)" "y"; then
     mkdir -p "$CLAUDE_DIR/rules" "$CLAUDE_DIR/hooks"
 
     # The starter-kit manifest. SINGLE SOURCE OF TRUTH for both the collision
@@ -470,6 +471,7 @@ if ask_yn "Install the recommended fresh-laptop core? (2 rules + 3 deterministic
         bash_policy_tables.py
         "${DISPATCHER_HOOKS[@]}"
         config-guard.py
+        read-deny-guard.py
         result-injection-guard.py
     )
     if (( operator_selected )); then
@@ -502,15 +504,16 @@ if ask_yn "Install the recommended fresh-laptop core? (2 rules + 3 deterministic
     chmod +x "$CLAUDE_DIR/hooks/run-hook"
 
     if (( operator_selected )); then
-        ok "Fresh-laptop core + operator layer installed (3 rules + 6 hook registrations)"
+        ok "Fresh-laptop core + operator layer installed (3 rules + 7 hook registrations)"
     else
-        ok "Fresh-laptop core installed (2 rules + 3 hook registrations)"
+        ok "Fresh-laptop core installed (2 rules + 4 hook registrations)"
     fi
     fi  # idempotency guard
 
     hook_configs=(
         'PreToolUse|Bash|PowerShell|bash-pretooluse-dispatcher.py|30'
         'PreToolUse|Write|Edit|config-guard.py|30'
+        'PreToolUse|Read|read-deny-guard.py|30'
         'PostToolUse|mcp__.*|result-injection-guard.py|30'
     )
     if (( operator_selected )); then

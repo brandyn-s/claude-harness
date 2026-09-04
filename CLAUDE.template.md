@@ -46,3 +46,12 @@ the prompt/output secret hooks. Optional skills are invoked with `/skill-name`;
 - Don't add features beyond what was asked
 - Don't add comments to code you didn't change
 - Don't create documentation files unless explicitly asked
+
+## Invoke skills explicitly
+
+Description routing is unreliable in practice (measured 2026-09-04: 8 of 30 real
+sessions reached the expected skill on their own). Name the skill you want:
+`/superplan` before non-trivial changes, `/validate-changes` before claiming
+tests pass, `/ship` to deliver, `/capture` and `/distill` for knowledge work,
+`/semgrep` and `/threat-model` for security review, `/interview` to pin
+requirements. Keep this list short and specific to the project.
