@@ -1,0 +1,14 @@
+{
+  "_comment": [
+    "Pairs of skills whose model-visible listing text (description + when_to_use) is allowed",
+    "to exceed the content-word Jaccard threshold enforced by",
+    "scripts/test_skill_description_quality.py. Each entry needs a one-line reason; the test",
+    "also fails if an entry names a missing skill or no longer exceeds the threshold, so",
+    "stale entries cannot linger.",
+    "Measured 2026-09-03 on 78 model-visible skills: no pair exceeded 0.6. Nearest were",
+    "gather-claude-endpoints vs gather-openai-endpoints (0.554, deliberately parallel",
+    "vendor-drift skills) and mega-capture vs mega-distill (0.417)."
+  ],
+  "threshold": 0.6,
+  "pairs": []
+}
