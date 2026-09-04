@@ -99,18 +99,15 @@ def main():
     filenames = []
 
     # Method 1: explicit "Load topics:" in prompt
-    source = "none"
     match = TOPIC_PATTERN.search(prompt)
     if match:
         raw = match.group(1)
         filenames = [f.strip() for f in raw.split(",") if f.strip()]
-        source = "explicit"
 
     # Method 2: manifest-derived topics from skill name in prompt
     if not filenames:
         filenames = _topics_from_manifest(prompt)
         if filenames:
-            source = "manifest-fallback"
             try:
                 from manifest_metrics import log_manifest_query
                 log_manifest_query(

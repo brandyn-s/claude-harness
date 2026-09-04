@@ -34,7 +34,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "hooks"))
-from rule_context_budget import estimate_tokens  # noqa: E402
+from rule_context_budget import estimate_tokens
 
 # Extensions common enough that scoping to them is not scoping. Deliberately a
 # LIST rather than a cleverness: a maintainer can see exactly what is counted and
@@ -47,7 +47,7 @@ MAINSTREAM_EXT = {
 # Directory patterns that appear in nearly every repository.
 UBIQUITOUS_DIR = {"tests", "test", "spec", "__tests__", "src", "lib", "docs"}
 
-FM = re.compile(r"^---\n(.*?)\n---", re.S)
+FM = re.compile(r"^---\n(.*?)\n---", re.DOTALL)
 
 
 def read_paths(path: str) -> list[str] | None:
@@ -64,7 +64,7 @@ def read_paths(path: str) -> list[str] | None:
     # Deliberately not a YAML parse: these files are read by several tools and a
     # hard dependency here would be a new failure mode for a reporting script.
     block = re.search(r"^paths:\s*(.*?)(?=^[A-Za-z@][A-Za-z0-9_-]*:|\Z)",
-                      body, re.S | re.M)
+                      body, re.DOTALL | re.MULTILINE)
     if not block:
         return None
     raw = block.group(1)

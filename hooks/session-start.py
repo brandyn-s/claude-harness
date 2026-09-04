@@ -24,9 +24,9 @@ from session_start_modules.concurrent_session import (
 )
 from session_start_modules.consistency import run_consistency_check
 from session_start_modules.env_loader import run_env_loader
+from session_start_modules.index_autoheal import autoheal_indexes
 from session_start_modules.index_corruption import check_index_corruption
 from session_start_modules.index_staleness import check_index_staleness
-from session_start_modules.index_autoheal import autoheal_indexes
 from session_start_modules.mcp_binary_staleness import check_mcp_binary_staleness
 from session_start_modules.mcp_oauth_heal import heal_mcp_oauth_clients
 from session_start_modules.mcp_zombie_cleanup import cleanup_stale_mcps

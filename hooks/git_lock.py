@@ -54,7 +54,7 @@ def git_lock(repo_path, timeout=30, stale_after=120):
             fd = os.open(
                 str(lockfile), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o644
             )
-            os.write(fd, f"{os.getpid()} {time.time()}\n".encode("utf-8"))
+            os.write(fd, f"{os.getpid()} {time.time()}\n".encode())
             break
         except FileExistsError:
             # Reclaim a stale lock left by a crashed holder.

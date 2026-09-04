@@ -485,7 +485,7 @@ def main():
         # Fallback: keyword regex for prompts that don't match a skill name
         matches = AUTH_MCP_KEYWORDS.findall(prompt)
         if matches:
-            unique = sorted(set(m.lower() for m in matches))
+            unique = sorted({m.lower() for m in matches})
             try:
                 from manifest_metrics import log_manifest_query
                 log_manifest_query(

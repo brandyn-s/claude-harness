@@ -269,7 +269,7 @@ def compute_drift(skill_dir):
 def fix_frontmatter(skill_md, missing_tools, unused_to_drop=None):
     """Add `missing_tools` to allowed-tools line; optionally drop unused."""
     text = skill_md.read_text(encoding="utf-8")
-    fm, body, _ = parse_frontmatter(text)
+    fm, _body, _ = parse_frontmatter(text)
     declared = parse_allowed_tools_line(fm)
     if unused_to_drop:
         declared = [t for t in declared if t not in unused_to_drop]
@@ -329,11 +329,11 @@ def report(drift):
         return False
     print(f"FAIL {drift['skill']}")
     if drift["missing_frontmatter"]:
-        print(f"  missing from allowed-tools:")
+        print("  missing from allowed-tools:")
         for t in sorted(drift["missing_frontmatter"]):
             print(f"    + {t}")
     if drift["missing_manifest"]:
-        print(f"  missing from manifest.yaml requires_tools:")
+        print("  missing from manifest.yaml requires_tools:")
         for t in sorted(drift["missing_manifest"]):
             print(f"    + {t}")
     return True

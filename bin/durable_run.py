@@ -49,9 +49,21 @@ import time
 import traceback
 from pathlib import Path
 
-__all__ = ["DurableError", "classify", "is_transient", "fail_loud", "heal", "Checkpoint",
-           "run_json", "run_text", "success_marker", "unique_name", "ErrorLog",
-           "InstrumentUnsound", "assert_instrument_sound"]
+__all__ = [
+    "Checkpoint",
+    "DurableError",
+    "ErrorLog",
+    "InstrumentUnsound",
+    "assert_instrument_sound",
+    "classify",
+    "fail_loud",
+    "heal",
+    "is_transient",
+    "run_json",
+    "run_text",
+    "success_marker",
+    "unique_name",
+]
 
 # ─────────────────────────── error classification ───────────────────────────
 # TRANSIENT = the world hiccuped and will recover on retry (network, throttle, 5xx, empty response, timeout).
@@ -121,7 +133,7 @@ class ErrorLog:
         return rec
 
 
-def fail_loud(stage, item, exc, action="aborting", cursor=None, errlog: "ErrorLog | None" = None) -> DurableError:
+def fail_loud(stage, item, exc, action="aborting", cursor=None, errlog: ErrorLog | None = None) -> DurableError:
     """Emit a LOUD, EXPLICIT, DETAILED error to stderr (+ the error log if given) and return a DurableError to
     raise. NEVER swallow — a failure must announce itself with everything needed to diagnose it on sight."""
     klass = classify(exc)
@@ -138,7 +150,7 @@ def fail_loud(stage, item, exc, action="aborting", cursor=None, errlog: "ErrorLo
 
 
 # ─────────────────────────── self-healing retry ───────────────────────────
-def heal(fn, stage="op", item="-", max_tries=6, base_wait=4, errlog: "ErrorLog | None" = None, cursor=None):
+def heal(fn, stage="op", item="-", max_tries=6, base_wait=4, errlog: ErrorLog | None = None, cursor=None):
     """Run fn(); retry ONLY transient errors (classified) with linear backoff. Deterministic/auth-expiry errors
     fail LOUD immediately — retrying them is futile and hides the real problem. Returns fn()'s result; raises
     DurableError on exhaustion or on a non-transient error.
@@ -190,7 +202,7 @@ class Checkpoint:
     def get(self, key, default=None):
         return self._state.get(key, default)
 
-    def advance(self, cursor: int, extra: "dict | None" = None):
+    def advance(self, cursor: int, extra: dict | None = None):
         self._state["cursor"] = int(cursor)
         if extra:
             self._state.update(extra)
@@ -201,7 +213,7 @@ class Checkpoint:
 
 
 # ─────────────────────────── collision-proof resource names ───────────────────────────
-def unique_name(base: str, attempt: int, chunk: "int | None" = None) -> str:
+def unique_name(base: str, attempt: int, chunk: int | None = None) -> str:
     """Build a collision-proof resource name. A FAILED prior attempt HOLDS its name, so a re-submit with the
     same name fails ConflictException forever — bump `attempt`. Format: base[-cNNN]-aNN (charset-safe: dashes
     + alphanum only, no underscores, since some services restrict the name charset)."""
@@ -263,7 +275,7 @@ class InstrumentUnsound(Exception):
     """An instrument failed its known-answer check — its measurements are NOT trustworthy until fixed."""
 
 
-def assert_instrument_sound(measure, known_cases, *, label="instrument", errlog: "ErrorLog | None" = None):
+def assert_instrument_sound(measure, known_cases, *, label="instrument", errlog: ErrorLog | None = None):
     """Before trusting ANY measurement, prove the instrument returns the KNOWN answer on inputs whose answer you
     already know. Raises InstrumentUnsound (loud, detailed) if any known case fails — so a wrong-instrument
     number can NEVER be published as a finding.

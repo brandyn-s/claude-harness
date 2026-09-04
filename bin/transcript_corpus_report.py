@@ -49,7 +49,7 @@ def main():
     # Layer 2 rows (semantic clusters, >1MB cohort) — skip the honest 'None' catch-all from headline
     srows = []
     for c in sc:
-        breadth = c.get("breadth", len(set(m.split("::")[0] for m in c.get("members", []))))
+        breadth = c.get("breadth", len({m.split("::")[0] for m in c.get("members", [])}))
         name = c.get("name") or "uncategorized"   # the agent's catch-all cluster has a null name
         srows.append({
             "layer": "semantic", "name": name, "breadth": breadth,

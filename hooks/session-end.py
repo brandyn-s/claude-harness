@@ -22,11 +22,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from atomic_write import atomic_write
 from session_runtime import (
     bounded as _bounded,
+)
+from session_runtime import (
     initial_runtime_provenance,
     read_session_start_seed,
     safe_session_filename,
 )
-
 
 SCHEMA_VERSION = 3
 

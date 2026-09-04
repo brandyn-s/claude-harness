@@ -49,7 +49,7 @@ MODEL_SAFEGUARD_SUBTYPES = {"model_refusal_fallback", "model_refusal_no_fallback
 # Tier 2 — auto-mode Bash safety classifier
 CLASSIFIER_RE = re.compile(
     r"(auto mode cannot determine safety|cannot determine safety of|"
-    r"temporarily unavailable, auto mode)", re.I)
+    r"temporarily unavailable, auto mode)", re.IGNORECASE)
 
 # Tier 3 — local hook denials. Match the harness's structured block SHAPES only
 # (H1): the "PreToolUse:X hook error: … BLOCKED" envelope, or "blocked by … hook",
@@ -59,14 +59,14 @@ CLASSIFIER_RE = re.compile(
 HOOK_RE = re.compile(
     r"(?:Pre|Post)ToolUse:\S+\s+hook error:[^\n]*?BLOCKED"
     r"|blocked by (?:the |a |deployed )?[\w\-.]+ hook"
-    r"|Permission denied by [\w\-.]+ hook", re.I)
-_HOOK_MATCHER_RE = re.compile(r"(?:Pre|Post)ToolUse:\S+", re.I)
+    r"|Permission denied by [\w\-.]+ hook", re.IGNORECASE)
+_HOOK_MATCHER_RE = re.compile(r"(?:Pre|Post)ToolUse:\S+", re.IGNORECASE)
 # Exclude rows that are clearly documentation/source, not a live block. The
 # source/rule markers (re.compile, *_RE, topic filenames) also keep the auto-mode
 # CLASSIFIER phrase from matching rule files and this scanner's own source (H2).
 HOOK_DOC_EXCLUDE = re.compile(r"(GUARD pattern=|@rule |SKILL\.md|FORBIDDEN:|"
                               r"# WHY|manifest\.yaml|re\.compile|CLASSIFIER_RE|"
-                              r"HOOK_RE|platform-constraints|diagnose-before-fix)", re.I)
+                              r"HOOK_RE|platform-constraints|diagnose-before-fix)", re.IGNORECASE)
 
 # Security vocabulary the cyber classifier is reported to key on (community
 # issue tracker: #61646, #66449, #64230, HN 48752030). Used to estimate how
@@ -81,7 +81,7 @@ SEC_VOCAB = [
     "beacon", "keylog", "brute force", "port scan", "nmap", "metasploit",
     "vfio", "kernel", "hardcoded", "secret", "token", "api key", "leak",
 ]
-SEC_VOCAB_RE = re.compile("|".join(re.escape(w) for w in SEC_VOCAB), re.I)
+SEC_VOCAB_RE = re.compile("|".join(re.escape(w) for w in SEC_VOCAB), re.IGNORECASE)
 
 
 def load_rows(path):
@@ -272,8 +272,8 @@ def scan_file(path, since_dt, tiers):
         if ts and session_start_ts:
             minutes_into_session = round((ts - session_start_ts).total_seconds() / 60, 1)
         acc_context = " ".join(prompts_seen)
-        sec_vocab_hits = len(set(m.group(0).lower()
-                                 for m in SEC_VOCAB_RE.finditer(acc_context)))
+        sec_vocab_hits = len({m.group(0).lower()
+                                 for m in SEC_VOCAB_RE.finditer(acc_context)})
 
         events.append({
             "session_id": sid,
@@ -436,8 +436,7 @@ def main():
             fcntl.flock(lock, fcntl.LOCK_EX)
         try:
             with open(tmp, "w", encoding='utf-8') as fh:
-                for e in sorted(all_events, key=lambda e: e["timestamp"] or ""):
-                    fh.write(json.dumps(e) + "\n")
+                fh.writelines(json.dumps(e) + "\n" for e in sorted(all_events, key=lambda e: e["timestamp"] or ""))
                 fh.flush()
                 os.fsync(fh.fileno())
             os.replace(tmp, jsonl)  # atomic rename (atomic on POSIX + Windows)

@@ -114,7 +114,7 @@ def wired_hooks(settings_text):
     return wired
 
 
-_HOOKS_HEADING_RE = re.compile(r"^## (?:Layer 5\b|\d+\.\s*Hooks\b).*$", re.M)
+_HOOKS_HEADING_RE = re.compile(r"^## (?:Layer 5\b|\d+\.\s*Hooks\b).*$", re.MULTILINE)
 
 
 def _hooks_section(arch):
@@ -128,7 +128,7 @@ def _hooks_section(arch):
     if not m:
         return ""
     start = m.end()
-    nxt = re.compile(r"^(?:## |### Rules\b)", re.M).search(arch, start)
+    nxt = re.compile(r"^(?:## |### Rules\b)", re.MULTILINE).search(arch, start)
     return arch[start:nxt.start()] if nxt else arch[start:]
 
 
@@ -147,7 +147,7 @@ def readme_documented_hooks(readme):
     """Hooks listed in hooks/README.md's inventory tables. ARCHITECTURE.md is a
     representative table by design; the README is the full registry, so a hook
     documented there is documented."""
-    return set(re.findall(r'^\|\s*`([a-z0-9-]+\.py)`', readme, re.M))
+    return set(re.findall(r'^\|\s*`([a-z0-9-]+\.py)`', readme, re.MULTILINE))
 
 
 # ── Check B: curated settings the doc states as the CURRENT value ──

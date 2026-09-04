@@ -14,12 +14,12 @@ So "security-keyword present" is a LOWER BOUND on classifier-driven fallback
 
 Usage: python3 bin/classifier-fallback-audit.py [days] [project_dir]
 """
-import json
 import glob
+import json
 import os
+import re
 import sys
 import time
-import re
 from collections import Counter
 
 DAYS = int(sys.argv[1]) if len(sys.argv) > 1 else 14
@@ -33,7 +33,7 @@ SEC = re.compile(
     r"pentest|red[ -]?team|offensive|shellcode|reverse shell|privilege escalation|"
     r"lateral movement|\bioc\b|yara|sigma rule|mitre|att&ck|exfil\w*|\bsbom\b|owasp|"
     r"injection|\bxss\b|\bsqli\b|\brce\b|\bcsrf\b|\bssrf\b|cwe-\d+|threat model|"
-    r"prompt injection|jailbreak|decrypt|cyber)\b", re.I)
+    r"prompt injection|jailbreak|decrypt|cyber)\b", re.IGNORECASE)
 
 
 def user_text(content):

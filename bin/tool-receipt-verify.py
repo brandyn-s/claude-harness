@@ -13,10 +13,10 @@ the assistant's narrative — that is the documented follow-on, not this prototy
 Run: python3 bin/tool-receipt-verify.py <transcript.jsonl> <receipts.jsonl>
      python3 bin/tool-receipt-verify.py --selftest
 """
-import sys
-import json
 import hashlib
 import hmac
+import json
+import sys
 
 
 def load_receipts(path):

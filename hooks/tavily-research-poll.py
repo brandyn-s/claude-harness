@@ -10,7 +10,6 @@ When research completes successfully, passes through silently.
 import json
 import sys
 
-
 # After this many total seconds, warn about potential hang
 HUNG_THRESHOLD_SECONDS = 600
 

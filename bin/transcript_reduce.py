@@ -41,16 +41,16 @@ GATE = os.path.join(HERE, "transcript_ground_check.py")
 # Extend this list as new recurring event classes appear; anything unmatched stays a distinct
 # finding (clustering is opt-in per pattern, never a catch-all that could over-merge).
 _SIGNATURES = [
-    (re.compile(r"inline[- ]python[- ]?guard|inline `?python -c", re.I), "guard:inline-python"),
-    (re.compile(r"tail[- ]buffering|\|\s*(tail|head|grep)\b.*block", re.I), "guard:tail-buffering"),
-    (re.compile(r"post[- ]write[- ]edit", re.I), "hook:post-write-edit"),
-    (re.compile(r"read[- ]before[- ]edit|has not been read|modified since", re.I), "guard:read-before-edit"),
-    (re.compile(r"encoding[- ]guard|encoding=.?utf-?8|cp1252", re.I), "guard:encoding"),
-    (re.compile(r"exfiltration[- ]guard", re.I), "guard:exfiltration"),
-    (re.compile(r"credential[- ]guard", re.I), "guard:credential"),
-    (re.compile(r"wasted (call|read)|file unchanged", re.I), "friction:wasted-read"),
-    (re.compile(r"dirty repos? (detected|at session)", re.I), "friction:dirty-repo-warning"),
-    (re.compile(r"memory[_-]search latency|latency_ms", re.I), "perf:memory-search-latency"),
+    (re.compile(r"inline[- ]python[- ]?guard|inline `?python -c", re.IGNORECASE), "guard:inline-python"),
+    (re.compile(r"tail[- ]buffering|\|\s*(tail|head|grep)\b.*block", re.IGNORECASE), "guard:tail-buffering"),
+    (re.compile(r"post[- ]write[- ]edit", re.IGNORECASE), "hook:post-write-edit"),
+    (re.compile(r"read[- ]before[- ]edit|has not been read|modified since", re.IGNORECASE), "guard:read-before-edit"),
+    (re.compile(r"encoding[- ]guard|encoding=.?utf-?8|cp1252", re.IGNORECASE), "guard:encoding"),
+    (re.compile(r"exfiltration[- ]guard", re.IGNORECASE), "guard:exfiltration"),
+    (re.compile(r"credential[- ]guard", re.IGNORECASE), "guard:credential"),
+    (re.compile(r"wasted (call|read)|file unchanged", re.IGNORECASE), "friction:wasted-read"),
+    (re.compile(r"dirty repos? (detected|at session)", re.IGNORECASE), "friction:dirty-repo-warning"),
+    (re.compile(r"memory[_-]search latency|latency_ms", re.IGNORECASE), "perf:memory-search-latency"),
 ]
 
 

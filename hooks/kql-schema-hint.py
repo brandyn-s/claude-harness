@@ -32,7 +32,6 @@ import re
 import sys
 from pathlib import Path
 
-
 # Tables for which getschema-first is high-value. Defender hunting has
 # schemas that change between tenants and over time; for these, a wrong
 # column guess is the documented failure mode from 2026-05-28.

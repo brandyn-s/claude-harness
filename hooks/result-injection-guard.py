@@ -18,6 +18,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from hook_input import (
     tool_name as hi_tool_name,
+)
+from hook_input import (
     tool_response_str as hi_tool_response_str,
 )
 
