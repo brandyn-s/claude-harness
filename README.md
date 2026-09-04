@@ -1,9 +1,9 @@
 # claude-harness
 
 A working [Claude Code](https://docs.claude.com/en/docs/claude-code) harness:
-**60 hooks**, **38 ambient rules**, **81 skills**, and the agent
-definitions that tie them together — about 1,568 source files, plus a generated
-plugin tree under `marketplace/` that roughly doubles the file count and is not
+**59 hooks**, **33 rules** (26 of them always loaded), **81 skills**, and the
+seven agent definitions that tie them together — about 1,630 source files, plus
+a generated plugin tree under `marketplace/` (another 1,069 files) that is not
 meant to be read (see [marketplace/README.md](marketplace/README.md)).
 
 It is a configuration repo, but the reusable part is not the config. It is the
@@ -33,13 +33,14 @@ python3 bin/fresh_laptop_doctor.py
 
 For a new machine, accept the fresh-laptop profile and the recommended core.
 The installer then offers the owner-focused Brandyn operator layer. The
-portable core installs one ambient rule, one path-scoped rule, and three
-deterministic hooks:
+portable core installs two rules and four deterministic hooks:
 
 - `outcome-over-verification.md` and `claude-md-quality.md`
-- Bash command safety (`bash-pretooluse-dispatcher.py`, which runs the two Bash
-  guards and four advisories in one process), config integrity, and MCP
-  result-injection guards
+- Bash command safety (`bash-pretooluse-dispatcher.py`, which runs the Bash
+  guards and advisories in one process), config integrity, MCP
+  result-injection detection, and a Read-tool guard for secret paths
+  (`read-deny-guard.py`; the sandbox denies the same paths to Bash, so nothing
+  prompts)
 - `acceptEdits` plus sandbox-auto-approved Bash; sandbox escapes require review
 - project MCP auto-activation disabled
 
@@ -49,6 +50,15 @@ non-blocking repeated-failure detector, and prompt/tool-output secret controls.
 It does not restore the phrase-based Stop blocker or the historical ambient
 corpus, and it enables no plugins. The doctor reports the operator layer
 separately when selected.
+
+Environment-specific data (the MCP servers whose writes need confirmation,
+topic routes, failure-pattern files, expected servers, repo paths, session
+exports, safe domains) lives in `~/.claude/environment-catalog.json`, which the
+installer seeds empty and never overwrites. The shipped hooks read it at run
+time and are no-ops until it is filled; nothing about a particular
+organisation is in the code. The shape is in
+[`contracts/environment-catalog.example.json`](contracts/environment-catalog.example.json)
+and the sections are documented in [`hooks/README.md`](hooks/README.md).
 
 The profile is previewable and independently applicable:
 
@@ -73,8 +83,8 @@ sandbox; use WSL2. After installation, `/sandbox` shows the effective boundary.
 Continue through `install.sh` only when you intentionally want the complete
 author mirror: all hooks, rules, skills, agents, and host integrations. It uses
 the same native sandbox boundary, but has a much larger context and dependency
-surface. Its measured cost, using Anthropic's `count_tokens` endpoint rather
-than byte estimates, is:
+surface. Its cost, measured 2026-09-03 with Anthropic's `count_tokens`
+endpoint rather than byte estimates, was:
 
 | component | measured tokens |
 |---|---|
@@ -86,8 +96,11 @@ than byte estimates, is:
 | **effective coding session** | **~109,000** |
 
 On a 200K-token context window that is **roughly half the window consumed at
-rest**. This is why the full mirror is not the fresh-laptop default.
-`bin/ambient-load-report.py` prints the current split.
+rest**. This is why the full mirror is not the fresh-laptop default. The rules
+ratchet has since moved dated narrative out of the ambient corpus behind
+anchors in `rules/incidents/`: 26 always-loaded rules, 165,868 bytes (about
+60,600 tokens by the byte proxy) as of 2026-09-04. `bin/ambient-load-report.py`
+prints the current split.
 
 The skill listing also exceeds its own budget: `skillListingBudgetFraction` is
 set to 3%, which is 6,000 tokens on a 200K context against an 18,687-token
@@ -153,6 +166,9 @@ rules/            ambient engineering rules (+ incidents/ and manifests/)
 hooks/            PreToolUse / PostToolUse / session-lifecycle enforcement
 skills/           invocable procedures (81 of them)
 agents/           subagent definitions
+contracts/        run-time contracts: environment catalog, model capabilities,
+                  hook output shapes, guard residual risks
+profiles/         installable settings profiles (fresh-laptop, operator)
 docs/rule-reference/   long-form rationale, loaded on demand
 platform-rules/   host-specific overlays (macOS / Windows)
 bin/ scripts/     supporting tools
@@ -189,7 +205,7 @@ user-level harness:
 /plugin install safety-net@claude-harness
 ```
 
-Six bundles are generated: `safety-net` (the three-hook fresh-laptop core),
+Six bundles are generated: `safety-net` (the fresh-laptop core hooks),
 `planning-toolkit`, `security-scanner`, `knowledge-ops`, `code-intelligence`,
 `research-intel`. Install only what you want; skills arrive as
 `/plugin-name:skill`. Update with `/plugin marketplace update claude-harness`.
@@ -209,11 +225,14 @@ pip install -r requirements-dev.txt
 python3 scripts/run-tests.py
 ```
 
-~3,900 tests across the repository. The runner goes **one directory at a time** on
-purpose — a single root-level `pytest` cannot work here, and `scripts/run-tests.py`
-explains why in its docstring.
-Every discovered test directory must pass; there is no tolerated-failure
-baseline.
+About 4,300 tests across the repository. The runner goes **one directory at a
+time** on purpose — a single root-level `pytest` cannot work here, and
+`scripts/run-tests.py` explains why in its docstring. Run it outside the Claude
+Code Bash sandbox: some hook tests write probe files under `hooks/`, open local
+sockets and call `ps`, which the sandbox denies. Every discovered test directory
+must pass; there is no tolerated-failure baseline. `ruff check` is pinned to a
+correctness core (`E4`, `E7`, `E9`, `F`) and gated at zero findings by
+`scripts/test_ruff_clean.py`.
 
 ## What this is a subset of
 
@@ -233,11 +252,17 @@ Two consequences worth knowing:
 
 A handful of identifiers in kept files were replaced with neutral placeholders
 (`example.internal`, `ExampleTarget`, `contributor-a`). Where you see one, the
-original named something internal.
+original named something internal. The author's former environment (its
+telemetry pipeline, MDM fleet records and MCP-server inventory) was removed
+rather than anonymised; incident narratives still name the author's own
+repositories and the security vendors the hooks protect, which is the voice of
+a personal repo, not a leak.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE). Third-party portions keep their own licenses and
+are listed in [THIRD_PARTY.md](THIRD_PARTY.md); the skills adapted from
+trailofbits/skills are CC BY-SA 4.0.
 
 ## Advanced full-mirror synchronization
 

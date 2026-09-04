@@ -19,14 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Third-party portions
-
-This repository also contains material derived from other projects, listed in
-THIRD_PARTY.md with their copyright holders and licenses. Those portions remain
-under their original licenses, not the MIT License above. In particular, the
-skills and agents adapted from trailofbits/skills are licensed under
-CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/), and derivative
-works of those files must carry the same license.
