@@ -12,6 +12,7 @@ here; local files identify the adapted mechanism where practical.
 | [prompt-master](https://github.com/nidhinjs/prompt-master) | Copyright (c) 2026 Nidhin Joseph Nelson | MIT | prompt diagnostic reference patterns |
 | [claude-pipeline](https://github.com/aaddrick/claude-pipeline) | Copyright (c) 2025 aaddrick | MIT | resolution-gate pattern in distill |
 | [microsoft/skills](https://github.com/microsoft/skills) | Copyright (c) Microsoft Corporation | MIT | architecture-review template structure |
+| [claude-forge](https://github.com/sangrokjung/claude-forge) | Copyright (c) 2026 sangrokjung | MIT | literal-preservation oracle concept (`bin/rule-preservation-check.py` extends `skills/harness-diet/scripts/preservation_check.py` to a whole rule set) |
 | [trailofbits/skills](https://github.com/trailofbits/skills) | Copyright (c) Trail of Bits | CC BY-SA 4.0 | `fp-check`, `semgrep`, `codeql`, `differential-review`, `semgrep-rule-creator`, `threat-model` skill structure and the `data-flow-analyzer`, `exploitability-verifier`, `poc-builder`, `semgrep-scanner` agents |
 
 The Trail of Bits material is licensed CC BY-SA 4.0, not MIT: the files adapted
