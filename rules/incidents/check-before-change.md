@@ -1087,3 +1087,38 @@ the contract. Extension filters may be used to ORGANIZE results, never to bound
 the census. Sibling KB entry: sealed-artifact-contract-evolution.md ("the
 consumer census includes payload constructors") — that instance missed
 build-time consumers; these missed test-pin and runtime consumers the same way.
+
+## 2026-08-12 an unsatisfiable IAM condition denied Athena's preflight — the third occurrence
+<a id="2026-08-12-unsatisfiable-iam-condition-third-occurrence"></a>
+
+Relocated verbatim from check 8b of the ambient rule body on 2026-09-04; the
+directive and a pointer stay in `rules/check-before-change.md`. The second paragraph
+is the check's closing sentence, copied whole so its dated clause keeps its subject;
+the rule keeps the sentence's directive half.
+
+PROMOTED to ambient on the THIRD occurrence. `agent-memory/topics/aws-infra-s3.md`
+already carries this as "An unsatisfiable CONDITION is a DENY — and knowing the
+pattern is not checking against it (2026-08-02)", which itself records re-stating
+the mechanism in a comment and then reproducing it one statement over. On
+2026-08-12 it recurred again: `StringLike s3:prefix` on a statement granting
+`s3:GetBucketLocation` (an action with no `s3:prefix` key) denied Athena's
+output-location preflight, so the FIRST scheduled run of a new lane died with
+`Unable to verify/create output bucket`.
+
+Split the conditioned and unconditioned actions into
+separate statements, and prefer copying a sibling statement PROVEN in production over
+deriving a "tighter" one — the 2026-08-12 instance was a re-derivation of a working
+sibling that had no condition.
+
+## 2026-08-24 a blanket text sweep broke a DATA_DIR path and a JS data key
+<a id="2026-08-24-blanket-sweep-broke-data-dir-and-js-key"></a>
+
+Relocated verbatim from the Forbidden-shortcuts list of the ambient rule body on
+2026-09-04; the directive and a pointer stay in `rules/check-before-change.md`. The
+sentence is copied whole so its dated clause keeps its subject; the rule keeps the
+sentence's directive half.
+
+A swept literal inside `os.path.join`, a dir name,
+or a JS data key is a consumer, not prose: one sweep pair broke a builder's
+DATA_DIR into a nonexistent dir and another blanked whole report sections via a
+renamed JS key (2026-08-24 ×2).

@@ -189,6 +189,12 @@
       "rule": "verify-before-assuming.md",
       "bytes": -501,
       "reason": "Relocated 3 dated-narrative blocks verbatim to rules/incidents/verify-before-assuming.md behind <a id> anchors: the check-3b INCIDENT 2026-08-12 paragraph (Slack's audit-action catalog sampled by group NAME, the 312-action largest group never read), the check-5b 2026-08-15 sentence (5 defects reported off a 70-commit-behind copy) and the closing GUARD's citation of the two 2026-08-15 one-call-probe instances; each leaves its directive and a Full: incidents# pointer in the rule. 10,413 -> 9,912 B. Oracle: 1,608/1,608 literals present with --also rules/incidents, no allow-drop. What remains is directive text (checks, INVARIANTs, GUARD), which is step 8's judgment work, not relocation. Negative so the freed budget cannot be silently re-spent."
+    },
+    {
+      "date": "2026-09-04",
+      "rule": "check-before-change.md",
+      "bytes": -716,
+      "reason": "Relocated 2 dated-narrative blocks verbatim to rules/incidents/check-before-change.md behind <a id> anchors: check 8b's PROMOTED-on-the-third-occurrence narrative (2026-08-02 topic-file recurrence; 2026-08-12 `StringLike s3:prefix` on `s3:GetBucketLocation` denying Athena's output-location preflight) with the closing sentence's dated clause, and the Forbidden-shortcuts blanket-sweep clause (2026-08-24 x2: a builder's DATA_DIR and a renamed JS key). Where a directive and its dated clause shared one sentence, the sentence is copied whole to incidents and the rule keeps the directive half with a period; no directive was reworded. 9,811 -> 9,095 B. Oracle: 1,605/1,605 literals present with --also rules/incidents, no allow-drop. Check 3b and the rest are undated directive text (step 8). Negative so the freed budget cannot be silently re-spent."
     }
   ]
 }
