@@ -21,6 +21,7 @@ modifies: null
 depends_on_files:
   - protected-repos.json
   - bash_policy_tables.py
+  - contracts/environment-catalog.json
 depends_on_env:
   - CLAUDE_BASH_POLICY_PACKS
   - CLAUDE_AWS_DEFAULT_PROFILE

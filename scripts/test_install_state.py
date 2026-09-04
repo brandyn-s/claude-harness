@@ -243,13 +243,19 @@ def test_install_sh_routes_every_component_through_the_classified_copy() -> None
 
     The starter kit was routed first; the optional installers (rules, skills,
     hooks, agents, agent-memory, ARCHITECTURE.md) still used cp, so a re-run
-    overwrote a user's edits to any of those files. The one cp left is the
-    CLAUDE.template.md -> CLAUDE.md rename, which only runs when CLAUDE.md is
-    absent and so can never overwrite anything.
+    overwrote a user's edits to any of those files. Two cps remain, both
+    seed-once: the CLAUDE.template.md -> CLAUDE.md rename and the
+    environment-catalog seed. Each runs only when its destination is absent and
+    so can never overwrite anything; the catalog is operator data, so it is
+    deliberately NOT a hash-manifest-managed file (the doctor must not report a
+    filled-in catalog as drift).
     """
     src = INSTALL_SH.read_text(encoding="utf-8")
     copies = [line.strip() for line in src.splitlines() if re.match(r"\s*cp\b", line)]
-    assert copies == ['cp "$SCRIPT_DIR/CLAUDE.template.md" "$CLAUDE_DIR/CLAUDE.md"'], copies
+    assert sorted(copies) == sorted([
+        'cp "$SCRIPT_DIR/CLAUDE.template.md" "$CLAUDE_DIR/CLAUDE.md"',
+        'cp "$src" "$dest"  # seed-once: guarded above, never overwrites',
+    ]), copies
     assert 'install_args+=(--install "$f")' in src
     assert 'install_files "${starter_files[@]}"' in src, "the starter copy must feed from the shared manifest"
     for installer in ("install_rules", "install_skills", "install_hooks", "install_agents",

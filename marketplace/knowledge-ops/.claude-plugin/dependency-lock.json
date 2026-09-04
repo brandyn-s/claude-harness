@@ -21,10 +21,15 @@
     "scripts/build-marketplace.py",
     "scripts/cleanup-indexes.py",
     "scripts/hook_exec_form.py",
+    "scripts/model_contracts.py",
     "scripts/retro-extract.py",
     "scripts/test_marketplace_safety_net.py",
     "scripts/verify-indexes.py",
     "scripts/wire_hooks.py"
+  ],
+  "model_contracts": [
+    "scripts/model_contracts.py",
+    "contracts/model-capabilities.json"
   ],
   "packaged_skills": [
     "distill",

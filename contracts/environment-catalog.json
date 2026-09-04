@@ -27,5 +27,12 @@
   "session_start": {
     "_comment": "hooks/session-start.py checks config_repo's branch and dirty state and warns another session may have left it mid-work. null disables the check.",
     "config_repo": null
-  }
+  },
+  "env_exports": {
+    "_comment": "hooks/session_start_modules/env_loader.py writes these to CLAUDE_ENV_FILE at session start. values: NAME -> value (`~` and `$VAR` in a value expand at write time). secrets: variable NAMES resolved at write time from an already-set variable, then the macOS Keychain (bin/keychain-seed); no secret value ever belongs in a catalog.",
+    "values": {},
+    "secrets": []
+  },
+  "_comment_safe_domains": "hooks/bash-security-guard.py. Plain API hostnames (no regex) that a command may legitimately send a credential to, merged with the guard's generic built-ins (package registries, GitHub, Anthropic). Empty means only the built-ins apply.",
+  "safe_domains": []
 }

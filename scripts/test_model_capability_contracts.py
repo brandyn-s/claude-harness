@@ -271,11 +271,15 @@ def test_validator_covers_superseded_model_restrictions_and_raw_http(tmp_path):
         assert expected in notes["E1"], name
 
 
-def test_compaction_marker_requires_actionable_recovery_language(tmp_path):
+def test_compaction_banner_no_longer_rescues_an_over_cap_skill(tmp_path):
+    """The `**Compaction continuity:**` banner left every skill body on 2026-09-03
+    and its C1b escape hatch left the validator on 2026-09-04: an over-cap WORKFLOW
+    skill fails whatever recovery prose it carries, and the note points at the two
+    sanctioned exits (split, or `body-cap: exempt` with a reason for PERIODIC)."""
     validator = _load_validator()
     skill = _write_fixture_skill(
         tmp_path / "marker-only",
-        "# **Compaction continuity:** arbitrary words are not recovery",
+        "# **Compaction continuity:** re-invoke this skill, then stop and ask",
     )
     skill_md = skill / "SKILL.md"
     skill_md.write_text(
@@ -286,7 +290,8 @@ def test_compaction_marker_requires_actionable_recovery_language(tmp_path):
     checks, notes = validator.score_skill(skill)
 
     assert checks["C1b_token_budget"] is False
-    assert "missing actionable" in notes["C1b"]
+    assert "over the soft body cap" in notes["C1b"]
+    assert "exempt with a reason" in notes["C1b"]
 
 
 def test_skill_invocation_fields_are_orthogonal_official_controls():

@@ -715,7 +715,7 @@ def test_fresh_laptop_hook_bundle_installs_a_working_dispatcher(tmp_path):
     config = tmp_path / ".claude"
     src = INSTALLER.read_text(encoding="utf-8")
     for name in (*_dispatcher_hooks(src), "manifest_metrics.py", "bash_policy_tables.py",
-                 "protected-repos.json", "hook_input.py", "run-hook"):
+                 "_environment_catalog.py", "protected-repos.json", "hook_input.py", "run-hook"):
         assert (config / "hooks" / name).is_file(), name
     settings = json.loads((config / "settings.json").read_text(encoding="utf-8"))
     bash_groups = [g for g in settings["hooks"]["PreToolUse"] if g.get("matcher") == "Bash|PowerShell"]

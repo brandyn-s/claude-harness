@@ -21,14 +21,15 @@ precedent for the catalog's shape.
 import re
 from pathlib import Path
 
+# validate-hook-paths-target: hooks/_environment_catalog.py
 import pytest
 
 HOOKS_DIR = Path(__file__).resolve().parent.parent
 
 # Every hook whose environment data moved into the catalog, plus the loader.
-# session_start_modules/mcp_binary_staleness.py is deliberately absent: it
-# watches two specific local clones and their build artifacts and was judged
-# author-only (proposed for deletion, not conversion) in the 2026-09-04 report.
+# session_start_modules/mcp_binary_staleness.py was judged author-only in the
+# 2026-09-04 report (it watched two specific local clones and their build
+# artifacts) and was deleted rather than converted.
 CONVERTED = [
     "_environment_catalog.py",
     "security-write-confirm.py",
@@ -41,6 +42,7 @@ CONVERTED = [
     "session_start_modules/repo_sync.py",
     "session_start_modules/index_staleness.py",
     "session_start_modules/code_search_stale_project_guard.py",
+    "session_start_modules/env_loader.py",
 ]
 
 # Vendor / gateway server names, topic files and author repo paths. Matched

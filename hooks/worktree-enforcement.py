@@ -28,20 +28,41 @@ from pathlib import Path
 
 CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
 
+# The canonical protected-repository data file, shared with
+# bash-security-guard.py (which reads its `repos` list from the same file
+# beside itself). Its `local_paths` object is this guard's ONLY source.
+PROTECTED_REPOS_FILE = Path(__file__).resolve().parent / "protected-repos.json"
 
-def _load_protected_repos() -> dict:
-    """Load the protected-repos map from
-    ~/.claude/hooks/protected-repos.json — the canonical source of truth
-    shared with bash-security-guard.py. Falls back to a hardcoded Windows
-    map only if the JSON is missing; the prior hardcoded-only behavior
-    silently no-op'd this entire write guard on macOS/Linux or for any
-    operator other than the original author."""
-    config = Path(__file__).resolve().parent / "protected-repos.json"
+
+def _inert_note(config: Path, reason: str) -> None:
+    """One stderr line, then carry on with an empty map: this guard is "open"
+    in write-edit-dispatcher.py (a load failure must not brick editing), so a
+    missing or broken data file makes the subagent gate inert and says so."""
+    sys.stderr.write(
+        f"[worktree-guard] {config} {reason}; protected-repo gate for "
+        "subagent writes is inert\n"
+    )
+
+
+def _load_protected_repos(config: Path = PROTECTED_REPOS_FILE) -> dict:
+    """Load repo name -> lowercase forward-slash root from `local_paths` in
+    hooks/protected-repos.json.
+
+    Nothing else feeds this map. A hard-coded fallback used to sit here (the
+    original author's Windows drive layout); on any other host it matched no
+    path while looking configured, so a missing data file was
+    indistinguishable from a working guard. Now a missing, unreadable or
+    malformed file leaves the map empty with one stderr note (fail-open, the
+    posture the dispatcher applies to this guard)."""
     try:
         data = json.loads(config.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        data = {}
-    local_paths = data.get("local_paths", {}) if isinstance(data, dict) else {}
+    except (OSError, json.JSONDecodeError) as exc:
+        _inert_note(config, f"missing or unreadable ({type(exc).__name__})")
+        return {}
+    local_paths = data.get("local_paths") if isinstance(data, dict) else None
+    if not isinstance(local_paths, dict):
+        _inert_note(config, "has no `local_paths` object")
+        return {}
     out = {}
     for repo, path in local_paths.items():
         if not isinstance(path, str) or not path:
@@ -50,15 +71,6 @@ def _load_protected_repos() -> dict:
         # downstream startswith() comparisons.
         resolved = os.path.expanduser(path).replace("\\", "/").lower()
         out[repo] = resolved
-    if not out:
-        # Last-resort fallback: original hardcoded Windows map.
-        out = {
-            "claude-config": "c:/users/you/.claude",
-            "mcp-servers": "c:/users/you/documents/github/mcp-servers",
-            "mcp-infra": "c:/users/you/documents/github/mcp-infra",
-            "knowledge-base": "c:/users/you/documents/knowledge-base",
-            "code-search": "c:/users/you/documents/github/code-search",
-        }
     return out
 
 

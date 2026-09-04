@@ -71,6 +71,8 @@ def test_shipped_default_is_well_formed_and_empty():
         assert sub == {}
     for sub in merged["agent_dispatch"].values():
         assert sub == []
+    assert merged["env_exports"] == {"values": {}, "secrets": []}
+    assert merged["safe_domains"] == []
 
 
 def test_example_catalog_fills_every_section_with_placeholders():
@@ -84,6 +86,8 @@ def test_example_catalog_fills_every_section_with_placeholders():
     assert data["agent_dispatch"]["auth_mcp_keywords"] and data["agent_dispatch"]["protected_repo_paths"]
     assert data["expected_servers"] and data["repo_paths"]
     assert data["session_start"]["config_repo"]["path"]
+    assert data["env_exports"]["values"] and data["env_exports"]["secrets"]
+    assert data["safe_domains"]
     text = EXAMPLE.read_text(encoding="utf-8").lower()
     for vendor in ("crowdstrike", "tenable", "airlock", "msgraph", "netcloud"):
         assert vendor not in text, f"the example must use placeholder names, found {vendor}"

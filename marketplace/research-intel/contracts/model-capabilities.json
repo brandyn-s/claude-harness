@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "verified_on": "2026-09-04",
+  "source": "Per-model Claude API request contract. Every row was re-verified 2026-09-04 (`verified_on`) by fetching the vendor pages: the models overview (platform.claude.com/docs/en/about-claude/models/overview: ids, aliases, dated snapshot, thinking mode, default effort, context window, max output, legacy list) and the model pages it links (fable-5-1 and mythos-5-1 overviews, whats-new-fable-5-1); the per-model migration guides linked from /docs/en/about-claude/models/migration-guide (fable-5-1, fable-5, opus-5, sonnet-5, haiku-4-5: thinking defaults, the Opus 5 disable cap, budget_tokens, sampling, prefill, tool_choice, retention, classifiers, Priority Tier, web fetch); effort (/docs/en/build-with-claude/effort: supported models, levels, default); thinking (/docs/en/build-with-claude/thinking) with its per-model configuration table (/docs/en/build-with-claude/thinking-troubleshooting); extended thinking (/docs/en/build-with-claude/extended-thinking); API and data retention (Covered Models); refusals and fallback; service tiers (Priority Tier exclusions); the web fetch tool (model list); model deprecations (status table); choosing a model. Claude Fable 5.1 and Claude Mythos 5.1 (released 2026-09-01) are the current fable/mythos rows; Claude Fable 5 and Claude Mythos 5 remain served (deprecations table: claude-fable-5 Active, retirement not sooner than 2027-06-09) and moved to `superseded`, which carries only the request restrictions scripts/validate-skills.py enforces. Two facts no fetched page states stay null: Claude Mythos 5.1's own refusal behaviour (the fable-5-1 migration guide lists safety classifiers under 'where the two models diverge' but describes only Fable 5.1's) and Claude Haiku 4.5 web fetch support. bin/render-model-capabilities.py renders `models` into skills/api-guardrails/SKILL.md; scripts/validate-skills.py reads every row; bin/test_render_model_capabilities.py fails when `verified_on` is older than 120 days.",
+  "effort_levels": ["low", "medium", "high", "xhigh", "max"],
+  "models": [
+    {
+      "id": "claude-fable-5-1",
+      "display_name": "Claude Fable 5.1",
+      "tier": "fable",
+      "thinking": {
+        "adaptive": "always_on",
+        "disable": {"allowed": false, "max_effort": null},
+        "manual_budget_tokens": false
+      },
+      "effort": {"levels": ["low", "medium", "high", "xhigh", "max"], "default": "high"},
+      "sampling": "rejected",
+      "assistant_prefill": false,
+      "retention": {"covered_model": true, "minimum_days": 30, "zdr": false},
+      "refusals": "classifier",
+      "priority_tier": false,
+      "web_fetch": true,
+      "availability": "general",
+      "context_window_tokens": 1000000,
+      "max_output_tokens": 128000,
+      "notes": [
+        "Forced `tool_choice` (`any`/`tool`) returns 400; keep `auto` and instruct.",
+        "Thinking blocks are bound to the producing model and conversation; keep history append-only."
+      ]
+    },
+    {
+      "id": "claude-mythos-5-1",
+      "display_name": "Claude Mythos 5.1",
+      "tier": "mythos",
+      "thinking": {
+        "adaptive": "always_on",
+        "disable": {"allowed": false, "max_effort": null},
+        "manual_budget_tokens": false
+      },
+      "effort": {"levels": ["low", "medium", "high", "xhigh", "max"], "default": "high"},
+      "sampling": "rejected",
+      "assistant_prefill": false,
+      "retention": {"covered_model": true, "minimum_days": 30, "zdr": false},
+      "refusals": null,
+      "priority_tier": false,
+      "web_fetch": true,
+      "availability": "project-glasswing",
+      "context_window_tokens": 1000000,
+      "max_output_tokens": 128000,
+      "notes": [
+        "Forced `tool_choice` (`any`/`tool`) returns 400; keep `auto` and instruct.",
+        "Refusal behaviour is not stated by the vendor; handle `stop_reason: refusal`."
+      ]
+    },
+    {
+      "id": "claude-opus-5",
+      "display_name": "Claude Opus 5",
+      "tier": "opus",
+      "thinking": {
+        "adaptive": "default_on",
+        "disable": {"allowed": true, "max_effort": "high"},
+        "manual_budget_tokens": false
+      },
+      "effort": {"levels": ["low", "medium", "high", "xhigh", "max"], "default": "high"},
+      "sampling": "rejected",
+      "assistant_prefill": false,
+      "retention": {"covered_model": false, "minimum_days": null, "zdr": true},
+      "refusals": "classifier",
+      "priority_tier": false,
+      "web_fetch": false,
+      "availability": "general",
+      "context_window_tokens": 1000000,
+      "max_output_tokens": 128000,
+      "notes": ["Re-run effort sweeps rather than inheriting earlier-model settings."]
+    },
+    {
+      "id": "claude-sonnet-5",
+      "display_name": "Claude Sonnet 5",
+      "tier": "sonnet",
+      "thinking": {
+        "adaptive": "default_on",
+        "disable": {"allowed": true, "max_effort": null},
+        "manual_budget_tokens": false
+      },
+      "effort": {"levels": ["low", "medium", "high", "xhigh", "max"], "default": "high"},
+      "sampling": "rejected",
+      "assistant_prefill": false,
+      "retention": {"covered_model": false, "minimum_days": null, "zdr": null},
+      "refusals": "cyber_safeguards",
+      "priority_tier": false,
+      "web_fetch": true,
+      "availability": "general",
+      "context_window_tokens": 1000000,
+      "max_output_tokens": 128000,
+      "notes": ["Re-count tokens and re-test truncation because it uses a different tokenizer from Sonnet 4.6."]
+    },
+    {
+      "id": "claude-haiku-4-5",
+      "display_name": "Claude Haiku 4.5",
+      "tier": "haiku",
+      "dated_snapshot": "claude-haiku-4-5-20251001",
+      "thinking": {
+        "adaptive": "unsupported",
+        "disable": {"allowed": true, "max_effort": null},
+        "manual_budget_tokens": true
+      },
+      "effort": {"levels": [], "default": null},
+      "sampling": "temperature_or_top_p",
+      "assistant_prefill": true,
+      "retention": {"covered_model": false, "minimum_days": null, "zdr": null},
+      "refusals": null,
+      "priority_tier": true,
+      "web_fetch": null,
+      "availability": "general",
+      "context_window_tokens": 200000,
+      "max_output_tokens": 64000,
+      "notes": [
+        "Current low-latency, high-volume, cost-sensitive option.",
+        "Do not apply Claude 5 request restrictions to it."
+      ]
+    }
+  ],
+  "superseded": [
+    {
+      "id": "claude-fable-5",
+      "display_name": "Claude Fable 5",
+      "tier": "fable",
+      "superseded_by": "claude-fable-5-1",
+      "thinking": {
+        "adaptive": "always_on",
+        "disable": {"allowed": false, "max_effort": null},
+        "manual_budget_tokens": false
+      },
+      "sampling": "rejected",
+      "assistant_prefill": false
+    },
+    {
+      "id": "claude-mythos-5",
+      "display_name": "Claude Mythos 5",
+      "tier": "mythos",
+      "superseded_by": "claude-mythos-5-1",
+      "thinking": {
+        "adaptive": "always_on",
+        "disable": {"allowed": false, "max_effort": null},
+        "manual_budget_tokens": false
+      },
+      "sampling": "rejected",
+      "assistant_prefill": false
+    },
+    {
+      "id": "claude-opus-4-8",
+      "display_name": "Claude Opus 4.8",
+      "tier": "opus",
+      "superseded_by": "claude-opus-5",
+      "thinking": {
+        "adaptive": "default_off",
+        "disable": {"allowed": true, "max_effort": null},
+        "manual_budget_tokens": false
+      },
+      "sampling": "rejected",
+      "assistant_prefill": false
+    },
+    {
+      "id": "claude-opus-4-7",
+      "display_name": "Claude Opus 4.7",
+      "tier": "opus",
+      "superseded_by": "claude-opus-4-8",
+      "thinking": {
+        "adaptive": "default_off",
+        "disable": {"allowed": true, "max_effort": null},
+        "manual_budget_tokens": false
+      },
+      "sampling": "rejected",
+      "assistant_prefill": false
+    }
+  ]
+}

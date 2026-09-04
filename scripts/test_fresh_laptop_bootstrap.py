@@ -60,6 +60,7 @@ def test_recommended_install_builds_portable_core_in_empty_config(tmp_path: Path
         "manifest_metrics.py",
         "protected-repos.json",
         "bash_policy_tables.py",
+        "_environment_catalog.py",
         "bash-pretooluse-dispatcher.py",
         "bash-security-guard.py",
         "destructive-ops-guard.py",

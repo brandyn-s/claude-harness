@@ -254,30 +254,66 @@ def test_dispatcher_invokes_branchgate_end_to_end(monkeypatch):
     assert "shared-checkout-guard" in stderr.lower()
 
 
-def test_protected_repos_loaded_from_json_not_hardcoded():
-    """Regression: prior version hardcoded c:/users/you/... which
-    silently no-op'd the guard on macOS/Linux. The map must now load from
-    hooks/protected-repos.json so operator-portable paths work."""
-    import importlib.util
-    import pathlib
-    import sys
-    hook_path = pathlib.Path(__file__).resolve().parent.parent / "worktree-enforcement.py"
-    spec = importlib.util.spec_from_file_location("worktree_enforcement_test", hook_path)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
+# --- PROTECTED_REPOS comes from hooks/protected-repos.json and nothing else.
+# The prior version carried a hard-coded c:/users/<author>/... map as a
+# fallback; on every other host it matched nothing while looking configured,
+# so a missing data file and a working guard were indistinguishable.
+
+def test_protected_repos_loaded_from_json():
+    """The JSON-driven map carries the repos declared in local_paths, resolved
+    through expanduser (lowercase, forward slashes)."""
+    mod = _load_hook_module()
     protected = mod.PROTECTED_REPOS
-    # The JSON-driven map must contain at least the repos declared in
-    # hooks/protected-repos.json local_paths (mcp-servers, mcp-infra, etc.).
     assert "mcp-servers" in protected
     assert "mcp-infra" in protected
-    # And the resolved paths must not contain the hardcoded user name
-    # — they must come from expanduser, which on this host resolves to
-    # /home/user or similar, not c:/users/you.
+    home = _HOME.as_posix().lower()
     for repo, path in protected.items():
-        if "you" in path.lower():
-            # Only acceptable if HOME genuinely points there (i.e., we are
-            # running on the original Windows machine).
-            assert pathlib.Path.home().as_posix().lower().startswith("c:/users/you"), (
-                f"PROTECTED_REPOS[{repo}] = {path} but HOME does not match — "
-                "fallback hardcoded map is being used despite a valid JSON config"
-            )
+        assert path.startswith(home), f"PROTECTED_REPOS[{repo}] = {path} did not resolve under HOME"
+
+
+def test_no_hardcoded_fallback_map_in_source():
+    """The fallback's paths must not come back; the data file is the only source."""
+    source = (Path(__file__).resolve().parent.parent / "worktree-enforcement.py").read_text(encoding="utf-8")
+    assert "c:/users/" not in source.lower()
+
+
+def test_missing_protected_repos_json_is_inert_with_one_stderr_note(tmp_path, capsys):
+    mod = _load_hook_module()
+    missing = tmp_path / "protected-repos.json"
+    assert mod._load_protected_repos(missing) == {}
+    err = capsys.readouterr().err
+    assert err.count("\n") == 1, err
+    assert "worktree-guard" in err and "inert" in err and str(missing) in err
+
+
+def test_malformed_protected_repos_json_is_noted_not_raised(tmp_path, capsys):
+    mod = _load_hook_module()
+    broken = tmp_path / "protected-repos.json"
+    broken.write_text("{not json", encoding="utf-8")
+    assert mod._load_protected_repos(broken) == {}
+    err = capsys.readouterr().err
+    assert err.count("\n") == 1 and "JSONDecodeError" in err
+
+
+def test_protected_repos_without_local_paths_is_inert(tmp_path, capsys):
+    """`repos` alone (the Bash guard's list) does not configure this path gate."""
+    mod = _load_hook_module()
+    cfg = tmp_path / "protected-repos.json"
+    cfg.write_text('{"repos": ["mcp-servers"]}', encoding="utf-8")
+    assert mod._load_protected_repos(cfg) == {}
+    assert "local_paths" in capsys.readouterr().err
+
+
+def test_local_paths_entries_are_expanded_and_normalized(tmp_path, capsys):
+    mod = _load_hook_module()
+    cfg = tmp_path / "protected-repos.json"
+    cfg.write_text(
+        '{"local_paths": {"kb": "~/Docs/KB", "win": "C:\\\\Users\\\\Me\\\\Repo", "bad": 3, "empty": ""}}',
+        encoding="utf-8",
+    )
+    loaded = mod._load_protected_repos(cfg)
+    assert loaded == {
+        "kb": (_HOME / "Docs" / "KB").as_posix().lower(),
+        "win": "c:/users/me/repo",
+    }
+    assert capsys.readouterr().err == "", "a usable file produces no note"

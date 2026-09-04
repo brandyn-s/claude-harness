@@ -48,3 +48,22 @@ def test_retired_session_stop_modules_cannot_mask_an_orphan(tmp_path, monkeypatc
 
     errors = MODULE.check_test_orphans()
     assert any("test_dead_path.py" in error for error in errors)
+
+
+def test_private_helper_modules_are_valid_test_targets(tmp_path, monkeypatch):
+    """test_foo.py may target hooks/_foo.py (a private helper such as
+    hooks/_environment_catalog.py); an unrelated test stays an orphan."""
+    hooks = tmp_path / "hooks"
+    tests = hooks / "test-hooks"
+    tests.mkdir(parents=True)
+    (hooks / "_environment_catalog.py").write_text("# private helper\n")
+    (tests / "test_environment_catalog.py").write_text("def test_placeholder(): pass\n")
+    (tests / "test_nothing_here.py").write_text("def test_placeholder(): pass\n")
+
+    monkeypatch.setattr(MODULE, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(MODULE, "HOOKS_DIR", hooks)
+    monkeypatch.setattr(MODULE, "TEST_HOOKS_DIR", tests)
+
+    errors = MODULE.check_test_orphans()
+    assert not any("test_environment_catalog.py" in error for error in errors), errors
+    assert any("test_nothing_here.py" in error for error in errors), errors

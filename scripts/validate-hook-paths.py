@@ -237,6 +237,7 @@ def check_test_orphans() -> list[str]:
         names = (
             f"{base.replace('_', '-')}.py",
             f"{base}.py",
+            f"_{base}.py",  # private helper modules (hooks/_environment_catalog.py)
             base.replace("_", "-"),
             base,
         )
