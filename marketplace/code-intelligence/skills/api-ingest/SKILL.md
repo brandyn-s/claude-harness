@@ -106,44 +106,11 @@ Validate found resources from the saved body files: JSON specs must parse + cont
 
 ### 0c. Concept-page probe
 
-Even when 0b finds a spec, the prose-docs site usually carries cross-cutting concepts that aren't in OpenAPI: per-endpoint expansion values, pagination semantics, endpoint-naming conventions, error code shapes, webhook auth, idempotency keys, search/filter syntaxes. **Skipping the prose docs because OpenAPI was found gives a doc-set that looks complete but isn't.** This bit the Ashby ingestion (2026-04-26): the OpenAPI spec defined `expand: array<string>` with no per-endpoint enum, but the prose docs at `developers.ashbyhq.com/docs/expansions` listed the actual valid values per endpoint. mcp-forge built tool descriptions claiming `expand=['candidate'|'job']` worked when neither was valid; the model trusted the description, hit `invalid_input`, and incorrectly concluded the API didn't expose form responses.
-
-When the source URL points to a docs site (not a direct spec URL), probe these standard concept paths in parallel **alongside 0b** — they flow into Phase 3, not Phase 2:
-
-```bash
-# Step 1 of 2 (HEAD): cheap status check — narrows the candidate set
-# Step 2 of 2 (GET): inline body+heading validation — accepts only real
-# concept pages and drops HTML 200 shells. Both run inline below.
-for path in /docs/authentication /docs/auth \
-            /docs/expansions /docs/expansion /docs/expanding-results \
-            /docs/pagination /docs/pagination-and-incremental-sync \
-            /docs/endpoint-naming \
-            /docs/responses-and-errors /docs/errors /docs/error-codes \
-            /docs/rate-limit /docs/rate-limits /docs/rate-limiting \
-            /docs/idempotency /docs/idempotent-requests \
-            /docs/webhooks /docs/setting-up-webhooks /docs/authenticating-webhooks \
-            /docs/filtering /docs/sorting /docs/searching; do
-  (url="${ORIGIN}${path}"; \
-   # Step 1: HEAD status check
-   code=$(curl -sIL -o /dev/null -w "%{http_code}" -m 5 "$url"); \
-   [ "$code" != "200" ] && exit 0; \
-   # Step 2: GET body + Content-Type + <h1>/<h2> heading match (>1KB body)
-   tmp=$(mktemp); \
-   ct=$(curl -sL -m 8 -D - -o "$tmp" "$url" | grep -i '^Content-Type:' | head -1); \
-   echo "$ct" | grep -qi 'text/html' || { rm -f "$tmp"; exit 0; }; \
-   [ "$(wc -c < "$tmp")" -lt 1024 ] && { rm -f "$tmp"; exit 0; }; \
-   # Heading text must match the concept (case-insensitive substring)
-   concept=$(echo "$path" | sed 's|/docs/||; s|-| |g'); \
-   grep -iE "<h[12][^>]*>[^<]*${concept}" "$tmp" >/dev/null && \
-     echo "FOUND: $url"; \
-   rm -f "$tmp") &
-done
-wait
-```
-
-Per `references/concept-page-paths.md` (extend that list as new vendors surface different conventions). HEAD 200 is not sufficient — many sites return a 200 HTML shell for any path. The GET validation above is inline (no separate step required): each candidate must be `Content-Type: text/html`, body > 1 KB, AND contain an `<h1>`/`<h2>` whose text matches the concept name.
-
-Concept pages found here are mandatory inputs to Phase 3 when the source is a docs site, even if a spec was also found. The two are complementary, not redundant.
+When the source URL is a docs site (not a direct spec URL), probe the standard concept paths
+(authentication, expansions, pagination, endpoint naming, errors, rate limits, idempotency, webhooks,
+filtering/sorting/searching) in parallel **alongside 0b** — even when 0b finds a spec, because OpenAPI
+omits these cross-cutting semantics. Concept pages found here are mandatory inputs to Phase 3. The
+HEAD+GET validation loop and the Ashby incident behind it: `references/concept-page-probe.md`.
 
 ---
 
@@ -176,57 +143,9 @@ mkdir -p ~/Documents/api-docs/{api-name}
 
 ## Phase 2: Convert to Markdown
 
-### 2a. OpenAPI/Swagger spec
-
-**Set `TEMP` fallback before any `$TEMP` reference** (Linux/macOS do not export `TEMP`
-by default; without this, `$TEMP/parse-foo.py` expands to `/parse-foo.py`):
-
-```bash
-TEMP="${TEMP:-/tmp}"
-```
-
-Write a Python parser to `$TEMP/parse-{name}.py` (NOT output dir — improvement 3).
-Parse with `yaml.safe_load` / `json.load`. Detect: OpenAPI 3.x (`openapi` key) vs Swagger 2.0 (`swagger` key) vs Postman (`info.schema` contains `postman`).
-
-**Always use `encoding='utf-8'`** in `open()` calls.
-
-**If spec is large (>5 MB):** slice by `paths` prefix list. Keep the sliced YAML as `openapi.{json,yaml}` in the output dir for future re-parse but don't index it (wrong format for semantic search).
-
-Generate `reference.md` with:
-- API title, version, base URL
-- Auth schemes from `securitySchemes`
-- Endpoints grouped by tag/path prefix
-- Per-endpoint: method, path, summary, parameters, request body schema, permissions/scopes from `security`
-
-### 2b. llms-full.txt
-
-Fetch with `curl`, split into `reference.md` (endpoint sections) + `constraints.md` (auth/rate limit sections). If > 10 MB, treat as too large and fall back to 2e.
-
-### 2c. PDF
-
-```python
-import pymupdf4llm
-md = pymupdf4llm.to_markdown("spec.pdf")
-with open(output_path, "w", encoding="utf-8") as f:
-    f.write(md)
-```
-
-### 2d. Postman
-
-Fetch from:
-```
-https://documenter.gw.postman.com/api/collections/{userId}/{collectionId}?segregateAuth=true&versionTag=latest
-```
-Header: `Origin: https://documenter.getpostman.com`. Parse `item` tree recursively.
-
-### 2e. HTML scraping (Firecrawl fallback)
-
-Only used when Phase 0b found no spec. See `references/firecrawl-rate-limits.md` for plan-specific limits.
-
-1. `firecrawl_map` with `limit: 60`
-2. Filter URLs: drop `/es/`, `/fr/`, `/pt-BR/`, `/ja/`, `/zh/`, `/de/`, `/discuss/`, PDFs
-3. Scrape 8-12 highest-value pages, `formats: ["markdown"]`, `onlyMainContent: true`
-4. **Standard plan** (current): 500 scrapes/min + 50 crawls/min — parallelism is free. If >12 pages needed, proceed without narrowing. For >50 pages, `/crawl` is fine.
+Per-source recipes — **2a** OpenAPI/Swagger spec, **2b** llms-full.txt, **2c** PDF, **2d** Postman,
+**2e** HTML scraping (Firecrawl fallback, only when 0b found no spec) — are in
+`references/source-conversion.md`; run the one Phase 1 selected, then continue to Phase 3.
 
 ---
 

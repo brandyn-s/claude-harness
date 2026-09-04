@@ -50,7 +50,7 @@ Bigger skills push detail into `references/` and deterministic helpers into
 | [`interview`](./interview/SKILL.md) | Adversarially stress-test a plan, design, or proposal to expose hidden assumptions. | - |
 | [`legacy-code-tdd`](./legacy-code-tdd/SKILL.md) | Companion to superpowers:test-driven-development for untested code and multi-layer features: characterization tests that pin current behavior before a change, a w... | - |
 | [`manifest-gen`](./manifest-gen/SKILL.md) | Generate or refresh manifest.yaml files for skills, hooks, rules, KB topics, and more. | - |
-| [`mega-capture`](./mega-capture/SKILL.md) | Recover the COMPLETE record of a large auto-compacted session and feed /capture's whole-session judgment, so strategic knowledge from the compacted-away head reac... | - |
+| [`mega-capture`](./mega-capture/SKILL.md) | Recover the COMPLETE record of a large auto-compacted session and feed /capture's whole-session judgment, so strategic knowledge from the compacted-away head reac... | references |
 | [`mega-distill`](./mega-distill/SKILL.md) | Recover the COMPLETE record of a large auto-compacted session into a condensed signal slice, so /distill judges the whole session instead of only the post-compact... | references, scripts, tests |
 | [`modal`](./modal/SKILL.md) | Offload compute-heavy, egress-safe work to Modal serverless GPUs/containers from Claude Code: parallel batch fan-out, Sandboxes for untrusted/LLM-generated code,... | - |
 | [`monitor`](./monitor/SKILL.md) | Start a real-time flaw AND observation tracker for the current session — log two event types THE MOMENT they surface: FLAWs (mistakes, refuted assumptions, bad in... | - |

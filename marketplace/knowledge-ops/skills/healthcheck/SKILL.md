@@ -7,6 +7,8 @@ effort: medium
 metadata:
   author: example-security-engineering
   version: "1.0"
+  body-cap: exempt
+  body-cap-reason: "PERIODIC: on-demand 13-check hygiene report (Check 0-13 -> Report), 5-15 turns; no requires_skills edge into it"
 allowed-tools: Agent AskUserQuestion Bash Glob Grep Read
 ---
 

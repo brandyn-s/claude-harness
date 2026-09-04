@@ -13,6 +13,8 @@ effort: medium
 metadata:
   author: example-security-engineering
   version: "1.0"
+  body-cap: exempt
+  body-cap-reason: "PERIODIC: rule-compliance measurement run ('Monthly or quarterly as a health check'), disable-model-invocation, 8-15 turns; no requires_skills edge into it"
 allowed-tools: AskUserQuestion Bash Glob Grep Read WebFetch WebSearch Write
 ---
 

@@ -5,6 +5,8 @@ when_to_use: Use at the start of any new measurement project — when the questi
 metadata:
   author: example-security-engineering
   version: "1.0"
+  body-cap: exempt
+  body-cap-reason: "PERIODIC: once-per-project harness bootstrap ('at the start of any new measurement project'), 20-50 turns; no requires_skills edge into it"
 allowed-tools: Bash Read Write Edit AskUserQuestion
 effort: high
 ---
