@@ -7,6 +7,8 @@ effort: high
 metadata:
   author: example-security-engineering
   version: "1.0"
+  body-cap: exempt
+  body-cap-reason: "PERIODIC: a hygiene audit run before shipping a skill or as a corpus pass; the routine part is bin/audit-skill.py in pre-commit, not this body"
 allowed-tools: Agent Bash Edit Read Grep Write AskUserQuestion
 ---
 

@@ -8,6 +8,8 @@ effort: medium
 metadata:
   author: example-security-engineering
   version: "1.0"
+  body-cap: exempt
+  body-cap-reason: "PERIODIC: a weekly launchd sweep (templates/launchd/com.example.claude.gather-intel.plist), hidden from model routing"
 compatibility:
   # Requires Tavily MCP and Exa MCP for multi-source community intelligence gathering.
   # Firecrawl is intentionally omitted: this skill makes no firecrawl_* calls in its body or references.
