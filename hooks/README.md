@@ -58,7 +58,7 @@ workflows own analysis and repair.
 | Hook | Matcher | What it does | Why it exists |
 |------|---------|-------------|---------------|
 | `pre-agent-dispatch.py` | `Agent` | Warns when dispatching workers that reference authenticated remote MCPs | Sub-agents can't authenticate to MCP Gateway. Warning prevents wasted turns on auth failures. |
-| `auto-topic-loader.py` | `mcp__remote-.*` etc. | Auto-loads topic context on first call to each MCP server | Workers get domain-specific gotchas without needing to remember to load them. |
+| `auto-topic-loader.py` | `mcp__.*\|WebSearch\|WebFetch` | Injects the routed topic on the first call to each MCP server. A topic over 8,000 chars is split on headings and only the summary plus the sections matching the tool name and input are injected, ending with a pointer to the file; sections are never repeated within a session | Workers get domain-specific gotchas without loading them by hand. Measured 2026-09-04, one call per routed server (13): whole-file injection emitted 64,866 chars and delivered NOTHING for msgraph.md (24,170 chars) and linear.md (10,256) beyond a NOT DELIVERED pointer; retrieval emits 78,262 chars and every route delivers (msgraph 8,030, linear 6,929, firecrawl 6,902; the 10 topics under 8,000 arrive whole). The hook's own work is about 1 ms; the ~18 ms end-to-end is interpreter startup. |
 
 ### Quality Enforcement (PostToolUse)
 

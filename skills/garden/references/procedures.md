@@ -313,7 +313,7 @@ is only a defect where a *mechanism enforces it*:
 
 | how the file reaches context | cap | over-cap consequence |
 |---|---|---|
-| injected by a hook (`auto-topic-loader`) | **10,000 chars**, hard | 85-98% silently absent |
+| injected by a hook (`auto-topic-loader`) | **8,000 chars** per topic (platform cap 10,000, hard) | since 2026-09-04: sliced — summary + the sections matching the tool call are injected under the cap, the rest via a pointer to the file; before that, 85-98% silently absent |
 | read explicitly (`Read`) | far higher | none — a token-cost question |
 
 The sweep reads the loader's own route map (never a copy — a copy drifts) and
