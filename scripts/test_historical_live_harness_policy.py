@@ -133,8 +133,14 @@ def _fake_runtime(
         args.extend(("--limit", "1"))
     # Runners that enforce a minimum N (evaluate-repos since 2026-09-03) refuse
     # --runs 1 unless the smoke is declared as such; the receipt records the override.
-    if "--allow-low-n" in (source_harness / "run_live.py").read_text(encoding="utf-8"):
+    runner_source = (source_harness / "run_live.py").read_text(encoding="utf-8")
+    if "--allow-low-n" in runner_source:
         args.append("--allow-low-n")
+    # Runners whose fixture is retired or paused (the five research A/Bs, 2026-09-04)
+    # print a notice and refuse a real run unless it is acknowledged; the fake runtime
+    # acknowledges so the run path itself stays exercised.
+    if "--acknowledge-retired-fixture" in runner_source:
+        args.append("--acknowledge-retired-fixture")
     env = {
         "ANTHROPIC_API_KEY": "test-only-fake-provider",
         "PYTHONPATH": str(fake_sdk),

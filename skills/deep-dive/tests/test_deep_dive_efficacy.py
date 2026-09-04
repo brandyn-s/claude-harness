@@ -368,12 +368,55 @@ def test_run_live_keyless_aborts_without_touching_results(tmp_path):
            if k not in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL")}
     proc = subprocess.run([sys.executable, str(work / "run_live.py"),
                            "--historical-reproduction", "--output", str(work / "runs" / "keyless.json"),
-                           "--runs", "1", "--workers", "2"],
+                           "--runs", "1", "--workers", "2", "--acknowledge-retired-fixture"],
                           capture_output=True, env=env, timeout=120, check=False)
     stderr = proc.stderr.decode("utf-8", errors="replace")
     assert proc.returncode == 2, f"expected exit 2 on keyless run, got {proc.returncode}; stderr: {stderr[:400]}"
     assert "error:" in stderr and "Traceback" not in stderr
+    assert "pass --acknowledge-retired-fixture" not in stderr, "the acknowledged run must get past the fixture gate"
     assert (work / "results.json").read_bytes() == before, "keyless run must not rewrite results.json"
+
+
+# ---------- 3b. Paused fixture (2026-09-04): a real run needs an explicit acknowledgement ----------
+
+def test_run_live_refuses_paused_fixture_without_acknowledgement(tmp_path):
+    """docs/research-skills-root-cause.md sections 4, 9.1 and 12.1: the currency keys are being
+    made run-time-resolved elsewhere. Until then a real run prints the notice, refuses, and
+    writes nothing."""
+    import shutil
+
+    work = tmp_path / "harness"
+    shutil.copytree(HARNESS, work)
+    before = (work / "results.json").read_bytes()
+    env = {k: v for k, v in os.environ.items()
+           if k not in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL")}
+    proc = subprocess.run([sys.executable, str(work / "run_live.py"),
+                           "--historical-reproduction", "--output", str(work / "runs" / "refused.json"),
+                           "--runs", "1"],
+                          capture_output=True, env=env, timeout=120, check=False)
+    stderr = proc.stderr.decode("utf-8", errors="replace")
+    assert proc.returncode == 2, stderr
+    assert "PAUSED pending run-time keys" in stderr
+    assert "--acknowledge-retired-fixture" in stderr and "Traceback" not in stderr
+    assert not (work / "runs" / "refused.json").exists()
+    assert (work / "results.json").read_bytes() == before
+
+
+def test_plan_only_reports_fixture_status_without_acknowledgement(tmp_path):
+    proc = _run_cli("--historical-reproduction", "--output", str(tmp_path / "plan.json"), "--plan-only")
+    assert proc.returncode == 0, proc.stderr
+    receipt = json.loads(proc.stdout)
+    assert receipt["fixture_status"] == "paused-pending-runtime-keys"
+    assert receipt["fixture_status_since"] == "2026-09-04"
+    assert receipt["retired_fixture_acknowledged"] is False
+    assert not (tmp_path / "plan.json").exists()
+
+
+def test_harness_docs_record_the_pause():
+    for name in ("README.md", "PROBLEM.md"):
+        text = (HARNESS / name).read_text(encoding="utf-8")
+        assert "Paused at this fixture (2026-09-04)" in text, name
+        assert "research-skills-root-cause.md" in text and "--acknowledge-retired-fixture" in text, name
 
 
 def test_run_live_requires_exactly_one_model_mode(tmp_path):
