@@ -52,6 +52,19 @@ def test_config_fails_on_disabled_sandbox_or_missing_hook(tmp_path: Path) -> Non
     assert checks["hook wiring"].status == "FAIL"
 
 
+def test_doctor_accepts_auto_mode_as_the_operator_permission_mode(tmp_path: Path) -> None:
+    """The operator overlay sets defaultMode auto (classifier + deny list + sandbox);
+    the doctor must read that as a valid mode, not a FAIL."""
+    _seed(tmp_path)
+    settings_path = tmp_path / "settings.json"
+    settings = json.loads(settings_path.read_text(encoding="utf-8"))
+    settings["permissions"]["defaultMode"] = "auto"
+    settings_path.write_text(json.dumps(settings), encoding="utf-8")
+    checks = {check.name: check for check in MODULE.inspect_config(tmp_path)}
+    assert checks["permission mode"].status == "PASS"
+    assert "auto" in checks["permission mode"].detail
+
+
 def test_doctor_warns_when_the_superpowers_plugin_is_missing(tmp_path: Path) -> None:
     """The companion skills extend superpowers; a kernel without the plugin has
     nothing for them to extend, so the doctor must say so (review 2026-09-03)."""

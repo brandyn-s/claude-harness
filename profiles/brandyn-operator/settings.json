@@ -3,34 +3,25 @@
     "CLAUDE_BASH_POLICY_PACKS": "delivery"
   },
   "permissions": {
-    "ask": [
-      "Bash(terraform apply:*)",
-      "Bash(terraform destroy:*)",
-      "Bash(terraform import:*)",
-      "Bash(terraform state rm:*)",
-      "Bash(aws iam put-role-policy:*)",
-      "Bash(aws iam attach-role-policy:*)",
-      "Bash(aws iam put-user-policy:*)",
-      "Bash(aws iam create-access-key:*)",
-      "Bash(aws secretsmanager put-secret-value:*)",
-      "Bash(aws secretsmanager delete-secret:*)",
-      "Bash(aws s3 rm:*)",
-      "Bash(aws ssm put-parameter:*)",
-      "Bash(git reset --hard:*)",
-      "Bash(git clean:*)",
-      "Bash(git push --force:*)",
-      "Bash(git push --force-with-lease:*)",
-      "Bash(git worktree remove --force:*)",
-      "Bash(git stash drop:*)",
-      "mcp__github__set_branch_protection",
-      "mcp__github__toggle_enforce_admins",
-      "mcp__github__trigger_workflow",
-      "mcp__paloalto__update_custom_url_categories",
-      "mcp__paloalto__push_candidate_config",
-      "mcp__paloalto__update_security_rules",
-      "mcp__crowdstrike__contain_host",
-      "mcp__crowdstrike__falcon_add_ioc",
-      "mcp__tailscale__set_policy_file"
+    "defaultMode": "auto"
+  },
+  "autoMode": {
+    "environment": [
+      "$defaults",
+      "Security-engineering operator workstation on macOS running the fresh-laptop core (deny list + native sandbox) plus this overlay; the bash-security-guard hook hard-blocks catastrophic commands and secret exposure before the classifier sees them",
+      "Source control: GitHub through gh and git; forbidden organisations come from CLAUDE_FORBIDDEN_GITHUB_ORGS and are hard-blocked, everything else is routine",
+      "Cloud and infrastructure: AWS through named profiles (CLAUDE_AWS_DEFAULT_PROFILE) and Terraform; read paths (plan, describe, list, get) are routine",
+      "MCP servers for GitHub, Tailscale, CrowdStrike, Palo Alto and ITSM: read tools are routine; write tools change production security controls"
+    ],
+    "allow": [
+      "$defaults"
+    ],
+    "soft_deny": [
+      "$defaults",
+      "Infrastructure mutation: terraform apply, destroy, import or state rm unless the user asked for that exact change in this session",
+      "IAM and secrets: aws iam put/attach policies, create-access-key, secretsmanager put or delete, ssm put-parameter, s3 rm unless the user asked for that exact change",
+      "Irreversible git: reset --hard, clean, force push including --force-with-lease, worktree remove --force, stash drop unless the user asked for it",
+      "Production security controls through MCP: branch protection and enforce-admins changes, workflow triggers, firewall rule/category/config pushes, host containment, IOC additions, tailnet policy changes unless the user asked for that exact change"
     ]
   }
 }

@@ -33,6 +33,10 @@ _APPEND_LISTS = {
     ("permissions", "allow"),
     ("permissions", "deny"),
     ("permissions", "ask"),
+    ("autoMode", "environment"),
+    ("autoMode", "allow"),
+    ("autoMode", "soft_deny"),
+    ("autoMode", "hard_deny"),
 }
 
 

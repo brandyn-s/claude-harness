@@ -47,8 +47,9 @@ def inspect_config(config_root: Path) -> list[Check]:
     checks.append(
         Check(
             "permission mode",
-            "PASS" if permissions.get("defaultMode") == "acceptEdits" else "FAIL",
-            f"defaultMode={permissions.get('defaultMode')!r}",
+            "PASS" if permissions.get("defaultMode") in ("acceptEdits", "auto") else "FAIL",
+            f"defaultMode={permissions.get('defaultMode')!r}"
+            + (" (classifier-judged; deny list and sandbox still apply)" if permissions.get("defaultMode") == "auto" else ""),
         )
     )
     sandbox = settings.get("sandbox") or {}
@@ -129,13 +130,17 @@ def inspect_config(config_root: Path) -> list[Check]:
             ).split(",")
             if item.strip()
         }
-        asks = set(permissions.get("ask") or [])
-        required_asks = {
-            "Bash(terraform apply:*)",
-            "Bash(aws iam put-role-policy:*)",
-            "Bash(git push --force-with-lease:*)",
-            "mcp__github__set_branch_protection",
-        }
+        # 2026-09-03: the overlay runs the auto-mode classifier; its review
+        # boundaries are autoMode.soft_deny prose categories, not ask rules.
+        soft_deny = " ".join(
+            str(entry).lower()
+            for entry in ((settings.get("autoMode") or {}).get("soft_deny") or [])
+        )
+        required_categories = ("terraform", "iam", "force push", "branch protection")
+        review_boundaries_ok = (
+            permissions.get("defaultMode") == "auto"
+            and all(category in soft_deny for category in required_categories)
+        )
         wired_scripts = {
             Path(str((hook.get("args") or [""])[-1])).name
             for _event, hook in handlers
@@ -147,7 +152,7 @@ def inspect_config(config_root: Path) -> list[Check]:
         }
         operator_ok = (
             "delivery" in packs
-            and required_asks.issubset(asks)
+            and review_boundaries_ok
             and required_scripts.issubset(wired_scripts)
             and operator_rule.is_file()
         )
@@ -155,7 +160,7 @@ def inspect_config(config_root: Path) -> list[Check]:
             Check(
                 "operator layer",
                 "PASS" if operator_ok else "FAIL",
-                "delivery policy, authority review, non-progress, and secret controls active"
+                "delivery policy, auto-mode review boundaries, non-progress, and secret controls active"
                 if operator_ok
                 else "operator layer is partially installed or misconfigured",
             )

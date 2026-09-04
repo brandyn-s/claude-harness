@@ -37,9 +37,15 @@ def test_operator_profile_composes_on_fresh_kernel(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stdout + result.stderr
     settings = json.loads(target.read_text(encoding="utf-8"))
     assert settings["sandbox"]["enabled"] is True
-    assert settings["permissions"]["defaultMode"] == "acceptEdits"
+    # 2026-09-03: the overlay runs the auto-mode classifier with the fresh core's
+    # deny list and sandbox kept; the former ask list became autoMode.soft_deny
+    # prose so destructive infra changes are judged by intent instead of prompting.
+    assert settings["permissions"]["defaultMode"] == "auto"
     assert settings["env"]["CLAUDE_BASH_POLICY_PACKS"] == "delivery"
-    assert "Bash(terraform apply:*)" in settings["permissions"]["ask"]
+    assert "Bash(terraform apply:*)" not in settings["permissions"].get("ask", [])
+    assert any("terraform" in entry for entry in settings["autoMode"]["soft_deny"])
+    assert settings["autoMode"]["environment"][0] == "$defaults"
+    assert settings["permissions"]["deny"], "the fresh core deny list must survive the overlay"
     # Review 2026-09-03: the overlay enabled an org plugin that the referenced
     # marketplace catalog did not contain, so a fresh install would fail plugin
     # resolution at startup. An operator overlay may only wire what exists.
@@ -57,7 +63,8 @@ def test_operator_profile_preserves_existing_review_boundaries(tmp_path: Path) -
                         "Bash(custom-production-release:*)",
                         "Bash(terraform apply:*)",
                     ]
-                }
+                },
+                "autoMode": {"soft_deny": ["Custom production release without a change ticket"]},
             }
         ),
         encoding="utf-8",
@@ -82,9 +89,14 @@ def test_operator_profile_preserves_existing_review_boundaries(tmp_path: Path) -
     )
 
     assert result.returncode == 0, result.stdout + result.stderr
-    asks = json.loads(target.read_text(encoding="utf-8"))["permissions"]["ask"]
-    assert "Bash(custom-production-release:*)" in asks
-    assert asks.count("Bash(terraform apply:*)") == 1
+    merged = json.loads(target.read_text(encoding="utf-8"))
+    asks = merged["permissions"]["ask"]
+    assert "Bash(custom-production-release:*)" in asks          # user's own ask survives
+    assert asks.count("Bash(terraform apply:*)") == 1          # never duplicated, never removed
+    soft = merged["autoMode"]["soft_deny"]
+    assert "Custom production release without a change ticket" in soft   # user's own soft_deny survives
+    assert any("terraform" in entry for entry in soft)                    # ours is added
+    assert len(soft) == len(set(soft)), "autoMode lists must union without duplicates"
 
 
 def test_installer_deploys_operator_rule_and_hooks(tmp_path: Path) -> None:
