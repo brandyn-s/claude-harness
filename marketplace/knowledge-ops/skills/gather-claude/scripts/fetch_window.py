@@ -113,7 +113,7 @@ CURL_TASKS = [
     # REQUIRED by the skill but had no task here, so the manifest reported
     # "0 failed" while the channel was never fetched at all. That run found 5
     # in-window releases in it, including the v1.40609.0 deprecation wave with a
-    # hard 2026-10-07 cut-off affecting keys deployed on both our fleets. An
+    # hard 2026-10-07 cut-off affecting keys deployed through any MDM. An
     # omitted channel is indistinguishable from an empty one; that is the bug.
     # NOTE the host: these live on claude.com/docs/third-party/, NOT
     # code.claude.com — the code.claude.com spellings 404.
