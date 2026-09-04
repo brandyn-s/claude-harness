@@ -29,7 +29,7 @@ ON powershell_acl_detection_or_remediation (Get-Acl loops, Intune detection, STI
   FORBIDDEN: write-mask from FullControl/Modify composites (includes read bits).
   REQUIRED: enumerate write bits explicitly — WriteData,AppendData,WriteExtendedAttributes,
             WriteAttributes,Delete,DeleteSubdirectoriesAndFiles,ChangePermissions,TakeOwnership
-  # INCIDENT 2026-05-29 REM051. Full: #powershell-acl-write-mask
+  # INCIDENT 2026-05-29 managed-settings remediation script. Full: #powershell-acl-write-mask
 
 ON interactive_npm_cli:
   # The UV_HANDLE_CLOSING assertion/hang was WINDOWS-ONLY (a Windows libuv TTY
