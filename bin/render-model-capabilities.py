@@ -92,7 +92,9 @@ def _restrictions(model: dict) -> str:
     return f"{sampling} {prefill}"
 
 
-def _thousands(tokens: int) -> str:
+def _token_count(tokens: int) -> str:
+    if tokens % 1_000_000 == 0:
+        return f"{tokens // 1_000_000}M"
     return f"{tokens // 1000}k"
 
 
@@ -123,8 +125,8 @@ def _notes(model: dict) -> str:
         parts.append("Priority Tier is unavailable.")
     if model["context_window_tokens"]:
         parts.append(
-            f"{_thousands(model['context_window_tokens'])} context window; "
-            f"up to {_thousands(model['max_output_tokens'])} output tokens."
+            f"{_token_count(model['context_window_tokens'])} context window; "
+            f"{_token_count(model['max_output_tokens'])} max output."
         )
     parts.extend(model["notes"])
     return " ".join(parts)

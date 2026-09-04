@@ -58,7 +58,9 @@ def test_render_reads_every_current_row_and_no_superseded_one():
     for model in model_contracts.current_models():
         assert f"(`{model['id']}`)" in block
     for model_id in model_contracts.superseded_ids():
-        assert model_id not in block, "superseded models are frozen evidence, not current guidance"
+        assert not model_contracts.names(block, model_id), (
+            "superseded models are frozen evidence, not current guidance"
+        )
 
 
 def test_render_encodes_the_disable_effort_cap_and_absent_effort():

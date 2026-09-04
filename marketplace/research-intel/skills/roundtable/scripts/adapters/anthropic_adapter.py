@@ -6,11 +6,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import http_post_json  # noqa: E402
 
-DEFAULT_MODEL = "claude-fable-5"
+DEFAULT_MODEL = "claude-fable-5-1"
 MODEL_ENV_VAR = "ROUNDTABLE_ANTHROPIC_MODEL"
 SUPPORTED_MODELS = frozenset({
-    "claude-fable-5",
-    "claude-mythos-5",
+    "claude-fable-5-1",
+    "claude-mythos-5-1",
     "claude-opus-5",
     "claude-sonnet-5",
 })
@@ -19,7 +19,7 @@ SUPPORTED_MODELS = frozenset({
 # ROUNDTABLE_COVERED_MODEL_RETENTION_APPROVED gate is retired: an org whose
 # retention configuration regresses gets a 400 from the API, which call()
 # already surfaces as a typed transport_or_api failure.
-COVERED_MODELS = frozenset({"claude-fable-5", "claude-mythos-5"})
+COVERED_MODELS = frozenset({"claude-fable-5-1", "claude-mythos-5-1"})
 DEFAULT_EFFORT = "high"
 EFFORT_ENV_VAR = "ROUNDTABLE_ANTHROPIC_EFFORT"
 SUPPORTED_EFFORTS = frozenset({"low", "medium", "high", "xhigh", "max"})
@@ -32,8 +32,8 @@ BASE_MAX_TOKENS = {
 DEEP_REASONING_MIN_TOKENS = 64_000
 UNAVAILABLE = "<unavailable>"
 TOKEN_PRICING_USD_PER_MTOK = {
-    "claude-fable-5": {"in": 10.0, "out": 50.0},
-    "claude-mythos-5": {"in": 10.0, "out": 50.0},
+    "claude-fable-5-1": {"in": 10.0, "out": 50.0},
+    "claude-mythos-5-1": {"in": 10.0, "out": 50.0},
     "claude-opus-5": {"in": 5.0, "out": 25.0},
     # Conservative standard rate. A time-limited introductory rate may apply;
     # do not use the estimator as a billing oracle.

@@ -66,9 +66,16 @@ configurable:
 - Pre-registered rubric fixture: `models.persona`,
   `models.persona_effort`, `models.judge`, `models.judge_effort`
 
-Fable 5 and Mythos 5 require 30-day retention and are unavailable under ZDR.
-Set `PERSONA_COVERED_MODEL_RETENTION_APPROVED=1` only after that retention lane
-is approved. Every producer and judge result records a `runtime_receipt` with
+A model value is either an exact current API id or a tier alias (`fable`,
+`mythos`, `opus`, `sonnet`, `haiku`). Aliases resolve against
+`contracts/model-capabilities.json` before any request; an unknown or
+superseded id, or Claude Code's `default`, is a configuration error (exit 2)
+before the fixture is dispatched, never a 404 from the API. The resolved id is
+what the request and every `runtime_receipt` record.
+
+Covered Models (the Fable and Mythos families) require 30-day retention and are
+unavailable under ZDR. Set `PERSONA_COVERED_MODEL_RETENTION_APPROVED=1` only
+after that retention lane is approved. Every producer and judge result records a `runtime_receipt` with
 the requested model/effort and provider-observed effective model. Refusals,
 truncation, context exhaustion, and empty responses are failed typed outcomes,
 not qualification evidence. A provider model switch is a typed

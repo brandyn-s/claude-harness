@@ -69,3 +69,13 @@ Not worth it when:
 - The decision is reversible at low cost
 - The target has been reviewed by a domain expert recently
 - You'd take the recommendations on faith without acting on them
+
+## 2026-08-30 live requalification (historical evidence)
+
+The first live requalification recorded in SKILL.md ran with `claude-fable-5`
+as the Anthropic arm (`high` effort) alongside grok-4.6 and gpt-5.6-sol:
+$5.45 total across 21 provider calls, of which the Anthropic arm was $3.69.
+On 2026-09-04 `contracts/model-capabilities.json` moved Claude Fable 5 to
+`superseded` and the adapter default followed the contract to
+`claude-fable-5-1`, which the vendor prices identically per token; no live run
+has been repeated on it yet, so treat the figures above as the predecessor's.

@@ -1,6 +1,6 @@
 id: roundtable
 type: skill
-description: "Run a multi-agent adversarial roundtable on any target context. Three LLMs (Claude Fable 5, Grok 4.6, GPT-5.6 Sol by default) produce independent assessments, then engage in forced critique, defend/concede, and resolution. Built-in null-control injection, falsifier-required claims, and embedding-based auto-stop."
+description: "Run a multi-agent adversarial roundtable on any target context. Three LLMs (Claude Fable 5.1, Grok 4.6, GPT-5.6 Sol by default) produce independent assessments, then engage in forced critique, defend/concede, and resolution. Built-in null-control injection, falsifier-required claims, and embedding-based auto-stop."
 category: review
 
 requires_tools:
@@ -47,7 +47,7 @@ input_contract:
     covered_model_retention_approved:
       type: bool
       required: false
-      description: "Must be true via ROUNDTABLE_COVERED_MODEL_RETENTION_APPROVED=1 for Fable 5 or Mythos 5"
+      description: "Must be true via ROUNDTABLE_COVERED_MODEL_RETENTION_APPROVED=1 for Fable 5.1 or Mythos 5.1"
   scope_from: argument
 output_contract:
   produces:
@@ -68,7 +68,7 @@ estimated_turns: "15-40"
 
 preconditions:
   - "ANTHROPIC_API_KEY, XAI_API_KEY, OPENAI_API_KEY set"
-  - "Fable 5 or Mythos 5 overrides require approved 30-day retention and ROUNDTABLE_COVERED_MODEL_RETENTION_APPROVED=1"
+  - "Fable 5.1 or Mythos 5.1 overrides require approved 30-day retention and ROUNDTABLE_COVERED_MODEL_RETENTION_APPROVED=1"
   - "output directory is new or empty, except an Agent D seed at round_1/agent_d.md when injection is enabled"
   - "target context is non-trivial (not a bug-shaped problem with obvious answer)"
 guardrails:

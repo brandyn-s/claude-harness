@@ -1,7 +1,7 @@
 ---
 name: roundtable
 description: "Run a multi-agent adversarial roundtable (Claude, Grok, GPT) for independent critique."
-when_to_use: 'Run a multi-agent adversarial roundtable on any target context. Three LLMs (Claude Fable 5, Grok 4.6, GPT-5.6 Sol by default) produce independent assessments, then engage in up to 5 rounds of forced critique, defend/concede, and resolution (default 5 rounds; R1 independent, R2 forced critique, R3-R4 pre-reg + defend/concede, R5 final consolidated; auto-stop typically halts at R3-R4). Built-in null-control injection, falsifier-required claims, embedding-based auto-stop, single-retry on transient failures. Use when a methodology review, design proposal, security audit, or multi-stakeholder critique needs independent multi-model adversarial scrutiny. Trigger phrases - "roundtable", "multi-agent review", "adversarial review", "second opinion from multiple models". Do NOT use for bug-shaped problems with obvious answers, single-tool lookups, or trivial questions.'
+when_to_use: 'Run a multi-agent adversarial roundtable on any target context. Three LLMs (Claude Fable 5.1, Grok 4.6, GPT-5.6 Sol by default) produce independent assessments, then engage in up to 5 rounds of forced critique, defend/concede, and resolution (default 5 rounds; R1 independent, R2 forced critique, R3-R4 pre-reg + defend/concede, R5 final consolidated; auto-stop typically halts at R3-R4). Built-in null-control injection, falsifier-required claims, embedding-based auto-stop, single-retry on transient failures. Use when a methodology review, design proposal, security audit, or multi-stakeholder critique needs independent multi-model adversarial scrutiny. Trigger phrases - "roundtable", "multi-agent review", "adversarial review", "second opinion from multiple models". Do NOT use for bug-shaped problems with obvious answers, single-tool lookups, or trivial questions.'
 argument-hint: "[context-file-path] [--max-rounds N] [--no-inject-agent-d] [--no-prereg] [--auto-stop] [--budget USD]"
 allowed-tools: AskUserQuestion Bash Edit Glob Grep Read Write Agent
 compatibility:
@@ -16,7 +16,7 @@ compatibility:
     - env_var: VOYAGE_API_KEY
       fallback: "Embedding-based convergence detection disabled; auto-stop falls back to fixed max-rounds"
     - env_var: ROUNDTABLE_ANTHROPIC_MODEL
-      fallback: "Uses the qualified production default claude-fable-5"
+      fallback: "Uses the production default claude-fable-5-1"
     - env_var: ROUNDTABLE_ANTHROPIC_EFFORT
       fallback: "Uses high effort"
 verified_on: 2026-08-08
@@ -36,10 +36,12 @@ Run a structured adversarial review of any target context using three frontier L
 > Resolve and record each effective model per
 > `../_shared/model-runtime-policy.md`.
 
-The qualified production default for the Anthropic arm and synthesis is
-`claude-fable-5` at `high` effort. It is explicit in the adapter and configurable
-per run with `ROUNDTABLE_ANTHROPIC_MODEL` and
-`ROUNDTABLE_ANTHROPIC_EFFORT`. The transcript records the requested and effective
+The production default for the Anthropic arm and synthesis is
+`claude-fable-5-1` at `high` effort: the current Fable row of
+`contracts/model-capabilities.json`, same per-token price as its predecessor,
+on which the 2026-08-30 live requalification below ran and has not yet been
+repeated. It is explicit in the adapter and configurable per run with
+`ROUNDTABLE_ANTHROPIC_MODEL` and `ROUNDTABLE_ANTHROPIC_EFFORT`. The transcript records the requested and effective
 model returned by the provider in a nested `runtime_receipt`, together with
 provider, effort, context class, fallback/switch, refusal, and observation-source
 fields. Unobserved values remain `<unavailable>`; do not infer the serving model
@@ -48,7 +50,7 @@ not quorum or JRH evidence. `context_class` likewise remains `<unavailable>`
 unless provider or runtime metadata explicitly observes it; a requested model
 name or capability table is not evidence of the active context class.
 
-Fable 5 has thinking always on. The adapter sends effort explicitly and omits
+Fable 5.1 has thinking always on. The adapter sends effort explicitly and omits
 sampling parameters and manual thinking budgets. An Anthropic HTTP-200
 `stop_reason: refusal` is a typed failed arm, not a successful assessment —
 and Fable's safety classifiers fire more readily than Opus-tier on
@@ -59,7 +61,7 @@ the panel composition and invalidate the decorrelated-consensus claim. If the
 Fable arm refuses on a given context, requalify that run explicitly on
 `claude-opus-5` via `ROUNDTABLE_ANTHROPIC_MODEL`.
 
-Fable 5 and Mythos 5 require 30-day data retention (unavailable under ZDR;
+Fable 5.1 and Mythos 5.1 require 30-day data retention (unavailable under ZDR;
 Mythos also requires Project Glasswing access). The org's 30-day retention was
 confirmed 2026-08-19 and Fable is now the default arm; the former per-run
 `ROUNDTABLE_COVERED_MODEL_RETENTION_APPROVED` gate is retired. If the org's
@@ -100,7 +102,7 @@ Roundtable is for **methodologically subtle** targets where individual blind spo
 
 ## Step 1 — Configuration
 
-Default protocol uses Claude Fable 5 (`claude-fable-5`, `high` effort) + Grok
+Default protocol uses Claude Fable 5.1 (`claude-fable-5-1`, `high` effort) + Grok
 4.6 + GPT-5.6 Sol across 5 rounds with pre-reg in R3-R4 only and the
 Agent D null-control **ON**. Injection is the default, not an opt-in: it is the
 only instrument that detects placebo agreement (arms endorsing a fabricated
@@ -111,7 +113,7 @@ Override only the Anthropic arm with per-run environment values after
 qualification:
 
 ```bash
-ROUNDTABLE_ANTHROPIC_MODEL=claude-fable-5 \
+ROUNDTABLE_ANTHROPIC_MODEL=claude-fable-5-1 \
 ROUNDTABLE_ANTHROPIC_EFFORT=high \
 python3 ${CLAUDE_PLUGIN_ROOT}/skills/roundtable/scripts/harness.py \
   --context path/to/context.md \
@@ -305,15 +307,16 @@ cost materially.
 - 4 rounds with prereg, auto-stop on: ~$15-25, ~15 min wall
 - 3 rounds no prereg: ~$8-12, ~8 min wall
 
-**First live requalification on the Fable 5 / grok-4.6 / gpt-5.6-sol panel
-(2026-08-30) came in ~5x BELOW those historical ranges**, so budget from this
+**First live requalification on the 2026-08-30 panel (the previous Fable arm,
+grok-4.6, gpt-5.6-sol; exact ids in `references/cost-tradeoffs.md`) came in
+~5x BELOW those historical ranges**, so budget from this
 row, not the ones above, and treat the ranges above as an upper bound until
 more runs land:
 
 | measured | value |
 |---|---|
 | total | **$5.45** across 21 provider calls |
-| per arm | Anthropic (Fable 5, `high`) $3.69 · GPT $1.23 · Grok $0.54 |
+| per arm | Anthropic (previous Fable arm, `high`) $3.69 · GPT $1.23 · Grok $0.54 |
 | configuration | 5 rounds, prereg in R3-R4, `--inject-agent-d`, no auto-stop |
 | context | 15,981 chars (~2,500 words) |
 | completeness | 3/3 arms succeeded in every main round; terminal `run_complete`; 0 malformed transcript lines |
@@ -353,7 +356,8 @@ already on by default and costs about nothing, since Round 1 is the small round.
 ## Known operational constraints
 
 - **Anthropic model contract**: `ROUNDTABLE_ANTHROPIC_MODEL` defaults to
-  `claude-opus-5`; `ROUNDTABLE_ANTHROPIC_EFFORT` defaults to `high` and accepts
+  `claude-fable-5-1`, with `claude-opus-5` as the documented override arm;
+  `ROUNDTABLE_ANTHROPIC_EFFORT` defaults to `high` and accepts
   `low`, `medium`, `high`, `xhigh`, or `max`. Opus 5 thinking cannot be disabled
   at `xhigh`/`max`; the adapter does not send a disabling override. A refusal is
   logged as a failed arm so it cannot silently become consensus. Any model or
