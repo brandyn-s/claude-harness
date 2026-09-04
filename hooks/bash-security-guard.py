@@ -915,17 +915,18 @@ try:
         _config = json.load(_f)
         PROTECTED_REPOS = set(_config["repos"])
         FORK_REPOS = _config.get("fork_repos", {})
-except Exception:
+except Exception as _config_error:
+    # protected-repos.json is the ONLY source of the protected set (same posture
+    # as worktree-enforcement.py): a missing or malformed file leaves the repo-
+    # scoped guards inert with one visible note, never a stale built-in list.
     _config = {}
-    PROTECTED_REPOS = {
-        "mcp-servers",
-        "mcp-infra",
-        "example-compliance-repo",
-        "example-sbom-tool",
-        "claude-config",
-        "claude-harness",
-    }
+    PROTECTED_REPOS = set()
     FORK_REPOS = {}
+    print(
+        f"[bash-security-guard] protected-repos.json unreadable ({_config_error!r}); "
+        "repo-scoped guards inert until it is installed",
+        file=sys.stderr,
+    )
 
 
 def _forbidden_github_orgs():

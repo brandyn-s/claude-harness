@@ -406,7 +406,7 @@ install_environment_catalog() {
         warn "Missing $src (incomplete checkout?) -- environment catalog not seeded"
         return
     fi
-    cp "$src" "$dest"
+    cp "$src" "$dest"  # seed-once: guarded above, never overwrites
     ok "Seeded $dest (every section empty; fill it from contracts/environment-catalog.example.json)"
 }
 

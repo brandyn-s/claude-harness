@@ -21,6 +21,7 @@ precedent for the catalog's shape.
 import re
 from pathlib import Path
 
+# validate-hook-paths-target: hooks/_environment_catalog.py
 import pytest
 
 HOOKS_DIR = Path(__file__).resolve().parent.parent
