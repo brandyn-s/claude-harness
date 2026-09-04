@@ -1,0 +1,20 @@
+{
+  "_about": "Exact model ids permitted in active surfaces (skills/*/SKILL.md bodies, rules/**, hooks/*.py, agents/*.md). One entry per file: the ids it may name and a one-line reason. scripts/test_model_id_hygiene.py fails on any other exact id and on an entry that no longer matches anything. Harnesses, frozen results, contracts, run-history references, the generated api-guardrails block, and 'measured 2026-' verdict lines are allowed by construction and need no entry.",
+  "entries": [
+    {
+      "path": "skills/api-guardrails/SKILL.md",
+      "ids": ["claude-opus-5", "claude-sonnet-5"],
+      "reason": "Claude API code samples must pass a real API model id; Claude Code aliases (opus/sonnet) are not valid API ids. The capability table itself is generated from contracts/model-capabilities.json."
+    },
+    {
+      "path": "skills/roundtable/SKILL.md",
+      "ids": ["claude-fable-5", "claude-opus-5"],
+      "reason": "Documents the adapter's exact API default and the ROUNDTABLE_ANTHROPIC_MODEL override, which anthropic_adapter.py validates against SUPPORTED_MODELS; aliases are not valid API ids."
+    },
+    {
+      "path": "rules/incidents/verify-effectiveness.md",
+      "ids": ["claude-opus-5"],
+      "reason": "Incident narrative names the model that produced the observation: frozen evidence, not guidance."
+    }
+  ]
+}
