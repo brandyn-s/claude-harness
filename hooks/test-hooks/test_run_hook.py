@@ -176,3 +176,22 @@ def test_termination_is_prompt_and_logged(probe, tmp_path):
         ["pgrep", "-f", name], capture_output=True, text=True, check=False
     ).stdout.strip()
     assert not survivors, f"orphaned hook child still running: {survivors}"
+
+
+def test_fire_row_records_elapsed_ms_even_without_epochrealtime(probe, tmp_path):
+    """macOS ships bash 3.2, which has no EPOCHREALTIME, so every fire row the
+    wrapper wrote there carried ms=null and hook-fire-report's latency view was
+    blind on the owner's machine (2026-09-04). The wrapper must fall back to a
+    sub-millisecond clock and record an integer."""
+    name = probe("import sys, json\njson.load(sys.stdin)\nsys.exit(0)\n")
+    env = {**os.environ, "HOME": str(tmp_path)}
+    env.pop("CLAUDE_CONFIG_DIR", None)
+    proc = subprocess.run([str(RUN_HOOK), name], input=json.dumps({"tool_name": "Bash"}),
+                          capture_output=True, text=True, encoding="utf-8", timeout=60, check=False, env=env)
+    assert proc.returncode == 0, proc.stderr
+    audit = tmp_path / ".claude" / "audit"
+    rows = [json.loads(line) for path in sorted(audit.glob("hook-fires-*.jsonl"))
+            for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    mine = [r for r in rows if r.get("hook") == name]
+    assert mine, rows
+    assert isinstance(mine[-1]["ms"], int) and 0 <= mine[-1]["ms"] < 60_000, mine[-1]
