@@ -176,7 +176,7 @@ Fire all adversarial queries in a single parallel message. For each finding wher
 
 Research papers frequently have caveats buried in methodology sections, failed replication attempts, or follow-up work that narrows the original claim. Without adversarial search, the skill would uncritically relay abstract-level claims.
 
-**Symmetric evidentiary burden** (per `~/.claude/rules/symmetric-evidentiary-burden.md`): counter-evidence sources must meet the same PRIMARY-source bar as supporting sources. Single-source counter-evidence is preliminary signal, not refutation; pre-LLM citations cannot refute LLM-era behavioral claims; absence of supporting evidence is UNCHARTED, not REFUTED (see `~/.claude/rules/uncharted-vs-refuted.md`).
+**Symmetric evidentiary burden** (per `~/.claude/rules/symmetric-evidentiary-burden.md`): counter-evidence sources must meet the same PRIMARY-source bar as supporting sources. Single-source counter-evidence is preliminary signal, not refutation; pre-LLM citations cannot refute LLM-era behavioral claims; absence of supporting evidence is UNCHARTED, not REFUTED.
 
 ## Step 6c: Citation-Domain Freshness Check
 

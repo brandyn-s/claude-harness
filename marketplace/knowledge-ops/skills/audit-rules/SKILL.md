@@ -374,7 +374,7 @@ ledger under `demotions` (each entry with `effective_here` for this
 platform). A high warn-band rate on a ledgered rule is the *expected
 consequence of the demotion*, not a promotion signal.
 
-**Hook-enforced + high-rate gate (verify-instrument-before-fix)**: If a rule
+**Hook-enforced + high-rate gate**: If a rule
 is already classified hook-enforced AND its rate is >10%, do NOT recommend
 upgrading enforcement strength. Instead, READ the hook source and identify
 the **coverage gap** — the surface the hook doesn't fire on. The scanner's

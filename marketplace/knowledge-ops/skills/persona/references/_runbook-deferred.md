@@ -145,7 +145,7 @@ problem. Methodology-evolution entry documents the comparison.
 See `methodology-evolution.md` 2026-05-02 entry for the full list. P0
 #1-4 (doc-vs-code drift), P1 #7 (curator warning), P2 #9 (configurable
 paths), P3 #12-14 (parser logging, parse-error retry, INDEX locking),
-plus the Tier-1 `verify-instrument-before-fix.md` rule and
+plus the Tier-1 instrument-first gate (now in `verify-effectiveness.md`) and
 plateau-diagnose Step 1 demotion.
 
 Total LoC changed: ~150 across 5 files in /persona, 1 in /plateau-diagnose,

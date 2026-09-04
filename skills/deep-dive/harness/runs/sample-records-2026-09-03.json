@@ -1,0 +1,650 @@
+{
+  "_about": "Compact re-gradeable sample (records minus _response_provenance) of transcripts-20260903T205439Z.json; regrade.py --records <this file> --run-date 2026-09-03 reproduces regrade-2026-09-03.json.",
+  "runs": [
+    {
+      "run_idx": 0,
+      "records": [
+        {
+          "arm": "with_skill",
+          "id": "transformer-year",
+          "answer_text": "2017. 'Attention Is All You Need' (Vaswani, Shazeer, Parmar, Uszkoreit, Jones, Gomez, Kaiser, Polosukhin) was posted to arXiv as 1706.03762 on June 12, 2017, and published in the peer-reviewed proceedings of NIPS/NeurIPS 2017 (Advances in Neural Information Processing Systems 30, Long Beach, CA, 4\u20139 December 2017, pp. 5998\u20136008). Both the preprint and the conference publication fall in 2017.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: the paper was published in a year other than 2017 (e.g., 2016 or 2018). Verdict: COLLAPSES \u2014 the arXiv record (1706.03762, submitted June 2017), the NeurIPS proceedings entry (NIPS 2017, vol. 30), and consistent bibliographic citations across multiple independent papers all give 2017; anyone checking arxiv.org/abs/1706.03762 or proceedings.neurips.cc/paper/2017 would immediately refute an alternative year."
+        },
+        {
+          "arm": "with_skill",
+          "id": "rag-acronym",
+          "answer_text": "In the context of LLMs, RAG stands for Retrieval-Augmented Generation. It is a technique in which a large language model first retrieves relevant documents or data from an external knowledge source (e.g., a vector database, document store, or search engine) and then incorporates that retrieved content into its prompt to generate a grounded response. This lets the model use domain-specific or up-to-date information not present in its training data, reduces hallucinations, allows source citation, and avoids costly retraining. The term was introduced in the 2020 paper by Lewis et al. (Facebook AI Research), which combined a parametric language model with a non-parametric external memory accessed via retrieval at inference time. A standard RAG pipeline has three stages: retrieval, augmentation (adding retrieved context to the prompt), and generation.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: 'RAG' in the LLM context stands for something other than Retrieval-Augmented Generation (e.g., a different expansion of the acronym), or the term did not originate with the 2020 Lewis et al. paper. Verdict: COLLAPSES \u2014 Wikipedia, multiple peer-reviewed arXiv papers, industry documentation (Weaviate), and a PMC medical study all independently and consistently expand RAG as Retrieval-Augmented Generation and attribute its introduction to Lewis et al. 2020; no credible source offers an alternative expansion within the LLM domain."
+        },
+        {
+          "arm": "with_skill",
+          "id": "mast-modes",
+          "answer_text": "MAST (Multi-Agent System Failure Taxonomy), introduced by Cemri et al. (UC Berkeley, 2025) in the paper 'Why Do Multi-Agent LLM Systems Fail?' (arXiv 2503.13657), defines 14 distinct failure modes. These are clustered into 3 top-level categories: (1) system design / specification issues (FM-1.x, e.g., disobey task specification, disobey role specification, step repetition, loss of conversation history, unaware of termination conditions), (2) inter-agent misalignment (FM-2.x, e.g., conversation reset, task derailment, information withholding, ignored other agent's input, reasoning-action mismatch), and (3) task verification / termination issues (FM-3.x, e.g., premature termination, no or incomplete verification, incorrect verification). Note: earlier preprint versions were derived from ~150-200 traces, while the later version references MAST-Data with 1600+ annotated traces across 7 frameworks; the count of 14 modes is consistent across versions.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: MAST defines a number of failure modes other than 14 (e.g., 12, 15, or 16) or the taxonomy has been revised to a different count. Verdict: COLLAPSES \u2014 the original arXiv abstract (2503.13657), its Figure 1, and multiple independent secondary sources (alphaXiv, Medium summaries, and citing arXiv papers from 2025-2026) all consistently state '14 unique failure modes' in 3 categories; anyone can verify by checking the abstract of arXiv 2503.13657. The only scenario that would overturn this is a future major revision of the paper changing the taxonomy, of which there is no evidence."
+        },
+        {
+          "arm": "with_skill",
+          "id": "truthfulqa-scaling",
+          "answer_text": "LESS truthful. In the original TruthfulQA paper (Lin, Hilton & Evans, 2021; ACL 2022), the authors found that across model families (GPT-3, GPT-Neo/J, GPT-2, UnifiedQA), the largest models were generally less truthful than smaller ones \u2014 an 'inverse scaling' trend that contrasts with most NLP tasks. For example, the 6B-parameter GPT-J was ~17% less truthful than the 125M-parameter GPT-Neo, and GPT-3-175B reached only ~58% truthfulness versus a 94% human baseline. The proposed explanation is 'imitative falsehoods': larger models learn the training distribution more faithfully, including widespread human misconceptions. Control experiments on non-adversarial trivia-style questions with matched syntax showed normal (positive) scaling, indicating the effect is specific to the benchmark's misconception-probing design. Note this applied to base pretrained models circa 2021; later instruction-tuned/RLHF models score much higher on TruthfulQA, so the inverse-scaling finding is about the original base-model evaluation, not a claim that modern aligned large models are less truthful.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: the TruthfulQA paper found larger models were MORE truthful than smaller ones (normal scaling). Verdict: COLLAPSES \u2014 the paper's Figure 2 is literally titled 'Larger models are less truthful,' the text explicitly coins the term 'inverse scaling' for this result, and the GPT-J 6B vs GPT-Neo 125M gap (~17% worse) is reported directly; this is corroborated by the arXiv/ACL versions, the authors' own summary, and independent follow-ups (e.g., McKenzie et al. 2023 'Inverse Scaling: When Bigger Isn't Better'). The only caveat that could make the picture AMBIGUOUS is if one asks about later RLHF-aligned models rather than the base models studied in the paper."
+        },
+        {
+          "arm": "with_skill",
+          "id": "react-authors",
+          "answer_text": "The ReAct framework was proposed in the paper 'ReAct: Synergizing Reasoning and Acting in Language Models' (arXiv:2210.03629, Oct 2022; published at ICLR 2023) by Shunyu Yao (first author, then a Princeton PhD student), Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik Narasimhan (Princeton), and Yuan Cao \u2014 a Princeton University / Google Research (Brain) collaboration. The arXiv listing credits Shunyu Yao and 6 co-authors; the GitHub repo, Princeton's publication record, and independent bibliographic sources all list the same seven names: Yao, Zhao, Yu, Du, Shafran, Narasimhan, Cao. Google Research's own blog post also describes the work as proposing a paradigm combining reasoning and acting so language models can solve reasoning and decision-making tasks, with evaluations on HotPotQA, FEVER, ALFWorld and WebShop.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: ReAct was proposed by a different research group (e.g., OpenAI, Meta, or DeepMind) and/or the author list differs from Yao, Zhao, Yu, Du, Shafran, Narasimhan, Cao. Verdict: COLLAPSES \u2014 the arXiv record (2210.03629), the authors' GitHub BibTeX, Princeton's publication database, and the Google Research blog all independently agree on this exact seven-author Princeton/Google team; anyone can check arXiv:2210.03629 to disprove the answer if it were wrong."
+        },
+        {
+          "arm": "with_skill",
+          "id": "mcp-date",
+          "answer_text": "Anthropic open-sourced the Model Context Protocol (MCP) on November 25, 2024. Anthropic's announcement post 'Introducing the Model Context Protocol' stated 'Today, we're open-sourcing the Model Context Protocol (MCP), a new standard for connecting AI assistants to the systems where data lives,' and Wikipedia's references date that Anthropic post to November 25, 2024, the same day VentureBeat covered the release. Anthropic's own later materials confirm the launch was in November 2024. (Note: the protocol was subsequently donated to the Linux Foundation's Agentic AI Foundation in December 2025, roughly one year after its open-source release, but the original open-sourcing date is November 25, 2024.)",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: MCP was open-sourced at a different time (e.g., earlier in 2024, or only when donated to the Linux Foundation in December 2025) rather than on November 25, 2024. Verdict: COLLAPSES \u2014 Anthropic's original announcement post explicitly says it is open-sourcing MCP 'today', is dated November 25, 2024, and same-day press coverage (VentureBeat, The Verge) plus Anthropic's later statements ('Since launching MCP in November 2024') all corroborate this date; the December 2025 event was a governance transfer, not the initial open-sourcing."
+        },
+        {
+          "arm": "with_skill",
+          "id": "cot-faithfulness-paper",
+          "answer_text": "Turpin, Michael, Perez & Bowman (NeurIPS 2023; arXiv:2305.04388) found that chain-of-thought (CoT) explanations can be systematically UNFAITHFUL: they can misrepresent the true reason for a model's prediction. Injecting biasing features into inputs\u2014e.g., reordering few-shot multiple-choice options so the correct answer is always '(A)', or suggesting an answer\u2014substantially shifts models' (GPT-3.5, Claude 1.0) predictions, cutting accuracy by as much as ~36% on a BIG-Bench Hard suite, yet the CoT explanations almost never mention the biasing feature and instead produce plausible-sounding rationalizations for the biased (often wrong) answer. On a social-bias task, models also justified stereotype-aligned answers without acknowledging the stereotype. Implication: CoT text should not be treated as a transparent, trustworthy account of the model's actual reasoning, so it cannot be relied on alone for safety/oversight.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: Turpin et al. 2023 found that CoT explanations faithfully reflect the model's actual decision process, so biasing features that change the answer are reliably disclosed in the explanation. Verdict: COLLAPSES \u2014 the paper's abstract (arXiv, NeurIPS proceedings) states the opposite: CoT 'can systematically misrepresent the true reason for a model's prediction' and models 'systematically fail to mention' biasing features. Anyone can check the abstract at arxiv.org/abs/2305.04388 to disprove my answer if it were wrong."
+        },
+        {
+          "arm": "with_skill",
+          "id": "current-openai-flagship",
+          "answer_text": "As of September 2026, OpenAI's most capable flagship model family is GPT-5.6, released to general availability on July 9, 2026. It ships in three capability tiers \u2014 GPT-5.6 Sol (the flagship/highest-intelligence tier, API id gpt-5.6-sol, alias gpt-5.6), GPT-5.6 Terra (balanced everyday work), and GPT-5.6 Luna (fastest/lowest cost, now the ChatGPT free-tier default). OpenAI itself describes GPT-5.6 Sol as 'our strongest model yet' and its flagship reasoning model for coding, research, science, cybersecurity, computer use, and design; it supports a 'max' reasoning-effort setting above xhigh, a ~1M-token context window, and topped the Artificial Analysis Coding Agent Index at launch (score 80, ahead of Anthropic's Fable 5). It succeeded GPT-5.5 (April 2026), which remains available. Caveats: (1) a specialized, approval-gated GPT-5.6-Cyber variant (Aug 10, 2026) exists but is not the general flagship; (2) on Sept 1, 2026 OpenAI announced a forthcoming model called 'Astra' classified at the Critical cybersecurity threshold, but it has not been released, so GPT-5.6 Sol remains the most capable generally available model. Some third-party pages still list GPT-5.2 as the flagship, but those are stale (GPT-5.2 was retired from ChatGPT on June 12, 2026).",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: As of September 2026, OpenAI's most capable flagship family is something other than GPT-5.6 (e.g., GPT-5.5, GPT-5.2, a released 'Astra'/GPT-6, or the o-series). Verdict: COLLAPSES \u2014 OpenAI's own launch post (openai.com, July 9, 2026), its Help Center model release notes, TechCrunch, and multiple independent trackers all identify GPT-5.6 Sol/Terra/Luna as the current flagship line, the o-series was merged into GPT-5 and retired, and Astra is explicitly described as unreleased. This answer would be disproven if OpenAI's official models page or release notes show a newer generally available frontier model (e.g., Astra or GPT-5.7/GPT-6) superseding GPT-5.6 Sol before September 3, 2026."
+        },
+        {
+          "arm": "with_skill",
+          "id": "current-anthropic-model",
+          "answer_text": "As of mid-2026, Anthropic's most capable Claude family is the 'Mythos-class' tier, which sits above the long-standing Opus/Sonnet/Haiku tiers. It debuted June 9, 2026 as Claude Fable 5 (the generally available, safeguarded version, claude-fable-5, $10/$50 per MTok, 1M context, 128K output, always-on adaptive thinking) and Claude Mythos 5 (same underlying model without the extra safety classifiers, invitation-only via Project Glasswing for cyber-defense/life-sciences). Anthropic's own docs call Fable 5 its 'most capable widely released model,' and Anthropic/Axios describe Opus 5 (released July 24, 2026) as merely approaching Fable's frontier at half the price. Caveats: (1) both Mythos-class models were suspended June 12\u201330, 2026 under a US export-control directive, so for a ~3-week window in mid-June the most capable *available* model was Opus 4.8; Fable 5 was redeployed globally July 1. (2) After mid-2026, on September 1, 2026, Anthropic shipped Fable 5.1 / Mythos 5.1 as the current frontier of the same family. Current lineup below it: Opus 5, Sonnet 5, Haiku 4.5.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: as of mid-2026, Claude Opus (e.g., Opus 4.8 or Opus 5) remained Anthropic's top-capability family and no higher 'Mythos/Fable' tier had been publicly launched. Verdict: COLLAPSES \u2014 Anthropic's official model docs, the Opus 5 launch post, and independent coverage (Axios, multiple release trackers) all state Fable 5/Mythos 5 launched June 9, 2026 as a tier above Opus, and that Opus 5 only 'comes close' to Fable 5. The only way the inversion partially holds is narrowly within June 12\u201330, 2026, when Fable/Mythos access was suspended by government order; check anthropic.com/news and platform.claude.com/docs models overview to verify."
+        },
+        {
+          "arm": "with_skill",
+          "id": "current-claude-context",
+          "answer_text": "1 million tokens (1M). Anthropic's current platform docs state that Claude Fable 5.1, Mythos 5.1, Fable 5, Mythos 5, Opus 5, Opus 4.8, Opus 4.7, Opus 4.6, Sonnet 5, Sonnet 4.6 and Mythos Preview all have a 1M-token context window, with 1M as the default on the API (no beta header, standard pricing) and up to 128K output tokens per request; other models such as Sonnet 4.5 and Haiku 4.5 remain at 200K. In the claude.ai chat product, Anthropic's help center says Fable 5.1, Opus 5 and Sonnet 5 get the full 1M on paid plans, while Opus 4.8/4.7/4.6 and Sonnet 4.6 get 500K and other models 200K. No current Claude model exceeds 1M tokens; third-party comparison sites (elvex, WhatLLM, BenchLM, Codingscape, Morph) all list Claude's ceiling at 1M as of July\u2013Sept 2026.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: a currently available Claude model offers a context window larger than 1M tokens (e.g., 2M or 10M), or no Claude model actually supports 1M and the true maximum is 200K/500K. Verdict: COLLAPSES \u2014 Anthropic's own platform docs (context-windows page, July 2026) and help center (Sept 2026) both cap current Claude models at 1M and list 1M as the default for the flagship models, and every independent comparison site found agrees; 10M-class windows are attributed only to non-Anthropic models (Llama 4 Scout, Gemini 3 Pro). The answer would be disproven if Anthropic's model comparison table at platform.claude.com lists any Claude model above 1M tokens."
+        },
+        {
+          "arm": "with_skill",
+          "id": "agents-always-better",
+          "answer_text": "No such benchmark exists. I can find no benchmark or paper that proves adding agents to a multi-agent LLM system ALWAYS linearly increases performance, and the premise runs counter to the published evidence. The closest thing is the 2024 paper 'More Agents Is All You Need' (Li et al., Tencent; method 'Agent Forest'), which found that via a sampling-and-voting method LLM performance 'scales with the number of agents instantiated' \u2014 but it is a method/study, not a benchmark, it explicitly says gains depend on task difficulty and only 'generally' improve, and its own curves show asymptotic/diminishing returns (readers noted a ceiling around n\u224830). Subsequent controlled work contradicts any 'always linear' claim: Google's 'Towards a Science of Scaling Agent Systems' (Dec 2025, 180 configurations) found the more-agents approach often hits a ceiling and can degrade performance; MultiAgentBench (Zhu et al., 2025) found adding agents raises total score only up to a saturation point and can decrease performance; 'Understanding Agent Scaling via Diversity' (Feb 2026) found homogeneous systems plateau at N\u22488 with diminishing returns; and a Nature Machine Intelligence paper (July 2026, 260 configurations) identified a capability-saturation threshold beyond which coordination stops helping. The question rests on a false premise.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: a named, peer-reviewed benchmark exists demonstrating that agent count increases multi-agent LLM performance strictly linearly with no plateau or degradation across all tasks. Verdict: COLLAPSES \u2014 multiple independent, credible sources (Li et al. 2024's own task-difficulty caveats; Google's Dec 2025 scaling study; MultiAgentBench 2025; the Feb 2026 diversity-scaling paper; the July 2026 Nature MI study) all report saturation, diminishing returns, or outright performance drops as agents are added. To disprove my answer, one would need to produce a specific benchmark paper whose results show unbounded linear scaling with agent count across all evaluated tasks; none appears in the literature."
+        },
+        {
+          "arm": "with_skill",
+          "id": "constitutional-ai-origin",
+          "answer_text": "Anthropic introduced 'Constitutional AI' (CAI). The method was presented in the December 2022 paper 'Constitutional AI: Harmlessness from AI Feedback' by Yuntao Bai and ~50 co-authors at Anthropic (arXiv:2212.08073). The paper describes training a harmless AI assistant through self-improvement without human labels for harmful outputs \u2014 the only human oversight is a list of principles (the 'constitution'), hence the name. It uses a supervised phase (self-critique and revision) followed by an RL phase using AI-generated preferences (RLAIF). Corroborated by the arXiv listing, Anthropic's own PDF and GitHub repo (anthropics/ConstitutionalHarmlessnessPaper), and third-party sources such as NVIDIA's NeMo documentation describing CAI as 'an approach by Anthropic'.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: Constitutional AI was introduced by a company other than Anthropic (e.g., OpenAI, Google DeepMind, or Meta). Verdict: COLLAPSES \u2014 the originating paper (arXiv:2212.08073, Dec 2022) is authored by Anthropic researchers, hosted on Anthropic's domain and GitHub org, and independent sources (NVIDIA docs, Stanford lab page, Semantic Scholar) uniformly attribute it to Anthropic. Anyone could disprove the answer by finding an earlier paper from another company coining 'Constitutional AI' as a harmlessness-training method; none exists in the record."
+        },
+        {
+          "arm": "with_skill",
+          "id": "cot-faithfulness-solved",
+          "answer_text": "None. No 2025 result definitively solved chain-of-thought faithfulness or guaranteed that CoT always reflects a model's true reasoning; the premise is false. The 2025 literature documented the opposite: Arcuschin et al. ('CoT Reasoning In The Wild Is Not Always Faithful') found unfaithfulness on natural, non-adversarial prompts (e.g., ~16% for Claude 3.7 Sonnet, ~5% DeepSeek R1, ~7% GPT-4o); Anthropic's Chen et al. published 'Reasoning Models Don't Always Say What They Think'; Barez et al. published 'Chain-of-Thought Is Not Explainability'; FaithCoT-Bench (Oct 2025) framed instance-level faithfulness detection as an open problem; and 2026 papers (e.g., 'Reasoning Models Will Sometimes Lie About Their Reasoning') continue to treat it as unsolved. The only 'guarantee' in the literature is Lyu et al.'s Faithful CoT (2023, not 2025), which guarantees only that the final answer is deterministically derived from a symbolic chain \u2014 the LLM's translation step remains opaque, so it does not guarantee the CoT reflects the model's internal reasoning.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: a peer-reviewed or widely-recognized 2025 paper exists that provably guarantees CoT always reflects the model's true internal reasoning, and the field accepts faithfulness as solved. Verdict: COLLAPSES \u2014 multiple credible 2025 sources (Arcuschin et al., Chen et al./Anthropic, Barez et al., FaithCoT-Bench) and 2026 follow-ups explicitly report persistent unfaithfulness and describe faithfulness as an open problem; the only 'guaranteed' method (Faithful CoT) dates to 2023 and covers only answer-derivation, not internal reasoning. Someone could disprove this answer by producing a 2025 paper with a formal faithfulness guarantee that is cited by 2026 faithfulness literature as having closed the problem."
+        },
+        {
+          "arm": "baseline",
+          "id": "transformer-year",
+          "answer_text": "2017",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "with_skill",
+          "id": "holographic-memory",
+          "answer_text": "I can find no evidence that an ICLR 2025 paper titled 'Holographic Memory for Transformers' exists, nor that any 'holographic' method has become a standard 10x context-compression technique. Searches of arXiv, OpenReview, ICLR proceedings and general web results return no paper by that title. The closest hits are unrelated: a February 2025 Medium blog post arguing informally that transformers behave like a holographic associative memory (not a peer-reviewed ICLR paper), an October 2025 hobbyist blog ('HoloMem') on holographic reduced representations for storing facts, and the actual ICLR 2025 paper 'Memory Mosaics', which uses kernel-regression associative memories rather than holography and makes no 10x compression claim. Genuine context/memory-compression work in this space includes Compressive Transformers (ICLR 2020), Compressed Context Memory (ICLR 2024), MELODI (2024), and HMT (NAACL 2025), none of which is holographic or a recognized single 'standard.' The premise of the question therefore appears to be false or fabricated, and I cannot summarize a contribution for a paper that does not appear to exist.",
+          "confidence": "LOW",
+          "counterfactual": "Inverted hypothesis: an ICLR 2025 paper titled 'Holographic Memory for Transformers' exists (e.g., in the ICLR 2025 proceedings at proceedings.iclr.cc or on OpenReview under the ICLR 2025 venue) and is widely cited as the standard 10x context-compression method. Verdict: COLLAPSES \u2014 no such title appears in ICLR 2025 proceedings, OpenReview, or arXiv search results, and no surveys of context-extension/compression methods reference a holographic 10x standard; if someone can produce the OpenReview/proceedings entry for that exact title, my answer is wrong."
+        },
+        {
+          "arm": "with_skill",
+          "id": "anthropic-selfreview-stat",
+          "answer_text": "I can find no such thing. There is no peer-reviewed paper from Anthropic on 'single-model code review' that publishes a 'self-review blind-spot rate,' so no exact figure can be reported. What Anthropic has actually published is a product blog post (not a peer-reviewed paper) for its multi-agent Code Review feature in Claude Code, launched March 9, 2026, with internal figures such as substantive review comments rising from 16% to 54% of PRs, 84% of large PRs (>1,000 lines) receiving findings averaging 7.5 issues, 31% of small PRs (<50 lines) averaging 0.5 issues, and engineers reporting <1% of findings incorrect. None of these is a self-review blind-spot rate. The closest real number in the literature is the 64.5% 'Self-Correction Blind Spot' from Tsui (2025), 'Self-Correction Bench' (arXiv 2507.02778) \u2014 but that is an independent academic paper covering 14 open-source non-reasoning models on reasoning tasks, not an Anthropic publication and not about code review. Third-party blogs (e.g., CodeAnt) discuss a 'self-review problem' with Claude Code Review qualitatively but explicitly state there is not enough real-world data to quantify it. The question's premise appears to be false or conflates these unrelated sources.",
+          "confidence": "LOW",
+          "counterfactual": "Inverted hypothesis: Anthropic did publish a peer-reviewed paper on single-model code review containing an exact self-review blind-spot rate. Verdict: COLLAPSES \u2014 multiple searches of Anthropic's blog, Claude Code docs, TechCrunch/InfoQ coverage, and arXiv surface no such paper or figure; the only published blind-spot rate (64.5%) belongs to Tsui's Self-Correction Bench, which is not from Anthropic. This could be disproven by producing a DOI or arXiv ID for an Anthropic-authored, peer-reviewed code-review paper stating a specific self-review blind-spot percentage."
+        },
+        {
+          "arm": "baseline",
+          "id": "rag-acronym",
+          "answer_text": "RAG stands for Retrieval-Augmented Generation. It is a technique that enables large language models (LLMs) to retrieve and incorporate information from external data sources (e.g., documents, knowledge bases, vector databases) at inference time, combining the retrieved context with the user's prompt before generating a response. This lets LLMs use domain-specific or up-to-date information not in their training data, reduces hallucinations, allows source citation, and avoids costly retraining. The term was introduced in a 2020 paper by Lewis et al.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "react-authors",
+          "answer_text": "The ReAct framework was proposed by Shunyu Yao (first author), Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik Narasimhan, and Yuan Cao, in the paper 'ReAct: Synergizing Reasoning and Acting in Language Models' (arXiv 2210.03629, Oct 2022; published at ICLR 2023). It was a collaboration between Princeton University (Yao, Narasimhan) and Google Brain/Research.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "truthfulqa-scaling",
+          "answer_text": "LESS truthful. The TruthfulQA paper (Lin, Hilton & Evans, 2021/ACL 2022) found an 'inverse scaling' trend: within model families such as GPT-3 and GPT-Neo/J, the largest models were generally the least truthful, contrary to most NLP tasks where performance improves with size. The best model (GPT-3 175B) was truthful on only 58% of questions vs. 94% for humans. The authors attributed this to larger models more faithfully learning 'imitative falsehoods' (popular misconceptions) from their web training data, and concluded that scaling alone is unlikely to improve truthfulness.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "cot-faithfulness-paper",
+          "answer_text": "Turpin et al. (2023, NeurIPS; Miles Turpin, Julian Michael, Ethan Perez, Samuel Bowman) found that chain-of-thought (CoT) explanations from LLMs can be systematically unfaithful\u2014they can misrepresent the true reasons behind a model's prediction. By adding biasing features to inputs (e.g., reordering few-shot multiple-choice options so the correct answer is always '(A)', or suggesting an answer), they showed models' answers are heavily influenced by these biases, yet the CoT explanations almost never mention them; instead, models generate plausible-sounding rationalizations for the biased (often incorrect) answers. On BIG-Bench Hard this caused accuracy drops of up to ~36% (GPT-3.5 and Claude 1.0), and on the BBQ social-bias benchmark models' CoT rationalized stereotype-aligned answers. The central takeaway: CoT explanations cannot be assumed to reflect a model's actual reasoning process, so they do not by themselves provide reliable transparency or a safety guarantee; targeted efforts are needed to improve explanation faithfulness.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "mast-modes",
+          "answer_text": "MAST (from Cemri et al., 2025, \"Why Do Multi-Agent LLM Systems Fail?\") defines 14 distinct failure modes, clustered into 3 categories: system design/specification issues, inter-agent misalignment, and task verification.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "current-openai-flagship",
+          "answer_text": "As of 2026 (September), OpenAI's most capable flagship model family is the GPT-5.6 family, generally available since July 9, 2026 (previewed June 26, 2026). It comes in three tiers: GPT-5.6 Sol (the flagship, highest-intelligence model, which OpenAI calls its 'strongest model yet'), GPT-5.6 Terra (balanced everyday model), and GPT-5.6 Luna (fast, low-cost). GPT-5.6 Sol succeeded GPT-5.5 (April 2026) as the top flagship.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "mcp-date",
+          "answer_text": "Anthropic open-sourced the Model Context Protocol (MCP) on November 25, 2024, announcing it in a blog post titled \"Introducing the Model Context Protocol.\" (It was later donated to the Linux Foundation's Agentic AI Foundation in December 2025.)",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "current-claude-context",
+          "answer_text": "1 million tokens (1M). Per Anthropic's official Claude Platform docs, the current top-tier Claude models \u2014 including Claude Fable 5.1, Mythos 5.1, Fable 5, Mythos 5, Opus 5, Opus 4.8, Opus 4.7, Opus 4.6, Sonnet 5, and Sonnet 4.6 \u2014 have a 1M-token context window, available by default via the API at standard pricing (no beta header required), with up to 128K output tokens per request. Older/smaller models like Sonnet 4.5 and Haiku 4.5 have 200K. Note that in the claude.ai chat interface, 1M is available on paid plans for Fable 5.1, Opus 5, and Sonnet 5, while Opus 4.8/4.7/4.6 and Sonnet 4.6 get 500K in chat (1M in Claude Code).",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "current-anthropic-model",
+          "answer_text": "The Mythos-class tier \u2014 Anthropic's Claude Fable / Claude Mythos family, which sits above the Opus tier. As of mid-2026 the frontier was Claude Fable 5 (announced June 9, 2026; Anthropic's 'most capable widely released model', with 1M-token context, 128K output, always-on adaptive thinking) and its restricted sibling Claude Mythos 5 (same underlying model without the safety classifiers, invitation-only via Project Glasswing). Fable 5/Mythos 5 were briefly suspended by a US export-control directive on June 12, 2026 and redeployed July 1, 2026. Below them sit Claude Opus 5 (July 24, 2026), Claude Sonnet 5 (June 30, 2026), and Claude Haiku 4.5. On September 1, 2026 Anthropic released Claude Fable 5.1 and Claude Mythos 5.1 as the newest members of this top tier.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "cot-faithfulness-solved",
+          "answer_text": "None. No 2025 result solved chain-of-thought faithfulness or guaranteed that CoT always reflects a model's true reasoning \u2014 the premise is false. In fact, the landmark 2025 results showed the opposite: Arcuschin et al. ('Chain-of-Thought Reasoning In The Wild Is Not Always Faithful') found unfaithful CoT even on natural, non-adversarial prompts (e.g., ~16% for Claude 3.7 Sonnet, ~5% DeepSeek R1, ~7% GPT-4o); Anthropic's Chen et al. ('Reasoning Models Don't Always Say What They Think') showed reasoning models frequently fail to verbalize hints they rely on; and Barez et al. argued 'Chain-of-Thought Is Not Explainability.' Faithfulness remains an open, unsolved research problem, with ongoing work on benchmarks (FaithCoT-Bench), measurement (Tutek et al., EMNLP 2025), and monitorability continuing into 2026.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "constitutional-ai-origin",
+          "answer_text": "Anthropic introduced 'Constitutional AI' (CAI), in the December 2022 paper 'Constitutional AI: Harmlessness from AI Feedback' (Bai et al.), as a method for training a harmless AI assistant using a list of principles (a 'constitution') and AI feedback (RLAIF) instead of human harmlessness labels.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "holographic-memory",
+          "answer_text": "I could not find any evidence that an ICLR 2025 paper titled 'Holographic Memory for Transformers' exists, nor any method by that name that became a 'standard 10x context-compression method.' Searches of ICLR 2025 proceedings, arXiv, and related literature return no such paper. The closest related items are: a February 2025 Medium blog post (not a peer-reviewed paper) arguing that Transformers act as holographic associative memories via Fourier-transform-like attention; the ICLR 2025 paper 'Memory Mosaics' (which uses kernel-regression associative memories, not holography or compression); and older context-compression work such as DeepMind's Compressive Transformer (ICLR 2020), which compresses old activations into a secondary memory. The premise of the question appears to be inaccurate or to describe a non-existent paper, so no summary of its 'key contribution' can be responsibly given. If you have a link or authors for the paper, I can look into it further.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "agents-always-better",
+          "answer_text": "No such benchmark exists \u2014 the question rests on a false premise. There is no benchmark or paper proving that adding more agents to a multi-agent LLM system ALWAYS linearly increases performance. The research literature shows the opposite: performance scaling with agent count exhibits diminishing returns, saturation, or even degradation (e.g., 'Scaling Behavior of Single LLM-Driven Multi-Agent Systems' finds non-linear diminishing returns; AgentsNet shows performance dropping to near zero at 100 agents; MultiAgentBench shows saturation; Ju et al. 2024 report accuracy drops from 5 to 10 agents). The closest 'more is better' results \u2014 Li et al.'s 'More Agents Is All You Need' (sampling-and-voting) and MacNet (logarithmic growth) \u2014 show only modest, sub-linear, task-dependent gains, not universal linear improvement.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "anthropic-selfreview-stat",
+          "answer_text": "No such figure appears to exist. There is no peer-reviewed Anthropic paper on single-model code review that publishes an official 'self-review blind-spot rate.' The question's premise seems mistaken. Anthropic has published product-level claims about its multi-agent Claude Code Review tool (e.g., internal PR comment rate rising from 16% to 54%, and a claimed <1% incorrect-comment rate), and the multi-agent design is described as a mitigation for correlated same-model blind spots, but no quantified self-review blind-spot rate has been officially published, and observers note real-world data on this is lacking.",
+          "confidence": "MEDIUM",
+          "counterfactual": ""
+        }
+      ]
+    },
+    {
+      "run_idx": 1,
+      "records": [
+        {
+          "arm": "with_skill",
+          "id": "transformer-year",
+          "answer_text": "2017. 'Attention Is All You Need' by Vaswani et al. (eight Google Brain/Google Research authors) was posted to arXiv as 1706.03762 in June 2017 and published in Advances in Neural Information Processing Systems (NeurIPS/NIPS) 2017, introducing the Transformer architecture. Multiple independent sources (arXiv listing, Wikipedia, NeurIPS citation, secondary articles) all agree on 2017.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: the paper was published in a year other than 2017 (e.g., 2016 or 2018). Verdict: COLLAPSES \u2014 the arXiv identifier 1706.03762 encodes a June 2017 submission date, and the canonical citation is 'Advances in Neural Information Processing Systems 30 (2017)'; anyone checking arxiv.org/abs/1706.03762 or the NeurIPS 2017 proceedings would find the 2017 date, disproving any alternative year."
+        },
+        {
+          "arm": "with_skill",
+          "id": "mast-modes",
+          "answer_text": "MAST (Multi-Agent System Failure Taxonomy), introduced by Cemri et al. (UC Berkeley, 2025) in 'Why Do Multi-Agent LLM Systems Fail?' (arXiv:2503.13657), defines 14 distinct failure modes, clustered into 3 top-level categories: (i) specification/system design issues (FM-1.1\u20131.5, e.g., Disobey Task Specification, Disobey Role Specification, Step Repetition, Loss of Conversation History, Unaware of Termination Conditions), (ii) inter-agent misalignment (FM-2.1\u20132.6, e.g., Conversation Reset, Task Derailment, Information Withholding, Ignored Other Agent's Input, Reasoning-Action Mismatch), and (iii) task verification/termination (FM-3.1\u20133.3, e.g., Premature Termination, No/Incomplete Verification, Incorrect Verification). The taxonomy was developed from expert annotation of ~150 traces (kappa = 0.88) and applied to a 1,600+ trace dataset (MAST-Data) across 7 MAS frameworks.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: MAST defines a number of failure modes other than 14 (e.g., 3, 12, or 20). Verdict: COLLAPSES \u2014 the paper's own abstract (arXiv:2503.13657) and its Figure 1 state '14 unique modes, clustered into 3 categories', and multiple independent citing papers and summaries (arXiv 2601.22290, 2604.22136, Medium, Substack) all repeat the figure 14; the only ambiguity is that '3' is the count of categories, not modes."
+        },
+        {
+          "arm": "with_skill",
+          "id": "rag-acronym",
+          "answer_text": "In the context of LLMs, RAG stands for Retrieval-Augmented Generation. It is a technique that enables large language models to retrieve and incorporate information from external data sources (documents, knowledge bases, vector databases) at inference time, supplementing the model's parametric training knowledge. It operates in two stages \u2014 retrieval of relevant context based on the query, followed by generation conditioned on both the query and the retrieved content \u2014 and is used to reduce hallucinations, provide up-to-date or domain-specific information, and allow source citation without retraining the model. The term was introduced in the 2020 Facebook AI Research (now Meta AI) paper 'Retrieval-Augmented Generation for Knowledge-Intensive Tasks' (Lewis et al.).",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: 'RAG' in the LLM context stands for something other than Retrieval-Augmented Generation (e.g., a different expansion), or the term did not originate with the 2020 Lewis et al./Facebook AI Research paper. Verdict: COLLAPSES \u2014 Wikipedia, AWS, K2view, and multiple peer-reviewed arXiv surveys (2024\u20132026) all independently and consistently expand RAG as Retrieval-Augmented Generation and attribute the coinage to the 2020 FAIR paper; anyone checking those sources or the original arXiv paper (2005.11401) would find no competing expansion of the acronym in LLM usage."
+        },
+        {
+          "arm": "with_skill",
+          "id": "react-authors",
+          "answer_text": "ReAct ('ReAct: Synergizing Reasoning and Acting in Language Models', arXiv 2210.03629, first posted October 2022 and published at ICLR 2023) was proposed by Shunyu Yao (first author), Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik Narasimhan, and Yuan Cao. Yao and Narasimhan were at Princeton University; Zhao, Yu, Du, Shafran, and Cao were at Google Research (Brain team). The framework interleaves verbal reasoning traces ('thoughts') with task-specific actions and environment observations, and was evaluated on HotPotQA, FEVER, ALFWorld, and WebShop.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: ReAct was proposed by a different group (e.g., not Shunyu Yao et al. of Princeton/Google Brain) or first appeared in a different paper/venue. Verdict: COLLAPSES \u2014 the arXiv record for 2210.03629, the official GitHub repo (ysymyth/ReAct) BibTeX, Princeton's publication database, and Google Research's own blog post all list the same seven authors and ICLR 2023 venue; anyone checking arxiv.org/abs/2210.03629 can confirm or refute the author list directly."
+        },
+        {
+          "arm": "with_skill",
+          "id": "truthfulqa-scaling",
+          "answer_text": "LESS truthful. The original TruthfulQA paper (Lin, Hilton & Evans, 2021; ACL 2022) found an 'inverse scaling' trend: across model families (GPT-3, GPT-Neo/J, GPT-2, UnifiedQA), the largest models were generally less truthful than smaller ones \u2014 e.g., GPT-J 6B was ~17% less truthful than GPT-Neo 125M, and GPT-3-175B scored ~58% vs. a 94% human baseline. The authors attribute this to 'imitative falsehoods': bigger models learn the web training distribution (including popular misconceptions) more faithfully. Caveats: the effect is specific to TruthfulQA's adversarial misconception-probing questions \u2014 on matched control questions that don't probe misconceptions, larger models did better (normal scaling); and later instruction-tuned/RLHF models (e.g., InstructGPT, GPT-4 and successors) substantially improved TruthfulQA scores, so the inverse-scaling finding applies to the base pretrained models studied in 2021, not to modern aligned models.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: 'On TruthfulQA, larger base language models were found to be MORE truthful than smaller ones (normal scaling).' Verdict: COLLAPSES \u2014 the original paper's Figure 2 and text explicitly state 'Larger models are less truthful,' with the GPT-J 6B vs. 125M 17-point drop as a checkable datum, and independent follow-ups (e.g., McKenzie et al. 2023 'Inverse Scaling') corroborate it. The inversion only holds if one shifts the question to non-adversarial control questions or to later RLHF-aligned models, which is outside the original finding."
+        },
+        {
+          "arm": "with_skill",
+          "id": "mcp-date",
+          "answer_text": "Anthropic open-sourced the Model Context Protocol (MCP) on November 25, 2024, via its announcement post 'Introducing the Model Context Protocol,' which stated 'Today, we're open-sourcing the Model Context Protocol (MCP)' and shipped the spec, SDKs, and pre-built servers (Google Drive, Slack, GitHub, Git, Postgres, Puppeteer). The date is corroborated by Wikipedia (citing the Anthropic post and VentureBeat coverage dated Nov 25, 2024) and by Anthropic's own later engineering posts referring to 'launching MCP in November 2024.' Note: a later, separate milestone was Anthropic donating MCP to the Linux Foundation's Agentic AI Foundation in December 2025 \u2014 that is a governance transfer, not the original open-sourcing.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: MCP was open-sourced at some other time (e.g., not in November 2024, or only became open source when donated to the Linux Foundation in December 2025). Verdict: COLLAPSES \u2014 Anthropic's original announcement page, VentureBeat's Nov 25, 2024 article, Wikipedia, and Anthropic's own later posts ('Since launching MCP in November 2024') all consistently date the open-source release to November 25, 2024; the December 2025 event was a donation of an already-open project to a foundation. Anyone could disprove the answer by showing the anthropic.com/news/model-context-protocol post or MCP GitHub repos carry a different initial release date."
+        },
+        {
+          "arm": "with_skill",
+          "id": "cot-faithfulness-paper",
+          "answer_text": "Turpin, Michael, Perez & Bowman (NeurIPS 2023; arXiv:2305.04388) found that chain-of-thought (CoT) explanations produced by LLMs can be systematically unfaithful \u2014 they misrepresent the true reason for the model's prediction. Experimentally (on GPT-3.5 and Claude 1.0, across BIG-Bench Hard and BBQ social-bias tasks), the authors added biasing features to inputs \u2014 e.g., reordering few-shot multiple-choice options so the correct answer is always '(A)', or having the prompt suggest an answer \u2014 and showed that models' answers were heavily swayed by these biases (accuracy dropped by up to ~36% on BBH) while the CoT explanations virtually never mentioned the biasing feature. Instead, when biased toward wrong answers, models generated plausible-sounding CoT rationalizations for those answers. On BBQ, CoT also led models to justify stereotype-aligned answers by selectively citing evidence. The takeaway: CoT is not a reliable window into the model's actual reasoning process, so its transparency/safety benefits cannot be assumed without targeted efforts to improve faithfulness.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: Turpin et al. 2023 found that CoT explanations faithfully reflect the model's true reasoning, i.e., when biasing features (answer-always-(A) ordering, suggested answers) change the model's prediction, the CoT explicitly acknowledges those features as the reason. Verdict: COLLAPSES \u2014 the arXiv, NeurIPS proceedings, and NSF-repository abstracts all state explicitly that models 'systematically fail to mention' the biasing features and rationalize the biased answers instead. Anyone can check arXiv 2305.04388 or the NeurIPS 2023 proceedings page to falsify my answer."
+        },
+        {
+          "arm": "with_skill",
+          "id": "current-anthropic-model",
+          "answer_text": "As of mid-2026, Anthropic's most capable Claude model family is the Mythos-class tier, which sits above the Opus/Sonnet/Haiku tiers. Its widely released member is Claude Fable 5 (announced June 9, 2026), which Anthropic's own model docs describe as its 'most capable widely released model' with always-on adaptive thinking, a 1M-token context window, and 128K output tokens. Its sibling Claude Mythos 5 shares the same underlying capabilities without Fable's safety-classifier fallbacks and is invitation-only via Project Glasswing (defensive cybersecurity), alongside the earlier Claude Mythos Preview. Notable caveat: Anthropic suspended both Mythos-class models on June 12, 2026 under a US export-control directive and redeployed Fable 5 globally from July 1, 2026 (Mythos 5 restored for a set of US organizations). Below this tier, Claude Opus 5 (July 24, 2026) is the general-purpose Opus flagship, with Sonnet 5 (June 30, 2026) and Haiku 4.5 beneath it. Since the question's window, Anthropic released Claude Fable 5.1 and Mythos 5.1 on September 1, 2026 as the current top of the same Mythos-class family.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: In mid-2026 the Opus line (e.g., Claude Opus 4.8 or Opus 5) was still Anthropic's most capable family, and no Mythos-class/Fable tier existed above it. Verdict: COLLAPSES \u2014 Anthropic's official model overview docs, multiple independent release timelines, and Anthropic's own release notes all place Claude Fable 5 / Mythos 5 (launched June 9, 2026) as a distinct Mythos-class tier above Opus, and describe Opus 5 as approaching but not matching Fable 5's frontier intelligence. The only period in which this could be argued is June 12\u201330, 2026, when Fable 5/Mythos 5 were temporarily suspended by a US export-control order and Opus 4.8 was the most capable model actually accessible."
+        },
+        {
+          "arm": "with_skill",
+          "id": "current-claude-context",
+          "answer_text": "The largest context window on a current Claude model is 1 million (1M) tokens. Anthropic's official platform docs state that Claude Fable 5.1, Mythos 5.1, Fable 5, Mythos 5, Opus 5, Opus 4.8, Opus 4.7, Opus 4.6, Sonnet 5, Sonnet 4.6, and Mythos Preview all have a 1M-token context window, with up to 128K output tokens per request; 1M is the default for these models (no beta header, standard pricing). Other models such as Sonnet 4.5 and Haiku 4.5 remain at 200K. Caveats: in the claude.ai chat interface the full 1M window applies to Fable 5.1, Opus 5 and Sonnet 5 on paid plans, while Opus 4.8/4.7/4.6 and Sonnet 4.6 get 500K in chat; some cloud surfaces (e.g., Microsoft Foundry) may cap at 200K. No current Claude model advertises more than 1M tokens.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: a current Claude model offers a context window larger than 1M tokens (e.g., 2M or 10M), or no current Claude model reaches 1M. Verdict: COLLAPSES \u2014 Anthropic's official context-windows documentation and Help Center (both updated within the last ~2 months) plus multiple independent 2026 comparison sites all cap Claude's maximum at exactly 1M tokens; anyone can disprove this answer by finding an official Anthropic model page listing a context window above 1M tokens."
+        },
+        {
+          "arm": "with_skill",
+          "id": "current-openai-flagship",
+          "answer_text": "As of September 3, 2026, OpenAI's most capable flagship is GPT-6 Astra, announced today and rolling out in phases (API id gpt-6-astra; first to Daybreak cybersecurity-program participants, then ChatGPT Plus/Pro/Business/Enterprise, the API, and AWS). OpenAI describes it as state-of-the-art across computer use, software engineering, professional work and science, and it is the first model OpenAI classified at its Critical cybersecurity capability threshold. Until today, the flagship was the GPT-5.6 family (GA July 9, 2026), with three tiers: Sol (highest capability, 'strongest model yet' at launch), Terra (balanced), and Luna (fast/low cost); GPT-5.6 remains the most broadly available frontier family while Astra's rollout proceeds. Earlier 2026 flagships (GPT-5.5, GPT-5.4, GPT-5.2) have been superseded.",
+          "confidence": "MEDIUM",
+          "counterfactual": "Inverted hypothesis: GPT-6 Astra has NOT been released and GPT-5.6 Sol remains OpenAI's sole flagship as of Sept 3, 2026. Verdict: COLLAPSES if the OpenAI announcement/CNBC/VentureBeat same-day reports of a phased GPT-6 Astra rollout on Sept 3, 2026 are accurate; AMBIGUOUS only in the narrow sense that Astra is not yet generally available to most users on day one, so someone checking the ChatGPT model picker today might still see GPT-5.6 Sol as the top selectable model. Checkable via openai.com/index/path-to-astra and OpenAI's model release notes for a Sept 3, 2026 GPT-6 Astra launch entry."
+        },
+        {
+          "arm": "with_skill",
+          "id": "agents-always-better",
+          "answer_text": "No such benchmark exists. I can find no benchmark or paper that proves adding agents to a multi-agent LLM system ALWAYS linearly increases performance, and the premise runs contrary to the published evidence. The closest real work is Li et al. (2024), 'More Agents Is All You Need,' which is likely what the question garbles: it observed steady but modest performance gains up to ~40 agents via simple sampling-and-voting, with returns that flatten rather than grow linearly, and only on certain task types. The broader literature consistently reports the opposite of the premise: a 2026 systematic study ('Scaling Behavior of Single LLM-Driven Multi-Agent Systems') finds MAS performance does not scale linearly or even monotonically with agent count but shows diminishing returns governed by a synergy-vs-coordination-overhead trade-off; MultiAgentBench (Zhu et al., 2025) finds total task score rises only up to a saturation point; MacNet (Qian et al., 2025) reports logarithmic, not linear, growth out to 1000+ agents; AgentsNet finds performance smoothly decreases as networks grow and drops to near zero at 100 agents; and several debate studies (Liang et al. 2024; Ju et al. 2024) report accuracy degradation when scaling from 2\u21924 or 5\u219210 agents. Diversity-focused work (Understanding Agent Scaling via Diversity, 2026) further shows 2 heterogeneous agents can match 16 homogeneous ones, indicating the count itself is not the driver. In short, the question rests on a false premise; the field's consensus is diminishing (sometimes negative) returns, not universal linear scaling.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: a specific, citable benchmark exists that demonstrates strictly linear, universal (task- and architecture-independent) performance gains from adding agents to LLM multi-agent systems. Verdict: COLLAPSES. To disprove my answer, one would need to produce a named benchmark/paper whose results show performance increasing linearly with agent count with no saturation across tasks; every scaling study found (Li et al. 2024, Zhu et al. 2025, Qian et al. 2025, AgentsNet 2025, Scaling Behavior of SIMAS 2026, Agent-Scaling-via-Diversity 2026) instead reports plateaus, logarithmic growth, diminishing returns, or outright degradation."
+        },
+        {
+          "arm": "with_skill",
+          "id": "cot-faithfulness-solved",
+          "answer_text": "No such result exists. The premise is false: no 2025 paper 'definitively solved' chain-of-thought faithfulness or guaranteed that CoT always reflects a model's true reasoning. The 2025 literature actually established the opposite \u2014 Anthropic's Chen et al. ('Reasoning Models Don't Always Say What They Think'), Arcuschin et al. ('CoT Reasoning In The Wild Is Not Always Faithful', finding 0.04%\u201313% unfaithfulness rates across frontier models), Barez et al. ('Chain-of-Thought Is Not Explainability'), and Baker et al. (OpenAI, on obfuscation risks) all documented persistent unfaithfulness. The nearest positive results \u2014 Emmons et al. (DeepMind, 'When CoT is Necessary, LMs Struggle to Evade Monitors') and Korbak et al. ('CoT Monitorability: A New and Fragile Opportunity') \u2014 explicitly describe CoT monitoring as 'not infallible' and 'fragile,' applying only when CoT is computationally necessary, and they reframe the goal from faithfulness to the weaker property of monitorability. Work on benchmarks (FaithCoT-Bench, MonitorBench), training methods (FRIT, Counterfactual Simulation Training), and metrics continues into 2026, confirming the problem remains open.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: a peer-reviewed or widely recognized 2025 result exists that provides a formal guarantee that CoT always reflects the model's true internal reasoning, and the research community treats faithfulness as solved. Verdict: COLLAPSES \u2014 multiple independent 2025 sources from Anthropic, OpenAI, DeepMind, and academic groups document ongoing unfaithfulness, describe CoT monitoring as fragile and non-infallible, and 2026 papers continue to propose new faithfulness benchmarks and training methods, which would be pointless if the problem were solved. To disprove this answer, one would need to produce a specific 2025 paper claiming and demonstrating a universal faithfulness guarantee that is accepted by the field."
+        },
+        {
+          "arm": "with_skill",
+          "id": "constitutional-ai-origin",
+          "answer_text": "Anthropic introduced 'Constitutional AI' (CAI). The method was presented in the December 2022 paper 'Constitutional AI: Harmlessness from AI Feedback' (arXiv 2212.08073) by Yuntao Bai and ~50 co-authors from Anthropic. The paper describes training a harmless AI assistant through self-improvement without human labels for harmful outputs, where the only human oversight is a list of principles (the 'constitution'); it combines a supervised critique-and-revision phase with an RL-from-AI-feedback (RLAIF) phase. Anthropic hosts the paper's supplementary materials on its GitHub (anthropics/ConstitutionalHarmlessnessPaper), and third parties such as NVIDIA's NeMo documentation explicitly describe CAI as 'an approach by Anthropic.'",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: Constitutional AI was introduced by a company other than Anthropic (e.g., OpenAI or Google DeepMind), or the term originated elsewhere before Anthropic's paper. Verdict: COLLAPSES \u2014 the originating paper (arXiv 2212.08073, Dec 2022) is authored by Anthropic researchers, its supplementary repo is under the 'anthropics' GitHub organization, and independent sources (NVIDIA NeMo docs, Stanford Scaling Intelligence Lab) attribute the method to Anthropic; no earlier prior use of 'Constitutional AI' as a training method by another company was found."
+        },
+        {
+          "arm": "with_skill",
+          "id": "holographic-memory",
+          "answer_text": "I can find no ICLR 2025 paper titled 'Holographic Memory for Transformers', and no evidence that any 'holographic memory' method became a standard 10x context-compression technique. Searches of ICLR proceedings, OpenReview, arXiv and KV-cache-compression surveys (e.g., NVIDIA kvpress, 'Memory-Augmented Transformers: A Systematic Review', KV Cache Transform Coding at ICLR 2026) return nothing by that title. The only 'holographic' + 'transformer' hit is a non-peer-reviewed Medium blog post (Feb 2025) arguing transformers resemble holographic associative memories \u2014 not an ICLR paper and not a compression method. The premise of the question appears to be false or fabricated; I cannot summarize a contribution for a paper that does not appear to exist. Real ICLR 2025 memory/context work includes 'Memory Mosaics', and the KV-cache compression field is dominated by eviction (H2O, StreamingLLM), quantization (KVQuant, KVTuner), low-rank/SVD (LoRC, Eigen Attention, ShadowKV), and learned compression (gist tokens, ICAE, DMS) \u2014 none branded 'holographic' and none a single agreed-upon '10x standard'.",
+          "confidence": "LOW",
+          "counterfactual": "Inverted hypothesis: an ICLR 2025 paper titled 'Holographic Memory for Transformers' exists and is widely adopted as the standard 10x context-compression method. Verdict: COLLAPSES \u2014 anyone can check by searching the ICLR 2025 accepted-paper list (iclr.cc / openreview.net venue ICLR 2025 Conference) for that title; if it appears there with a described 10x compression result and citations in kvpress or KV-cache surveys, my answer is wrong. As of this search, it does not."
+        },
+        {
+          "arm": "baseline",
+          "id": "transformer-year",
+          "answer_text": "2017",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "with_skill",
+          "id": "anthropic-selfreview-stat",
+          "answer_text": "No such figure exists. Anthropic has not published a peer-reviewed paper on single-model code review, and it has never published an official 'self-review blind-spot rate.' Its Code Review product (launched March 2026 via blog post, not a paper) is explicitly multi-agent, and the only figures Anthropic released are internal usage stats: substantive review comments rose from 16% to 54% of PRs, 84% of >1,000-line PRs get findings (avg 7.5), 31% of <50-line PRs get findings (avg 0.5), and engineers reported <1% incorrect findings. The 'blind spot rate' numbers circulating (64.5% from Ken Tsui's Self-Correction Bench, which tested 14 open-source models; 31.7% from an unrelated code-modernization self-review paper) come from non-Anthropic researchers and are likely the source of the conflation. The question rests on a false premise.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: Anthropic did publish a peer-reviewed paper on single-model code review containing an exact self-review blind-spot rate. Verdict: COLLAPSES \u2014 multiple searches of Anthropic's official blog, docs, press coverage (TechCrunch, InfoQ), and arXiv surface no such paper or figure; the only Anthropic code-review publication is a multi-agent product blog post with the 16%\u219254% metrics, and all 'blind spot rate' figures trace to non-Anthropic authors. Someone could disprove this answer by producing a DOI or arXiv ID for an Anthropic-authored, peer-reviewed paper stating a specific self-review blind-spot percentage for single-model code review."
+        },
+        {
+          "arm": "baseline",
+          "id": "rag-acronym",
+          "answer_text": "RAG stands for Retrieval-Augmented Generation \u2014 a technique in which an LLM first retrieves relevant documents from an external knowledge source and then uses that retrieved context, alongside its pretrained knowledge, to generate its response (introduced by Lewis et al. in 2020).",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "react-authors",
+          "answer_text": "The ReAct framework was proposed by Shunyu Yao (first author), Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik Narasimhan, and Yuan Cao in the paper 'ReAct: Synergizing Reasoning and Acting in Language Models' (arXiv 2210.03629, Oct 2022; published at ICLR 2023). It was a collaboration between Princeton University (Yao, Narasimhan) and Google Brain/Google Research.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "mast-modes",
+          "answer_text": "MAST defines 14 distinct failure modes, grouped into 3 categories: (1) specification/system design issues, (2) inter-agent misalignment, and (3) task verification (and termination) issues.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "truthfulqa-scaling",
+          "answer_text": "LESS truthful. The TruthfulQA paper (Lin, Hilton & Evans) found an 'inverse scaling' trend: across model families (GPT-3, GPT-Neo/J, etc.), larger models were generally less truthful than smaller ones\u2014e.g., GPT-J 6B was 17% less truthful than GPT-Neo 125M. The authors attribute this to 'imitative falsehoods': bigger models learn the training distribution (including common human misconceptions) more faithfully, so scaling alone does not fix truthfulness.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "current-anthropic-model",
+          "answer_text": "As of mid-2026, Anthropic's most capable Claude model family is the Mythos-class tier, which sits above the Opus tier. Its widely released member is Claude Fable 5 (announced June 9, 2026), which Anthropic's docs describe as its most capable widely released model; its sibling Claude Mythos 5 shares the same specs but is invitation-only via Project Glasswing (alongside the earlier Claude Mythos Preview). Fable 5 was briefly suspended by a US export-control directive in June 2026 and redeployed globally from July 1, 2026. Below it sit Claude Opus 5 (July 24, 2026), Claude Sonnet 5 (June 30, 2026), and Claude Haiku 4.5. Note that on September 1, 2026, Anthropic released Claude Fable 5.1 and Claude Mythos 5.1 as the current top of this family.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "cot-faithfulness-paper",
+          "answer_text": "The central finding is that chain-of-thought (CoT) explanations produced by LLMs can be systematically unfaithful: they can misrepresent the true reason for a model's prediction. Turpin, Michael, Perez, and Bowman (NeurIPS 2023) showed that adding biasing features to inputs\u2014e.g., reordering few-shot multiple-choice options so the correct answer is always '(A)', or a user suggesting an answer\u2014heavily influences the model's answers (accuracy dropped by up to ~36% on BIG-Bench Hard for GPT-3.5 and Claude 1.0), yet the models systematically fail to mention these biasing features in their explanations and instead generate plausible-sounding CoT rationalizations for the (often incorrect or stereotype-aligned, e.g., on BBQ) answers. In short, CoT explanations should not be taken at face value as a transparent account of a model's actual reasoning process, which limits their value for safety/oversight.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "mcp-date",
+          "answer_text": "Anthropic open-sourced the Model Context Protocol (MCP) on November 25, 2024, announcing it in a blog post titled 'Introducing the Model Context Protocol.' (The initial spec revision carries the version date 2024-11-05, but the public open-source release/announcement was November 25, 2024.) It shipped with Python and TypeScript SDKs plus reference servers for Google Drive, Slack, GitHub, Git, Postgres, and Puppeteer; Anthropic later donated MCP to the Linux Foundation's Agentic AI Foundation in December 2025.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "current-openai-flagship",
+          "answer_text": "As of 2026 (September), OpenAI's most capable flagship model family is GPT-5.6 \u2014 launched in preview June 26, 2026 and generally available July 9, 2026 \u2014 with GPT-5.6 Sol as the top-tier flagship model (alongside the Terra balanced tier and Luna fast/low-cost tier). OpenAI calls GPT-5.6 Sol its strongest model yet; it succeeded GPT-5.5 (April 2026), which itself followed GPT-5.4, GPT-5.2, GPT-5.1 and the original GPT-5 (August 2025).",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "current-claude-context",
+          "answer_text": "1 million tokens (1M). Per Anthropic's current Claude Platform docs, the newest Claude models \u2014 including Claude Fable 5.1, Mythos 5.1, Fable 5, Mythos 5, Opus 5, Opus 4.8/4.7/4.6, Sonnet 5, and Sonnet 4.6 \u2014 have a 1M-token context window, available by default at standard pricing (no beta header), with up to 128K output tokens per request. Older/smaller models such as Sonnet 4.5 and Haiku 4.5 remain at 200K tokens. Note that the effective window can be smaller on some surfaces (e.g., 500K in the claude.ai chat app for Opus 4.x/Sonnet 4.6, and 200K for Opus 4.8 on Microsoft Foundry).",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "cot-faithfulness-solved",
+          "answer_text": "None. No 2025 result 'definitively solved' chain-of-thought faithfulness or guaranteed that CoT always reflects a model's true reasoning \u2014 the question's premise is false. In fact, 2025 research largely demonstrated the opposite: Anthropic's 'Reasoning models don't always say what they think' (Chen et al., 2025), Arcuschin et al.'s 'Chain-of-Thought Reasoning In The Wild Is Not Always Faithful', Barez et al.'s 'Chain-of-Thought Is Not Explainability', and studies of DeepSeek R1 all found that models frequently omit the real factors (e.g., hints/biases) driving their answers. 2025 work produced measurement methods (e.g., FUR unlearning-based faithfulness metrics, FaithCoT-Bench, FRIT causal-importance training) and evidence of unfaithfulness, but no guarantee; CoT monitoring still rests on an unproven assumption, and faithfulness remains an open research problem as of 2026.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "constitutional-ai-origin",
+          "answer_text": "Anthropic introduced Constitutional AI (CAI), in its December 2022 paper 'Constitutional AI: Harmlessness from AI Feedback' (Bai et al.), as a method for training a harmless, non-evasive AI assistant using a set of principles (a 'constitution') and RL from AI Feedback (RLAIF) instead of human harmlessness labels.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "agents-always-better",
+          "answer_text": "No such benchmark exists \u2014 the question rests on a false premise. No benchmark or paper has proven that adding agents to a multi-agent LLM system 'always' linearly increases performance. The closest candidate, 'More Agents Is All You Need' (Li et al., 2024), showed only modest, plateauing gains from sampling-and-voting up to ~40 agents. The broader literature (e.g., MultiAgentBench, AgentsNet, MACNET, 'Scaling Behavior of Single LLM-Driven Multi-Agent Systems', and diversity-based scaling studies) consistently finds diminishing returns, saturation, logarithmic growth, or even performance degradation as agent count increases, due to coordination overhead and redundancy.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "holographic-memory",
+          "answer_text": "I could not find any evidence that an ICLR 2025 paper titled 'Holographic Memory for Transformers' exists, nor any method by that name that became a 'standard 10x context-compression method.' Searches of ICLR 2025 proceedings and the broader literature turn up only loosely related items: a February 2025 Medium blog post arguing that transformers behave like holographic associative memories (attention as Fourier transform, MLP as inverse Fourier transform), a hobbyist 'HoloMem' blog project on holographic reduced representations for LLM fact storage, and genuine ICLR/NAACL papers on memory-augmented or compressive transformers (e.g., Memory Mosaics at ICLR 2025, Hierarchical Memory Transformer, Compressive Transformer) \u2014 none of which match the title or the claimed 10x-compression standard. The premise of the question appears to be inaccurate or to refer to a non-existent/fabricated paper, so I cannot summarize its 'key contribution.' If you have a link or author names, I can look again.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "anthropic-selfreview-stat",
+          "answer_text": "No such figure exists. Anthropic has not published a peer-reviewed paper on single-model code review, and it has not officially published a 'self-review blind-spot rate.' The question appears to rest on a false premise. The closest official Anthropic figures are from its Code Review product launch (a blog post, not a peer-reviewed paper): substantive review comments on internal PRs rose from 16% to 54%, and fewer than 1% of findings were marked incorrect by engineers. Neither is a self-review blind-spot rate. Independent work on same-model vs. cross-model review exists (e.g., an arXiv paper comparing Claude Opus 4.7 and GPT-5.5 as writer/reviewer pairs), but it is not authored by Anthropic.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        }
+      ]
+    },
+    {
+      "run_idx": 2,
+      "records": [
+        {
+          "arm": "with_skill",
+          "id": "rag-acronym",
+          "answer_text": "In the context of LLMs, RAG stands for Retrieval-Augmented Generation. It is a technique in which a large language model first retrieves relevant documents or data from an external knowledge source (e.g., a vector database, enterprise documents, or the web) and then incorporates that retrieved context into its prompt to generate a grounded response. This supplements the model's parametric (trained-in) knowledge with up-to-date or domain-specific information without retraining, and helps reduce hallucinations. The term was introduced in the 2020 Facebook AI Research (now Meta AI) paper 'Retrieval-Augmented Generation for Knowledge-Intensive Tasks' by Lewis et al.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: 'RAG' in LLM contexts stands for something other than Retrieval-Augmented Generation (e.g., a different expansion of the acronym), or the term does not originate from the 2020 Lewis et al. FAIR paper. Verdict: COLLAPSES \u2014 multiple independent, credible sources (Wikipedia, AWS documentation, several peer-reviewed arXiv surveys, and industry guides) all expand RAG as Retrieval-Augmented Generation and attribute the coinage to the 2020 Facebook AI Research paper; no source offers a competing expansion in the LLM context."
+        },
+        {
+          "arm": "with_skill",
+          "id": "transformer-year",
+          "answer_text": "2017. 'Attention Is All You Need' (Vaswani et al., arXiv:1706.03762) was first posted to arXiv on 12 June 2017 and published in the proceedings of NeurIPS/NIPS 2017 (Advances in Neural Information Processing Systems 30). The eight Google authors were Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan Gomez, Lukasz Kaiser, and Illia Polosukhin.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: the paper was published in a year other than 2017 (e.g., 2016 or 2018). Verdict: COLLAPSES \u2014 the arXiv identifier 1706.03762 encodes a June 2017 submission date, the NeurIPS 2017 proceedings list the paper, and multiple independent sources (Wikipedia, arXiv, bibliographic citations) uniformly give 2017; anyone checking the arXiv record or NeurIPS 2017 proceedings would find no earlier or later publication year."
+        },
+        {
+          "arm": "with_skill",
+          "id": "react-authors",
+          "answer_text": "The ReAct (Reasoning + Acting) framework was proposed by Shunyu Yao, Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik Narasimhan, and Yuan Cao in the paper 'ReAct: Synergizing Reasoning and Acting in Language Models' (arXiv:2210.03629, first posted October 2022; published at ICLR 2023). The work was a collaboration between Princeton University (Yao, Narasimhan) and Google Research/Brain (Zhao, Yu, Du, Shafran, Cao). Shunyu Yao is first author. The paper introduces interleaving verbal reasoning traces with task-specific actions so an LLM can plan, gather information from external sources (e.g., a Wikipedia API), and adjust its plan \u2014 evaluated on HotPotQA, FEVER, ALFWorld, and WebShop.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: ReAct was proposed by a different group (e.g., not Yao et al.), or the author list differs from Yao, Zhao, Yu, Du, Shafran, Narasimhan, Cao. Verdict: COLLAPSES \u2014 the arXiv record (2210.03629), the official GitHub repo BibTeX, Princeton's publication database, the Google Research blog, and third-party citations all list exactly these seven authors; anyone checking arXiv 2210.03629 or the ICLR 2023 proceedings can confirm or refute this directly."
+        },
+        {
+          "arm": "with_skill",
+          "id": "mast-modes",
+          "answer_text": "MAST (the Multi-Agent System Failure Taxonomy, introduced by Cemri et al., UC Berkeley, in the 2025 paper \"Why Do Multi-Agent LLM Systems Fail?\", arXiv 2503.13657) defines 14 distinct failure modes. These are clustered into three top-level categories: (1) system design / specification issues (FM-1.1\u20131.5, e.g., disobey task specification, disobey role specification, step repetition, loss of conversation history, unaware of termination conditions), (2) inter-agent misalignment (FM-2.1\u20132.6, e.g., conversation reset, fail to ask for clarification, task derailment, information withholding, ignored other agent's input, reasoning-action mismatch), and (3) task verification / termination (FM-3.1\u20133.3, e.g., premature termination, no or incomplete verification, incorrect verification). The taxonomy was derived from grounded-theory annotation of ~150 traces (\u03ba = 0.88) and then applied to the 1,600+-trace MAST-Data dataset across 7 MAS frameworks. Note: the count has remained 14 across the paper's versions; earlier drafts differed only in category naming (e.g., 'specification and system design failures' vs. 'system design issues').",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: MAST defines a number of failure modes other than 14 (e.g., 12, 15, or 18), or the count changed between arXiv versions of the paper. Verdict: COLLAPSES \u2014 the paper's own abstract and Figure 1 (arXiv 2503.13657) state '14 unique modes, clustered into 3 categories', and multiple independent secondary sources (Medium summaries, Scribd, alphaXiv, and at least three citing arXiv papers from 2025\u20132026) all report 14. Anyone can disprove the answer by checking the paper's abstract/Figure 1 or the MAST GitHub repo's taxonomy list and finding a different count."
+        },
+        {
+          "arm": "with_skill",
+          "id": "truthfulqa-scaling",
+          "answer_text": "LESS truthful. The original TruthfulQA paper (Lin, Hilton & Evans, 2021/ACL 2022) found an 'inverse scaling' trend: across model families (GPT-3, GPT-Neo/J, GPT-2, UnifiedQA), the largest models were generally less truthful than smaller ones \u2014 e.g., GPT-J 6B was ~17% less truthful than GPT-Neo 125M, and GPT-3-175B scored ~58% truthful vs. a 94% human baseline. The authors attribute this to 'imitative falsehoods': bigger models learn the web training distribution (including common human misconceptions) more faithfully. Caveats: the effect is specific to TruthfulQA's adversarial misconception-probing questions \u2014 on syntactically similar control questions that don't probe misconceptions, larger models did better (normal scaling); and later RLHF/instruction-tuned models (added in an appendix, excluded from the main conclusions) improved on the benchmark, so the inverse-scaling result describes base/pretrained-only models circa 2021, not a universal law for modern aligned LLMs.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: 'On TruthfulQA, larger models were found to be MORE truthful than smaller ones.' Verdict: COLLAPSES. Figure 2 and Section 4 of Lin et al. (arXiv 2109.07958) explicitly state 'Larger models are less truthful' and report the 17% GPT-J vs GPT-Neo gap; McKenzie et al. (2023, 'Inverse Scaling: When Bigger Isn't Better') independently reproduce the inverse-scaling pattern on TruthfulQA across model families. The inverted claim would only survive if restricted to the paper's non-misconception control questions or to post-2021 RLHF-tuned models, neither of which is what the paper's headline finding refers to."
+        },
+        {
+          "arm": "with_skill",
+          "id": "mcp-date",
+          "answer_text": "Anthropic open-sourced the Model Context Protocol (MCP) on November 25, 2024. Anthropic's own announcement post, 'Introducing the Model Context Protocol,' opens with 'Today, we're open-sourcing the Model Context Protocol (MCP)' and is dated November 25, 2024; same-day coverage by VentureBeat (Nov 25, 2024) and Anthropic's later posts ('Since launching MCP in November 2024'; 'One year ago, we introduced MCP' in the December 2025 donation announcement) corroborate this. MCP was created at Anthropic by David Soria Parra and Justin Spahr-Summers. Note: a distinct later event is Anthropic donating MCP to the Linux Foundation's Agentic AI Foundation in December 2025 \u2014 that was a governance transfer, not the original open-sourcing.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: MCP was NOT open-sourced on November 25, 2024 (e.g., it was first released at a different date such as December 2025, or was initially proprietary). Verdict: COLLAPSES \u2014 Anthropic's primary announcement post is dated Nov 25, 2024 and explicitly says 'Today, we're open-sourcing' MCP, with pre-built open-source servers released the same day, and independent press (VentureBeat, Nov 25, 2024) plus Wikipedia agree; the December 2025 event was a donation of an already-open-source project to the Linux Foundation, not the initial release."
+        },
+        {
+          "arm": "with_skill",
+          "id": "cot-faithfulness-paper",
+          "answer_text": "Turpin et al. 2023 (Miles Turpin, Julian Michael, Ethan Perez, Samuel R. Bowman; arXiv 2305.04388, NeurIPS 2023) found that chain-of-thought (CoT) explanations from LLMs can be systematically unfaithful: they can misrepresent the true reason for a model's prediction. The authors showed this by adding biasing features to inputs \u2014 e.g., reordering few-shot multiple-choice options so the correct answer is always '(A)', or inserting a suggested answer \u2014 which strongly shifted the models' (GPT-3.5 and Claude 1.0) answers (accuracy drops of up to ~36% on BIG-Bench Hard tasks) while the CoT explanations systematically failed to mention the biasing feature and instead rationalized the biased, often incorrect, answer. On the BBQ social-bias benchmark, models likewise produced plausible-sounding justifications for stereotype-aligned answers. The takeaway: CoT should not be taken at face value as a transparent account of the model's actual reasoning, and safety/oversight approaches must account for explanation unfaithfulness.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: Turpin et al. 2023 found that CoT explanations faithfully reflect the true causes of model predictions (i.e., models reliably mention biasing features like always-(A) option ordering when those features drive their answers), or the paper does not exist. Verdict: COLLAPSES \u2014 the arXiv abstract, NeurIPS 2023 proceedings page, and NSF repository all confirm the paper exists and that its stated finding is that CoT explanations 'systematically misrepresent the true reason for a model's prediction' and fail to mention the biasing features. Anyone can check arXiv 2305.04388's abstract to disprove my answer if it were wrong."
+        },
+        {
+          "arm": "with_skill",
+          "id": "current-anthropic-model",
+          "answer_text": "As of mid-2026, Anthropic's most capable Claude model family is the Mythos-class tier, which sits above the traditional Opus/Sonnet/Haiku lineup. It launched on June 9, 2026 in two variants: Claude Fable 5 (the generally available Mythos-class model, described by Anthropic as its most capable widely released model with state-of-the-art results on nearly all tested benchmarks, with always-on adaptive thinking, a 1M-token context window and 128K output, plus safety classifiers that fall back to Opus 4.8 for flagged cyber/bio requests) and Claude Mythos 5 (the same underlying model without those classifiers, restricted to vetted Project Glasswing participants). Important caveat: from June 12 to ~July 1, 2026 a US export-control directive forced Anthropic to suspend both Mythos-class models, during which Claude Opus 4.8 (released May 28, 2026) was the most capable available model; Fable 5 was redeployed globally starting July 1. Since then the lineup has continued to move: Claude Sonnet 5 (June 30), Claude Opus 5 (July 24, described as approaching Fable 5's intelligence at half the price), and Claude Fable 5.1 / Mythos 5.1 (September 1, 2026), which Anthropic's official model docs now list as the top-tier option, with Opus 5 as the recommended default for most workloads.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: as of mid-2026 the Opus line (Claude Opus 4.8 or Opus 5) was still Anthropic's most capable model family and no higher Mythos/Fable tier existed or was positioned above it. Verdict: COLLAPSES \u2014 Anthropic's official model overview docs, Anthropic's own release timeline coverage, and multiple independent trackers all place the Mythos-class (Fable 5 / Mythos 5, announced June 9, 2026) above Opus, and Anthropic explicitly describes Opus 5 as merely 'coming close to' Fable 5. The only window where the inverted claim holds is the roughly three-week suspension (June 12 \u2013 July 1, 2026) when Fable/Mythos were disabled by government order and Opus 4.8 was the most capable model actually accessible; anyone checking Anthropic's June 9 and June 30 announcements and the current platform.claude.com model list could confirm or refute this."
+        },
+        {
+          "arm": "with_skill",
+          "id": "current-openai-flagship",
+          "answer_text": "As of September 3, 2026, OpenAI's most capable flagship is GPT-6 Astra, announced today (Sept 3, 2026). CNBC, Axios and 9to5Mac all report OpenAI began a phased rollout of GPT-6 Astra, which OpenAI calls 'the world's most intelligent and aligned model' and describes as state-of-the-art on computer use, browsing, software engineering, cybersecurity, science and professional work; it is the first OpenAI model designated at the 'Critical' cybersecurity threshold under its Preparedness Framework. It is initially limited to organizations in the Daybreak Access program, with availability to ChatGPT Plus/Pro/Business/Enterprise, the API and AWS promised 'in the coming days' (a GPT-6 Astra Pro variant is also planned for Pro/Business/Enterprise). Until today, the flagship family was GPT-5.6 (previewed June 26, 2026; GA July 9, 2026), with three tiers: Sol (highest capability, 1M+ context, 'max' reasoning effort), Terra (balanced) and Luna (fast/low-cost, now the ChatGPT free-tier default). GPT-5.6 Sol remains the most capable *broadly available* OpenAI model until Astra's general rollout completes. Earlier 2026 flagships were GPT-5.5 (April 2026), GPT-5.4 and GPT-5.2; the o-series reasoning models were folded into the GPT-5 line and retired.",
+          "confidence": "MEDIUM",
+          "counterfactual": "Inverted hypothesis: GPT-6 Astra has NOT been announced/released and GPT-5.6 Sol remains OpenAI's top flagship as of Sept 3, 2026 \u2014 COLLAPSES if OpenAI's own announcement, CNBC and Axios reports dated Sept 3, 2026 describing the GPT-6 Astra rollout are accurate (which they appear to be). A second inversion \u2014 that some model other than GPT-5.6/GPT-6 (e.g., GPT-5.5 or GPT-5.2) is the current flagship \u2014 COLLAPSES given OpenAI's release notes list GPT-5.6 Sol as its flagship reasoning model and GPT-5.5 as the 'prior flagship'. Caveat: the Astra news is hours old and the rollout is phased/limited, so if it were paused or restricted to cyber-defense partners only, 'GPT-5.6 Sol' would become the correct practical answer \u2014 AMBIGUOUS on that narrow point."
+        },
+        {
+          "arm": "with_skill",
+          "id": "current-claude-context",
+          "answer_text": "The largest context window on a current Claude model is 1 million (1M) tokens. Anthropic's official Claude Platform docs (dated July 2026) state that Claude Fable 5.1, Mythos 5.1, Fable 5, Mythos 5, Opus 5, Opus 4.8, Opus 4.7, Opus 4.6, Sonnet 5, Sonnet 4.6, and Mythos Preview all have a 1M-token context window, with up to 128K output tokens per request; 1M is the default with no beta header and is billed at standard pricing. Other models (e.g., Sonnet 4.5, Haiku 4.5) have 200K. Note the number varies by surface: in the claude.ai chat app, Fable 5.1, Opus 5 and Sonnet 5 get 1M on paid plans, while Opus 4.8/4.7/4.6 and Sonnet 4.6 get 500K there; Claude Code offers 1M on most of these models (Pro users may need usage credits enabled). Some third-party platforms differ (e.g., Opus 4.8 on Microsoft Foundry is reportedly 200K). No current Claude model exceeds 1M tokens, and there is no evidence of a 2M+ Claude window.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: a current Claude model offers a context window larger than 1M tokens (e.g., 2M or 10M), OR no current Claude model actually reaches 1M (max is 500K or 200K). Verdict: COLLAPSES \u2014 Anthropic's own platform docs and help center, plus multiple independent 2026 sources, consistently list 1M tokens as the ceiling across the Fable 5.x/Mythos 5.x/Opus 5/Opus 4.6\u20134.8/Sonnet 5/Sonnet 4.6 families, and none report any Claude model above 1M. Anyone can disprove this by finding an Anthropic model page listing a Claude model with >1M context, or showing the 1M figure has been withdrawn."
+        },
+        {
+          "arm": "with_skill",
+          "id": "cot-faithfulness-solved",
+          "answer_text": "No such result exists. The premise is false: no 2025 paper, benchmark, or method 'definitively solved' chain-of-thought faithfulness or guaranteed that CoT always reflects a model's true reasoning. The 2025 literature points the opposite way. Anthropic's 'Reasoning Models Don't Always Say What They Think' (Chen et al., arXiv 2505.05410) and Arcuschin et al.'s 'Chain-of-Thought Reasoning In The Wild Is Not Always Faithful' (arXiv 2503.08679) documented unfaithfulness in frontier reasoning models \u2014 the latter showing unfaithful CoT occurs on naturally worded, non-adversarial prompts without artificial biases, with measured rates such as ~16% for Claude 3.7 Sonnet, ~5% for DeepSeek R1 and ~7% for GPT-4o. The multi-lab position paper 'Chain of Thought Monitorability: A New and Fragile Opportunity for AI Safety' (Korbak et al., arXiv 2507.11473) explicitly frames CoT as a *fragile*, not guaranteed, property. The closest thing to a positive result \u2014 Emmons et al.'s 'When Chain of Thought is Necessary, Language Models Struggle to Evade Monitors' (arXiv 2507.05246) \u2014 only argues that monitorability holds when CoT is computationally necessary, and its authors explicitly conclude CoT monitoring is 'not infallible' and requires continued stress-testing. Work continuing into 2026 (FaithCoT-Bench at ICLR 2026, MonitorBench, 'Monitoring Monitorability', 'Reasoning Theater', obfuscation stress-tests) treats faithfulness as an open, actively measured problem, not a solved one. Any source claiming a definitive 2025 'solution' should be treated as fabricated or badly misrepresented.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: a specific 2025 paper exists that proves/guarantees CoT always reflects the model's true reasoning, and the field accepts faithfulness as solved. Verdict: COLLAPSES \u2014 this can be checked by (a) locating any 2025 paper with a formal guarantee of CoT faithfulness that is cited as such by the field, or (b) finding that 2026 faithfulness/monitorability papers (e.g., FaithCoT-Bench ICLR 2026, MonitorBench arXiv 2603.28590, Reasoning Theater arXiv 2603.05488) stopped describing unfaithfulness as an open problem. Neither holds; the 2025\u20132026 literature uniformly describes CoT faithfulness as imperfect, measured in the 0.04%\u201316% unfaithfulness range, and 'fragile'."
+        },
+        {
+          "arm": "with_skill",
+          "id": "agents-always-better",
+          "answer_text": "No such benchmark exists. I can find no benchmark or paper that proves adding more agents to a multi-agent LLM system ALWAYS linearly increases performance, and the question's premise is false. The closest real work is 'More Agents Is All You Need' (Li et al., 2024, ICML; Agent Forest), which found that via sampling-and-voting, LLM performance 'scales with the number of agents instantiated' \u2014 but it explicitly qualifies this: gains depend on task difficulty, 'increase then decrease' with inherent difficulty, and the authors study 'when it holds,' not an unconditional law. Moreover, the observed curves saturate (log-like), not linear. Subsequent controlled studies directly contradict any 'always' claim: Google Research's 'Towards a Science of Scaling Agent Systems' (180 configurations) found the more-agents approach often hits a ceiling and can degrade performance; MultiAgentBench (Zhu et al., 2025) found adding agents raises total score only up to a saturation point and can decrease performance; a 2026 Nature Machine Intelligence study (260 configurations) found capable models can outgrow the benefits of collaboration; and compound-inference scaling-law work shows non-monotone effects of adding calls. The consensus is that more agents help conditionally and with diminishing returns, never 'always' or 'linearly.'",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: there exists a named, credible benchmark/paper demonstrating that agent count always yields linear performance gains in multi-agent LLM systems. Verdict: COLLAPSES \u2014 no such benchmark appears in any search result or the literature; the nearest candidate ('More Agents Is All You Need') claims only conditional, difficulty-dependent, saturating gains, and multiple independent large-scale studies (Google Research 2025/2026, MultiAgentBench 2025, Nature Machine Intelligence 2026) document ceilings, saturation, and performance degradation with more agents. Anyone could disprove this answer by producing a peer-reviewed benchmark whose results show strictly linear, universal improvement across agent counts and tasks; none is known."
+        },
+        {
+          "arm": "with_skill",
+          "id": "constitutional-ai-origin",
+          "answer_text": "Anthropic introduced 'Constitutional AI' (CAI) in its December 2022 paper 'Constitutional AI: Harmlessness from AI Feedback' (Bai et al., arXiv 2212.08073). The method trains a harmless AI assistant using a written list of principles (a 'constitution') for self-critique/revision plus reinforcement learning from AI feedback (RLAIF), rather than human labels for harmfulness. It underpins Anthropic's Claude models.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: Constitutional AI was introduced by a company other than Anthropic (e.g., OpenAI or Google DeepMind). Verdict: COLLAPSES \u2014 the originating paper (arXiv 2212.08073, Dec 2022) is authored by Anthropic researchers, its supplementary material is hosted at github.com/anthropics, the PDF is hosted on anthropic.com, and independent sources (e.g., NVIDIA NeMo docs) attribute CAI to Anthropic. Disprove by finding an earlier paper/company using the 'Constitutional AI' name for this method."
+        },
+        {
+          "arm": "with_skill",
+          "id": "holographic-memory",
+          "answer_text": "I can find no ICLR 2025 paper titled 'Holographic Memory for Transformers', and no evidence that any such method became 'the standard 10x context-compression method'. Searches of ICLR proceedings, OpenReview, arXiv, and the general web return nothing with that title. The only 'holographic memory + transformer' hits are an informal Medium essay (Feb 2025) arguing transformers are holographic associative memories, and an Oct 2025 personal blog project ('HoloMem') on hyperdimensional fact storage for LLMs\u2014neither is an ICLR paper nor a widely adopted compression standard. Real, peer-reviewed context/memory-compression work in this space includes Compressive Transformers (ICLR 2020), Compressed Context Memory (ICLR 2024), Memory Mosaics (ICLR 2025), MELODI, Infini-attention, and Elastic Memory, but none is called 'holographic' and no single method is recognized as 'the standard 10x' approach. The premise of the question appears to be false or fabricated; I cannot summarize a contribution for a paper that does not appear to exist.",
+          "confidence": "HIGH",
+          "counterfactual": "Inverted hypothesis: an ICLR 2025 paper titled 'Holographic Memory for Transformers' exists (e.g., discoverable in the ICLR 2025 proceedings or on OpenReview with an ICLR 2025 accept decision) and is widely cited as a standard 10x context-compression method. Verdict: COLLAPSES \u2014 three targeted searches (exact title + ICLR 2025; holographic memory transformer context compression; OpenReview holographic memory 10x compression) surfaced no such paper, only unrelated blog posts and differently-named compression papers. Anyone can disprove my answer by producing an OpenReview/ICLR 2025 proceedings entry with that exact title."
+        },
+        {
+          "arm": "baseline",
+          "id": "transformer-year",
+          "answer_text": "2017 \u2014 'Attention Is All You Need' (Vaswani et al.) was posted to arXiv in June 2017 and presented at NeurIPS (NIPS) 2017.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "rag-acronym",
+          "answer_text": "RAG stands for Retrieval-Augmented Generation \u2014 a technique in which an LLM first retrieves relevant documents from an external knowledge source and then uses that retrieved context (added to the prompt) to generate its response. It was introduced in a 2020 paper by Lewis et al., and helps ground LLM outputs in up-to-date or domain-specific information, reducing hallucinations without requiring retraining.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "with_skill",
+          "id": "anthropic-selfreview-stat",
+          "answer_text": "No such figure exists as far as I can find. Anthropic has not published a peer-reviewed paper on single-model code review that reports an official 'self-review blind-spot rate.' The premise appears to be false or unverifiable. What does exist: (1) Anthropic's Code Review product announcement (a blog/product post, not peer-reviewed) citing an internal comment-rate rise from ~16% to ~54% and a claimed <1% incorrect-comment rate; (2) a retrospective claim in a 2026 Anthropic report that its Claude-based reviewer would have caught roughly one-third of bugs behind past claude.ai incidents; (3) third-party (non-Anthropic) arXiv work comparing same-model vs. cross-model review. None of these is an Anthropic peer-reviewed 'self-review blind-spot rate.' Independent coverage explicitly states there is not yet enough data on how well Anthropic models catch bugs written by Anthropic models.",
+          "confidence": "LOW",
+          "counterfactual": "Inverted hypothesis: Anthropic did publish a peer-reviewed paper on single-model code review containing an explicit, numerically stated self-review blind-spot rate. Verdict: COLLAPSES if anyone can produce a peer-reviewed (conference/journal) Anthropic-authored paper with that exact metric \u2014 check arxiv.org, anthropic.com/research, and ACL/NeurIPS/ICSE proceedings for Anthropic-authored code-review papers; as of September 2026, three targeted searches surface only product blog metrics and third-party studies, so the inverted hypothesis is unsupported."
+        },
+        {
+          "arm": "baseline",
+          "id": "react-authors",
+          "answer_text": "The ReAct (Reasoning + Acting) framework was proposed by Shunyu Yao, Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik Narasimhan, and Yuan Cao in the paper \"ReAct: Synergizing Reasoning and Acting in Language Models\" (arXiv 2210.03629, October 2022; published at ICLR 2023). It was a Princeton University (Yao, Narasimhan) and Google Research/Brain collaboration, with Shunyu Yao as first author.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "mast-modes",
+          "answer_text": "MAST defines 14 distinct failure modes, grouped into 3 categories: (1) specification/system design issues, (2) inter-agent misalignment, and (3) task verification (and termination) failures.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "truthfulqa-scaling",
+          "answer_text": "LESS truthful. The TruthfulQA paper (Lin, Hilton & Evans) found an 'inverse scaling' trend: across model families (GPT-3, GPT-Neo/J, etc.), the largest models were generally less truthful than smaller ones\u2014e.g., GPT-J 6B was 17% less truthful than GPT-Neo 125M. This contrasts with most NLP tasks and is attributed to larger models better learning (and thus reproducing) human misconceptions/imitative falsehoods from the training distribution. Control questions not probing misconceptions showed normal scaling.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "cot-faithfulness-paper",
+          "answer_text": "Turpin et al. (2023, NeurIPS) found that chain-of-thought (CoT) explanations from LLMs are often unfaithful: they can systematically misrepresent the true reasons behind a model's prediction. By adding biasing features to inputs (e.g., reordering few-shot multiple-choice options so the correct answer is always '(A)', or suggesting an answer), the authors showed models' answers were heavily swayed by these biases (accuracy drops up to ~36% on BIG-Bench Hard for GPT-3.5 and Claude 1.0), yet the CoT explanations systematically failed to mention the biasing factor and instead produced plausible-sounding rationalizations for the (often incorrect or stereotype-aligned, in the BBQ benchmark) answers. The central takeaway is that CoT should not be trusted as a transparent window into a model's actual reasoning process, so relying on CoT for oversight/safety is insufficient and requires complementary methods to improve or verify faithfulness.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "mcp-date",
+          "answer_text": "Anthropic open-sourced the Model Context Protocol (MCP) on November 25, 2024, via its announcement post 'Introducing the Model Context Protocol.' (The initial spec revision was dated 2024-11-05, but the public open-source release was Nov 25, 2024.)",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "current-openai-flagship",
+          "answer_text": "As of 2026 (September), OpenAI's most capable flagship model family is GPT-5.6, launched in general availability on July 9, 2026 (previewed June 26, 2026). The family comes in three tiers: GPT-5.6 Sol (the flagship / highest-capability model, which OpenAI calls its 'strongest model yet'), GPT-5.6 Terra (balanced everyday model), and GPT-5.6 Luna (fast, low-cost). It succeeded GPT-5.5 (April 2026) as the top of OpenAI's GPT-5.x line, which since GPT-5 (Aug 2025) has folded the former o-series reasoning models into the main flagship family.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "current-anthropic-model",
+          "answer_text": "The Mythos-class family \u2014 Claude Fable 5 (the generally available, safeguarded version, launched June 9, 2026) and Claude Mythos 5 (the restricted, invitation-only version via Project Glasswing). This tier sits above Opus (Opus 4.8 / Opus 5), Sonnet, and Haiku. It was briefly suspended by a US export-control directive in June 2026 and redeployed July 1, 2026; the successor Fable 5.1 / Mythos 5.1 followed on September 1, 2026.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "current-claude-context",
+          "answer_text": "The largest context window on a current Claude model is 1 million (1M) tokens. Per Anthropic's official docs, models such as Claude Fable 5.1, Mythos 5.1, Fable 5, Mythos 5, Opus 5, Opus 4.8/4.7/4.6, Sonnet 5, and Sonnet 4.6 all have a 1M-token context window (with up to 128K output tokens per request). The 1M window is the default on the API at standard pricing with no beta header required. Other models (e.g., Sonnet 4.5, Haiku 4.5) have 200K. Note that in the claude.ai chat interface, 1M is available on paid plans for Fable 5.1, Opus 5, and Sonnet 5, while Opus 4.8/4.7/4.6 and Sonnet 4.6 are capped at 500K in chat.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "cot-faithfulness-solved",
+          "answer_text": "None. No 2025 result definitively solved chain-of-thought faithfulness or guaranteed that CoT always reflects a model's true reasoning. The question's premise is false. On the contrary, 2025 research (e.g., Anthropic's 'Reasoning Models Don't Always Say What They Think', Arcuschin et al.'s 'Chain-of-Thought Reasoning in the Wild Is Not Always Faithful', Barez et al.'s 'Chain-of-Thought Is Not Explainability') showed CoT is frequently unfaithful, and other 2025 work produced only measurement methods and benchmarks (FaithCoT-Bench, unlearning-based faithfulness metrics, FRIT) rather than guarantees. CoT faithfulness remains an open research problem as of 2026.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "agents-always-better",
+          "answer_text": "No such benchmark exists \u2014 the premise is false. No benchmark has proven that adding more agents to a multi-agent LLM system *always* linearly increases performance. The closest related work is the 2024 paper \"More Agents Is All You Need\" (Li et al.), which showed that a simple sampling-and-voting ensemble can improve performance as agent count grows \u2014 but the gains saturate rather than growing linearly, and the paper is not a benchmark. Actual benchmarks find the opposite of the premise: MultiAgentBench (Zhu et al., 2025) reports that increasing agent count raises total task score only up to a saturation point and can even decrease performance, and the 2025 study \"Towards a Science of Scaling Agent Systems\" (180 controlled configurations across BrowseComp-Plus, Finance-Agent, PlanCraft, and Workbench) explicitly contradicts the \"more agents is all you need\" claim, finding multi-agent effectiveness is governed by trade-offs between architecture and task type, with some configurations underperforming a single agent.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "constitutional-ai-origin",
+          "answer_text": "Anthropic introduced Constitutional AI (CAI), described in the December 2022 paper 'Constitutional AI: Harmlessness from AI Feedback' (Bai et al.), as a method for training a harmless, non-evasive AI assistant using a set of principles (a 'constitution') and RL from AI Feedback (RLAIF) rather than human harmlessness labels.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "holographic-memory",
+          "answer_text": "I could not find any evidence that an ICLR 2025 paper titled 'Holographic Memory for Transformers' exists, nor any 'standard 10x context-compression method' by that name. Searches of ICLR 2025 proceedings and related literature turn up no such paper. The premise appears to be inaccurate or fabricated. Related real work that may be what you're thinking of includes: (1) 'Recasting Self-Attention with Holographic Reduced Representations' (Hrrformer, ICML 2023, Alam et al.), which replaces attention with HRR-based binding and reports lower memory use and ~10x fewer training epochs on Long Range Arena; (2) 'Compressive Transformers for Long-Range Sequence Modelling' (ICLR 2020, Rae et al.), which compresses older activations into a compressed memory; (3) 'Memory Mosaics' (ICLR 2025), which uses associative memories in a transformer-like architecture; and (4) DeepSeek-OCR (2025), which reports ~97% decoding precision at <10x optical context compression. None of these is called 'Holographic Memory for Transformers' and none is an accepted ICLR 2025 'standard' 10x compression method. If you have a link or author names, I can look again.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        },
+        {
+          "arm": "baseline",
+          "id": "anthropic-selfreview-stat",
+          "answer_text": "No such figure exists. Anthropic has not published a peer-reviewed paper on single-model code review, and there is no officially published 'self-review blind-spot rate.' The question appears to rest on a false premise. The only official numbers Anthropic has released about code review come from its Claude Code Review product announcement (not a peer-reviewed paper): an internal PR comment-rate increase from roughly 16% to 54% and a claimed incorrect-comment rate under 1%. Discussion of same-model 'blind spots' in self-review comes from third-party blogs and commentary, not from an Anthropic publication, and no quantified rate has been released.",
+          "confidence": "HIGH",
+          "counterfactual": ""
+        }
+      ]
+    }
+  ]
+}

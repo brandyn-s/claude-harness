@@ -996,8 +996,8 @@ def check_push_guard(command, cwd):
                         f"[push-guard] BLOCKED: Bare `git push` on '{branch}' in protected repo ({repo}). "
                         "Create a feature branch and PR instead."
                     )
-            except Exception:
-                pass
+            except Exception:  # noqa: S110, BLE001 -- fail-open: a failed branch check must not block the session
+                pass  # fail-open: allow the push, mirroring the commit guard
 
     return None
 
@@ -1033,7 +1033,7 @@ def check_commit_on_main(command, cwd):
                 f"[commit-guard] BLOCKED: Attempting to commit on '{branch}' in a protected repo. "
                 "Create a feature branch first: git checkout -b <type>/<description>"
             )
-    except Exception:
+    except Exception:  # noqa: S110, BLE001 -- fail-open: a failed git check must not block the commit
         pass  # Fail-open: if git check fails, allow the commit
     return None
 
@@ -1070,8 +1070,8 @@ def check_settings_json_staged(command, cwd):
                     "[settings-guard] WARNING: settings.json is in the staged diff. "
                     "Verify these are intentional config changes."
                 )
-        except Exception:
-            pass
+        except Exception:  # noqa: S110, BLE001 -- fail-open: advisory; a failed git check must not block
+            pass  # fail-open: advisory only
 
     return None
 
@@ -1115,8 +1115,8 @@ def check_pr_before_push(command, cwd):
                 f"[pr-guard] BLOCKED: Branch '{branch_name}' has no upstream tracking ref. "
                 f"Push first: git push -u origin {branch_name}"
             )
-    except Exception:
-        pass
+    except Exception:  # noqa: S110, BLE001 -- fail-open: a failed git check must not block the session
+        pass  # fail-open: allow the PR command
     return None
 
 
@@ -1757,8 +1757,8 @@ def check_pr_security(command, cwd=None):
                     "Verify response formats against current docs (Context7, Tavily, or SDK source).",
                     file=sys.stderr,
                 )
-    except Exception:
-        pass
+    except Exception:  # noqa: S110, BLE001 -- fail-open: an advisory must never break the session
+        pass  # fail-open: advisory only
 
 
 # ── REBASE STASH AUTO-FIX (merged from rebase-stash-guard.py) ────────
@@ -2291,8 +2291,8 @@ def _autofix_pr_head_flag(command, cwd):
         branch = result.stdout.strip()
         if branch and branch not in ("main", "master"):
             return command.rstrip() + f" --head {shlex.quote(branch)}", f"appended --head {branch}"
-    except Exception:
-        pass
+    except Exception:  # noqa: S110, BLE001 -- fail-open: the auto-fix is best-effort; leave the command unchanged
+        pass  # fail-open: leave the command unchanged
     return None, None
 
 
@@ -2325,7 +2325,7 @@ def _audit_log(command, action, reason):
         }
         with open(audit_dir / f"bash-security-{date_str}.jsonl", "a", encoding="utf-8") as f:
             f.write(json.dumps(entry) + "\n")
-    except Exception:
+    except Exception:  # noqa: S110, BLE001 -- fail-open: audit logging must never fail the guard
         pass  # Never fail the guard for audit logging
 
 

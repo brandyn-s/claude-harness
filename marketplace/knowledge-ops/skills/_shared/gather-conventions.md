@@ -132,7 +132,7 @@ prevents a CHANGELOG/docs keyword match from auto-removing a still-live workarou
 
 Read the cited page/file; confirm the quote and the "what changed" claim.
 Absence of a first-party hit in a *bounded* search is a property of the search,
-not the world (`rules/uncharted-vs-refuted.md`): multiple independent credible
+not the world (`rules/symmetric-evidentiary-burden.md`): multiple independent credible
 sources + no first-party contradiction → CURRENT at lower confidence; reserve
 NONEXISTENT for claims with no credible attestation anywhere.
 

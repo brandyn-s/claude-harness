@@ -104,7 +104,9 @@ def score_run(fixture: dict, records: list[dict]) -> dict:
 
     `records`: list of {id, raw_verdict, cited_urls(list), grounded(bool|None)}.
     `grounded` is computed upstream by run_live.py (fetch cited URL ->
-    grounding_passes); for not_supported verdicts it is irrelevant (None).
+    grounding_passes); for not_supported verdicts it is irrelevant (None), and
+    for claims the fixture marks `groundable: false` it is None as well: they are
+    excluded from grounding_precision but still scored on disposition.
     Returns metrics + per-claim rows.
     """
     by_id = {c["id"]: c for c in fixture["claims"]}
@@ -114,8 +116,12 @@ def score_run(fixture: dict, records: list[dict]) -> dict:
         nv = normalize_verdict(r["raw_verdict"])
         supported = nv == "supported"
         # A "supported" assertion grounds only if it cites a URL whose fetched
-        # text passes the term check. No citation => not grounded.
-        grounded = bool(r.get("grounded")) if supported else None
+        # text passes the term check. No citation => not grounded. A claim the
+        # oracle marks `groundable: false` (2026-09-03 revision: no page-level
+        # phrase a supporting citation must contain) is excluded from the
+        # grounding view entirely (grounded=None) but still scored on disposition.
+        groundable = bool(c.get("groundable", True))
+        grounded = bool(r.get("grounded")) if (supported and groundable) else None
         rows.append({
             "id": r["id"],
             "category": c["category"],
@@ -124,6 +130,7 @@ def score_run(fixture: dict, records: list[dict]) -> dict:
             "norm_verdict": nv,
             "correct": nv == c["expected_disposition"],
             "cited_urls": r.get("cited_urls", []),
+            "groundable": groundable,
             "grounded": grounded,
         })
 
@@ -131,7 +138,8 @@ def score_run(fixture: dict, records: list[dict]) -> dict:
         return [x for x in rows if x["category"] in cats]
 
     supported_rows = [x for x in rows if x["norm_verdict"] == "supported"]
-    grounded_supported = [x for x in supported_rows if x["grounded"]]
+    groundable_supported = [x for x in supported_rows if x["groundable"]]
+    grounded_supported = [x for x in groundable_supported if x["grounded"]]
 
     refuted_outdated = subset({"refuted", "outdated"})
     fabricated = subset({"fabricated"})
@@ -139,10 +147,11 @@ def score_run(fixture: dict, records: list[dict]) -> dict:
 
     return {
         "n_claims": len(rows),
-        # precision-sensitive view: of everything the arm asserted SUPPORTED,
-        # what fraction is backed by a citation that actually grounds.
-        "grounding_precision": _rate(len(grounded_supported), len(supported_rows)),
+        # precision-sensitive view: of everything the arm asserted SUPPORTED on a
+        # groundable claim, what fraction is backed by a citation that actually grounds.
+        "grounding_precision": _rate(len(grounded_supported), len(groundable_supported)),
         "n_supported": len(supported_rows),
+        "n_supported_groundable": len(groundable_supported),
         "n_grounded_supported": len(grounded_supported),
         # recall-sensitive view: stale/false claims correctly downgraded.
         "refutation_recall": _rate(

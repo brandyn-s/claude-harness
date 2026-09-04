@@ -77,7 +77,7 @@ value-prop is therefore *unfalsified-on-the-upside* by this fixture, not disprov
 ## 6. REAL vs INSTRUMENT (Phase-9 check) — a grader bug was caught and corrected
 This harness's most instructive Phase-9 moment. The FIRST grading produced a
 striking verdict: `fix` — "framework ANTI-calibrated, accuracy 0.867 < baseline 1.0".
-Per `verify-instrument-before-fix`, I read the transcript before trusting it. BOTH
+Per verify-effectiveness's instrument-first gate, I read the transcript before trusting it. BOTH
 framework "misses" were **grader artifacts**, not real failures:
 - `mast-modes`: framework correctly said "14 modes… clustered into **3 categories**",
   but the v1 fixture listed `"three categories"` as a wrong_term → false-fail.

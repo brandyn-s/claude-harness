@@ -89,20 +89,16 @@ done
 git -C "$HOME/.claude" diff --stat origin/main HEAD -- skills/<target>/
 ```
 
-GUARD pattern="the tree is dirty but my edit is small / touches different files":
-  Still use a worktree. The 2026-08-08 edits were reverted by a concurrent
-  session's re-serialization of `settings.json` — a file the other session was
-  editing for unrelated reasons. Measured again 2026-08-11, 08-12 and 08-21:
-  three consecutive runs found claude-config dirty AND diverged, and each one
-  rediscovered it at Step 15 instead of Step 0. That late discovery is the main
-  reason the adoption metric sits near half.
+"The tree is dirty but my edit is small / touches different files" is not a
+reason to skip the worktree — a concurrent session's re-serialization of an
+unrelated file has reverted in-place edits before
+([references/run-history.md](references/run-history.md) "Step 0b").
 
 **Deployed-skill freshness (run in the same preflight):** the scripts this skill
 executes live in the checkout you just measured. If `~/.claude` is behind
 `origin/main`, the DEPLOYED skill may be older than the skill's own upstream —
-and the working tree can hold a THIRD, stale intermediate (measured 2026-08-22:
-HEAD behind, working tree diverged from both; the run had to extract and execute
-origin/main script content from /tmp). Check and prefer origin content when behind:
+and the working tree can hold a THIRD, stale intermediate. Check and prefer
+origin content when behind:
 
 ```bash
 git -C ~/.claude diff --stat origin/main HEAD -- skills/gather-claude/ | tail -3
@@ -163,22 +159,17 @@ pruned), plus a paste-ready PRUNE list and a COMPLETED list. Numbers come from
 `parse_watching.py`'s Item-column logic (same host caveat — pipe the Read-tool
 `## Watching` section on stdin `-` if `~/Documents` is TCC-blocked).
 
-**THE SCRIPT NOW CLASSIFIES ROWS ITSELF** (added 2026-08-22 after a THIRD
-consecutive run hand-derived the same split): its output ends with a
+**The script classifies rows itself:** its output ends with a
 `# ROW CLASSIFICATION` block bucketing every closed number into
 **PRUNABLE ROWS** (every number in the Item cell closed), **ANNOTATE**
 (closed sibling of an open canonical, not yet marked closed in row prose),
 and **EXPECTED RESIDUE** (already-annotated siblings — no action, and they
 re-flag every run by design). Quote prune counts ONLY from the PRUNABLE ROWS
-bucket; never from the closed-numbers total.
+bucket; never from the closed-numbers total. Do not re-derive the split by hand.
 
 Expect the stale-missed bucket and the EXPECTED RESIDUE count to stay
-non-empty run over run — that is NOT evidence of missed work. (History:
-2026-08-06 "prune 10" reached a user-facing plan when 0 rows were prunable;
-2026-07-24 same finding; 2026-08-22 17 flagged, all residue. The
-classification moved into `reconcile_watching.py` — tests in
-`test_reconcile_watching.py::ClassifyClosed` — precisely because three runs
-re-derived it by hand.)
+non-empty run over run — that is NOT evidence of missed work
+([references/run-history.md](references/run-history.md) "Step 1b").
 
 Act on each closed number by reason:
 - `completed` → promote to Active findings as REMOVE_WORKAROUND or UPDATE_PATTERN. Verify the fix actually retires one of OUR workarounds before retiring it — do not auto-retire on `completed` alone.
@@ -187,34 +178,21 @@ Act on each closed number by reason:
 - still `open` → keep in Watching, refresh the Updated date
 - **multi-number cluster rows**: if a CLOSED number is a NON-canonical sibling in a `#A / #B / #C` row whose canonical is still OPEN, ANNOTATE the sibling as closed in the row prose — do NOT prune the row. (The parser extracts every Item-column number, so the reconcile flags siblings too; only prune a row when ALL its numbers are closed.)
 
-**RETIRED — the bulk `closed:>=DATE` intersection (do NOT use; kept as rationale).**
-Earlier runs (Step 1b through 2026-07-20) intersected the Watching set against
-`gh issue list --search "closed:>=<last-run>"`. That query's cost scales with the
-REPO's closure volume, not our ~128-number Watching set, and anthropics/claude-code
-runs stale-bot mass-triage waves that close hundreds of issues per day — so the list
-truncates before the relevant closures are even on the page. Observed limit-capped at
-100 (2026-06-11 — #58682 missed at item 100), returning 0 at limit 500 (2026-07-18),
-and capped at 400 (2026-07-23 — the GraphQL batch found 12 closures the bulk cut
-surfaced only 2 of, including 3 standalone rows the run had otherwise missed). No
-`--limit` fixes a query bounded by the wrong thing; the GraphQL batch above is bounded
-by OUR set and is immune to the wave. Per-item `gh issue view {number} --json
-state,stateReason` remains valid for spot-checking a single number, but is not the
-set-reconciliation path.
+**RETIRED — the bulk `gh issue list --search "closed:>=<last-run>"` intersection
+(do NOT use).** Its cost scales with the repo's closure volume, not our Watching
+set, and stale-bot waves truncate the list before the relevant closures appear;
+the GraphQL batch above is bounded by OUR set. Per-item `gh issue view {number}
+--json state,stateReason` remains valid for spot-checking a single number.
+Observed truncations: [references/run-history.md](references/run-history.md).
 
-**Watching-set extraction — generate, don't transcribe (2026-06-16):** the
-intersection input is the Watching issue numbers. Hand-typing ~85 of them into
-the script is the one place a typo silently drops a closure (→ stale Watching →
-a workaround kept for an already-fixed bug). Generate the set:
+**Watching-set extraction — generate, don't transcribe:**
 `python3 scripts/parse_watching.py <report-path>` prints the tracked issue
-numbers from the report's `## Watching` section as a paste-ready Python set.
-The script extracts from the table's **Item column only** (2026-07-05 fix —
-whole-section extraction over-captured inline issue/PR references embedded in
-row prose, e.g. `PR #1489`, inflating a 90-row set to 120; the 2026-07-03 run
-had to re-derive the column-only set by hand with awk). HOST CAVEAT: where
-the report lives under a Bash-sandbox-blocked path (e.g. `~/Documents` under
-macOS TCC — `cp`/`ls`/`git` there return "Operation not permitted" even with the
-sandbox disabled), pipe the Read-tool's `## Watching` section to the script on
-stdin (`-`); never eyeball-transcribe.
+numbers from the report's `## Watching` section (**Item column only**) as a
+paste-ready Python set. HOST CAVEAT: where the report lives under a
+Bash-sandbox-blocked path (e.g. `~/Documents` under macOS TCC — `cp`/`ls`/`git`
+there return "Operation not permitted" even with the sandbox disabled), pipe the
+Read-tool's `## Watching` section to the script on stdin (`-`); never
+eyeball-transcribe.
 
 **Closure-boundary overlap:** `reconcile_watching.py --since` classifies a
 closure as this-cycle when `closedAt >= since` (INCLUSIVE), so it re-surfaces
@@ -244,7 +222,7 @@ Fetch the raw CHANGELOG.md from GitHub (Tavily truncates the page - it's too lon
 gh api repos/anthropics/claude-code/contents/CHANGELOG.md --jq '.content'
 ```
 
-Decode from base64 in a Python script. Parse into per-version sections using a generic semver regex `re.split(r'^## (\d+\.\d+\.\d+)', text, flags=re.MULTILINE)` — the prior pattern was hardcoded to `2\.1\.\d+` and silently left the entire CHANGELOG as one unsplit blob whenever the version moved to 2.2, 3.0, etc.
+Decode from base64 in a Python script. Parse into per-version sections using a generic semver regex `re.split(r'^## (\d+\.\d+\.\d+)', text, flags=re.MULTILINE)` — never a pattern hardcoded to the current major/minor.
 
 For each workaround from Step 2, build **compound keyword groups** (2+ keywords that must ALL appear in the same changelog line). Single keywords produce ~80% false positives. Example:
 - "autocompact fires at 76K" -> `[["autocompact", "threshold"], ["compact", "premature"], ["compact", "token"]]`
@@ -312,8 +290,7 @@ python3 ${CLAUDE_PLUGIN_ROOT}/skills/gather-claude/scripts/fetch_window.py --sin
 Pass `--dedupe-against <prior report>` on every incremental run: it splits the
 window's issue numbers into ALREADY-COVERED vs FRESH (and buckets the `[cyber]`
 classifier-FP wave into one counted line), so overlapping or same-day windows
-need no hand-grep (2026-08-22: the hand-grep missed a covered number the flag
-catches). Use `--get <task>` to print a task's output file path instead of
+need no hand-grep. Use `--get <task>` to print a task's output file path instead of
 guessing extensions (`npm-dist-tags` is `.json`; `changelog-b64` is RAW BASE64
 `.txt` — decode it directly, it is not the `gh api` JSON envelope; `status` is
 `.json`). The docs baseline persists and diffs automatically, recovers the
@@ -335,11 +312,9 @@ Use `gh issue list --search` (NOT `gh search issues` which fails on label filter
 Inject `{since_date}` into searches for incremental runs. Run the label-filtered
 bug queries from [references/github-track-queries.md](references/github-track-queries.md):
 the **host-matching platform label** (`platform:macos` on macOS, `platform:windows`
-on Windows — the label MUST match the host this deployment runs on; a
-Windows-era `platform:windows` query ran for weeks on a macOS host and missed
-macOS-labeled regressions), the three area labels (area:hooks, area:agents,
-area:mcp), and the four high-signal labels added 2026-07-05: `regression`
-(maintainer-triaged, higher precision than keyword search), `data-loss`,
+on Windows — the label MUST match the host this deployment runs on), the three
+area labels (area:hooks, area:agents, area:mcp), and four high-signal labels:
+`regression` (maintainer-triaged, higher precision than keyword search), `data-loss`,
 `api:bedrock` (our GovCloud lane), and `area:security`. Low-volume labels
 (regression, data-loss, api:bedrock) are scanned exhaustively; high-volume ones
 (platform, area:security) are triaged by title. For `full` runs, omit the date
@@ -357,26 +332,17 @@ Fetch first-party security advisories and cross-check the installed version
   `[SECURITY-ADVISORY]`**, Act-now priority (upgrade or mitigate).
 - Otherwise → Document in Known Issues with the patched version noted.
 
-Rationale (2026-07-05): 30 published GHSAs existed — including a HIGH sandbox
-escape via git-worktree path confusion, the exact isolation mechanism this
-architecture depends on — while the report contained zero advisory mentions.
 Advisories never appear in the CHANGELOG; this sweep is the only lane that
-carries them. Cost: one `gh api` call per run.
+carries them ([references/run-history.md](references/run-history.md) "Step 4b").
 
-### Step 5: RETIRED 2026-08-02 — Pain-Correlated Search (do NOT reinstate)
+### Step 5: RETIRED — Pain-Correlated Search (do NOT reinstate)
 
-Deleted because it did not run: skipped or substituted in **6 of 15** recorded runs
-(40%, the highest of any step), always with the same correct justification — the
-area sweeps already covered it. Evidence + the general rule:
-[references/run-metrics.md](references/run-metrics.md) "per-step SKIP RATE".
-
-**Successor, already folded into Step 4**: architecture-keyword sweeps (`hook`,
-`worktree`, `transcript`, `skill`, `permission deny`, `sandbox bash`, `subagent`)
-scoped to `created:>={since_date}` — where the 2026-08-01 findings actually came from.
-
-The NUMBER is retired, not renumbered, so `Step 6`..`Step 16` and every historical
-citation still resolve. Same convention as the RETIRED bulk `closed:>=` intersection
-in Step 1b.
+Retired 2026-08-02 because the Step 4 area sweeps already covered it
+([references/run-metrics.md](references/run-metrics.md) "per-step SKIP RATE").
+Successor, folded into Step 4: architecture-keyword sweeps (`hook`, `worktree`,
+`transcript`, `skill`, `permission deny`, `sandbox bash`, `subagent`) scoped to
+`created:>={since_date}`. The NUMBER is retired, not renumbered, so `Step 6`..`Step 16`
+and every historical citation still resolve.
 
 ### Step 6: Deep-Fetch High-Signal Items
 
@@ -402,22 +368,21 @@ Release notes often have more narrative than CHANGELOG.md. Fetch in parallel wit
 releases after `{since_date}`; deep-fetch bodies only for versions not already covered
 by the Step 3 CHANGELOG parse.
 
-Also fetch (added 2026-07-05, same reference for literal commands):
+Also fetch (same reference for literal commands):
 - **API SDK releases** (`anthropics/anthropic-sdk-python` / `-typescript`, ~3/week) —
   API-surface changes (new endpoints, beta headers, param deprecations) land here first
-  in machine-readable form; the Sonnet 5 `temperature` removal 400'd our Bedrock
-  detector before any covered source carried it.
+  in machine-readable form.
 - **MCP spec releases** (`modelcontextprotocol/modelcontextprotocol`) — protocol
-  revisions hit our MCP gateway fleet; the 2026-07-28 revision RC shipped 2026-05-29.
+  revisions hit our MCP gateway fleet.
 - **npm dist-tags** for `@anthropic-ai/claude-code` — Anthropic's own `stable` vs
-  `latest` designation (one curl). A wide stable/latest gap (e.g. 2.1.193 vs 2.1.201
-  observed 2026-07-05) is a first-party known-good-version signal for pinning decisions.
+  `latest` designation (one curl). A wide stable/latest gap is a first-party
+  known-good-version signal for pinning decisions.
 
 ## Web Track
 
 ### Step 8: Docs Inventory (llms.txt) + Extract Key Pages
 
-**Tool routing**: Follow `rules/web-search-preference.md` (source: `<claude-config-repo>/rules/web-search-preference.md`; deployed at `~/.claude/rules/web-search-preference.md`). The Claude Code docs are Mintlify-hosted — that rule routes Mintlify extraction to `mcp__firecrawl__firecrawl_scrape` (tavily_extract returns nav-shell/`Content: undefined` on these pages; observed degraded on every extract until the 2026-07-05 fix). Exa stays for date-filtered discovery; Tavily for non-Mintlify extraction and search.
+**Tool routing**: Follow `rules/web-search-preference.md` (source: `<claude-config-repo>/rules/web-search-preference.md`; deployed at `~/.claude/rules/web-search-preference.md`). The Claude Code docs are Mintlify-hosted — that rule routes Mintlify extraction to `mcp__firecrawl__firecrawl_scrape` (tavily_extract returns nav-shell/`Content: undefined` on these pages). Exa stays for date-filtered discovery; Tavily for non-Mintlify extraction and search.
 
 Fetch the docs inventory from `https://code.claude.com/docs/llms.txt` (one GET, ~169
 lines, every page WITH a one-line description) and diff it against the previous run's
@@ -429,30 +394,23 @@ sub-agents, mcp).
 
 **New pages in the inventory are high-signal** — extract them immediately.
 
-**PERSIST THE PAGE LIST, NOT JUST ITS COUNT.** `fetch_window.py` now does this
-automatically (added 2026-08-22): it extracts the page set from the fetched
-`docs-llms.txt`, writes `research/baselines/claude-docs-pages-<date>.txt`
-(override with `--baseline-dir`), and prints the +added/-removed diff against
-the newest previous baseline. The automation exists because the manual step
-was a dead letter — mandated since 2026-07-05, executed by ZERO runs, so the
-page-set diff had never once been derivable (measured 2026-08-22: no baseline
-file existed). Verify the `docs baseline:` line appears in the fetch output;
+**PERSIST THE PAGE LIST, NOT JUST ITS COUNT.** `fetch_window.py` does this
+automatically: it extracts the page set from the fetched `docs-llms.txt`, writes
+`research/baselines/claude-docs-pages-<date>.txt` (override with
+`--baseline-dir`), and prints the +added/-removed diff against the newest
+previous baseline. Verify the `docs baseline:` line appears in the fetch output;
 its absence or a "NOT persisted" message goes in the Sources Log.
+(`gather-vendor` follows the same convention —
+`research/baselines/openai-llms-links-YYYY-MM-DD.txt`.)
 
-(`gather-vendor` follows the same convention — `research/baselines/openai-llms-links-YYYY-MM-DD.txt`.)
+**A COUNT DELTA IS NOT A PAGE DIFF, AND A KEYWORD GREP IS NOT EITHER.** A keyword
+grep over the new inventory over-reports additions (it matches pages catalogued
+for months) and is structurally blind to REMOVALS. Report a page-set change ONLY
+from a real set-diff; if the prior list is unavailable, say the diff was not
+derivable rather than substituting a grep
+([references/run-history.md](references/run-history.md) "Step 8").
 
-**A COUNT DELTA IS NOT A PAGE DIFF, AND A KEYWORD GREP IS NOT EITHER.** With only
-the prior count, the temptation is to grep the new inventory for interesting-looking
-topics and call the hits "new" — but a keyword grep returns pages that have been
-catalogued for months, so it over-reports additions AND is structurally blind to
-REMOVALS (a page that disappeared cannot match a grep). Report a page-set change
-ONLY from a real set-diff; if the prior list is unavailable, say the diff was not
-derivable rather than substituting a grep. (2026-08-06: a keyword grep produced
-"+2 new pages"; the inventory had actually gone 180 → 176 — a NET LOSS of 4,
-including `ultraplan.md`, which the CHANGELOG independently confirmed as a removed
-feature. The removal was the real finding and the grep could not have found it.)
-
-### Step 8b: First-Party Release-Notes Sweep (added 2026-07-05)
+### Step 8b: First-Party Release-Notes Sweep
 
 Five cheap fetch groups per run — literal commands in
 [references/web-track-queries.md](references/web-track-queries.md); filter each to
@@ -475,12 +433,9 @@ entries after `{since_date}`:
    deployed plists.
 
 Findings flow into the normal categories (NEW_FEATURE, DEPRECATION, UPDATE_PATTERN).
-Rationale: the Fable 5 suspension/restoration, the Sonnet 5 parameter deprecations, and
-every Admin-API endpoint migration were published ONLY in these channels — none reach
-the CHANGELOG or the claude-code issue tracker. Likewise the Desktop-3P surface: M365
-write tools (2026-07-07), the websearch built-in (2026-06-25), and the
-`isDesktopExtensionEnabled` default flip shipped ONLY in the Desktop-3P config
-changelog — invisible to every other track.
+Model lifecycle events, parameter deprecations, Admin-API migrations, and Desktop-3P
+config changes have shipped ONLY in these channels — none reach the CHANGELOG or the
+issue tracker ([references/run-history.md](references/run-history.md) "Step 8b").
 
 ### Step 9: Gap Fill (only if needed)
 
@@ -533,7 +488,7 @@ downgrade rule live in `references/adversarial-verification.md`.
 | **UPDATE_PATTERN** | Act soon | Behavior we depend on changed |
 | **KNOWN_BUG** | Document | Open issue explains our pain |
 | **NEW_FEATURE** | Evaluate | Capability we're not using |
-| **NEW_FEATURE_AUTO** | Document only | Platform applies it for free (memory leak fixes, FD limits, retry behavior). ADOPT-by-default per Step 12b. |
+| **NEW_FEATURE_AUTO** | Document only | Platform applies it for free (memory leak fixes, FD limits, retry behavior). ADOPT-by-default (`../_shared/gather-conventions.md` §1). |
 | **INCOMING** | Watch | Open PR signals upcoming change |
 | **CONFIGURATION** | Low | Better config option exists |
 | **TRAINING** | Low | New learning resources |
@@ -556,23 +511,15 @@ missing or unresolved Qualification/Verified evidence, and Watching counts. Act 
 finding to ADOPT, DEFER, or REJECT in the same run. Archived historical records
 remain historical and do not block.
 
-It is a script because all four of these failed on 2026-08-01 as prose. Why that
-generalises: [references/run-metrics.md](references/run-metrics.md).
+Why it is a script rather than prose: [references/run-metrics.md](references/run-metrics.md).
 
 ## Step 12b: Assign verdict per finding (MANDATORY)
 
 Every finding gets one of four verdicts in the same run it surfaces. No "decided later" — that produces the multi-month opportunity backlog this skill exists to prevent. The verdict set, the "a category is never a verdict" rule, and the canonical finding-format field spellings are the gather-family shared discipline — `../_shared/gather-conventions.md` §1–2 is the canonical authority (it wins on any disagreement).
 
-| Verdict | Meaning | What this run does |
-|---------|---------|--------------------|
-| **ADOPT** | Apply after qualification | Concrete edit to `settings.json`, `~/.claude.json`, a skill, hook, or rule only after deterministic qualification evidence is recorded in this same run. Doc update is a side-effect, not the deliverable. |
-| **QUALIFY** | Do not apply | Exercise the proposed edit in a disposable candidate in this same run, then replace this provisional verdict with ADOPT, DEFER, or REJECT before presentation. |
-| **DEFER** | Don't apply yet | Reason + concrete re-eval trigger (e.g., "until Bedrock eval is active", "if PR-CI integration added"). Vague "maybe later" is REJECT, not DEFER. |
-| **REJECT** | Don't apply | Reason logged. Future runs surfacing the same finding tag `[previously-rejected-similar]` and deprioritize per Rejection Log. |
-
-Findings tagged NEW_FEATURE_AUTO (platform applies it for free — memory leak fixes, FD limits, retry behavior) are ADOPT-by-default; the only deliverable is the doc note.
-
-If you can't pick a verdict at run-time, the verdict is REJECT — surface as "no use case identified at run-time." This prevents the holding-pen failure mode.
+Skill-specific reading of that set: ADOPT means a concrete edit to `settings.json`,
+`~/.claude.json`, a skill, hook, or rule after deterministic qualification evidence
+is recorded in this same run — a doc update is a side-effect, not the deliverable.
 
 **A new setting that OVERLAPS a mechanism we already run is DEFER, not ADOPT, until the
 precedence is measured.** ADOPT requires deterministic qualification, and for a setting
@@ -581,25 +528,18 @@ qualification — it says nothing about which mechanism wins or what the current
 already is. Before grading such a finding ADOPT, establish: (a) does any first-party
 source state the precedence, and (b) what does the existing mechanism deliver TODAY.
 If (a) is silent, the verdict is DEFER with the measuring instrument named as the trigger.
-Measured 2026-08-30: `promptCacheTtl` / `subagentPromptCacheTtl` (v2.1.243) were graded
-ADOPT and applied to the LIVE settings while `env.ENABLE_PROMPT_CACHING_1H` was already
-set and `FORCE_PROMPT_CACHING_5M` also exists — with no source stating precedence. So
-`subagentPromptCacheTtl: "5m"` may have SHORTENED subagent caching rather than preserving
-it: an unmeasured cost/latency regression, shipped in the run whose own headline finding
-was a cost control silently breaking. Both keys were reverted the same day and re-graded
-DEFER. The tell to catch it earlier: the finding's "What changed" called them
-"finer-grained successors" to the env var — an inference stated as fact, with nothing read
-this run establishing that they supersede rather than conflict.
+The tell for a mis-graded overlap: a "What changed" that calls the new key a
+"finer-grained successor" of an existing mechanism without a source stating so
+([references/run-history.md](references/run-history.md) "Step 12b").
 
-QUALIFY is a same-run, pre-application state only. Run the applicable regression,
+QUALIFY is a same-run, pre-application state only: run the applicable regression,
 mutation, transcript replay, smoke, and authenticated read-only probes against a
-disposable candidate. Record the command and result in `Qualification`, then
-replace QUALIFY with ADOPT only on success. A blocked qualification becomes
-DEFER only when it has a machine-checkable external trigger; otherwise REJECT.
-Do not apply a live edit merely to observe it. The exact success form is
-`PASSED — <command and result>`; the lifecycle gate rejects a bare `PASSED`.
-It also rejects pending/unknown verification and an unlabeled non-zero overall
-result. Identify expected non-zero negative controls as expected evidence.
+disposable candidate; record the command and result in `Qualification`; replace
+QUALIFY with ADOPT only on success. A blocked qualification becomes DEFER only
+with a machine-checkable external trigger; otherwise REJECT. Do not apply a live
+edit merely to observe it. The exact success form is `PASSED — <command and result>`;
+the lifecycle gate rejects a bare `PASSED`, pending/unknown verification, and an
+unlabeled non-zero overall result — label expected non-zero negative controls as such.
 
 In addition to the required identity/evidence fields in the canonical format,
 the lifecycle fields use these exact spellings:
@@ -620,15 +560,11 @@ downgrade — never present unverified findings. Full 4-step procedure
 and the originating near-miss (Finding #2 conflating `settings.json` vs
 `~/.claude.json`) live in `references/verify-claims.md`.
 
-**Currency calibration — do not over-reject current features (measured fix):**
-when judging a feature/flag/command NONEXISTENT or stale, apply
-`uncharted-vs-refuted.md` — absence of a first-party hit in a *bounded* search
-is a property of the search, not evidence of absence. If multiple independent
-credible sources describe the SPECIFIC feature and no first-party source
-contradicts it, classify it CURRENT at lower confidence; reserve NONEXISTENT for
-features with no credible attestation anywhere. (Live arm measured the
-pre-calibration framework over-rejecting real `effort:`/`/rewind` — see
-`harness/PROBLEM.md`.)
+**Currency calibration** (`../_shared/gather-conventions.md` §7,
+`symmetric-evidentiary-burden.md`): do not over-reject current features — absence of a
+first-party hit in a *bounded* search is a property of the search, not the world.
+The live arm measured the pre-calibration framework over-rejecting real
+`effort:`/`/rewind` (`harness/PROBLEM.md`).
 
 ## Step 14: Present Report
 
@@ -646,12 +582,9 @@ staged state, or an invalid/missing field blocks presentation.
 
 Emit a `## What Changed Upstream` section BEFORE `## Active Findings`, narrating each
 update in the window **as a change or a new capability, not as a defect**. Every other
-part of this report is defect-shaped: the categories are REMOVE_WORKAROUND / KNOWN_BUG /
-UPDATE_PATTERN / DEPRECATION, Phase A audits workarounds, and Step 3's compound-keyword
-match only fires on lines resembling a bug we already track. That structure answers "what
-of ours broke or got fixed" and **silently drops "what can we now do that we could not
-before"** — a run can pass every gate while never telling the reader what Anthropic
-actually shipped.
+part of this report is defect-shaped (the categories, the Phase A workaround audit, Step
+3's keyword match), so without this section a run can pass every gate while never telling
+the reader what Anthropic actually shipped.
 
 Write prose, one short paragraph per update, grouped by channel. Say what changed, what
 it now enables, and whether it touches anything we run. Name versions and dates.
@@ -676,9 +609,8 @@ entry date). An omitted channel is indistinguishable from a channel that was nev
 fetched — that ambiguity is the thing this section exists to remove.
 
 Derive the CLI paragraph from ALL `Added`/`Changed`/`Improved`/`Removed`/`Reverted`
-bullets in the window's versions, not from the Step 3 compound-keyword matches. Step 3's
-keyword groups are tuned for workaround staleness (high precision, deliberately low
-recall); reusing them here inherits their blind spot.
+bullets in the window's versions (the file Step 3 wrote), never from the Step 3
+compound-keyword matches.
 
 ## Step 15: User Approval and Apply
 
@@ -693,13 +625,9 @@ After user approval, for each ADOPT finding:
    step 1 below is necessary but not sufficient. This checkout routinely sits tens of
    commits behind (recurring P1 across retros), so a finding derived from it can be a
    problem someone already fixed. Verify with `git show origin/<default>:<path>`, not
-   the working copy, and drop the finding if upstream is already correct.
-   (2026-08-08: a `cc-monitor` eval repair was real against the local checkout AND
-   mutation-verified 8 BITES / 0 misses — yet was **already obsolete on arrival**:
-   #1930/#1922 had rewritten skill and eval together and the gate was 9/9 green
-   upstream. Applying it would have overwritten a CURRENT eval with one written
-   against older content. The mutation evidence was sound and measured the wrong
-   baseline, which is why "I verified it" does not cover this.)
+   the working copy, and drop the finding if upstream is already correct — mutation
+   evidence against a stale checkout measures the wrong baseline
+   ([references/run-history.md](references/run-history.md) "Step 15").
    Also check each target with `git cat-file -e origin/<default>:<path>` — a file that
    exists only locally cannot ship independently; drop that part of the finding and say
    so rather than dragging its parent commits along.
@@ -721,21 +649,14 @@ label set, a better extraction tool, a workaround for a broken query or parser �
 the skill in the SAME run: edit the relevant `references/*.md` or `scripts/*` alongside
 the report edits (same worktree/PR), or record the exact intended diff in the report as
 a `SKILL-DEBT` finding so the next run ships it. An improvisation that lives only in
-the Sources Log is re-derived from scratch every subsequent run.
-
-Rationale (2026-07-05 audit): three run improvisations — `platform:macos` in the label
-sweep (2026-06-11), Item-column Watching extraction (2026-07-03), firecrawl-for-Mintlify
-(2026-07-03) — were each documented in Sources Logs but never codified; the spec kept
-the stale versions and later runs re-solved the same problems.
+the Sources Log is re-derived from scratch every subsequent run
+([references/run-history.md](references/run-history.md) "Step 16").
 
 **Close the worktree loop:** a skill-improvement worktree whose PR has MERGED is
 debris — verify containment (`git cherry origin/main <branch>` all `-`, clean
-tree, no unique stash), then remove it. Measured 2026-08-22: FIVE gather-claude
-worktrees existed, at least one (`gc-skill-improvements`) matching an
-already-merged PR; each run that skips this step leaves the next run to
-re-classify the sprawl.
+tree, no unique stash), then remove it.
 
-**Adoption metric**: in the metadata header, record `Adopted last 90d: X / Y opportunities`. The number on the right counts every NEW_FEATURE finding surfaced in runs from the last 90 days; the left counts only findings that reached `Applied` after direct qualification. QUALIFY is not adoption. Visible drift = pressure to re-evaluate the DEFER list at the next run. **Re-derive both counts each run** by tallying `Verdict:` lines across the last-90-days run-metadata/Archived blocks — do NOT hand-carry the prior run's figure. A number that rides forward unchanged with a `≈` (as `≈6/≈17` did across four runs) creates no pressure: either recompute it from the report, or write `(not recomputed this run)` so the staleness is explicit rather than disguised as a measurement.
+**Adoption metric**: in the metadata header, record `Adopted last 90d: X / Y opportunities`. The number on the right counts every NEW_FEATURE finding surfaced in runs from the last 90 days; the left counts only findings that reached `Applied` after direct qualification. QUALIFY is not adoption. Visible drift = pressure to re-evaluate the DEFER list at the next run. **Re-derive both counts each run** by tallying `Verdict:` lines across the last-90-days run-metadata/Archived blocks — do NOT hand-carry the prior run's figure. A `≈` number that rides forward unchanged creates no pressure: either recompute it from the report, or write `(not recomputed this run)` so the staleness is explicit.
 
 ---
 

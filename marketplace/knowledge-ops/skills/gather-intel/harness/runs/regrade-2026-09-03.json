@@ -1,0 +1,792 @@
+{
+  "_about": "OFFLINE RE-GRADE (no API calls, no fetches) of transcripts-20260903T211607Z.json with grade.py at fixture revision 0fdf793bdf0f; the frozen 2026-05-31 results.json is untouched. Reproduce: python3 regrade.py --records <this sample> --run-date <run_date> ...",
+  "regrade": {
+    "records_file": "transcripts-20260903T211607Z.json",
+    "records_sha256": "49ee38f35095c67d4b26ddce3eab632e11934e117593da45634e442f84a1f10a",
+    "run_date": "2026-09-03",
+    "grader": "grade.py",
+    "fixture_sha": "0fdf793bdf0f",
+    "regraded_on": "2026-09-04",
+    "frozen_results_sha256": "3a8390ceeb070101c284011cd51928c0a58cbe716edb259b3ec169c897251e15"
+  },
+  "model": "claude-fable-5-1",
+  "arms": "with_skill (framework) vs baseline (plain strong pass)",
+  "run_date": "2026-09-03",
+  "n_runs": 3,
+  "n_claims": 15,
+  "fixture_sha": "0fdf793bdf0f",
+  "primary_metric": "grounding_precision",
+  "cost_ratio": 5.0,
+  "metrics": {
+    "with_skill": {
+      "n_runs": 3,
+      "grounding_precision": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "ci95": {
+          "low": 0.0,
+          "high": 0.0,
+          "excludes_zero": false,
+          "direction": "inconclusive",
+          "n": 3
+        }
+      },
+      "refutation_recall": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "ci95": {
+          "low": 0.0,
+          "high": 0.0,
+          "excludes_zero": false,
+          "direction": "inconclusive",
+          "n": 3
+        }
+      },
+      "fabrication_resistance": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "ci95": {
+          "low": 0.0,
+          "high": 0.0,
+          "excludes_zero": false,
+          "direction": "inconclusive",
+          "n": 3
+        }
+      },
+      "true_recall": {
+        "mean": 0.9333,
+        "min": 0.8,
+        "max": 1.0,
+        "stdev": 0.0943,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          0.8
+        ],
+        "ci95": {
+          "low": -0.2,
+          "high": 0.0,
+          "excludes_zero": false,
+          "direction": "inconclusive",
+          "n": 3
+        }
+      },
+      "verdict_accuracy": {
+        "mean": 0.9778,
+        "min": 0.9333,
+        "max": 1.0,
+        "stdev": 0.0314,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          0.9333
+        ],
+        "ci95": {
+          "low": -0.0667,
+          "high": 0.0,
+          "excludes_zero": false,
+          "direction": "inconclusive",
+          "n": 3
+        }
+      }
+    },
+    "baseline": {
+      "n_runs": 3,
+      "grounding_precision": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "refutation_recall": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "fabrication_resistance": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "true_recall": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "verdict_accuracy": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    }
+  },
+  "verdict": {
+    "verdict": "BLOCKED ON MEASUREMENT",
+    "primary_metric": "grounding_precision",
+    "ci95": {
+      "low": 0.0,
+      "high": 0.0,
+      "excludes_zero": false,
+      "direction": "inconclusive",
+      "n": 3
+    },
+    "reason": "95% CI [0.0, 0.0] on grounding_precision straddles 0 \u2014 no current-state evidence the framework helps or hurts",
+    "ci_aware": true,
+    "delta": 0.0,
+    "cost_ratio": 5.0,
+    "legacy_min_delta": 0.05
+  },
+  "per_category_n": {
+    "true_primary": 5,
+    "outdated": 3,
+    "refuted": 4,
+    "fabricated": 3
+  },
+  "per_claim": {
+    "awesome-claude-code-exists": {
+      "category": "true_primary",
+      "expected": "supported",
+      "groundable": true,
+      "with_skill": {
+        "raw_verdict": [
+          "SUPPORTED",
+          "SUPPORTED",
+          "SUPPORTED"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          true,
+          true,
+          true
+        ]
+      },
+      "baseline": {
+        "raw_verdict": [
+          "TRUE",
+          "TRUE",
+          "TRUE"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          true,
+          true,
+          true
+        ]
+      }
+    },
+    "community-orchestrators-exist": {
+      "category": "true_primary",
+      "expected": "supported",
+      "groundable": true,
+      "with_skill": {
+        "raw_verdict": [
+          "SUPPORTED",
+          "SUPPORTED",
+          "SUPPORTED"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          true,
+          true,
+          true
+        ]
+      },
+      "baseline": {
+        "raw_verdict": [
+          "TRUE",
+          "TRUE",
+          "TRUE"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          true,
+          true,
+          true
+        ]
+      }
+    },
+    "claudemd-practice": {
+      "category": "true_primary",
+      "expected": "supported",
+      "groundable": true,
+      "with_skill": {
+        "raw_verdict": [
+          "SUPPORTED",
+          "SUPPORTED",
+          "SUPPORTED"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          true,
+          true,
+          true
+        ]
+      },
+      "baseline": {
+        "raw_verdict": [
+          "TRUE",
+          "TRUE",
+          "TRUE"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          true,
+          true,
+          true
+        ]
+      }
+    },
+    "community-mcp-servers": {
+      "category": "true_primary",
+      "expected": "supported",
+      "groundable": true,
+      "with_skill": {
+        "raw_verdict": [
+          "SUPPORTED",
+          "SUPPORTED",
+          "SUPPORTED"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          true,
+          true,
+          true
+        ]
+      },
+      "baseline": {
+        "raw_verdict": [
+          "TRUE",
+          "TRUE",
+          "TRUE"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          true,
+          true,
+          true
+        ]
+      }
+    },
+    "three-workers-sweetspot": {
+      "category": "true_primary",
+      "expected": "supported",
+      "groundable": false,
+      "with_skill": {
+        "raw_verdict": [
+          "SUPPORTED",
+          "SUPPORTED",
+          "CONTESTED"
+        ],
+        "correct": [
+          true,
+          true,
+          false
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      },
+      "baseline": {
+        "raw_verdict": [
+          "TRUE",
+          "TRUE",
+          "TRUE"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    "taskoutput-community-workaround": {
+      "category": "outdated",
+      "expected": "not_supported",
+      "groundable": true,
+      "with_skill": {
+        "raw_verdict": [
+          "OUTDATED",
+          "OUTDATED",
+          "OUTDATED"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      },
+      "baseline": {
+        "raw_verdict": [
+          "OUTDATED",
+          "OUTDATED",
+          "OUTDATED"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    "resume-community-workaround": {
+      "category": "outdated",
+      "expected": "not_supported",
+      "groundable": true,
+      "with_skill": {
+        "raw_verdict": [
+          "OUTDATED",
+          "OUTDATED",
+          "OUTDATED"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      },
+      "baseline": {
+        "raw_verdict": [
+          "OUTDATED",
+          "OUTDATED",
+          "OUTDATED"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    "ripgrep-workaround-stale": {
+      "category": "outdated",
+      "expected": "not_supported",
+      "groundable": true,
+      "with_skill": {
+        "raw_verdict": [
+          "REFUTED",
+          "REFUTED",
+          "REFUTED"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      },
+      "baseline": {
+        "raw_verdict": [
+          "FALSE",
+          "FALSE",
+          "FALSE"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    "claudemd-never-use": {
+      "category": "refuted",
+      "expected": "not_supported",
+      "groundable": true,
+      "with_skill": {
+        "raw_verdict": [
+          "REFUTED",
+          "REFUTED",
+          "REFUTED"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      },
+      "baseline": {
+        "raw_verdict": [
+          "FALSE",
+          "FALSE",
+          "FALSE"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    "awesome-list-official-cert": {
+      "category": "refuted",
+      "expected": "not_supported",
+      "groundable": true,
+      "with_skill": {
+        "raw_verdict": [
+          "REFUTED",
+          "REFUTED",
+          "REFUTED"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      },
+      "baseline": {
+        "raw_verdict": [
+          "FALSE",
+          "FALSE",
+          "FALSE"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    "more-agents-linear-throughput": {
+      "category": "refuted",
+      "expected": "not_supported",
+      "groundable": true,
+      "with_skill": {
+        "raw_verdict": [
+          "REFUTED",
+          "REFUTED",
+          "REFUTED"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      },
+      "baseline": {
+        "raw_verdict": [
+          "FALSE",
+          "FALSE",
+          "FALSE"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    "selfreview-blindspot-stat": {
+      "category": "refuted",
+      "expected": "not_supported",
+      "groundable": true,
+      "with_skill": {
+        "raw_verdict": [
+          "REFUTED",
+          "REFUTED",
+          "REFUTED"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      },
+      "baseline": {
+        "raw_verdict": [
+          "FALSE",
+          "FALSE",
+          "FALSE"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    "fab-contextzip": {
+      "category": "fabricated",
+      "expected": "not_supported",
+      "groundable": true,
+      "with_skill": {
+        "raw_verdict": [
+          "REFUTED",
+          "REFUTED",
+          "REFUTED"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      },
+      "baseline": {
+        "raw_verdict": [
+          "FALSE",
+          "FALSE",
+          "FALSE"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    "fab-telepathy": {
+      "category": "fabricated",
+      "expected": "not_supported",
+      "groundable": true,
+      "with_skill": {
+        "raw_verdict": [
+          "UNCHARTED",
+          "UNCHARTED",
+          "UNCHARTED"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      },
+      "baseline": {
+        "raw_verdict": [
+          "NONEXISTENT",
+          "NONEXISTENT",
+          "NONEXISTENT"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    "fab-agentforge-cert": {
+      "category": "fabricated",
+      "expected": "not_supported",
+      "groundable": true,
+      "with_skill": {
+        "raw_verdict": [
+          "UNCHARTED",
+          "UNCHARTED",
+          "UNCHARTED"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      },
+      "baseline": {
+        "raw_verdict": [
+          "NONEXISTENT",
+          "NONEXISTENT",
+          "NONEXISTENT"
+        ],
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "grounded": [
+          null,
+          null,
+          null
+        ]
+      }
+    }
+  }
+}

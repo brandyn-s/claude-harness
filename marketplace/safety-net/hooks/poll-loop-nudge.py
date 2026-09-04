@@ -87,8 +87,8 @@ def main():
     try:
         if fires(cmd):
             sys.stderr.write(_MSG + "\n")
-    except Exception:
-        pass
+    except Exception:  # noqa: S110, BLE001 -- fail-open: an advisory must never block
+        pass  # fail-open: advisory only
     sys.exit(0)  # ADVISORY: never block
 
 

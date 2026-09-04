@@ -22,6 +22,10 @@ names and behavior notes are overlays, not security or completion controls.
    model once needed them.
 6. Never assume a fixed context window. Use the active lane's reported
    capacity and produce a durable checkpoint/handoff only at a real boundary.
+7. For a cross-model validation, second-rater, or panel task, every arm is its
+   vendor's flagship; a mid-tier arm confounds the comparison. Substitute another
+   vendor's flagship or surface the block rather than downgrade silently, and
+   record each arm's exact model id and tier (`rules/eval-shipping-discipline.md`).
 
 ## Current overlays
 

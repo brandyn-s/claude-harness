@@ -5,7 +5,7 @@
 No wired Gemini runtime tooling today. Dependencies are real but thinner; a
 "no delta affects us" run is a CORRECT outcome — do not manufacture findings.
 
-1. **Cross-model panel arm** — `rules/best-in-class-for-cross-model.md` requires
+1. **Cross-model panel arm** — `rules/eval-shipping-discipline.md` requires
    each vendor's FLAGSHIP for cross-model validation. This skill's first job is
    keeping the Gemini flagship record current (a wrong-flagship arm silently
    confounds a panel — the Nova-Pro incident shape). Current record:

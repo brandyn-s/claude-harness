@@ -211,7 +211,7 @@ def output_reuse_error(output_dir: Path, inject_agent_d: bool) -> str | None:
 # Probe-before-panel: the pinned non-Anthropic arms are the exact class that
 # silently invalidates a cross-model panel — a retired/silently-redirected model
 # runs the whole roundtable under the wrong weights (the Nova-Pro confound
-# rules/best-in-class-for-cross-model.md exists to prevent). Reuse the validated
+# rules/eval-shipping-discipline.md exists to prevent). Reuse the validated
 # gather-vendor probe (sibling skill) rather than re-implementing the check.
 _PROBE = SKILL_DIR.parent / "gather-vendor" / "scripts" / "probe_models.py"
 

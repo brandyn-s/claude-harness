@@ -31,17 +31,14 @@ silently diagnoses only the surviving tail. mega-distill reads the file from dis
 complete session as a **condensed signal slice** small enough to fit a context window, so `/distill`
 applies its NORMAL whole-session judgment to the WHOLE session.
 
-**What it is NOT (design history — read this).** mega-distill is a *preprocessor for distill*, not a
-parallel retro engine. An earlier version fanned ~79 context-ISOLATED subagents over the transcript
-and emitted ~995 disconnected findings — a transcript CENSUS, not a diagnosis. A 2026-06-21 red-team
-established why that failed: `/distill` is valuable precisely because it is LOSSY in the right
-direction (it discards ~99% of noise and keeps the load-bearing few, using WHOLE-SESSION context to
-judge what matters). Chunking destroyed the session ARC (goal → error → pivot) that judgment needs,
-and frequency-ranking (a guard firing 24×) is not importance-ranking (one data-sovereignty violation
-> 24 working-as-intended guard blocks). The fix is this skill's whole design: **condense, preserving
-the arc; then let distill judge.** The map/synthesis/meta apparatus from that era still exists in
-`bin/transcript_{ground_check,reduce,synth_input,synth_shard,synth_check,meta}.py` but is NOT invoked
-here — left dormant, not deleted.
+**What it is NOT.** mega-distill is a *preprocessor for distill*, not a parallel retro engine.
+Fanning context-isolated extractors over chunks produces a transcript CENSUS, not a diagnosis:
+`/distill` is valuable precisely because it is LOSSY in the right direction (it keeps the
+load-bearing few using WHOLE-SESSION context), chunking destroys the session ARC (goal → error →
+pivot) that judgment needs, and frequency-ranking is not importance-ranking. Hence the design:
+**condense, preserving the arc; then let distill judge.** The retired census apparatus
+(`bin/transcript_{ground_check,reduce,synth_input,synth_shard,synth_check,meta}.py`) is dormant and
+NOT invoked here (`references/run-history.md`).
 
 **Core principle: condense, don't census.** Keep the diagnostic signal in chronological order; drop
 the noise. The slice is ~4% of the raw file (measured: 56MB → 2.2MB, 65MB → 2.9MB) yet preserves
@@ -89,10 +86,8 @@ to **Corpus Mode** below. The single-session path (no `--corpus`) continues here
    - **Otherwise STOP** and report: "Session is uncompacted and fits in context — run /retro
      instead." Do NOT proceed on byte-size alone: a build-heavy but uncompacted session is mostly
      `thinking`/tool-output bytes, not conversational scale that overflowed — and there is nothing
-     to recover. (FLAW-8, 2026-06-21: the old `size > 5MB` OR-clause over-triggered on a 5.4MB /
-     0-compaction / 3,105-line session whose 451KB condensed slice distill could read in-context
-     directly. Byte-size alone is not the signal — compaction or line-scale is.)
-3. **Delta-since-last-recovery gate (FLAW-9, 2026-06-22).** The gate above keys on the file's
+     to recover (FLAW-8, `references/run-history.md`).
+3. **Delta-since-last-recovery gate (FLAW-9).** The gate above keys on the file's
    STATIC properties (total boundaries / lines / bytes) — but on a SECOND `/retro` or `/mega-distill`
    in the SAME long session, all those boundaries are from the segment a PRIOR recovery ALREADY
    processed, and the only NEW work is the delta since then. Re-running here would re-condense the
@@ -115,40 +110,30 @@ to **Corpus Mode** below. The single-session path (no `--corpus`) continues here
      mega-distill's recovery value applies. But do NOT re-condense the whole file either —
      **slice the delta first** and condense only that:
      locate the prior recovery's line (grep the `/retro` or `/mega-distill` command records),
-     write `lines >= that` to a `*-delta.jsonl`, and pass THAT to `transcript_condense.py`.
-     A 4th-retro run measured 2026-07-28: full file 11,607 lines / 22 MB / 4 boundaries, but
-     the un-distilled delta was 3,423 lines / 6.7 MB / 2 boundaries → one 173K-token slice
-     instead of re-processing three already-distilled segments.
+     write `lines >= that` to a `*-delta.jsonl`, and pass THAT to `transcript_condense.py`
+     (one slice instead of re-processing already-distilled segments).
    - OBSERVED PATTERN worth expecting: in a long session each `/retro` is frequently followed
-     WITHIN A FEW HUNDRED LINES by a compaction boundary (measured: retro at 2496 → boundary
-     2846; 5396 → 5466; 8196 → 8303), because the retro's own reads are what tip the context.
-     So on the Nth retro, assume a boundary sits just after the (N−1)th and slice from there.
+     WITHIN A FEW HUNDRED LINES by a compaction boundary, because the retro's own reads are what
+     tip the context. So on the Nth retro, assume a boundary sits just after the (N−1)th and
+     slice from there.
    - This is the same "don't fan out when the in-context path handles it" judgment as the size gate,
-     applied to the TIME axis (delta since last recovery) instead of the SIZE axis. (2026-06-22: a
-     second /retro on a 36MB/5-boundary session had a 1,491-line delta entirely post-last-boundary;
-     full mega-distill would have re-processed the whole file for an in-context delta.)
+     applied to the TIME axis (delta since last recovery) instead of the SIZE axis
+     (measured runs: `references/run-history.md`).
 
 ---
 
 ## Step 0.5 — A turn that TRIGGERED a compaction is not in the slice; read the boundary summary for it
 
-**Structural blind spot, verified 2026-07-28 — this is NOT a bug to fix in
-`transcript_condense.py`.** A message the user sends WHILE a turn is still running is
-queued, and if it is what pushes the context over the limit, the compaction consumes
-it: the verbatim turn then exists **nowhere** in the transcript as a standalone
-`type=="user"` record. It survives only as a line item inside the boundary record's
-own generated summary prose (an `isCompactSummary` record whose `message.content` is
-one long string — 17,916 chars in the observed case).
-
-So the condenser cannot recover it, and it is RIGHT not to emit that summary — the
-slice exists precisely to replace the lossy summary. Confirmed by measurement:
-patching the condenser to ALSO emit user text carried on the boundary record produced
-a **byte-identical** slice, because the text is in the summary prose, not on a user
-content block. The patch was reverted as a fix for a defect that does not exist.
-
-The cruel part: a message urgent enough to be sent mid-turn is disproportionately
-likely to be the session's PIVOT — a correction, an objection, a stop ("this feels
-like the wrong approach"). Exactly the turn a recovery pass most needs.
+**Structural blind spot — NOT a bug to fix in `transcript_condense.py`.** A message the
+user sends WHILE a turn is still running is queued, and if it is what pushes the context
+over the limit, the compaction consumes it: the verbatim turn then exists **nowhere** in
+the transcript as a standalone `type=="user"` record. It survives only as a line item
+inside the boundary record's own generated summary prose (an `isCompactSummary` record
+whose `message.content` is one long string). The condenser is RIGHT not to emit that
+summary — the slice exists precisely to replace it — and emitting user text from the
+boundary record produces a byte-identical slice (`references/run-history.md`). A message
+urgent enough to be sent mid-turn is disproportionately likely to be the session's PIVOT
+— a correction, an objection, a stop — exactly the turn a recovery pass most needs.
 
 **REQUIRED when a slice's user-turn spine ends abruptly, or the arc changes direction
 with no visible cause:** read the boundary record's summary directly and mine its
@@ -186,11 +171,7 @@ If the transcript has mid-turn deliveries the slice lacks, extract them from the
 transcript and hand them to /distill alongside the slice. Do NOT report a user-turn count
 from the slice as the session's ask count.
 
-(2026-07-30, both verified in one session: `"Make sure to collect all of the logs to
-ensure we have observability"` was in context and `grep`-absent from the slice; and
-`"Can you do 24, 48, 72 hours?"` was in the transcript but NEVER reached context — only
-the following `"Proceed with 24, 48, 72hrs"` did, so a QUESTION was acted on as a
-DIRECTIVE and the constraint that answered it was found after execution began.)
+(Both shapes verified in one session — `references/run-history.md`.)
 
 ---
 
@@ -374,10 +355,8 @@ table is **prioritization input, NOT the deliverable**. Clustering is a LOSSY ag
 INVERSE of distill's per-item judgment: it answers "what recurs" by averaging specifics into a count,
 which is exactly the wrong operation for "fix it". A cluster says "bash-antipattern-reflex, 50/97
 sessions"; the FIX lives in its 56 member-lessons, each carrying a concrete `proposed_fix`. Summarizing
-the cluster (early-version FLAW, 2026-06-21: "auto-ship a T1 rule with N/M as its WHY") emits a
-frequency report and BURIES the shippable specifics — a stale-but-already-fixed lesson and a real
-one-line hook-message bug were both invisible at the cluster level and only surfaced when distill's
-loop ran on the member-lessons.
+the cluster emits a frequency report and BURIES the shippable specifics
+(`references/run-history.md`).
 
 So: for each cluster, IN BREADTH-RANK ORDER (highest first — that is all the ranking is for), hand its
 **member-lessons** (not the cluster summary) to /distill's judge-and-write loop, with the cross-session
@@ -431,21 +410,6 @@ diffs, the step FAILED — re-run it through distill's loop.
   is a breadth table of counts rather than a set of shipped fixes, the ship step did NOT run — the
   clustering is input to distill, never a substitute for it.
 
-## What This Skill Does NOT Do
-
-- Does NOT emit a per-chunk findings census (the retired 79-extractor design — see "What it is NOT").
-- Does NOT re-implement tiering/judgment — that is /distill's job; mega-distill recovers the complete
-  session into a slice distill can hold, THEN auto-ships distill's output (Step 3).
-- Does NOT stop to ask which lessons to apply — it writes + ships automatically like /distill; the
-  only blocks are a fix that fails its test or a destructive change (security-confirmations).
-- Does NOT run on uncompacted in-context-fitting sessions (Step 0 routes those to /retro).
-- Does NOT drop diagnostic signal: every user turn, assistant text, tool call, and ERROR result is
-  kept after high-confidence credential redaction; only non-diagnostic noise
-  (thinking/images/success-bodies/bookkeeping) is condensed out.
-- (Corpus mode) Does NOT treat the cluster summary as the fix. Clustering ranks/prioritizes; the
-  specific fix is always /distill's per-member-lesson judge-and-write. A breadth count is never a
-  remediation — emitting one in place of shipped diffs is the documented Phase-C failure (2026-06-21).
-
 ## Examples
 
 **Example 1 — 56MB / 10-compaction session**
@@ -454,7 +418,7 @@ turns, 1,939 assistant texts, 2,338 tool calls, 93 errors) → splits into the m
 with every part ≤180K estimated tokens →
 /distill reads every part, reconstructs the arc, yields ~5 load-bearing lessons (e.g. a diagnose-before-fix
 violation the user had to correct twice, a security-write on an ambiguous instruction), and SKIPS the
-recurring guard-blocks as working-as-intended. (Validated 2026-06-21.)
+recurring guard-blocks as working-as-intended.
 
 **Example 2 — uncompacted session misroute (incl. big-but-uncompacted)**
 `/mega-distill` on a 0-compaction session that fits context — whether 4.7MB or 5.4MB/3,105 lines (the
@@ -473,16 +437,9 @@ boundaries → /distill each → reconcile duplicate lessons across the split.
 The Step 0.5 probe above (`grep -c "sent a new message while you were working"`) does not
 find every mid-turn message, and it fails in the most misleading way: on a transcript
 containing this SKILL.md's own text, that grep returns a NONZERO count composed entirely
-of **phantom self-referential hits** — this document describing the pattern — while the
-real message goes unfound. A "2" that is really "0 real + 2 self-quotes" reads as coverage.
-
-Measured 2026-07-30 (session f8491918): the pivot turn *"This is not recoverable in our
-local session prompts? v2 judge prompt"* — which refuted a conclusion already shipped in a
-recommendation and redirected the remainder of the session — was stored as **four
-`type=="queue-operation"` records plus one `type=="attachment"`**, carried NO
-`"sent a new message while you were working"` wrapper, and was **absent from the condensed
-slice** (`grep -c` on the slice = 0). A refinement filtering to `type=="user"` returned a
-confident **0**.
+of **phantom self-referential hits** while the real message goes unfound. A session pivot
+has been stored as `type=="queue-operation"` records with no wrapper at all
+(`references/run-history.md`).
 
 **REQUIRED — validate the probe against a known-positive, do not merely run it.** Recall a
 message you know you answered, grep the raw transcript for a distinctive phrase, and
@@ -508,15 +465,10 @@ link: the turns most likely to be dropped are the ones a compaction ate, which a
 the ones you cannot recall a phrase from. **Replace the recall-based probe with a
 deterministic sweep.**
 
-Measured 2026-08-01 (session c9f95428, 1 boundary, 2,197 lines): **5 mid-turn user asks
-were absent from the slice**, and the documented probes found NONE of them.
-`grep -c "sent a new message while you were working"` returned **2 — both phantom** (this
-SKILL.md's own text plus the reply quoting it); exactly **1** was a real `type=="user"`
-record. The 5 real ones were carried as `type=="attachment"` with
-`attachment.type == "queued_command"`, and **3 of the 5 had NO `queue-operation` twin at
-all** — so a probe keyed on `queue-operation` (blind spot 3) also misses them. Three were
-the session PIVOTS: the user diagnosing the agent's own RTR automation as rebooting the
-subject's machine.
+Mid-turn asks are also carried as `type=="attachment"` with
+`attachment.type == "queued_command"`, often with NO `queue-operation` twin — so a probe
+keyed on `queue-operation` (blind spot 3) misses them too, and the phrase-probes found none
+of five dropped asks in the measured session (`references/run-history.md`).
 
 **REQUIRED after every condense — run this; do not grep for a remembered phrase:**
 
@@ -566,11 +518,9 @@ corrected ask count explicitly (slice `USER:` count + recovered), because the sl
 spine UNDERCOUNTS the session asks and `/distill` will otherwise reason about an arc
 missing its pivots.
 
-**Do NOT report the slice `USER:` count as the session ask count** — measured 66
-against a true 71 in one case, and **91 against 103** on 2026-08-03 (12 dropped, of
-which 2 predated the compaction and appeared in no summary: a sanctions-scope
-correction and a named-entity/OEM-subsidiary directive, both of which had reshaped
-the rubric).
+**Do NOT report the slice `USER:` count as the session ask count** — measured
+undercounts of 5 and 12 asks, some of which had reshaped the session's rubric
+(`references/run-history.md`).
 
 **Sanity-check the sweep itself before trusting a zero.** A `DROPPED total: 0` on a
 compacted session is more likely a broken sweep than a clean one — confirm the script

@@ -232,7 +232,7 @@ Different consumers want different tradeoffs. A single F1 number hides this; two
 
 ## Phase 9 — Step 6 verification protocol
 
-Wire `~/.claude/rules/verify-instrument-before-fix.md` into the team's workflow. Whenever the harness identifies a failure cell holding ≥30% of failure mass:
+Wire the instrument-first gate of `~/.claude/rules/verify-effectiveness.md` ("Verify the instrument before fixing the subject") into the team's workflow. Whenever the harness identifies a failure cell holding ≥30% of failure mass:
 
 1. Sample 3-5 edges from the cell at random.
 2. For each, open the source code at the cited location and verify by direct inspection.
@@ -273,8 +273,7 @@ Then `/plateau-diagnose` and `/persona` work as designed when you hit your first
 
 ## Related rules and skills
 
-- `~/.claude/rules/verify-effectiveness.md` — instrument validation, tiny known-truth fixture procedure
-- `~/.claude/rules/verify-instrument-before-fix.md` — Phase 9 protocol (T1 rule, 2026-05-02)
+- `~/.claude/rules/verify-effectiveness.md` — instrument validation, tiny known-truth fixture procedure, and the Phase 9 dominant-cell gate (its own rule from 2026-05-02 to 2026-09-03)
 - `/plateau-diagnose` — six-step diagnosis recipe; operates on a system instrumented per this skill
 - `/persona` — hypothesis generation; used as `/plateau-diagnose` Step 1 when hypothesis space is unmapped
 - `/validate-changes` — per-PR validation; complementary to longitudinal harness measurement

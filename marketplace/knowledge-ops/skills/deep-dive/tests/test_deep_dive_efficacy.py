@@ -76,8 +76,13 @@ def test_calibration_grader_fp_fn_zero():
     m = grade.score_run(_SYNTH_FIXTURE, _SYNTH_RECORDS)
     assert m["accuracy"] == pytest.approx(2 / 3), "A correct, B wrong (stale), C correctly rejected"
     assert m["acc_high"] == pytest.approx(1.0), "the one HIGH answer (A) is correct"
-    assert m["acc_nonhigh"] == pytest.approx(0.5), "non-HIGH: B wrong, C correct -> 0.5"
-    assert m["calibration_discrimination"] == pytest.approx(0.5), "1.0 - 0.5"
+    # 2026-09-03 revision: calibration is computed over FACT rows only, so the non-HIGH
+    # bin is {B wrong} -> 0.0 and discrimination is 1.0. The legacy all-kinds view still
+    # counts C's LOW-but-correct rejection ({B wrong, C right} -> 0.5, discrimination 0.5).
+    assert m["acc_nonhigh"] == pytest.approx(0.0), "non-HIGH FACT answers: B wrong -> 0.0"
+    assert m["calibration_discrimination"] == pytest.approx(1.0), "1.0 - 0.0 over fact rows"
+    assert m["calibration_discrimination_all"] == pytest.approx(0.5), "legacy view: 1.0 - 0.5"
+    assert m["n_key_expired"] == 0
     assert m["false_premise_reject_rate"] == pytest.approx(1.0), "C rejected the false premise"
     # only A carried a counterfactual; it is substantive (has a COLLAPSES verdict, >40 chars)
     assert m["counterfactual_substantive_rate"] == pytest.approx(1.0)
@@ -102,6 +107,178 @@ def test_counterfactual_boilerplate_detection():
     assert not grade.counterfactual_substantive("too short", ["too short"])  # length
 
 
+# ---------- 1b. 2026-09-03 grader revision (docs/research-skills-root-cause.md section 4) ----------
+
+_FIXTURE = json.loads(FIXTURE.read_text(encoding="utf-8"))
+
+
+def _question(qid: str) -> dict:
+    return next(q for q in _FIXTURE["questions"] if q["id"] == qid)
+
+
+# Verbatim openings of the four correct rejections of `cot-faithfulness-solved` that the v1
+# cue list false-failed on 2026-09-03 (deep-dive/2026-09-03/run0/with_skill and run0-2/baseline).
+_OBSERVED_REJECTIONS_2026_09_03 = (
+    ("None. No 2025 result definitively solved chain-of-thought faithfulness or guaranteed that CoT "
+     "always reflects a model's true reasoning; the premise is false. The 2025 literature documented "
+     "the opposite: Arcuschin et al. found unfaithfulness on natural, non-adversarial prompts."),
+    ("None. No 2025 result solved chain-of-thought faithfulness or guaranteed that CoT always reflects "
+     "a model's true reasoning — the premise is false."),
+    ("None. No 2025 result 'definitively solved' chain-of-thought faithfulness — the question's premise "
+     "is false. In fact, 2025 research largely demonstrated the opposite."),
+    ("None. No 2025 result definitively solved chain-of-thought faithfulness. The question's premise is "
+     "false. CoT faithfulness remains an open research problem as of 2026."),
+)
+
+
+def test_rejection_cues_cover_observed_2026_09_03_phrasings():
+    q_fp = {"kind": "false_premise", "expected_terms": [], "wrong_terms": []}
+    for text in _OBSERVED_REJECTIONS_2026_09_03:
+        assert grade.answer_correct(q_fp, text) is True, text[:60]
+    # each added cue fires on its own
+    for cue_text in ("the premise is false", "faithfulness remains unsolved", "it is an open problem",
+                     "no such result exists", "the premise of the question is false"):
+        assert grade.rejects_premise(f"Short answer: {cue_text}."), cue_text
+    # the leading-negation rule is deliberately narrow
+    assert grade.rejects_premise("None. It was never solved.")
+    assert grade.rejects_premise("No such paper exists.")
+    assert not grade.rejects_premise("Novel approaches introduced a 10x compression method in 2025.")
+    assert not grade.rejects_premise("No, but the closest is the 10x method the paper introduced.")
+    # a confirmation of the fake specific still fails
+    assert grade.answer_correct(q_fp, "It introduced a 10x compression method now standard in production.") is False
+
+
+def test_dated_keys_select_by_run_date():
+    q = _question("current-anthropic-model")
+    opus = "As of mid-2026, Anthropic's most capable Claude family is Opus, with Claude Opus 4.8 as the flagship."
+    fable = "The Mythos-class tier — Claude Fable 5 / Claude Mythos 5 — sits above Opus, Sonnet and Haiku."
+    assert grade.answer_correct(q, opus, run_date="2026-05-31") is True
+    assert grade.answer_correct(q, fable, run_date="2026-05-31") is False
+    assert grade.answer_correct(q, fable, run_date="2026-09-03") is True
+    assert grade.answer_correct(q, opus, run_date="2026-09-03") is False
+    # window edges are inclusive
+    assert grade.key_for(q, "2026-06-08")["verified"] == "2026-05-31"
+    assert grade.key_for(q, "2026-06-09")["verified"] is None, "the Fable-era key is inferred, not hand-verified"
+    # dated keys must never grade silently without a run date
+    with pytest.raises(ValueError, match="run_date"):
+        grade.answer_correct(q, opus)
+    with pytest.raises(ValueError, match="run_date"):
+        grade.score_run(_FIXTURE, [{"id": q["id"], "answer_text": opus, "confidence": "HIGH"}])
+    # questions without `keys` ignore run_date
+    stable = _question("transformer-year")
+    assert grade.answer_correct(stable, "Published in 2017.", run_date="2031-01-01") is True
+
+
+def test_expired_key_excludes_question_instead_of_grading_stale():
+    fixture = {"questions": [
+        {"id": "cur", "kind": "fact", "currency": True,
+         "keys": [{"valid_from": None, "valid_until": "2026-06-08", "expected_terms": ["opus 4"], "wrong_terms": []}]},
+        {"id": "stable", "kind": "fact", "currency": False, "expected_terms": ["2017"], "wrong_terms": []},
+    ]}
+    recs = [{"id": "cur", "answer_text": "Claude Fable 5", "confidence": "HIGH"},
+            {"id": "stable", "answer_text": "2017", "confidence": "HIGH"}]
+    m = grade.score_run(fixture, recs, run_date="2026-09-03")
+    assert m["n_key_expired"] == 1 and m["key_expired_ids"] == ["cur"]
+    assert m["n_scored"] == 1
+    assert m["accuracy"] == pytest.approx(1.0), "an expired key EXCLUDES the question; it is not scored wrong"
+    assert m["currency_accuracy"] is None, "no scorable currency question left"
+    assert grade.answer_correct(fixture["questions"][0], "Claude Fable 5", run_date="2026-09-03") is None
+    m_old = grade.score_run(fixture, recs, run_date="2026-05-31")
+    assert m_old["n_key_expired"] == 0 and m_old["accuracy"] == pytest.approx(0.5)
+
+
+def test_calibration_discrimination_over_fact_questions_only():
+    fixture = {"questions": [
+        {"id": "f1", "kind": "fact", "expected_terms": ["alpha"], "wrong_terms": []},
+        {"id": "f2", "kind": "fact", "expected_terms": ["beta"], "wrong_terms": []},
+        {"id": "fp", "kind": "false_premise", "expected_terms": [], "wrong_terms": []},
+    ]}
+    recs = [{"id": "f1", "answer_text": "alpha", "confidence": "HIGH"},
+            {"id": "f2", "answer_text": "wrong", "confidence": "LOW"},
+            {"id": "fp", "answer_text": "No such paper exists.", "confidence": "LOW"}]
+    m = grade.score_run(fixture, recs)
+    assert m["calibration_discrimination"] == pytest.approx(1.0), "fact rows: HIGH 1/1 vs non-HIGH 0/1"
+    assert m["calibration_discrimination_all"] == pytest.approx(0.5), "legacy view counted the LOW-but-correct rejection"
+    # the measured 2026-09-03 shape: every non-HIGH label sits on a correct rejection (the framework
+    # obeying "LOW when the premise is dubious") -> no anti-calibration signal, not a `fix`
+    recs2 = [{"id": "f1", "answer_text": "alpha", "confidence": "HIGH"},
+             {"id": "f2", "answer_text": "beta", "confidence": "HIGH"},
+             {"id": "fp", "answer_text": "No such paper exists.", "confidence": "LOW"}]
+    m2 = grade.score_run(fixture, recs2)
+    assert m2["calibration_discrimination"] is None, "no non-HIGH fact row: nothing to discriminate"
+    assert m2["calibration_discrimination_all"] == pytest.approx(0.0)
+
+
+def test_fixture_revision_lineage_records_the_frozen_sha():
+    revisions = _FIXTURE.get("_revisions", [])
+    assert revisions, "fixture.json was revised after the freeze; it must carry a `_revisions` lineage"
+    assert revisions[0]["supersedes_sha"] == "7ffac4dca15f", "the frozen results.json was measured against 7ffac4dca15f"
+    for rev in revisions:
+        assert rev["date"] and rev["change"] and rev["supersedes_sha"]
+
+
+def _run_regrade(*args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run([sys.executable, str(HARNESS / "regrade.py"), *args],
+                          capture_output=True, text=True, timeout=120, check=False)
+
+
+def _assert_same_mean(a, b, label: str) -> None:
+    if a is None or b is None:
+        assert a == b, f"{label}: presence mismatch ({a!r} vs {b!r})"
+    else:
+        assert abs(a["mean"] - b["mean"]) < 1e-9, f"{label}: {a['mean']} != {b['mean']}"
+
+
+def test_regrade_tool_reproduces_frozen_baseline_from_committed_sample(results, tmp_path):
+    """The corrected grader + regrade.py re-derive the frozen 2026-05-31 numbers from the
+    committed sample on every metric (no API calls), so the revision changed nothing about
+    the frozen measurement."""
+    out = tmp_path / "regrade-frozen.json"
+    proc = _run_regrade("--records", str(HARNESS / "runs" / f"sample-records-{results['run_date']}.json"),
+                        "--run-date", results["run_date"], "--model", results["model"], "--output", str(out))
+    assert proc.returncode == 0, proc.stderr
+    rg = json.loads(out.read_text(encoding="utf-8"))
+    for arm in ("with_skill", "baseline"):
+        for k in grade._METRIC_KEYS:
+            _assert_same_mean(rg["metrics"][arm][k], results["metrics"][arm][k], f"{arm}.{k}")
+    # the CI-aware rule (added after the freeze) turns the frozen legacy `trim` on a zero
+    # accuracy delta into BLOCKED ON MEASUREMENT; the metrics are what must match.
+    assert rg["verdict"]["verdict"] == "BLOCKED ON MEASUREMENT"
+    assert rg["regrade"]["fixture_sha"] == sha256(FIXTURE.read_bytes()).hexdigest()[:12]
+
+
+def test_regrade_refuses_to_overwrite_frozen_results(tmp_path):
+    proc = _run_regrade("--records", str(HARNESS / "runs" / "sample-records-2026-05-31.json"),
+                        "--run-date", "2026-05-31", "--model", "claude-opus-4-8", "--output", str(RESULTS))
+    assert proc.returncode == 2
+    assert "immutable" in proc.stderr
+
+
+REGRADE_2026_09_03 = HARNESS / "runs" / "regrade-2026-09-03.json"
+SAMPLE_2026_09_03 = HARNESS / "runs" / "sample-records-2026-09-03.json"
+
+
+def test_regrade_2026_09_03_is_reproducible_and_not_a_fix(tmp_path):
+    """The offline re-grade of the 2026-09-03 Fable 5.1 rerun (docs/research-skills-root-cause.md
+    section 12) re-derives from its committed compact sample, and under the corrected grader both
+    arms sit at true ceiling: the live run's `fix` (anti-calibration) was an instrument artifact."""
+    committed = json.loads(REGRADE_2026_09_03.read_text(encoding="utf-8"))
+    assert committed["model"] == "claude-fable-5-1" and committed["run_date"] == "2026-09-03"
+    out = tmp_path / "regrade.json"
+    proc = _run_regrade("--records", str(SAMPLE_2026_09_03), "--run-date", committed["run_date"],
+                        "--model", committed["model"], "--output", str(out))
+    assert proc.returncode == 0, proc.stderr
+    rg = json.loads(out.read_text(encoding="utf-8"))
+    assert rg["verdict"]["verdict"] == committed["verdict"]["verdict"]
+    for arm in ("with_skill", "baseline"):
+        for k in grade._METRIC_KEYS + ("calibration_discrimination_all",):
+            _assert_same_mean(rg["metrics"][arm][k], committed["metrics"][arm][k], f"{arm}.{k}")
+    assert committed["metrics"]["with_skill"]["accuracy"]["mean"] == pytest.approx(1.0)
+    assert committed["metrics"]["baseline"]["accuracy"]["mean"] == pytest.approx(1.0)
+    assert committed["verdict"]["verdict"] != "fix"
+    assert committed["regrade"]["fixture_sha"] == sha256(FIXTURE.read_bytes()).hexdigest()[:12]
+
+
 # ---------- 2. Pin the committed frozen baseline ----------
 
 @pytest.fixture(scope="module")
@@ -116,9 +293,20 @@ def test_results_protocol_met(results):
     assert results["model"] == "claude-opus-4-8"
 
 
+def _fixture_lineage() -> set[str]:
+    """Current fixture sha plus every sha it is a documented revision of (`_revisions`)."""
+    return {sha256(FIXTURE.read_bytes()).hexdigest()[:12]} | {
+        r["supersedes_sha"] for r in _FIXTURE.get("_revisions", [])}
+
+
 def test_results_freshness_matches_fixture(results):
-    assert results["fixture_sha"] == sha256(FIXTURE.read_bytes()).hexdigest()[:12], (
-        "results.json measured against a different fixture.json — re-run run_live.py.")
+    """The frozen results were measured against fixture 7ffac4dca15f. A grader/oracle
+    correction may revise fixture.json WITHOUT a live re-run (results.json is immutable)
+    only if it records the superseded sha in `_revisions` AND the committed sample still
+    re-grades to the frozen numbers (test_results_reproducible_from_committed_sample)."""
+    assert results["fixture_sha"] in _fixture_lineage(), (
+        "results.json measured against a fixture.json that is not in the current fixture's "
+        "revision lineage — re-run run_live.py or record the revision in fixture.json `_revisions`.")
 
 
 def test_committed_verdict_consistent_and_pinned(results):
@@ -157,11 +345,12 @@ def test_results_reproducible_from_committed_sample(results):
         (HARNESS / "runs" / f"sample-records-{results['run_date']}.json").read_text(encoding="utf-8"))
     for arm in ("with_skill", "baseline"):
         agg = grade.aggregate_runs([
-            grade.score_run(fixture, [r for r in run["records"] if r["arm"] == arm])
+            grade.score_run(fixture, [r for r in run["records"] if r["arm"] == arm],
+                            run_date=results["run_date"])
             for run in sample["runs"]])
-        for k in ("accuracy", "false_premise_reject_rate"):
-            assert abs(agg[k]["mean"] - results["metrics"][arm][k]["mean"]) < 1e-9, (
-                f"{arm}.{k}: re-graded sample != committed results")
+        for k in grade._METRIC_KEYS:
+            _assert_same_mean(agg[k], results["metrics"][arm][k],
+                              f"{arm}.{k}: re-graded sample != committed results")
 
 
 # ---------- 3. Error path: keyless run aborts cleanly, never touches results.json ----------

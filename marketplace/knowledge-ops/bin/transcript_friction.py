@@ -45,34 +45,34 @@ import sys
 
 _ERROR_SIGNATURES = [
     # Hook/guard blocks (PreToolUse) — the body names the hook script.
-    (re.compile(r"bash-security-guard", re.I),            "guard:bash-security"),
-    (re.compile(r"bash-tail-buffering|\|\s*(tail|head|grep)\b", re.I), "guard:tail-buffering"),
-    (re.compile(r"inline[- ]python|python -c", re.I),     "guard:inline-python"),
-    (re.compile(r"encoding[- ]?guard|cp1252|encoding=.{0,3}utf", re.I), "guard:encoding"),
-    (re.compile(r"staged-additions-guard", re.I),         "guard:staged-additions"),
-    (re.compile(r"write-edit-dispatche|Agent.*protected|targets protected repo", re.I), "guard:agent-dispatch"),
-    (re.compile(r"worktree-enforcement", re.I),           "guard:worktree-enforcement"),
-    (re.compile(r"commit-guard|commit to main|never_commit", re.I), "guard:commit-to-main"),
-    (re.compile(r"exfiltration[- ]?guard", re.I),         "guard:exfiltration"),
-    (re.compile(r"credential[- ]?guard|curl.*verbose", re.I), "guard:credential"),
-    (re.compile(r"PreToolUse:.*hook error", re.I),        "guard:other-pretooluse-hook"),
+    (re.compile(r"bash-security-guard", re.IGNORECASE),            "guard:bash-security"),
+    (re.compile(r"bash-tail-buffering|\|\s*(tail|head|grep)\b", re.IGNORECASE), "guard:tail-buffering"),
+    (re.compile(r"inline[- ]python|python -c", re.IGNORECASE),     "guard:inline-python"),
+    (re.compile(r"encoding[- ]?guard|cp1252|encoding=.{0,3}utf", re.IGNORECASE), "guard:encoding"),
+    (re.compile(r"staged-additions-guard", re.IGNORECASE),         "guard:staged-additions"),
+    (re.compile(r"write-edit-dispatche|Agent.*protected|targets protected repo", re.IGNORECASE), "guard:agent-dispatch"),
+    (re.compile(r"worktree-enforcement", re.IGNORECASE),           "guard:worktree-enforcement"),
+    (re.compile(r"commit-guard|commit to main|never_commit", re.IGNORECASE), "guard:commit-to-main"),
+    (re.compile(r"exfiltration[- ]?guard", re.IGNORECASE),         "guard:exfiltration"),
+    (re.compile(r"credential[- ]?guard|curl.*verbose", re.IGNORECASE), "guard:credential"),
+    (re.compile(r"PreToolUse:.*hook error", re.IGNORECASE),        "guard:other-pretooluse-hook"),
     # Read-before-edit / write gate (harness-level, not a hook).
-    (re.compile(r"has not been read yet|modified since|read it first", re.I), "gate:read-before-edit"),
+    (re.compile(r"has not been read yet|modified since|read it first", re.IGNORECASE), "gate:read-before-edit"),
     # Permission / classifier denials.
-    (re.compile(r"auto mode classifier|safety classifier|vets bash", re.I), "deny:bash-classifier"),
-    (re.compile(r"doesn'?t want to proceed|tool use was rejected|user (denied|rejected)", re.I), "deny:user-rejected-tool"),
-    (re.compile(r"Permission.*denied by", re.I),          "deny:permission"),
+    (re.compile(r"auto mode classifier|safety classifier|vets bash", re.IGNORECASE), "deny:bash-classifier"),
+    (re.compile(r"doesn'?t want to proceed|tool use was rejected|user (denied|rejected)", re.IGNORECASE), "deny:user-rejected-tool"),
+    (re.compile(r"Permission.*denied by", re.IGNORECASE),          "deny:permission"),
     # Filesystem / OS errors.
-    (re.compile(r"EPERM|operation not permitted", re.I),  "fs:eperm"),
-    (re.compile(r"File does not exist|no such file|not a file", re.I), "fs:file-not-found"),
-    (re.compile(r"ENOENT|EACCES|EEXIST", re.I),           "fs:other-errno"),
+    (re.compile(r"EPERM|operation not permitted", re.IGNORECASE),  "fs:eperm"),
+    (re.compile(r"File does not exist|no such file|not a file", re.IGNORECASE), "fs:file-not-found"),
+    (re.compile(r"ENOENT|EACCES|EEXIST", re.IGNORECASE),           "fs:other-errno"),
     # Process control.
-    (re.compile(r"timed out|timeout|Exit code 143", re.I), "proc:timeout"),
-    (re.compile(r"Exit code [1-9]", re.I),                "proc:nonzero-exit"),
+    (re.compile(r"timed out|timeout|Exit code 143", re.IGNORECASE), "proc:timeout"),
+    (re.compile(r"Exit code [1-9]", re.IGNORECASE),                "proc:nonzero-exit"),
     # MCP / network.
-    (re.compile(r"No such tool available|tool not found", re.I), "mcp:tool-unavailable"),
-    (re.compile(r"Connection error|ECONNREFUSED|connection refused|disconnect", re.I), "net:connection"),
-    (re.compile(r"rate limit|429|throttl", re.I),         "net:rate-limit"),
+    (re.compile(r"No such tool available|tool not found", re.IGNORECASE), "mcp:tool-unavailable"),
+    (re.compile(r"Connection error|ECONNREFUSED|connection refused|disconnect", re.IGNORECASE), "net:connection"),
+    (re.compile(r"rate limit|429|throttl", re.IGNORECASE),         "net:rate-limit"),
 ]
 
 # User-correction detection. A correction is a SHORT user turn that rebukes / redirects. We keep this
@@ -86,7 +86,7 @@ _CORRECTION_PHRASES = re.compile(
     r"stop (doing|that)|why (did|would) you|you (keep|already|just|still)|"
     r"i (already )?(told|said|asked) you|read (it|the|my)|you didn'?t|you failed to|"
     r"that'?s not|do it (again|right|properly)|undo|revert that|wrong (repo|file|branch|approach))",
-    re.I,
+    re.IGNORECASE,
 )
 # A user turn longer than this many chars is treated as a fresh instruction, not a correction,
 # even if it contains a rebuke phrase (it's carrying too much new content to be a pure correction).
@@ -158,8 +158,8 @@ def extract(path, n_examples=2):
                 continue
             try:
                 r = json.loads(raw)
-            except Exception:
-                continue
+            except Exception:  # noqa: S112, BLE001 -- report tooling: skip unparseable JSONL lines
+                continue  # skip unparseable line
             if r.get("isCompactSummary"):
                 counts["compaction"] += 1
                 bump("session:compaction-boundary", "[compaction]")

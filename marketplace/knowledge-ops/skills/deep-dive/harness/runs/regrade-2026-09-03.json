@@ -1,0 +1,754 @@
+{
+  "_about": "OFFLINE RE-GRADE (no API calls) of transcripts-20260903T205439Z.json with grade.py at fixture revision d2715b22bf58; the frozen 2026-05-31 results.json is untouched. Reproduce: python3 regrade.py --records <this sample> --run-date <run_date> ...",
+  "regrade": {
+    "records_file": "transcripts-20260903T205439Z.json",
+    "records_sha256": "7bed8d7687f6efd716c1094cb9a677bfe60e34814e884670f18dfa6b7b6a5fcf",
+    "run_date": "2026-09-03",
+    "grader": "grade.py",
+    "fixture_sha": "d2715b22bf58",
+    "regraded_on": "2026-09-04",
+    "frozen_results_sha256": "63c51e333d93927c9cb6a7eea9cf9e9dc8bade4d10145f92c133c448bf0811e9"
+  },
+  "model": "claude-fable-5-1",
+  "arms": "with_skill (3-layer framework) vs baseline (plain + confidence)",
+  "run_date": "2026-09-03",
+  "n_runs": 3,
+  "n_questions": 15,
+  "fixture_sha": "d2715b22bf58",
+  "cost_ratio": 4.0,
+  "metrics": {
+    "with_skill": {
+      "n_runs": 3,
+      "accuracy": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "ci95": {
+          "low": 0.0,
+          "high": 0.0,
+          "excludes_zero": false,
+          "direction": "inconclusive",
+          "n": 3
+        }
+      },
+      "calibration_discrimination": {
+        "mean": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "stdev": 0.0,
+        "n": 2,
+        "values": [
+          0.0,
+          0.0
+        ]
+      },
+      "currency_accuracy": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "ci95": {
+          "low": 0.0,
+          "high": 0.0,
+          "excludes_zero": false,
+          "direction": "inconclusive",
+          "n": 3
+        }
+      },
+      "false_premise_reject_rate": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "ci95": {
+          "low": 0.0,
+          "high": 0.0,
+          "excludes_zero": false,
+          "direction": "inconclusive",
+          "n": 3
+        }
+      },
+      "counterfactual_substantive_rate": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "calibration_discrimination_all": {
+        "mean": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "baseline": {
+      "n_runs": 3,
+      "accuracy": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "calibration_discrimination": null,
+      "currency_accuracy": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "false_premise_reject_rate": {
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0,
+        "stdev": 0.0,
+        "n": 3,
+        "values": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "counterfactual_substantive_rate": null,
+      "calibration_discrimination_all": {
+        "mean": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "stdev": 0.0,
+        "n": 1,
+        "values": [
+          0.0
+        ]
+      }
+    }
+  },
+  "verdict": {
+    "verdict": "BLOCKED ON MEASUREMENT",
+    "primary_metric": "accuracy",
+    "ci95": {
+      "low": 0.0,
+      "high": 0.0,
+      "excludes_zero": false,
+      "direction": "inconclusive",
+      "n": 3
+    },
+    "reason": "95% CI [0.0, 0.0] on accuracy straddles 0 \u2014 no current-state evidence the framework helps or hurts",
+    "ci_aware": true,
+    "calibration_discrimination": 0.0,
+    "legacy_min_delta": 0.05
+  },
+  "per_question": {
+    "transformer-year": {
+      "kind": "fact",
+      "currency": false,
+      "with_skill": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      },
+      "baseline": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    "rag-acronym": {
+      "kind": "fact",
+      "currency": false,
+      "with_skill": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      },
+      "baseline": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    "react-authors": {
+      "kind": "fact",
+      "currency": false,
+      "with_skill": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      },
+      "baseline": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    "mast-modes": {
+      "kind": "fact",
+      "currency": false,
+      "with_skill": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      },
+      "baseline": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    "truthfulqa-scaling": {
+      "kind": "fact",
+      "currency": false,
+      "with_skill": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      },
+      "baseline": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    "cot-faithfulness-paper": {
+      "kind": "fact",
+      "currency": false,
+      "with_skill": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      },
+      "baseline": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    "current-anthropic-model": {
+      "kind": "fact",
+      "currency": true,
+      "with_skill": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      },
+      "baseline": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    "current-openai-flagship": {
+      "kind": "fact",
+      "currency": true,
+      "with_skill": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "MEDIUM",
+          "MEDIUM"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      },
+      "baseline": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    "mcp-date": {
+      "kind": "fact",
+      "currency": true,
+      "with_skill": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      },
+      "baseline": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    "current-claude-context": {
+      "kind": "fact",
+      "currency": true,
+      "with_skill": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      },
+      "baseline": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    "cot-faithfulness-solved": {
+      "kind": "false_premise",
+      "currency": false,
+      "with_skill": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      },
+      "baseline": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    "agents-always-better": {
+      "kind": "false_premise",
+      "currency": false,
+      "with_skill": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      },
+      "baseline": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    "holographic-memory": {
+      "kind": "false_premise",
+      "currency": false,
+      "with_skill": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "LOW",
+          "LOW",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      },
+      "baseline": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    "anthropic-selfreview-stat": {
+      "kind": "false_premise",
+      "currency": false,
+      "with_skill": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "LOW",
+          "HIGH",
+          "LOW"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      },
+      "baseline": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "MEDIUM",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    "constitutional-ai-origin": {
+      "kind": "fact",
+      "currency": false,
+      "with_skill": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      },
+      "baseline": {
+        "correct": [
+          true,
+          true,
+          true
+        ],
+        "confidence": [
+          "HIGH",
+          "HIGH",
+          "HIGH"
+        ],
+        "key_expired": [
+          false,
+          false,
+          false
+        ]
+      }
+    }
+  }
+}

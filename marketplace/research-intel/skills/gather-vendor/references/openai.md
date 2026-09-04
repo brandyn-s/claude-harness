@@ -3,7 +3,7 @@
 ## Dependency map (why this vendor matters)
 
 1. **Cross-provider second rater** — the standing different-vendor rater required by
-   `rules/eval-shipping-discipline.md` + `rules/best-in-class-for-cross-model.md`.
+   `rules/eval-shipping-discipline.md` (oracle and rater gates).
    Current flagship line: **gpt-5.6-sol** (GA 2026-07-09; alias `gpt-5.6` -> sol).
 2. **/roundtable arm** — `skills/roundtable/scripts/adapters/openai_adapter.py` pins
    `gpt-5.6-sol` (default) + `gpt-5.6-terra` + `gpt-5.5-pro` (as of 2026-08-22 —

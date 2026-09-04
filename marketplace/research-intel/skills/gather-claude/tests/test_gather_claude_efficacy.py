@@ -113,7 +113,7 @@ def test_calibration_fix_eliminated_overrejection_and_framework_now_leads(result
     """Post-calibration-fix MEASURED finding (the pinned reality, 2026-05-31).
     Pre-fix this skill's framework over-rejected current features (true_recall
     -0.20 vs baseline -> the `fix` verdict). After relaxing the over-conservative
-    UNCHARTED rule (uncharted-vs-refuted.md) + re-measuring, the regression is
+    UNCHARTED rule (symmetric-evidentiary-burden.md) + re-measuring, the regression is
     ELIMINATED (with_skill true_recall now >= baseline) AND the framework leads on
     overall verdict_accuracy, WITHOUT leaking fabrication-resistance. Pinned with
     equal specificity to the prior regression-finding so that a returning

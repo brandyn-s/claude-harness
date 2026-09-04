@@ -72,20 +72,10 @@ Before doing anything else, verify the local environment:
 
    **Include the session-id prefix in the name.** A date-only name collides
    with any concurrent session doing the same thing, and `worktree add` then
-   fails on a path another live session owns — costing two retries before you
-   pick a distinct name (2026-07-28: `kb-capture-20260728` was already taken
-   by a parallel session, on a different branch). The date alone is not
-   unique; sessions are.
-
-   Also branch-name the worktree for the *content*, not the date
+   fails on a path another live session owns. The date alone is not unique;
+   sessions are. Also branch-name the worktree for the *content*, not the date
    (`capture/<topic-slug>`), so two same-day captures don't collide at the
-   branch level either.
-
-   This gate exists because the 2026-05-28 /retro session found the KB
-   repo on `capture/bedrock-bearer-token-jamf-ongoing` with uncommitted
-   work alongside the current session's intune-mde topic. Without this
-   preflight, /capture either hijacks the prior branch (bad) or
-   silently dances around it (what happened — worked but wasted turns).
+   branch level either. (Both collisions on record: `references/run-history.md`.)
 
 Skipping Step 0 leaves the user with an orphan branch pushed to origin and
 no PR — the failure mode this gate exists to prevent.
@@ -116,8 +106,7 @@ does the work.
 > transcript, glob `~/.claude/projects/*/*.jsonl` and select the file named for
 > THIS session's id (`$CLAUDE_CODE_SESSION_ID`, authoritative) — do NOT pick the
 > most-recent-by-mtime: under concurrent sessions that is frequently a DIFFERENT
-> session's transcript (2026-06-25: `ls -t` grabbed a parallel session's
-> 88MB/11-compaction file; the real one was 760KB). mtime is a fallback only.
+> session's transcript. mtime is a fallback only.
 > If `$CLAUDE_PROJECT_ID` is set, scope the glob to
 > `~/.claude/projects/<project-id>/*.jsonl` (the project ID encodes the working
 > directory with `/` replaced by `-`, e.g. `-home-user-claude-config`).
@@ -294,11 +283,9 @@ chunk, which is *why* `###` splitting is a real fix and not cosmetic), the resul
 Exit 1 means a `kb.py check` failure is already guaranteed — restructure the draft
 now, while the content is still in your head.
 
-WHY: discovering the limits from `kb.py check` costs a rewrite of finished prose.
-2026-07-28: three entries were written, then rejected at 3,525c / 3,601c / 3,115c,
-then re-split — and the same run also had to retro-fit a `## Current understanding`
-because the append silently crossed 8 entries. All four facts were knowable before
-the first Write.
+WHY: discovering the limits from `kb.py check` costs a rewrite of finished prose,
+and every number it checks is knowable before the first Write
+(`references/run-history.md`).
 
 See `references/topic-format.md` for the full topic page format,
 wiki-linking rules, alias generation, confidence tags, and session comment format.
@@ -313,12 +300,8 @@ threshold, update `stage`:
 **These bands set a NEW page's INITIAL stage too — count its own entries, never
 default to `seedling`.** A new page is routinely born with several dated entries
 (a session's findings on one theme), so `seedling` is wrong the moment it is
-written. (2026-08-15: a new page shipped with 5 entries and `stage: seedling`;
-/garden promoted it 20 minutes later. The bands read as append-only, so nothing
-here was violated — that IS the gap. The same run also caught a skipped Step 4b
-MoC placement and two un-bumped `updated:` fields; those are already covered
-above and were execution misses. Authoring pages via a script to dodge the
-2,500-char write guard bypasses this checklist — re-read before committing.)
+written. Authoring pages via a script to dodge the 2,500-char write guard bypasses
+this checklist — re-read before committing (`references/run-history.md`).
 
 **Recovery when YAML frontmatter is broken** (missing `---` fence, unparseable YAML,
 or missing required fields like `updated`/`stage`): do NOT append silently — a write
@@ -339,7 +322,7 @@ on mental counting or raw H2 counts (which include non-entry headings).
 
 For each proposed entry, BEFORE writing:
 
-1. Run `mcp__memory-search__memory_search(query=<entry's central claim phrased as the OPPOSITE>, limit=5)`. The query phrasing matters — search for entries that would CONTRADICT the new finding, not entries that match it. **For a multi-claim entry, run ONE opposite-query per DISTINCT factual claim, not just the headline** — a single entry-level query misses contradictions to secondary claims. (2026-06-11: a 2-claim SCP entry's *second* claim was backwards and the refuting same-page evidence sat at 0.52 cosine, below the gate, because only the headline claim was queried.)
+1. Run `mcp__memory-search__memory_search(query=<entry's central claim phrased as the OPPOSITE>, limit=5)`. The query phrasing matters — search for entries that would CONTRADICT the new finding, not entries that match it. **For a multi-claim entry, run ONE opposite-query per DISTINCT factual claim, not just the headline** — a single entry-level query misses contradictions to secondary claims (`references/run-history.md`).
 2. For each result with cosine > 0.65 sourced from the SAME topic page being updated:
    - Read the matched entry's full text
    - Determine whether the new entry's claim contradicts the prior entry's claim (not merely refines or extends it)
@@ -348,9 +331,7 @@ For each proposed entry, BEFORE writing:
    - **(b) Refinement framing**: if the contradiction is partial (the prior entry was scope-correct but the new one extends/qualifies it), title the new entry `Refinement: <topic> (YYYY-MM-DD)` and add `[Refined by entry from YYYY-MM-DD below]` annotation on the prior
 4. If neither (a) nor (b) is applied, do NOT write the new entry. Surface the contradiction to the user and ask which framing fits.
 
-INCIDENT 2026-05-10 (D1 surprise positive vs A4 prior diagnosis): D1's measured +0.036 golden MRR contradicted A4's earlier "Voyage doesn't weight identifier tokens enough to move retrieval" diagnosis. /capture wrote the new D1 entry but did NOT back-annotate A4's findings doc with `[Superseded]`. Future readers of A4 see the falsified diagnosis as still-current. The Corrections prose in /capture was not a structural gate; this Step 4a makes it one.
-
-**External vendor-behavior claims need a SOURCE check, not just a contradiction query.** A claim about how a third-party system behaves (AWS/IAM/API/deploy-pipeline semantics, condition-key resolution, response shapes) can be confidently wrong AND have no same-page entry that happens to contradict it — so it sails through the cosine gate and ships. Before writing such a claim, verify it against the vendor doc or a 30s live test (per `verify-before-assuming.md` "asserting vendor-system behavior"). INCIDENT 2026-06-11: a shipped SCP entry asserted `aws:PrincipalArn` is the assumed-role STS form — backwards (it is the role ARN); the gate didn't catch it and it needed a correction PR (#763).
+**External vendor-behavior claims need a SOURCE check, not just a contradiction query.** A claim about how a third-party system behaves (AWS/IAM/API/deploy-pipeline semantics, condition-key resolution, response shapes) can be confidently wrong AND have no same-page entry that happens to contradict it — so it sails through the cosine gate and ships. Before writing such a claim, verify it against the vendor doc or a 30s live test (per `verify-before-assuming.md` "asserting vendor-system behavior"). The incidents behind this gate: `references/run-history.md`.
 
 **Skip when**: the new entry's claim is genuinely orthogonal to all prior entries (no contradiction surfaced by the memory_search). Most entries skip 4a; the gate only fires when contradiction is detected. (The external-vendor-fact source check above is NOT skippable for vendor-behavior claims.)
 
@@ -365,7 +346,7 @@ Step 4a catches a stale state-claim only when you happen to write a new entry on
 
 **Skip when**: the session resolved nothing (pure new-knowledge capture). This fires on fix/close/resolve sessions — which /retro-after-/distill almost always is.
 
-WHY: a distill-only pass persists the FIX but leaves the stale "it's broken" description standing — the rot behind this corpus's many reactive `[Superseded]`/`[RESOLVED]` annotations. INCIDENT 2026-06-07: the messages-empty gap stayed documented as open in two topics until Step 4a happened to fire on a same-page write; this step makes the catch systematic instead of lucky.
+WHY: a distill-only pass persists the FIX but leaves the stale "it's broken" description standing — the rot behind this corpus's many reactive `[Superseded]`/`[RESOLVED]` annotations (`references/run-history.md`).
 
 **Step 4a.2: Regenerate `## Current understanding` (topics with 8+ dated entries)**
 
@@ -387,14 +368,10 @@ For each topic page you are appending to, after drafting the new entry:
 4. **Re-run `kb-entry-budget.py <slug>` (no `--entry-file`) AFTER regenerating.**
    The pre-write budget in Step 4 measured the drafted ENTRY; regenerating the CU
    is a SECOND write to the same page, and on a soft-split CU it lands inside one
-   `###` sub-section rather than spreading across them. Measured 2026-08-30: the
-   entry itself budgeted clean (largest chunk 1,082c), then a 6-line CU paragraph
-   took the `Is this the system, or the instrument?` sub-section from 2,189c to
-   **3,245c** — past the 3,000c hard limit. The fix is the same `###` split the
-   checker recommends, but it is cheap only while the text is still in your head;
-   discovering it from `kb.py check` at commit time costs a re-split of finished
-   prose. The checker names the sub-section to grow and its exact headroom, so
-   read that line BEFORE choosing where the paragraph goes.
+   `###` sub-section rather than spreading across them — it can push that
+   sub-section past the 3,000c hard limit on its own (`references/run-history.md`).
+   The checker names the sub-section to grow and its exact headroom, so read that
+   line BEFORE choosing where the paragraph goes.
 
 WHY: dated entries are history; retrieval needs state. The synthesis section
 is the chunk a model should land on first (memory-search boosts the exact
@@ -438,8 +415,8 @@ account numbers, endpoints. **NEVER auto-store a secret VALUE** — if a secret 
 referenced but absent, report it must be added manually (`security
 add-generic-password -U -a NAME -s NAME -w`, no-echo prompt). **NEVER store
 error-message IDs** — AADSTS700016 "client ID … not found" / "tenant not
-registered" are FAILED-auth IDs (a 2026-06-15 backfill caught 2); the value's
-CONTEXT must read as an own/working credential, not an error.
+registered" are FAILED-auth IDs; the value's CONTEXT must read as an own/working
+credential, not an error.
 
 Detection — gather candidates from BOTH paths, then confirm ONCE:
 1. **Label-adjacency** (per-session, high precision): extract IDs explicitly
@@ -529,14 +506,12 @@ Step 4 for broken frontmatter):
    `git diff --name-only` above that no topic YOU edited is in the incoming set; if one
    is, resolve that file by hand rather than fast-forwarding over it.
 
-   Both shapes observed 2026-08-17: the first ff had incoming edits to all three compiled
-   files and needed the discard; the second was `plans/`-only and fast-forwarded straight
-   through. Doing this proactively costs 3 read-only commands; doing it reactively costs a
-   worktree, a `--theirs` checkout, a rebuild, a merge commit, and a re-armed PR.
+   Doing this proactively costs 3 read-only commands; doing it reactively costs a
+   worktree, a `--theirs` checkout, a rebuild, a merge commit, and a re-armed PR
+   (both shapes on record: `references/run-history.md`).
 
    **If the merge conflicts on a TOPIC file you appended to** (a parallel session
-   captured to the SAME topic the same day — observed 2026-08-22 on
-   `verification-instrument-discipline.md`): this is an append-vs-append conflict,
+   captured to the SAME topic the same day): this is an append-vs-append conflict,
    not a generated-file one. Resolve by KEEPING BOTH SIDES: both dated H2 entries
    (HEAD's then origin/main's, in hunk order, blank line between), and both sides'
    `Current understanding` additions merged into one section with the newer
@@ -546,8 +521,8 @@ Step 4 for broken frontmatter):
    **If the armed PR goes `mergeStateStatus: DIRTY`** (a parallel capture merged to main
    after you branched — `generated/`, README.md, and Home.md are COMPILED, so any two
    capture PRs conflict on them): resolve in a WORKTREE off your capture branch, never in
-   the shared checkout (other sessions' dirty topic files block the merge there —
-   2026-07-22). In the worktree: `git merge origin/main`, take main's side of the
+   the shared checkout (other sessions' dirty topic files block the merge there).
+   In the worktree: `git merge origin/main`, take main's side of the
    generated files (`git checkout --theirs README.md Home.md generated/`), re-run
    `python3 ~/Documents/knowledge-base/tools/kb.py build` (regenerates every artifact from
    the MERGED topic set) then `check`, `git add` + commit the merge, push. Auto-merge stays

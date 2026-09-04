@@ -107,7 +107,7 @@ cap tripwire). Exit code 1 on any non-PRESENT pin.
   probe exits non-OK "NO flagship pin passed" — it verified nothing). Recorded
   flagship absent from the printed pro-tier -> **HIGH `[PINNED-MODEL-RETIREMENT]`**;
   a NEWER pro-generation above it in the printed set -> **NEW_FEATURE** (panel
-  arms must be best-in-class per `rules/best-in-class-for-cross-model.md`).
+  arms must be best-in-class per `rules/eval-shipping-discipline.md`).
 - **Probe limits (do not over-credit it):** the metadata GET proves the id
   RESOLVES, NOT that the endpoint the tooling rides is INVOCABLE — the Live-
   Search-410 class is an endpoint retirement a model-id GET cannot see. For
@@ -164,7 +164,7 @@ finding needs corroboration. No further waves.
 ## Step 6: Verify Claims (MANDATORY)
 
 Read the cited page/file; confirm quotes + the "what changed" claim. Currency
-calibration per `rules/uncharted-vs-refuted.md`: bounded-search absence !=
+calibration per `rules/symmetric-evidentiary-burden.md`: bounded-search absence !=
 nonexistence; multiple independent credible sources + no first-party
 contradiction -> CURRENT at lower confidence; reserve NONEXISTENT for claims
 with no credible attestation anywhere.
@@ -275,7 +275,7 @@ ADOPT: update the roundtable adapter pin + re-run its golden test.
 ### Example 3: Flagship currency
 `/gather-vendor gemini` — probe enumerates the full pro-tier; a newer pro
 generation than the recorded flagship appears -> NEW_FEATURE (panel arms must
-be best-in-class per `rules/best-in-class-for-cross-model.md`). ADOPT: update
+be best-in-class per `rules/eval-shipping-discipline.md`). ADOPT: update
 the flagship record.
 
 # Success Criteria

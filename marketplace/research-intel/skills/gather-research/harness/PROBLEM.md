@@ -20,7 +20,7 @@ runner (`run_live.py`) is keyed + manual; CI asserts only on the committed
 - **Decision under test:** the skill's `references/citation-domain-freshness.md`
   framework — PRIMARY/ADJACENT/OFF-DOMAIN classification, freshness windows, and
   verdict bars (SUPPORTED ≥2 PRIMARY, REFUTED ≥3 PRIMARY, CONTESTED, UNCHARTED) —
-  plus the `symmetric-evidentiary-burden` / `uncharted-vs-refuted` discipline.
+  plus the `symmetric-evidentiary-burden` discipline.
 - **Success:** per-claim correctness vs the hand-label, AND grounding (a
   SUPPORTED claim's *own cited URL* must actually contain the claim's specifics).
 - **Cost asymmetry:** **ASYMMETRIC** — a false SUPPORTED on a fabricated / refuted /
@@ -131,7 +131,7 @@ framework's uncharted-first rule on fabricated-source claims.
 <!-- RESULTS_TABLE_END -->
 
 ## 6. REAL vs INSTRUMENT (Phase-9 check) — PERFORMED, result is REAL
-A perfect 1.0/1.0 tie demands the Phase-9 check (verify-instrument-before-fix):
+A perfect 1.0/1.0 tie demands the Phase-9 check (verify-effectiveness's instrument-first gate):
 is the tie a real ceiling, or a grader that trivially returns 1.0? Both ruled in:
 1. **Scorer proven non-trivial:** `tests/test_gather_research_efficacy.py`
    (`test_grader_instrument_fp_fn_zero`) drives `grade.py` on a tiny synthetic
