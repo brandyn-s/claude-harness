@@ -65,7 +65,9 @@ PLUGINS = [
         "version": "1.1.0",
         "hooks": {
             "PreToolUse": [
-                _hook_group("bash-security-guard.py", 30, "Bash"),
+                # The two Bash guards and four advisories run inside the
+                # dispatcher, the same shape as the repository's settings.json.
+                _hook_group("bash-pretooluse-dispatcher.py", 30, "Bash|PowerShell"),
                 _hook_group("config-guard.py", 30, "Write|Edit"),
             ],
             "PostToolUse": [
@@ -75,9 +77,17 @@ PLUGINS = [
         "files": [
             # Hooks
             ("hooks/run-hook", "hooks/run-hook"),
+            # The dispatcher and the six hooks it runs in-process ship as one
+            # set (scripts/test_marketplace_safety_net.py pins it to GUARDS).
+            ("hooks/bash-pretooluse-dispatcher.py", "hooks/bash-pretooluse-dispatcher.py"),
+            ("hooks/bash-security-guard.py", "hooks/bash-security-guard.py"),
+            ("hooks/destructive-ops-guard.py", "hooks/destructive-ops-guard.py"),
+            ("hooks/git-destructive-checkout-guard.py", "hooks/git-destructive-checkout-guard.py"),
+            ("hooks/bash-tail-buffering-guard.py", "hooks/bash-tail-buffering-guard.py"),
+            ("hooks/zsh-dialect-guard.py", "hooks/zsh-dialect-guard.py"),
+            ("hooks/poll-loop-nudge.py", "hooks/poll-loop-nudge.py"),
             ("hooks/loop-detector.py", "hooks/loop-detector.py"),
             ("hooks/result-injection-guard.py", "hooks/result-injection-guard.py"),
-            ("hooks/bash-security-guard.py", "hooks/bash-security-guard.py"),
             ("hooks/bash_policy_tables.py", "hooks/bash_policy_tables.py"),
             ("hooks/bash-error-classifier.py", "hooks/bash-error-classifier.py"),
             ("hooks/config-guard.py", "hooks/config-guard.py"),
@@ -91,7 +101,8 @@ PLUGINS = [
             # plugin is self-contained): result-injection-guard imports
             # hook_input; loop-detector imports atomic_write;
             # bash-security-guard imports manifest_metrics for the
-            # repeat-block escalation and bash_policy_tables for opt-in
+            # repeat-block escalation (so do bash-tail-buffering-guard and
+            # zsh-dialect-guard) and bash_policy_tables for opt-in
             # non-catastrophic command policy.
             ("hooks/hook_input.py", "hooks/hook_input.py"),
             ("hooks/atomic_write.py", "hooks/atomic_write.py"),

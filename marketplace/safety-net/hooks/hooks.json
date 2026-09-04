@@ -9,12 +9,12 @@
             "command": "bash",
             "args": [
               "${CLAUDE_PLUGIN_ROOT}/hooks/run-hook",
-              "bash-security-guard.py"
+              "bash-pretooluse-dispatcher.py"
             ],
             "timeout": 30
           }
         ],
-        "matcher": "Bash"
+        "matcher": "Bash|PowerShell"
       },
       {
         "hooks": [

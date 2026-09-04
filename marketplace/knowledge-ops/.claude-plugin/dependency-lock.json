@@ -22,6 +22,7 @@
     "scripts/cleanup-indexes.py",
     "scripts/hook_exec_form.py",
     "scripts/retro-extract.py",
+    "scripts/test_marketplace_safety_net.py",
     "scripts/verify-indexes.py",
     "scripts/wire_hooks.py"
   ],

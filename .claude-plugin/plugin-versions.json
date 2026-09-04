@@ -4,8 +4,8 @@
     "version": "1.1.18"
   },
   "knowledge-ops": {
-    "content_hash": "6a2a1d7809c3860cbb0a2e6fe7740aa5baaf15593d861472391c00b13fa82ebf",
-    "version": "1.1.55"
+    "content_hash": "14af76900986bb703c5ac238b0ab1178e8aafef28a5f9b40736c43b1bbf50a3e",
+    "version": "1.1.56"
   },
   "planning-toolkit": {
     "content_hash": "8c5fb9bad5df65a812a641c1d872b2e29d9c657a79c05b80887d78171d3fbc3b",
@@ -16,8 +16,8 @@
     "version": "1.1.29"
   },
   "safety-net": {
-    "content_hash": "323a3f048af845bd94e35f2c56a095ae4a6073b9b5113780fd906fb27fa3dcfe",
-    "version": "1.1.35"
+    "content_hash": "1486f0c7565c72f7e6b93a0dcb4d9e815051d519c1911ebb73f18e7e11615892",
+    "version": "1.1.36"
   },
   "security-scanner": {
     "content_hash": "449b80b45d0135e58afa88be5261f57acea83dca857259d72bfe5b9259282911",
