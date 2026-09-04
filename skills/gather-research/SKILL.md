@@ -12,6 +12,8 @@ effort: high
 metadata:
   author: example-security-engineering
   version: "1.0"
+  body-cap: exempt
+  body-cap-reason: "PERIODIC: research-frontier report reconciled run over run (Step 0 reviews the previous run), disable-model-invocation, 30-60 turns; only edge is scout-frontier"
 compatibility:
   # Academic paper search runs through Exa with category=research. The
   # arxiv-mcp-server dependency was declared in a prior version but

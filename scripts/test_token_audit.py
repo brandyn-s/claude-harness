@@ -191,13 +191,31 @@ def _decisions_doc_rows() -> dict[str, tuple[str, str]]:
     return rows
 
 
+PERIODIC_SKILLS = {
+    # first pass (feat/skill-cap-decisions)
+    "gather-claude", "deep-dive", "gather-claude-endpoints", "audit-architecture",
+    "audit-skill", "scout-frontier", "gather-intel",
+    # next pass (chore/skill-cap-splits)
+    "garden", "healthcheck", "retrospective", "audit-rules", "build-measurement-harness",
+    "roundtable", "review-learnings", "gather-research", "absorb",
+}
+WORKFLOW_SKILLS = {
+    "superplan", "capture", "mega-distill",
+    "distill", "code-explore", "supergoal", "pr-fix", "api-ingest", "mega-capture",
+}
+
+
 def test_corpus_exemptions_match_the_documented_periodic_decisions():
-    """The exempt set in the corpus IS the PERIODIC set in docs/skill-cap-decisions.md, every
-    exemption carries a reason, and every WORKFLOW decision carries a split-or-slim proposal."""
+    """The exempt set in the corpus IS the PERIODIC set in docs/skill-cap-decisions.md (both
+    decision tables), every exemption carries a reason, every WORKFLOW row still over the cap
+    carries a split-or-slim proposal, and every WORKFLOW row under the cap records its executed
+    split ("Split done") so a stale decision cannot hide behind a green number."""
     decisions = _decisions_doc_rows()
-    assert len(decisions) == 10, sorted(decisions)
     periodic = {name for name, (kind, _) in decisions.items() if kind == "PERIODIC"}
     workflow = {name for name, (kind, _) in decisions.items() if kind == "WORKFLOW"}
+    assert periodic == PERIODIC_SKILLS, sorted(periodic ^ PERIODIC_SKILLS)
+    assert workflow == WORKFLOW_SKILLS, sorted(workflow ^ WORKFLOW_SKILLS)
+    assert len(decisions) == len(PERIODIC_SKILLS) + len(WORKFLOW_SKILLS) == 25, sorted(decisions)
 
     report = run_json()
     rows = {row["skill"]: row for row in report["skills"]}
@@ -205,11 +223,14 @@ def test_corpus_exemptions_match_the_documented_periodic_decisions():
     assert exempt == periodic
     assert not {name for name, row in rows.items() if row["body_cap"] == "exempt-missing-reason"}
     for name in periodic:
-        assert rows[name]["body_cap_reason"], name
+        assert rows[name]["body_cap_reason"].startswith("PERIODIC: "), name
     for name in workflow:
         assert rows[name]["body_cap"] == "applies", name
-        assert rows[name]["over_soft_body_cap"] is True, f"{name} is no longer over the cap; revisit the decision"
-        assert len(decisions[name][1]) > 40, f"{name}: WORKFLOW rows need a concrete split-or-slim proposal"
+        action = decisions[name][1]
+        if rows[name]["over_soft_body_cap"]:
+            assert len(action) > 40, f"{name}: WORKFLOW rows over the cap need a concrete split-or-slim proposal"
+        else:
+            assert "Split done" in action, f"{name} is no longer over the cap; record the executed split in the table"
     assert report["skills_body_cap_exempt"] == len(periodic)
     assert report["skills_over_soft_body_cap"] == sum(
         1 for row in rows.values() if row["over_soft_body_cap"] and row["body_cap"] != "exempt"
