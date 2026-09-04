@@ -746,6 +746,13 @@ Check, before forming another theory about the subject: diff the two call paths 
 their FIRST difference — origin, region, account, identity, base revision, installed
 set. One of those is why they disagree.
 
+Relocated verbatim from the Forbidden-shortcuts bullet of the ambient rule body on
+2026-09-04; the directive and a pointer stay in `rules/diagnose-before-fix.md`.
+
+Measured
+2026-08-29: 4 hours and 3 wrong fixes on one flat string; one `error_type` field named
+the cause on the next run.
+
 ## aws-cross-component-incompatibilities-are-documented-in-our-topic
 
 ```
@@ -843,3 +850,39 @@ phase with no invocable path free of production side effects; tests green locall
 failing under the CI job's actual keyless environment; a passing test whose own stated
 mechanism was factually wrong. All four checked EXISTENCE, none checked APPLYABILITY.
 ```
+
+## 2026-08-14 escalated for an admin role before running memory_search
+<a id="2026-08-14-escalated-for-admin-role-before-recall"></a>
+
+Relocated verbatim from check 2 of the ambient rule body on 2026-09-04; the directive
+and a pointer stay in `rules/diagnose-before-fix.md`.
+
+INCIDENT 2026-08-14: escalated for an admin role in a GovCloud account to reach an
+untried Bedrock lever. The operator replied "we've done this before for other
+accounts"; the memory search that comment triggered returned a topic file naming the
+exact missing step (the entitlement does not auto-propagate cross-partition and must
+be created explicitly). The recall cost one tool call and would have avoided the
+escalation entirely.
+
+## 2026-08-26 a WAF 403 with two independent rules live; refuting one hid the other
+<a id="2026-08-26-waf-403-two-independent-rules-live"></a>
+
+Relocated verbatim from check 4 of the ambient rule body on 2026-09-04; the directive
+and a pointer stay in `rules/diagnose-before-fix.md`.
+
+Measured 2026-08-26 -- a WAF 403 on an upload:
+"too big" was refuted by a 141-byte probe, then "markup only" was refuted by a
+20,000-byte plain-text probe. BOTH rules were live (XSS-any-size AND an 8192-byte
+cap), so the obvious fix for the second, base64, would have shipped and still 403'd.
+
+## 2026-08-24 a fallback-chain fix shipped while a hardcoded enum gated it off
+<a id="2026-08-24-fallback-chain-fix-gated-off-by-enum"></a>
+
+Relocated verbatim from check 7 of the ambient rule body on 2026-09-04; the directive
+and a pointer stay in `rules/diagnose-before-fix.md`.
+
+Measured 2026-08-24: a gateway /v1/models fix shipped
+through a full protected release while LibreChat's hardcoded FetchTokenConfig
+enum gated the fetched value off for this endpoint — the 32K-default symptom
+reproduced unchanged and a second release (static config, the branch that
+bypasses the gate) was required.

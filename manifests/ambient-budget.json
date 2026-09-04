@@ -195,6 +195,12 @@
       "rule": "check-before-change.md",
       "bytes": -716,
       "reason": "Relocated 2 dated-narrative blocks verbatim to rules/incidents/check-before-change.md behind <a id> anchors: check 8b's PROMOTED-on-the-third-occurrence narrative (2026-08-02 topic-file recurrence; 2026-08-12 `StringLike s3:prefix` on `s3:GetBucketLocation` denying Athena's output-location preflight) with the closing sentence's dated clause, and the Forbidden-shortcuts blanket-sweep clause (2026-08-24 x2: a builder's DATA_DIR and a renamed JS key). Where a directive and its dated clause shared one sentence, the sentence is copied whole to incidents and the rule keeps the directive half with a period; no directive was reworded. 9,811 -> 9,095 B. Oracle: 1,605/1,605 literals present with --also rules/incidents, no allow-drop. Check 3b and the rest are undated directive text (step 8). Negative so the freed budget cannot be silently re-spent."
+    },
+    {
+      "date": "2026-09-04",
+      "rule": "diagnose-before-fix.md",
+      "bytes": -1006,
+      "reason": "Relocated 4 dated-narrative blocks verbatim to rules/incidents/diagnose-before-fix.md: check 2's INCIDENT 2026-08-14 paragraph (escalated for a GovCloud admin role before memory_search named the missing Bedrock entitlement step), check 4's Measured 2026-08-26 sentences (a WAF 403 with an XSS rule AND an 8192-byte cap both live; refuting one hid the other), check 7's Measured 2026-08-24 sentence (a /v1/models fix gated off by LibreChat's hardcoded FetchTokenConfig enum) behind three new <a id> anchors, and the Forbidden-shortcuts Measured 2026-08-29 sentence under its existing 2026-08-29-emit-the-discriminator anchor, whose parenthetical pointer became the standard Full: line. Each block leaves its directive and a pointer; no directive was reworded. 9,686 -> 8,680 B. Oracle: 1,599/1,599 literals present with --also rules/incidents, no allow-drop. The rest is directive text (step 8). Negative so the freed budget cannot be silently re-spent."
     }
   ]
 }
