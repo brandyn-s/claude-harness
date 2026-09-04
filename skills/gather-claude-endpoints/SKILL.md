@@ -7,6 +7,8 @@ effort: medium
 metadata:
   author: example-security-engineering
   version: "1.1"
+  body-cap: exempt
+  body-cap-reason: "PERIODIC: a data-channel drift sweep against committed baselines, run every few weeks for a report"
 compatibility:
   requires:
     - cli: python3

@@ -105,3 +105,21 @@ pins model, fixture_sha, run_date, n_runs.
 
 ## 8. Provenance
 Keys: `ANTHROPIC_API_KEY` only (hosted web_search + keyless grounding fetch).
+
+## 9. Retired at this fixture (2026-09-04)
+
+This A/B is retired at the current fixture. `run_live.py` prints a notice and refuses a
+real run without `--acknowledge-retired-fixture`; `--plan-only` keeps working and the
+receipt carries `fixture_status: retired`.
+
+Reason (`docs/research-skills-root-cause.md` §5, §12.2): the baseline is at ceiling on
+Fable 5.1 (45/45). May's +0.095 refutation_recall edge was one claim (`taskoutput`) that
+both arms now answer OUTDATED, and the 2026-09-03 grounding_precision delta was one
+CONTESTED on `three-workers-sweetspot`, a claim no arm has ever grounded (0/11); with that
+claim marked un-groundable the two arms are identical on the primary metric (1.0/1.0,
+delta 0.0). There is nothing left on this fixture for the framework to buy.
+
+Unchanged: the frozen 2026-05-31 baseline, its committed sample and lineage, and the CI
+gate. The skill itself stays as the audit/report format it is (Phase A, the four-section
+report, the user decision point) — none of which this harness measures. Reopen only with a
+fixture where the baseline is below 1.0 and `verdict_accuracy` as the primary metric.

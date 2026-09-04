@@ -29,7 +29,8 @@ def test_missing_httpx_fails_before_any_model_call(skill, tmp_path):
         sys.modules["httpx"] = None                          # `import httpx` -> ImportError
         sys.modules["anthropic"] = types.ModuleType("anthropic")  # SDK present, never usable
         ns = runpy.run_path({str(script)!r}, run_name="harness_under_test")
-        sys.exit(ns["main"](["--model", "claude-fable-5-1", "--runs", "1", "--output", {str(out)!r}]))
+        sys.exit(ns["main"](["--model", "claude-fable-5-1", "--runs", "1", "--output", {str(out)!r},
+                             "--acknowledge-retired-fixture"]))  # the fixture is retired (2026-09-04); the dependency check is downstream of that gate
     """)
     env = {**os.environ, "ANTHROPIC_API_KEY": "dummy-not-a-key"}
     proc = subprocess.run([sys.executable, "-c", bootstrap], capture_output=True, text=True,

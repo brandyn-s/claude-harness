@@ -43,6 +43,18 @@ RESULTS = FROZEN_RESULTS
 RUNS_DIR = HARNESS / "runs"
 HISTORICAL_MODEL = "claude-opus-4-8"
 COVERED_MODELS = {"claude-fable-5", "claude-mythos-5"}
+# Retired at this fixture (2026-09-04): PROBLEM.md section 9, docs/research-skills-root-cause.md
+# section 7. Real runs print the notice and refuse without --acknowledge-retired-fixture;
+# --plan-only never needs it.
+FIXTURE_STATUS = "retired"
+FIXTURE_STATUS_SINCE = "2026-09-04"
+FIXTURE_STATUS_NOTICE = (
+    "NOTICE: this A/B fixture is RETIRED (2026-09-04): N=3 runs of a 12-item ranking cannot "
+    "resolve the 0.02 Spearman delta between the arms (run-to-run spread 0.051), and the framework "
+    "arm is a two-sentence prompt, not the triage constitution. Reopening needs N>=10 and the "
+    "worked example removed from SYSTEM_WITH. See harness/PROBLEM.md section 9 and "
+    "docs/research-skills-root-cause.md section 7."
+)
 VALID_TERMINAL_STOPS = {"end_turn"}
 MODEL: str | None = None
 RUN_RECEIPT: dict = {}
@@ -222,6 +234,9 @@ def main(argv=None):
     ap.add_argument("--max-tokens", type=int, default=MAX_TOKENS,
                     help="per-call output budget for BOTH arms (frozen baseline used 1500)")
     ap.add_argument("--workers", type=int, default=6)
+    ap.add_argument("--acknowledge-retired-fixture", action="store_true",
+                    help=f"run although the fixture status is {FIXTURE_STATUS} (the notice still "
+                         "prints); --plan-only never needs it")
     args = ap.parse_args(argv)
     model = HISTORICAL_MODEL if args.historical_reproduction else args.model
     if not args.historical_reproduction and model == HISTORICAL_MODEL:
@@ -241,11 +256,19 @@ def main(argv=None):
                    "covered_model_retention_required": model in COVERED_MODELS,
                    "covered_model_retention_approved": model in COVERED_MODELS and args.approve_covered_model_retention,
                    "output_path": str(output),
+                   "fixture_status": FIXTURE_STATUS,
+                   "fixture_status_since": FIXTURE_STATUS_SINCE,
+                   "retired_fixture_acknowledged": args.acknowledge_retired_fixture,
                    "frozen_baseline": {"date": "2026-05-31", "model": HISTORICAL_MODEL,
                                        "sha256": sha256(FROZEN_RESULTS.read_bytes()).hexdigest()}}
     if args.plan_only:
         print(json.dumps(RUN_RECEIPT, indent=2))
         return 0
+    print(FIXTURE_STATUS_NOTICE, file=sys.stderr)
+    if not args.acknowledge_retired_fixture:
+        print(f"error: fixture status is {FIXTURE_STATUS}; pass --acknowledge-retired-fixture to run "
+              "anyway (--plan-only needs no acknowledgement; nothing was written)", file=sys.stderr)
+        return 2
     MODEL, RESULTS, MAX_TOKENS = model, output, args.max_tokens
     with RUNTIME_LOCK:
         RUNTIME_OBSERVATIONS.clear()

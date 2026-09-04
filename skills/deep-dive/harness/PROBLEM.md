@@ -105,3 +105,22 @@ hosted web_search `max_uses=4` (symmetric); `max_tokens=1500`; `claude-opus-4-8`
 ## 8. Provenance
 Keys: `ANTHROPIC_API_KEY` only (hosted web_search; no grounding fetch needed —
 correctness is key-matched, not URL-grounded).
+
+## 9. Paused at this fixture (2026-09-04) — pending run-time keys
+
+Status: **paused, not retired.** `run_live.py` prints a notice and refuses a real run
+without `--acknowledge-retired-fixture`; `--plan-only` keeps working and the receipt
+carries `fixture_status: paused-pending-runtime-keys`.
+
+Reason (`docs/research-skills-root-cause.md` §4, §9 item 1, §12.1): the `current-*`
+questions encode a dated answer key, and the 2026-09-03 `fix` verdict was entirely the
+instrument — a stale currency key plus a rejection-cue miss. Under the corrected grader
+both arms score 180/180 on both dates and the verdict is BLOCKED ON MEASUREMENT: the
+fixture is at ceiling and no calibration signal is left to measure. The currency keys are
+being made run-time-resolved on another branch; until that lands, a run against this
+fixture re-grades the same ceiling.
+
+Unchanged: the frozen 2026-05-31 baseline (`results.json`), its committed sample and
+lineage, and the CI gate in `tests/test_deep_dive_efficacy.py`. Reopen when the run-time
+keys land, together with a harder fixture (questions a searching frontier model gets
+wrong) so calibration has something to discriminate.
