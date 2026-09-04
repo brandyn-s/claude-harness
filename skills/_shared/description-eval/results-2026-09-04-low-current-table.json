@@ -3,8 +3,8 @@
     "model": "claude-fable-5-1",
     "effort": "low",
     "date": "2026-09-04",
-    "started_at": "2026-09-04T03:44:56+00:00",
-    "finished_at": "2026-09-04T03:50:39+00:00",
+    "started_at": "2026-09-04T04:31:33+00:00",
+    "finished_at": "2026-09-04T04:35:02+00:00",
     "skills": [
       "absorb",
       "agentic-actions-auditor",
@@ -53,7 +53,6 @@
       "pr-fix",
       "readiness-review",
       "recall",
-      "red-team-axes",
       "refine",
       "retro",
       "retrospective",
@@ -85,48 +84,7 @@
       "verify-search-result",
       "work"
     ],
-    "system_prompt_sha256": "ed5ec61bd064b8cf7391875d0b719038ad98155d83f72709e1b6453053c589b9",
-    "system_tokens": 20434,
-    "estimate": {
-      "system_tokens": 20434,
-      "requests": 264,
-      "request_tokens_assumed": 53,
-      "output_tokens_assumed": 500,
-      "cache_write_usd": 0.51085,
-      "cache_read_usd": 1.348644,
-      "input_usd": 0.13992,
-      "output_usd": 6.6,
-      "total_usd": 8.599414
-    },
-    "budget_usd": 10.0,
-    "budget_exceeded": false,
-    "limit": null,
-    "usage": {
-      "input_tokens": 16382,
-      "output_tokens": 3808,
-      "cache_creation_input_tokens": 21346,
-      "cache_read_input_tokens": 5613998,
-      "requests": 264
-    },
-    "cost_usd": 2.0245445,
-    "corpus_meta": {
-      "generated_at": "2026-09-04T03:44:23+00:00",
-      "model": "claude-sonnet-5",
-      "effort": "medium",
-      "skills": 78,
-      "positives_per_skill": 3,
-      "negatives": 30,
-      "method": "positives generated from each SKILL.md body with the frontmatter (description, when_to_use) removed; generator told not to name the skill, its slash command, or copy phrases verbatim; negatives hand-written",
-      "usage": {
-        "input_tokens": 530486,
-        "output_tokens": 15021,
-        "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 0,
-        "requests": 78
-      },
-      "cost_usd": 1.211182,
-      "generation_errors": {}
-    },
+    "system_prompt_sha256": "af45b82fcebf5ded9546ef89254e0f78d13ce51dbc27349dae12ef5e6481bb6e",
     "listing_shas": {
       "absorb": "9d605a8d4842",
       "agentic-actions-auditor": "b48cbc60760a",
@@ -140,7 +98,7 @@
       "capture": "8b500e77694e",
       "code-explore": "0257d4f4e2e2",
       "codebase-memory-exploring": "58bd13271d0e",
-      "codebase-memory-quality": "69713c6f4684",
+      "codebase-memory-quality": "d02e67d3012d",
       "codebase-memory-tracing": "7b6510f7b4b1",
       "codeql": "a28caebe1698",
       "context-budget": "c17980a6558d",
@@ -164,7 +122,7 @@
       "index-repo": "334ee710771e",
       "insecure-defaults": "b38735be85d9",
       "interview": "e233c37b3956",
-      "legacy-code-tdd": "f08c88951329",
+      "legacy-code-tdd": "ffac5b3afd76",
       "manifest-gen": "38213269b117",
       "mega-capture": "462846d06f23",
       "mega-distill": "584d3fa5183e",
@@ -175,7 +133,6 @@
       "pr-fix": "1ff5be27f4aa",
       "readiness-review": "f407e033306a",
       "recall": "e44a570ab703",
-      "red-team-axes": "80490de8701a",
       "refine": "28e238ee5608",
       "retro": "d53162c0c611",
       "retrospective": "2180912f8c42",
@@ -207,7 +164,47 @@
       "verify-search-result": "e4ccb2cc0788",
       "work": "68c0da86fc53"
     },
-    "listing_shas_source": "backfilled 2026-09-04 from git 0258d07 (skills as routed); prompt sha verified"
+    "system_tokens": 20333,
+    "estimate": {
+      "system_tokens": 20333,
+      "requests": 264,
+      "request_tokens_assumed": 53,
+      "output_tokens_assumed": 500,
+      "cache_write_usd": 0.508325,
+      "cache_read_usd": 1.341978,
+      "input_usd": 0.13992,
+      "output_usd": 6.6,
+      "total_usd": 8.590223
+    },
+    "budget_usd": 10.0,
+    "budget_exceeded": false,
+    "limit": null,
+    "usage": {
+      "input_tokens": 16337,
+      "output_tokens": 3847,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 5606040,
+      "requests": 264
+    },
+    "cost_usd": 1.75723,
+    "corpus_meta": {
+      "generated_at": "2026-09-04T03:44:23+00:00",
+      "model": "claude-sonnet-5",
+      "effort": "medium",
+      "skills": 78,
+      "positives_per_skill": 3,
+      "negatives": 30,
+      "method": "positives generated from each SKILL.md body with the frontmatter (description, when_to_use) removed; generator told not to name the skill, its slash command, or copy phrases verbatim; negatives hand-written",
+      "usage": {
+        "input_tokens": 530486,
+        "output_tokens": 15021,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "requests": 78
+      },
+      "cost_usd": 1.211182,
+      "generation_errors": {}
+    }
   },
   "routes": [
     {
@@ -217,12 +214,13 @@
       "kind": "positive",
       "answer": "absorb",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 38,
         "output_tokens": 13,
-        "cache_creation_input_tokens": 21346,
-        "cache_read_input_tokens": 0
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -232,12 +230,13 @@
       "kind": "positive",
       "answer": "absorb",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 75,
         "output_tokens": 13,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -247,12 +246,13 @@
       "kind": "positive",
       "answer": "absorb",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 63,
         "output_tokens": 13,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -262,12 +262,13 @@
       "kind": "positive",
       "answer": "agentic-actions-auditor",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 53,
         "output_tokens": 20,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -277,12 +278,13 @@
       "kind": "positive",
       "answer": "agentic-actions-auditor",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 127,
         "output_tokens": 20,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -292,12 +294,13 @@
       "kind": "positive",
       "answer": "agentic-actions-auditor",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 72,
         "output_tokens": 20,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -307,12 +310,13 @@
       "kind": "positive",
       "answer": "api-guardrails",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 39,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -322,12 +326,13 @@
       "kind": "positive",
       "answer": "api-guardrails",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 102,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -337,12 +342,13 @@
       "kind": "positive",
       "answer": "api-guardrails",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 89,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -352,12 +358,13 @@
       "kind": "positive",
       "answer": "api-ingest",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 37,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -367,12 +374,13 @@
       "kind": "positive",
       "answer": "api-ingest",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 65,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -382,12 +390,13 @@
       "kind": "positive",
       "answer": "api-ingest",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 62,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -397,12 +406,13 @@
       "kind": "positive",
       "answer": "api-preflight",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 47,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -412,12 +422,13 @@
       "kind": "positive",
       "answer": "api-preflight",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 75,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -427,12 +438,13 @@
       "kind": "positive",
       "answer": "api-preflight",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 75,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -442,12 +454,13 @@
       "kind": "positive",
       "answer": "audit-fix",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 52,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -457,12 +470,13 @@
       "kind": "positive",
       "answer": "audit-fix",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 95,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -472,12 +486,13 @@
       "kind": "positive",
       "answer": "audit-fix",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 86,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -487,12 +502,13 @@
       "kind": "positive",
       "answer": "audit-skill",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 48,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -502,12 +518,13 @@
       "kind": "positive",
       "answer": "audit-skill",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 116,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -517,12 +534,13 @@
       "kind": "positive",
       "answer": "audit-skill",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 77,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -532,12 +550,13 @@
       "kind": "positive",
       "answer": "build-measurement-harness",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 62,
         "output_tokens": 18,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -547,12 +566,13 @@
       "kind": "positive",
       "answer": "build-measurement-harness",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 99,
         "output_tokens": 18,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -562,12 +582,13 @@
       "kind": "positive",
       "answer": "build-measurement-harness",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 60,
         "output_tokens": 18,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -577,12 +598,13 @@
       "kind": "positive",
       "answer": "bulk-api-script",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 44,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -592,12 +614,13 @@
       "kind": "positive",
       "answer": "bulk-api-script",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 69,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -607,12 +630,13 @@
       "kind": "positive",
       "answer": "bulk-api-script",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 74,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -622,12 +646,13 @@
       "kind": "positive",
       "answer": "capture",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 51,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -637,12 +662,13 @@
       "kind": "positive",
       "answer": "retro",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 61,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -652,12 +678,13 @@
       "kind": "positive",
       "answer": "capture",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 74,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -667,12 +694,13 @@
       "kind": "positive",
       "answer": "code-explore",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 27,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -682,12 +710,13 @@
       "kind": "positive",
       "answer": "code-explore",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 75,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -697,12 +726,13 @@
       "kind": "positive",
       "answer": "code-explore",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 33,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -712,12 +742,13 @@
       "kind": "positive",
       "answer": "codebase-memory-exploring",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 21,
         "output_tokens": 20,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -727,12 +758,13 @@
       "kind": "positive",
       "answer": "codebase-memory-exploring",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 58,
         "output_tokens": 20,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -742,12 +774,13 @@
       "kind": "positive",
       "answer": "codebase-memory-exploring",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 35,
         "output_tokens": 20,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -757,12 +790,13 @@
       "kind": "positive",
       "answer": "codebase-memory-quality",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 33,
         "output_tokens": 19,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -772,12 +806,13 @@
       "kind": "positive",
       "answer": "codebase-memory-quality",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 71,
         "output_tokens": 19,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -785,14 +820,15 @@
       "request": "I want to know if there are files in our codebase that always get modified together even though they live in totally different folders, since that might mean there's some hidden dependency we don't know about.",
       "expected": "codebase-memory-quality",
       "kind": "positive",
-      "answer": "none",
+      "answer": "codebase-memory-quality",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 56,
-        "output_tokens": 11,
+        "output_tokens": 19,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -802,12 +838,13 @@
       "kind": "positive",
       "answer": "codebase-memory-tracing",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 27,
         "output_tokens": 20,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -817,12 +854,13 @@
       "kind": "positive",
       "answer": "codebase-memory-tracing",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 82,
         "output_tokens": 20,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -832,12 +870,13 @@
       "kind": "positive",
       "answer": "codebase-memory-tracing",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 59,
         "output_tokens": 20,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -847,12 +886,13 @@
       "kind": "positive",
       "answer": "codeql",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 39,
         "output_tokens": 13,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -862,12 +902,13 @@
       "kind": "positive",
       "answer": "semgrep",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 70,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -877,12 +918,13 @@
       "kind": "positive",
       "answer": "codeql",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 67,
         "output_tokens": 13,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -892,12 +934,13 @@
       "kind": "positive",
       "answer": "context-budget",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 50,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -907,12 +950,13 @@
       "kind": "positive",
       "answer": "context-budget",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 91,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -922,12 +966,13 @@
       "kind": "positive",
       "answer": "context-budget",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 83,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -937,12 +982,13 @@
       "kind": "positive",
       "answer": "debugging-hypotheses",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 66,
         "output_tokens": 19,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -952,12 +998,13 @@
       "kind": "positive",
       "answer": "debugging-hypotheses",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 82,
         "output_tokens": 19,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -967,12 +1014,13 @@
       "kind": "positive",
       "answer": "debugging-hypotheses",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 86,
         "output_tokens": 19,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -982,12 +1030,13 @@
       "kind": "positive",
       "answer": "deep-dive",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 55,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -997,12 +1046,13 @@
       "kind": "positive",
       "answer": "deep-dive",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 98,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1012,12 +1062,13 @@
       "kind": "positive",
       "answer": "deep-dive",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 71,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1027,12 +1078,13 @@
       "kind": "positive",
       "answer": "design-evidence-first",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 52,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1042,12 +1094,13 @@
       "kind": "positive",
       "answer": "design-evidence-first",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 64,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1057,12 +1110,13 @@
       "kind": "positive",
       "answer": "design-evidence-first",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 80,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1072,12 +1126,13 @@
       "kind": "positive",
       "answer": "differential-review",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 33,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1087,12 +1142,13 @@
       "kind": "positive",
       "answer": "differential-review",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 80,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1102,12 +1158,13 @@
       "kind": "positive",
       "answer": "differential-review",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 49,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1117,12 +1174,13 @@
       "kind": "positive",
       "answer": "distill",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 44,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1132,12 +1190,13 @@
       "kind": "positive",
       "answer": "distill",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 111,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1147,12 +1206,13 @@
       "kind": "positive",
       "answer": "distill",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 65,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1162,12 +1222,13 @@
       "kind": "positive",
       "answer": "evaluate-repos",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 78,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1177,12 +1238,13 @@
       "kind": "positive",
       "answer": "evaluate-repos",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 79,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1192,12 +1254,13 @@
       "kind": "positive",
       "answer": "evaluate-repos",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 86,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1207,12 +1270,13 @@
       "kind": "positive",
       "answer": "fp-check",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 56,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1222,12 +1286,13 @@
       "kind": "positive",
       "answer": "fp-check",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 95,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1237,12 +1302,13 @@
       "kind": "positive",
       "answer": "fp-check",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 74,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1252,12 +1318,13 @@
       "kind": "positive",
       "answer": "garden",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 38,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1267,12 +1334,13 @@
       "kind": "positive",
       "answer": "garden",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 70,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1282,12 +1350,13 @@
       "kind": "positive",
       "answer": "garden",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 60,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1297,12 +1366,13 @@
       "kind": "positive",
       "answer": "gather-claude",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 52,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1312,12 +1382,13 @@
       "kind": "positive",
       "answer": "gather-claude",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 84,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1327,12 +1398,13 @@
       "kind": "positive",
       "answer": "gather-claude",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 71,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1342,12 +1414,13 @@
       "kind": "positive",
       "answer": "gather-claude-endpoints",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 49,
         "output_tokens": 20,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1357,12 +1430,13 @@
       "kind": "positive",
       "answer": "gather-claude-endpoints",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 83,
         "output_tokens": 20,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1372,12 +1446,13 @@
       "kind": "positive",
       "answer": "gather-claude-endpoints",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 72,
         "output_tokens": 20,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1387,12 +1462,13 @@
       "kind": "positive",
       "answer": "gather-intel",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 51,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1402,12 +1478,13 @@
       "kind": "positive",
       "answer": "gather-intel",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 86,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1417,12 +1494,13 @@
       "kind": "positive",
       "answer": "gather-intel",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 94,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1432,12 +1510,13 @@
       "kind": "positive",
       "answer": "gather-openai-endpoints",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 42,
         "output_tokens": 20,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1447,12 +1526,13 @@
       "kind": "positive",
       "answer": "gather-openai-endpoints",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 82,
         "output_tokens": 20,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1462,12 +1542,13 @@
       "kind": "positive",
       "answer": "gather-openai-endpoints",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 69,
         "output_tokens": 20,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1477,12 +1558,13 @@
       "kind": "positive",
       "answer": "gather-repos",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 39,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1492,12 +1574,13 @@
       "kind": "positive",
       "answer": "gather-repos",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 73,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1507,12 +1590,13 @@
       "kind": "positive",
       "answer": "gather-repos",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 71,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1522,12 +1606,13 @@
       "kind": "positive",
       "answer": "gather-research",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 49,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1537,12 +1622,13 @@
       "kind": "positive",
       "answer": "gather-research",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 77,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1552,12 +1638,13 @@
       "kind": "positive",
       "answer": "gather-research",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 79,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1567,12 +1654,13 @@
       "kind": "positive",
       "answer": "gather-vendor",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 36,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1582,12 +1670,13 @@
       "kind": "positive",
       "answer": "gather-vendor",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 81,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1597,12 +1686,13 @@
       "kind": "positive",
       "answer": "gather-vendor",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 65,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1612,12 +1702,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 31,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1627,12 +1718,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 20,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1642,12 +1734,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 22,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1657,12 +1750,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 31,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1672,12 +1766,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 32,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1687,12 +1782,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 21,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1702,12 +1798,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 29,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1717,12 +1814,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 23,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1732,12 +1830,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 20,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1747,12 +1846,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 20,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1762,12 +1862,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 24,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1777,12 +1878,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 20,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1792,12 +1894,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 24,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1807,12 +1910,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 28,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1822,12 +1926,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 31,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1837,12 +1942,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 23,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1852,12 +1958,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 20,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1867,12 +1974,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 19,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1882,12 +1990,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 22,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1897,12 +2006,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 20,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1912,12 +2022,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 27,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1927,12 +2038,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 32,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1942,12 +2054,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 26,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1957,12 +2070,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 22,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1972,12 +2086,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 23,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -1987,12 +2102,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 27,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2002,12 +2118,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 29,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2017,12 +2134,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 24,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2032,12 +2150,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 29,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2047,12 +2166,13 @@
       "kind": "negative",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 27,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2062,12 +2182,13 @@
       "kind": "positive",
       "answer": "harness-prune",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 46,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2077,12 +2198,13 @@
       "kind": "positive",
       "answer": "harness-prune",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 103,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2092,12 +2214,13 @@
       "kind": "positive",
       "answer": "harness-prune",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 78,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2107,12 +2230,13 @@
       "kind": "positive",
       "answer": "healthcheck",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 34,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2122,12 +2246,13 @@
       "kind": "positive",
       "answer": "healthcheck",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 74,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2137,12 +2262,13 @@
       "kind": "positive",
       "answer": "healthcheck",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 50,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2152,12 +2278,13 @@
       "kind": "positive",
       "answer": "index-repo",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 43,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2167,12 +2294,13 @@
       "kind": "positive",
       "answer": "index-repo",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 63,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2182,12 +2310,13 @@
       "kind": "positive",
       "answer": "index-repo",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 47,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2197,12 +2326,13 @@
       "kind": "positive",
       "answer": "insecure-defaults",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 36,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2212,12 +2342,13 @@
       "kind": "positive",
       "answer": "insecure-defaults",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 73,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2227,12 +2358,13 @@
       "kind": "positive",
       "answer": "insecure-defaults",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 57,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2242,12 +2374,13 @@
       "kind": "positive",
       "answer": "interview",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 35,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2257,12 +2390,13 @@
       "kind": "positive",
       "answer": "interview",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 98,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2272,12 +2406,13 @@
       "kind": "positive",
       "answer": "interview",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 58,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2287,12 +2422,13 @@
       "kind": "positive",
       "answer": "legacy-code-tdd",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 52,
         "output_tokens": 19,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2302,12 +2438,13 @@
       "kind": "positive",
       "answer": "legacy-code-tdd",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 55,
         "output_tokens": 19,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2315,14 +2452,15 @@
       "request": "Our mutation testing tool reported a mutant as 'caught' and someone wants to delete the related guard clause because of it, but I'm suspicious the harness might be lying—can you help me verify this before we act on it?",
       "expected": "legacy-code-tdd",
       "kind": "positive",
-      "answer": "none",
+      "answer": "legacy-code-tdd",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 74,
-        "output_tokens": 11,
+        "output_tokens": 19,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2332,12 +2470,13 @@
       "kind": "positive",
       "answer": "manifest-gen",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 42,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2347,12 +2486,13 @@
       "kind": "positive",
       "answer": "manifest-gen",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 76,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2362,12 +2502,13 @@
       "kind": "positive",
       "answer": "manifest-gen",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 72,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2377,12 +2518,13 @@
       "kind": "positive",
       "answer": "mega-capture",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 84,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2392,12 +2534,13 @@
       "kind": "positive",
       "answer": "mega-capture",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 98,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2407,12 +2550,13 @@
       "kind": "positive",
       "answer": "mega-capture",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 105,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2422,12 +2566,13 @@
       "kind": "positive",
       "answer": "mega-distill",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 56,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2437,12 +2582,13 @@
       "kind": "positive",
       "answer": "mega-distill",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 74,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2452,12 +2598,13 @@
       "kind": "positive",
       "answer": "retrospective",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 75,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2467,12 +2614,13 @@
       "kind": "positive",
       "answer": "modal",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 48,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2482,12 +2630,13 @@
       "kind": "positive",
       "answer": "modal",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 65,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2497,12 +2646,13 @@
       "kind": "positive",
       "answer": "modal",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 64,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2512,12 +2662,13 @@
       "kind": "positive",
       "answer": "monitor",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 50,
         "output_tokens": 13,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2527,12 +2678,13 @@
       "kind": "positive",
       "answer": "monitor",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 72,
         "output_tokens": 13,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2542,12 +2694,13 @@
       "kind": "positive",
       "answer": "monitor",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 52,
         "output_tokens": 13,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2557,12 +2710,13 @@
       "kind": "positive",
       "answer": "persona",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 77,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2572,12 +2726,13 @@
       "kind": "positive",
       "answer": "persona",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 99,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2587,12 +2742,13 @@
       "kind": "positive",
       "answer": "persona",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 83,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2602,12 +2758,13 @@
       "kind": "positive",
       "answer": "plateau-diagnose",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 57,
         "output_tokens": 18,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2617,12 +2774,13 @@
       "kind": "positive",
       "answer": "plateau-diagnose",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 130,
         "output_tokens": 18,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2632,12 +2790,13 @@
       "kind": "positive",
       "answer": "plateau-diagnose",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 81,
         "output_tokens": 18,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2647,12 +2806,13 @@
       "kind": "positive",
       "answer": "pr-fix",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 32,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2662,12 +2822,13 @@
       "kind": "positive",
       "answer": "pr-fix",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 112,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2677,12 +2838,13 @@
       "kind": "positive",
       "answer": "pr-fix",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 51,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2692,12 +2854,13 @@
       "kind": "positive",
       "answer": "readiness-review",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 77,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2707,12 +2870,13 @@
       "kind": "positive",
       "answer": "readiness-review",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 84,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2722,12 +2886,13 @@
       "kind": "positive",
       "answer": "readiness-review",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 80,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2737,12 +2902,13 @@
       "kind": "positive",
       "answer": "recall",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 48,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2752,12 +2918,13 @@
       "kind": "positive",
       "answer": "recall",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 66,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2767,12 +2934,13 @@
       "kind": "positive",
       "answer": "recall",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 50,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2782,12 +2950,16 @@
       "kind": "positive",
       "answer": "refusal",
       "stop_reason": "refusal",
+      "stop_details": {
+        "category": "cyber",
+        "explanation": "This request triggered restrictions on violative cyber content and was blocked under Anthropic's Usage Policy. To learn more, see https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback. API integrators: you can reduce refusals for your users by configuring a fallback model — see https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback"
+      },
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 95,
         "output_tokens": 0,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2795,14 +2967,15 @@
       "request": "We've been red-teaming this agent for a week using the same jailbreak template and it keeps refusing the exfil sink, but I'm suspicious we're just testing one narrow angle over and over instead of actually proving it's safe — how do I check that properly and what other approaches should I bring in?",
       "expected": "red-team-axes",
       "kind": "positive",
-      "answer": "refusal",
-      "stop_reason": "refusal",
+      "answer": "search-axis-rotate",
+      "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
-        "input_tokens": 142,
-        "output_tokens": 0,
+        "input_tokens": 97,
+        "output_tokens": 18,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2812,12 +2985,16 @@
       "kind": "positive",
       "answer": "refusal",
       "stop_reason": "refusal",
+      "stop_details": {
+        "category": "cyber",
+        "explanation": "This request triggered restrictions on violative cyber content and was blocked under Anthropic's Usage Policy. To learn more, see https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback. API integrators: you can reduce refusals for your users by configuring a fallback model — see https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback"
+      },
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 126,
         "output_tokens": 0,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2827,12 +3004,13 @@
       "kind": "positive",
       "answer": "none",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 30,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2842,12 +3020,13 @@
       "kind": "positive",
       "answer": "refine",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 71,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2857,12 +3036,13 @@
       "kind": "positive",
       "answer": "refine",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 57,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2872,12 +3052,13 @@
       "kind": "positive",
       "answer": "retro",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 40,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2887,12 +3068,13 @@
       "kind": "positive",
       "answer": "retro",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 84,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2902,12 +3084,13 @@
       "kind": "positive",
       "answer": "retro",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 50,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2917,12 +3100,13 @@
       "kind": "positive",
       "answer": "retrospective",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 34,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2932,12 +3116,13 @@
       "kind": "positive",
       "answer": "retrospective",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 82,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2947,12 +3132,13 @@
       "kind": "positive",
       "answer": "retrospective",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 68,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2962,12 +3148,13 @@
       "kind": "positive",
       "answer": "review-depth-by-risk",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 56,
         "output_tokens": 19,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2977,12 +3164,13 @@
       "kind": "positive",
       "answer": "review-depth-by-risk",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 77,
         "output_tokens": 19,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -2992,12 +3180,13 @@
       "kind": "positive",
       "answer": "review-depth-by-risk",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 96,
         "output_tokens": 19,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3007,12 +3196,13 @@
       "kind": "positive",
       "answer": "roundtable",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 66,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3022,12 +3212,13 @@
       "kind": "positive",
       "answer": "roundtable",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 114,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3037,12 +3228,13 @@
       "kind": "positive",
       "answer": "roundtable",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 86,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3052,12 +3244,13 @@
       "kind": "positive",
       "answer": "run-status",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 19,
         "output_tokens": 13,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3067,12 +3260,13 @@
       "kind": "positive",
       "answer": "run-status",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 58,
         "output_tokens": 13,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3082,12 +3276,13 @@
       "kind": "positive",
       "answer": "run-status",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 46,
         "output_tokens": 13,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3097,12 +3292,13 @@
       "kind": "positive",
       "answer": "sarif-parsing",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 60,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3112,12 +3308,13 @@
       "kind": "positive",
       "answer": "sarif-parsing",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 59,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3127,12 +3324,13 @@
       "kind": "positive",
       "answer": "sarif-parsing",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 65,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3142,12 +3340,13 @@
       "kind": "positive",
       "answer": "scout",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 39,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3157,12 +3356,13 @@
       "kind": "positive",
       "answer": "evaluate-repos",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 80,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3172,12 +3372,13 @@
       "kind": "positive",
       "answer": "scout",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 68,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3187,12 +3388,13 @@
       "kind": "positive",
       "answer": "scout-frontier",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 67,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3202,12 +3404,13 @@
       "kind": "positive",
       "answer": "scout-frontier",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 106,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3217,12 +3420,13 @@
       "kind": "positive",
       "answer": "scout-frontier",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 117,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3232,12 +3436,13 @@
       "kind": "positive",
       "answer": "scout-skills",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 43,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3247,12 +3452,13 @@
       "kind": "positive",
       "answer": "scout-skills",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 72,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3262,12 +3468,13 @@
       "kind": "positive",
       "answer": "scout-skills",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 69,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3275,14 +3482,15 @@
       "request": "I've rewritten this jailbreak prompt like 10 different ways and it still gets refused every time — feels like I've hit a wall, what should I try next?",
       "expected": "search-axis-rotate",
       "kind": "positive",
-      "answer": "red-team-axes",
+      "answer": "search-axis-rotate",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 55,
-        "output_tokens": 16,
+        "output_tokens": 18,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3290,14 +3498,15 @@
       "request": "We've been tuning hyperparameters for two weeks and our recall metric hasn't budged in the last four experiments. I have a list of everything we changed — can you help me figure out if we're actually stuck or just hammering the wrong knob?",
       "expected": "search-axis-rotate",
       "kind": "positive",
-      "answer": "plateau-diagnose",
+      "answer": "search-axis-rotate",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 81,
         "output_tokens": 18,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3307,12 +3516,13 @@
       "kind": "positive",
       "answer": "search-axis-rotate",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 66,
         "output_tokens": 18,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3320,14 +3530,15 @@
       "request": "We've been stuck at 18 confirmed cells for two rounds and the model keeps refusing on this quadrant — I don't want to just call it done, help me set up the next wave properly.",
       "expected": "search-campaign",
       "kind": "positive",
-      "answer": "refusal",
-      "stop_reason": "refusal",
+      "answer": "search-axis-rotate",
+      "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
-        "input_tokens": 109,
-        "output_tokens": 0,
+        "input_tokens": 64,
+        "output_tokens": 18,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3335,14 +3546,18 @@
       "request": "I'm running a red-team style campaign against a sealed target with no scoring feedback, generating candidates with a few designer prompts and evaluating with two different judges. Can you help me structure this as a large parallel loop — generation, sharded evaluation, tracking coverage over time, and rotating to new angles when one dries up — instead of me just running things serially and guessing when we're 'done'?",
       "expected": "search-campaign",
       "kind": "positive",
-      "answer": "search-campaign",
-      "stop_reason": "end_turn",
+      "answer": "refusal",
+      "stop_reason": "refusal",
+      "stop_details": {
+        "category": "bio",
+        "explanation": "API integrators: you can reduce refusals for your users by configuring a fallback model — see https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback"
+      },
       "model": "claude-fable-5-1",
       "usage": {
-        "input_tokens": 129,
-        "output_tokens": 15,
+        "input_tokens": 174,
+        "output_tokens": 0,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3352,12 +3567,13 @@
       "kind": "positive",
       "answer": "search-campaign",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 103,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3367,12 +3583,13 @@
       "kind": "positive",
       "answer": "semgrep",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 30,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3382,12 +3599,13 @@
       "kind": "positive",
       "answer": "semgrep",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 68,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3397,12 +3615,13 @@
       "kind": "positive",
       "answer": "semgrep",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 50,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3412,12 +3631,13 @@
       "kind": "positive",
       "answer": "semgrep-rule-creator",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 61,
         "output_tokens": 20,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3427,12 +3647,13 @@
       "kind": "positive",
       "answer": "semgrep-rule-creator",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 78,
         "output_tokens": 20,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3442,12 +3663,13 @@
       "kind": "positive",
       "answer": "semgrep-rule-creator",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 54,
         "output_tokens": 20,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3457,12 +3679,13 @@
       "kind": "positive",
       "answer": "service-review",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 45,
         "output_tokens": 13,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3472,12 +3695,13 @@
       "kind": "positive",
       "answer": "service-review",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 90,
         "output_tokens": 13,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3487,12 +3711,13 @@
       "kind": "positive",
       "answer": "service-review",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 85,
         "output_tokens": 13,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3502,12 +3727,13 @@
       "kind": "positive",
       "answer": "sharp-edges",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 47,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3517,12 +3743,13 @@
       "kind": "positive",
       "answer": "sharp-edges",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 54,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3532,12 +3759,13 @@
       "kind": "positive",
       "answer": "sharp-edges",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 69,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3547,12 +3775,13 @@
       "kind": "positive",
       "answer": "ship",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 28,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3562,12 +3791,13 @@
       "kind": "positive",
       "answer": "ship",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 55,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3577,12 +3807,13 @@
       "kind": "positive",
       "answer": "ship",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 39,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3592,12 +3823,13 @@
       "kind": "positive",
       "answer": "ship-hook",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 29,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3607,12 +3839,13 @@
       "kind": "positive",
       "answer": "ship-hook",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 62,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3622,12 +3855,13 @@
       "kind": "positive",
       "answer": "ship-hook",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 70,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3637,12 +3871,13 @@
       "kind": "positive",
       "answer": "supergoal",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 78,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3652,12 +3887,13 @@
       "kind": "positive",
       "answer": "supergoal",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 100,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3667,12 +3903,13 @@
       "kind": "positive",
       "answer": "supergoal",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 94,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3682,12 +3919,13 @@
       "kind": "positive",
       "answer": "supergoal-pause",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 36,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3697,12 +3935,13 @@
       "kind": "positive",
       "answer": "supergoal-pause",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 72,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3712,12 +3951,13 @@
       "kind": "positive",
       "answer": "supergoal-pause",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 52,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3727,12 +3967,13 @@
       "kind": "positive",
       "answer": "supergoal-resume",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 32,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3742,12 +3983,13 @@
       "kind": "positive",
       "answer": "supergoal-resume",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 74,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3757,12 +3999,13 @@
       "kind": "positive",
       "answer": "supergoal-resume",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 37,
         "output_tokens": 17,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3772,12 +4015,13 @@
       "kind": "positive",
       "answer": "superplan",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 69,
         "output_tokens": 13,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3787,12 +4031,13 @@
       "kind": "positive",
       "answer": "superplan",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 102,
         "output_tokens": 13,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3802,12 +4047,13 @@
       "kind": "positive",
       "answer": "superplan",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 86,
         "output_tokens": 13,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3817,12 +4063,13 @@
       "kind": "positive",
       "answer": "superplan-loop",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 46,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3832,12 +4079,13 @@
       "kind": "positive",
       "answer": "superplan-loop",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 72,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3847,12 +4095,13 @@
       "kind": "positive",
       "answer": "superplan-loop",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 59,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3862,12 +4111,13 @@
       "kind": "positive",
       "answer": "superplan-status",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 21,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3877,12 +4127,13 @@
       "kind": "positive",
       "answer": "superplan-status",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 76,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3892,12 +4143,13 @@
       "kind": "positive",
       "answer": "superplan-status",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 40,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3907,12 +4159,13 @@
       "kind": "positive",
       "answer": "threat-model",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 45,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3922,12 +4175,13 @@
       "kind": "positive",
       "answer": "threat-model",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 70,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3937,12 +4191,13 @@
       "kind": "positive",
       "answer": "threat-model",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 57,
         "output_tokens": 14,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3952,12 +4207,13 @@
       "kind": "positive",
       "answer": "triage",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 43,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3967,12 +4223,13 @@
       "kind": "positive",
       "answer": "triage",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 89,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3982,12 +4239,13 @@
       "kind": "positive",
       "answer": "triage",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 69,
         "output_tokens": 12,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -3997,12 +4255,13 @@
       "kind": "positive",
       "answer": "validate-changes",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 35,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -4012,12 +4271,13 @@
       "kind": "positive",
       "answer": "validate-changes",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 91,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -4027,12 +4287,13 @@
       "kind": "positive",
       "answer": "validate-changes",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 62,
         "output_tokens": 15,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -4042,12 +4303,13 @@
       "kind": "positive",
       "answer": "variant-analysis",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 62,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -4057,12 +4319,13 @@
       "kind": "positive",
       "answer": "variant-analysis",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 91,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -4072,12 +4335,13 @@
       "kind": "positive",
       "answer": "variant-analysis",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 82,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -4087,12 +4351,13 @@
       "kind": "positive",
       "answer": "verify-search-result",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 70,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -4102,12 +4367,13 @@
       "kind": "positive",
       "answer": "verify-search-result",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 83,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -4117,12 +4383,13 @@
       "kind": "positive",
       "answer": "verify-search-result",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 86,
         "output_tokens": 16,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -4132,12 +4399,13 @@
       "kind": "positive",
       "answer": "work",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 48,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -4147,12 +4415,13 @@
       "kind": "positive",
       "answer": "work",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 71,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     },
     {
@@ -4162,12 +4431,13 @@
       "kind": "positive",
       "answer": "work",
       "stop_reason": "end_turn",
+      "stop_details": null,
       "model": "claude-fable-5-1",
       "usage": {
         "input_tokens": 60,
         "output_tokens": 11,
         "cache_creation_input_tokens": 0,
-        "cache_read_input_tokens": 21346
+        "cache_read_input_tokens": 21235
       }
     }
   ],
@@ -4271,9 +4541,9 @@
       },
       "codebase-memory-quality": {
         "positives": 3,
-        "hits": 2,
-        "recall": 0.6666666666666666,
-        "to_none": 1,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
         "refused": 0,
         "captured": 0
       },
@@ -4463,9 +4733,9 @@
       },
       "legacy-code-tdd": {
         "positives": 3,
-        "hits": 2,
-        "recall": 0.6666666666666666,
-        "to_none": 1,
+        "hits": 3,
+        "recall": 1.0,
+        "to_none": 0,
         "refused": 0,
         "captured": 0
       },
@@ -4523,7 +4793,7 @@
         "recall": 1.0,
         "to_none": 0,
         "refused": 0,
-        "captured": 1
+        "captured": 0
       },
       "pr-fix": {
         "positives": 3,
@@ -4554,8 +4824,8 @@
         "hits": 0,
         "recall": 0.0,
         "to_none": 0,
-        "refused": 3,
-        "captured": 1
+        "refused": 2,
+        "captured": 0
       },
       "refine": {
         "positives": 3,
@@ -4639,16 +4909,16 @@
       },
       "search-axis-rotate": {
         "positives": 3,
-        "hits": 1,
-        "recall": 0.3333333333333333,
+        "hits": 3,
+        "recall": 1.0,
         "to_none": 0,
         "refused": 0,
-        "captured": 0
+        "captured": 2
       },
       "search-campaign": {
         "positives": 3,
-        "hits": 2,
-        "recall": 0.6666666666666666,
+        "hits": 1,
+        "recall": 0.3333333333333333,
         "to_none": 0,
         "refused": 1,
         "captured": 0
@@ -4815,18 +5085,18 @@
         "count": 1
       },
       {
+        "expected": "red-team-axes",
+        "got": "search-axis-rotate",
+        "count": 1
+      },
+      {
         "expected": "scout",
         "got": "evaluate-repos",
         "count": 1
       },
       {
-        "expected": "search-axis-rotate",
-        "got": "plateau-diagnose",
-        "count": 1
-      },
-      {
-        "expected": "search-axis-rotate",
-        "got": "red-team-axes",
+        "expected": "search-campaign",
+        "got": "search-axis-rotate",
         "count": 1
       }
     ],
@@ -4845,24 +5115,10 @@
         "category": null
       },
       {
-        "id": "codebase-memory-quality-3",
-        "expected": "codebase-memory-quality",
-        "got": "none",
-        "request": "I want to know if there are files in our codebase that always get modified together even though they live in totally different folders, since that might mean there's some hidden dependency we don't know about.",
-        "category": null
-      },
-      {
         "id": "codeql-2",
         "expected": "codeql",
         "got": "semgrep",
         "request": "We just added a bunch of new Go microservices plus GitHub Actions workflows to our repo, and I want a thorough vulnerability audit covering both the code and the CI pipelines before our release next week.",
-        "category": null
-      },
-      {
-        "id": "legacy-code-tdd-3",
-        "expected": "legacy-code-tdd",
-        "got": "none",
-        "request": "Our mutation testing tool reported a mutant as 'caught' and someone wants to delete the related guard clause because of it, but I'm suspicious the harness might be lying—can you help me verify this before we act on it?",
         "category": null
       },
       {
@@ -4877,12 +5133,12 @@
         "expected": "red-team-axes",
         "got": "refusal",
         "request": "I've hit refusal on the shell.run and http.post sinks with three different prompts already — before I write this off as hardened, what should I try next?",
-        "category": null
+        "category": "cyber"
       },
       {
         "id": "red-team-axes-2",
         "expected": "red-team-axes",
-        "got": "refusal",
+        "got": "search-axis-rotate",
         "request": "We've been red-teaming this agent for a week using the same jailbreak template and it keeps refusing the exfil sink, but I'm suspicious we're just testing one narrow angle over and over instead of actually proving it's safe — how do I check that properly and what other approaches should I bring in?",
         "category": null
       },
@@ -4891,7 +5147,7 @@
         "expected": "red-team-axes",
         "got": "refusal",
         "request": "I want to stop guessing at prompts and actually look at how the scoring/detection logic decides pass/fail so I can target the blind spots in our auth and logic checks, since our crash-based checker clearly isn't catching those bug classes.",
-        "category": null
+        "category": "cyber"
       },
       {
         "id": "refine-1",
@@ -4908,36 +5164,29 @@
         "category": null
       },
       {
-        "id": "search-axis-rotate-1",
-        "expected": "search-axis-rotate",
-        "got": "red-team-axes",
-        "request": "I've rewritten this jailbreak prompt like 10 different ways and it still gets refused every time — feels like I've hit a wall, what should I try next?",
-        "category": null
-      },
-      {
-        "id": "search-axis-rotate-2",
-        "expected": "search-axis-rotate",
-        "got": "plateau-diagnose",
-        "request": "We've been tuning hyperparameters for two weeks and our recall metric hasn't budged in the last four experiments. I have a list of everything we changed — can you help me figure out if we're actually stuck or just hammering the wrong knob?",
-        "category": null
-      },
-      {
         "id": "search-campaign-1",
         "expected": "search-campaign",
-        "got": "refusal",
+        "got": "search-axis-rotate",
         "request": "We've been stuck at 18 confirmed cells for two rounds and the model keeps refusing on this quadrant — I don't want to just call it done, help me set up the next wave properly.",
         "category": null
+      },
+      {
+        "id": "search-campaign-2",
+        "expected": "search-campaign",
+        "got": "refusal",
+        "request": "I'm running a red-team style campaign against a sealed target with no scoring feedback, generating candidates with a few designer prompts and evaluating with two different judges. Can you help me structure this as a large parallel loop — generation, sharded evaluation, tracking coverage over time, and rotating to new angles when one dries up — instead of me just running things serially and guessing when we're 'done'?",
+        "category": "bio"
       }
     ],
     "overall": {
       "skills": 78,
       "positives": 234,
-      "hits": 221,
-      "micro_recall": 0.9444444444444444,
-      "macro_recall": 0.9444444444444444,
+      "hits": 224,
+      "micro_recall": 0.9572649572649573,
+      "macro_recall": 0.9572649572649573,
       "negatives": 30,
       "false_fire_rate": 0.0,
-      "refusals": 4,
+      "refusals": 3,
       "errors": 0,
       "skills_never_hit": [
         "red-team-axes"
@@ -4945,15 +5194,11 @@
       "skills_without_positives": [],
       "skills_capturing_foreign": [
         [
+          "search-axis-rotate",
+          2
+        ],
+        [
           "evaluate-repos",
-          1
-        ],
-        [
-          "plateau-diagnose",
-          1
-        ],
-        [
-          "red-team-axes",
           1
         ],
         [
