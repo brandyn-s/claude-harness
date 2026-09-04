@@ -130,9 +130,9 @@ placed in a not-COPYd sibling dir is the specific trap.
 
 INCIDENT 2026-06-26 (detector-expansion supergoal arc): Phase B shipped
 `judge_hardening.py` to `detector/` and wired `from judge_hardening import
-blind_transcript` into `otel_session_review.py` (the daily detector-of-record's
-ENTRYPOINT). The Lambda Dockerfile COPYs only `scripts/` — so the deployed image was
-missing the module and the fail-loud import would crash the daily judge at startup. The
+blind_transcript` into the daily detector's entrypoint module. The Lambda Dockerfile
+COPYs only `scripts/` — so the deployed image was missing the module and the fail-loud
+import would crash the daily judge at startup. The
 supergoal metric read `phases_complete=7` GREEN (it checked `[ -f detector/judge_hardening.py ]`
 + repo-tests-pass); CI was green (tests run where `detector/` exists). The break was
 invisible until the Lambda ran — caught only when the user asked "is it fully deployed?".

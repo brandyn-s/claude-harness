@@ -73,13 +73,10 @@ polling, evidence, cancellation, and cleanup.
 
 ## Context and topic routing
 
-Load only topic context required by the delegated task. Common routes:
-
-- Security, STIG, alerts, vulnerabilities: `security.md` and the named tool.
-- AWS, Terraform, ECS, CI/CD: `infrastructure.md`.
-- Identity, Entra, Microsoft Graph: `msgraph.md`.
-- Skills, hooks, rules, Claude Code config: `architecture.md`.
-- Slack, Linear, Box, Confluence, Tailscale: the matching topic file.
+Load only the topic context the delegated task needs. Where the environment
+keeps per-subject topic files (for example
+`~/.claude/agent-memory/topics/<subject>.md`), route by the task's subject and
+name each required file in the child prompt.
 
 Do not load unrelated topic files “just in case.” A child receives only the
 prompt and context explicitly supplied to it; claimed parent knowledge does

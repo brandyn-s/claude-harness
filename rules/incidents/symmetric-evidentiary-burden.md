@@ -103,8 +103,8 @@ rigor on the instance produces false confidence about the class.
 ```
 INCIDENT 2026-06-20 accuracy-measurement P4: claimed "the LLM judge emits no
 severity, only flag/no-flag" — and SHIPPED it as a flaw-log entry — after reading
-ONE of TWO judges (the per-tool-action judge in otel_detect_audit; the session-level
-judge in otel_session_review DOES emit severity). The claim was retracted same-session.
+ONE of TWO judges (the per-tool-action judge; the session-level judge DOES emit
+severity). The claim was retracted same-session.
 This is symmetric-burden applied to CODE: a claim about "the X" built from the FIRST
 instance of X found in the source is single-source. A system with N instances of a
 role (2 judges, 3 resolvers, several handlers) needs ALL N enumerated before

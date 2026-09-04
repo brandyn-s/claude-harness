@@ -422,13 +422,13 @@ came within a commit of shipping.
 | # | Claim | Reality | Where it actually lived |
 |---|---|---|---|
 | 1 | "a SIEM rule keyed on 6 actor types drops three principal classes" (HIGH) | no closed actor enum exists anywhere; `actor` is an untyped string column read schema-on-read | `compliance.tf:1365/1466` |
-| 2 | "5 Analytics endpoints documented but never probed by us" (MEDIUM) | all seven engagement endpoints already called by a deployed Lambda lane | `anthropic_audit_v2/analytics.py:44` |
-| 3 | "rate-limit headers available but unused — recommend consuming them" | already consumed: proactive throttle below `RATELIMIT_MIN_REMAINING=30`, honors server `Retry-After` | `compliance_poller.py:207-219` |
-| 4 | "uncollected Compliance key inventory — recommend ingesting + alerting" (HIGH) | ingested AND graded by an always-on credential guard emitting `UnexpectedDeleteCapableComplianceKeys` to CloudWatch | `anthropic_audit_v2/compliance.py:248,273` |
+| 2 | "5 Analytics endpoints documented but never probed by us" (MEDIUM) | all seven engagement endpoints already called by a deployed Lambda lane | the sibling audit bundle's analytics module |
+| 3 | "rate-limit headers available but unused — recommend consuming them" | already consumed: proactive throttle below `RATELIMIT_MIN_REMAINING=30`, honors server `Retry-After` | the poller module |
+| 4 | "uncollected Compliance key inventory — recommend ingesting + alerting" (HIGH) | ingested AND graded by an always-on credential guard emitting its own alarm metric to CloudWatch | the sibling audit bundle's compliance module |
 
 Root cause, identical all four times: **the grep was too narrow, not missing.** I searched
-`compliance_poller.py` and `lambda/*.py` — the modules I had in mind — while both #2 and #4
-lived in the sibling `anthropic_audit_v2/` bundle. #4 is the sharpest: I drafted a HIGH
+the poller module and `lambda/*.py` — the modules I had in mind — while both #2 and #4
+lived in the sibling audit bundle. #4 is the sharpest: I drafted a HIGH
 finding recommending we build alerting that already existed and was *stronger* than my
 proposal (allowlist grading + a CloudWatch alarm metric + a shared grader deliberately used
 by two callers "so the gated evidence path and the always-on control path can never disagree

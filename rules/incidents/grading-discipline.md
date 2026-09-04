@@ -166,10 +166,10 @@ thresholds in verify-effectiveness.md — that one governs setting a threshold, 
 governs REPORTING an observed one as a boundary.
 ```
 
-## 2026-07-30-claude-monitoring-grade-graded-detection-accuracy
+## 2026-07-30-detection-accuracy-grade-graded-c
 
 ```
-WHY: 2026-07-30 Claude-monitoring grade — graded detection accuracy C ("UNCHARTED;
+WHY: 2026-07-30 detection-accuracy grade — graded it C ("UNCHARTED;
 only oracle-relative 0.87 exists") and made "build an engine-independent candidate
 pool" the #1 recommendation. `bench/recall-census/` already existed, tested and
 documented, its README opening by naming the exact three confounds I cited, ONE
@@ -184,7 +184,7 @@ RECURRED 2026-07-31, ONE DAY LATER, which is why the trigger above was broadened
 "grade a capability absent" to include ANY remediation proposal. Diagnosed three
 firing detector alarms as a no-tolerance-band defect and proposed a 4-item fix list
 ("give the judge a tolerance band", "split didn't-run from ran-degraded", "fix the
-description"). All three ALREADY EXISTED in otel_session_daily.py — `COV_MIN_FRAC,
+description"). All three ALREADY EXISTED in the daily detector module — `COV_MIN_FRAC,
 COV_MIN_ABS = 0.01, 20`, `judge_loss_is_material()`, and a
 `DETECTOR_BEACON_MINOR_LOSS` token deliberately chosen not to collide with the metric
 filters — merged as #900 and DEPLOYED. Worse, the code comment narrated the exact

@@ -6,10 +6,10 @@ applies_to:
   - "worker dispatch"
   - "task routing"
 trigger_conditions:
-  - "user request matches keyword table"
+  - "delegated task depends on subject-specific topic context"
   - "multi-step task requiring domain context"
 required_actions:
-  - "map keywords to topic files using routing table"
+  - "route topic context by subject and name only the needed files in the child prompt"
   - "include output contract for analysis agents"
   - "check auth constraint before dispatching"
   - "select delegation from task topology and shared-state risk"

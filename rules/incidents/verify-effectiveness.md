@@ -310,7 +310,7 @@ metric that grades it) and in any emitter+validator pair maintained together.
 Extracted from rules/verify-effectiveness.md 2026-07-26 (size guard). The
 GUARD's imperative body stays in the rule; this is the narrative.
 
-WHY (auth-expiry, 2026-06-22 recall_recovery): the dev-security SSO token
+WHY (auth-expiry, 2026-06-22 recall_recovery): the SSO token
 expired mid-run; the funnel's `except Exception: return None` (correct for a
 transient blip) turned every oracle call into flag:False. Caught only because
 the Llama-flag count was STILL CLIMBING at kill time (proving the worker hadn't
@@ -337,7 +337,7 @@ GUARD's imperative body stays in the rule; this is the narrative.
 WHY: 2026-06-25, TWICE in one session. (a) the real-time secret Lambda ran a pre-Tier-0 image for a
 full day — build-detector.yml pushed to ECR but had no update-function-code step, TF's mutable
 :latest never repointed; symptom = stale detections, no error. (b) PR #661 added
-`import otel_tier2_conformal` to otel_session_daily.py but never added the module to
+a new import to the daily detector module but never added the imported module to
 detector/Dockerfile's COPY list → the daily + 4h detector crash-looped ~2 days (ModuleNotFoundError),
 gold-sessions + tracker ingest both stopped, caught only by the freshness alarm. Both are the
 multi-seam invariant applied to the DEPLOY seam. Fixes: mcp-servers #663/#665, mcp-infra #509/#510.
@@ -965,10 +965,9 @@ was correct — and left exactly those values unchecked. The user caught it, ver
 Two properties made it worse than a normal coverage gap:
 
 1. **The held-out values were the closed-set ones.** Both feed
-   `WHERE event_name IN (...)` predicates in live detectors
-   (`otel_channel_detect.py`, `activity_signal_detect.py`), so a vendor rename breaks
-   them rather than being absorbed — and the differ had already spent its `REMOVED`
-   alarm claiming they were gone.
+   `WHERE event_name IN (...)` predicates in the two live detector modules, so a
+   vendor rename breaks them rather than being absorbed — and the differ had already
+   spent its `REMOVED` alarm claiming they were gone.
 2. **The named compensating control had not run.** In the same turn: *"Step 2c's Athena
    leg did not run — no AWS credentials this session, so I ran `--probe-only`."* So the
    instrument I was pointing at as the thing that WOULD cover the held-out set was

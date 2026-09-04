@@ -429,8 +429,8 @@ GUARD pattern="grade a capability ABSENT / list 'build X' as an open item / PROP
   "build X" — it is "X exists and has never been RUN", a different grade and a far
   cheaper fix.
   NO EXCEPTIONS for a gap reported as an open item.
-  # WHY: 2026-07-30 Claude-monitoring grade — graded detection accuracy C ("UNCHARTED;
-  #   Full: incidents#2026-07-30-claude-monitoring-grade-graded-detection-accuracy
+  # WHY: 2026-07-30 detection-accuracy grade — graded it C ("UNCHARTED;
+  #   Full: incidents#2026-07-30-detection-accuracy-grade-graded-c
   # WHY THE TRIGGER MISSED: the framing was "what should we fix?", not "grade this
   #   Full: incidents#the-trigger-missed-the-framing-was-what-should-we
 

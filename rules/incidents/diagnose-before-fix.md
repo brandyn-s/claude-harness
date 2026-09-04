@@ -403,7 +403,7 @@ debugging; bisect found the answer in 5 minutes.
 ### inferred_coverage_table_from_training_data
 INCIDENT OTel (2026-03-13): 5 turns wasted on incorrect coverage
 tables. INCIDENT Cowork (2026-03-14): claimed "no visibility" without
-querying Athena (table literally named cowork_otel).
+querying Athena (the telemetry table).
 
 ### doc_consensus_overrode_source_truth
 INCIDENT PSM switch IPs (2026-03-17): 5 docs agreed on IPs, all wrong;
