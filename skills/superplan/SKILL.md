@@ -349,60 +349,6 @@ Persist the plan (including any `## Session Context` from Phase 4c) to
 `~/Documents/knowledge-base/plans/YYYY-MM-DD-<slug>.md`, then commit + PR +
 auto-merge via the standard git flow from inside the knowledge-base repo.
 
-### Step 5a.1: SHA-256 plan attestation
-
-Immediately after writing the plan file (before the git commit), compute and persist its SHA-256:
-
-```bash
-(cd ~/Documents/knowledge-base/plans && sha256sum YYYY-MM-DD-<slug>.md) \
-  > ~/Documents/knowledge-base/plans/YYYY-MM-DD-<slug>.md.attestation
-```
-
-The output format is `<sha>  <basename>` (e.g., `abc123def  2026-06-14-plan.md`), which matches the format written by supergoal's parse_plan.py at bootstrap time.
-
-The attestation locks the plan against mid-loop tamper. supergoal's verification hook checks the plan's mtime each turn; when mtime has changed, it re-hashes and aborts the loop with `plan-tampered` if the hash differs. Without this, a silently-mutated plan would let the prior-arc ledger lie.
-
-Intentional updates: stop supergoal, re-run superplan to update the plan (which re-attests), re-invoke supergoal. Do not edit the plan file directly during an active loop.
-
-The mtime-keyed cache avoids re-hashing on every turn — see `~/.claude/skills/supergoal/references/verification-hook.md` Step 1 for the full procedure.
-
-### Step 5a.2: Plan template — required new sections
-
-Beyond the existing Goal / Constraints / Steps / Verification structure, plans must now include:
-
-**`execution_budget`** — a YAML block that caps repair cycles, full-suite runs,
-and live probes and routes nonblocking findings to backlog. It prevents a green
-vertical slice from expanding into open-ended review or validation work.
-
-**`### Metric Commands`** — explicit code block of shell commands whose output (final line matching `^METRIC <name>=<value>`) is the authoritative measurement. supergoal parses these; conflating with `Verification:` legacy is still supported but emit the explicit section if possible.
-
-**`### Guard Commands`** — code block of commands that must continue to pass (existing tests, lints). Separate from metric — guards catch regressions, metrics drive progress; conflating them lets the model succeed by regressing tests.
-
-**`### Artifact Probe`** — code block of commands that observe the *artifact* (not the metric). Different surface area. Run only at exit as a Goodhart probe — a metric can pass while the artifact is junk. Without this section, supergoal warns and disables the probe; metric-gaming becomes undetectable.
-
-**`### Forbidden Actions`** — list of tool-call patterns the agent must NOT take during the loop. supergoal's hook can be extended to refuse these. Examples:
-- `Bash(rm *)`
-- `Edit(file_path=/etc/*)`
-- `Bash(git push --force *)`
-
-If omitted, supergoal warns and disables the policy axis.
-
-**Falsifier format is a parser contract:** `## Falsifiers` must be markdown
-LIST ITEMS — a table parses as zero falsifiers and `parse_plan.py` exits 20
-(the dry-run below catches it pre-commit).
-
-**Readiness self-check (supergoal-bound plans).** Nothing verifies superplan's OWN output matches this template, so a deviating plan (prose `## Verification` instead of an executable `### Metric Commands` block; bolded `**Demo:**`; sentence-final baseline) ships clean and fails only at supergoal parse-time. Before declaring ready, dry-run: `python3 ~/.claude/skills/supergoal/scripts/parse_plan.py <plan> --state-dir /tmp/claude/sp-check/ --reset` — exit 0 with `metric_commands: N≥1` = ready; exit 20 = fix the named section. The metric block must RUN as-is in the not-yet-built state (guard with `[ -f X ] &&`) and print a real `METRIC name=<number>`, not a `<placeholder>`.
-
-**A metric that reads a remote-tracking ref MUST `git fetch` inside the metric block.** `git -C "$REPO" show origin/main:<path>` reads the LOCAL remote-tracking ref, so after a PR merges the metric reports the world as of the last unrelated fetch. This survives plan authoring structurally: at baseline the true value and the stale-ref value agree, so a metric verified only at baseline cannot reveal the staleness bug. Emit the fetch for every repo the block reads, and treat "verified at baseline" as unverified for any metric whose source is a ref (`references/run-history.md`).
-
-### Step 5a.3: Plan-pattern library write (on successful supergoal exit only)
-
-When a downstream supergoal run exits with `success`, the terminal-doc writer extracts a reusable pattern template and writes it to `~/Documents/knowledge-base/plan-patterns/<pattern-slug>.md`. See `~/.claude/skills/supergoal/references/plan-pattern-library.md` (absolute path to the sibling supergoal skill's references/ directory) for the template schema. Phase 2e reads from this dir for the next plan.
-
-### Step 5a.4: Parallel-dispatch routing recommendation
-
-If the plan has ≥3 vertical slices that are independent at the file level (no shared mutable state between slices), Step 5b's execution-path recommendation should suggest **Task-tool parallel dispatch** instead of sequential `/supergoal`. Sub-tasks each get **scoped context** (their slice + the relevant plan steps), NOT the full plan — context inheritance corrupts subagent reasoning and explodes token cost.
-
 **Full procedure** (mkdir, slug generation, Write, readback verification,
 `git checkout -b plan/<slug>` → `git add` → commit → push → gh pr create →
 gh pr merge --auto --squash --delete-branch, plus failure-mode handling)
@@ -411,35 +357,19 @@ readback succeeds — deferring causes the session-start auto-checkpoint hook
 to absorb the file onto a `checkpoint/<timestamp>` branch with no PR path
 (5-10 turn recovery cost).
 
+Sub-steps 5a.1–5a.4 (SHA-256 plan attestation, the required plan-template sections and the
+`parse_plan.py` readiness dry-run, the plan-pattern library write, and the parallel-dispatch routing
+recommendation) are in `references/save-plan.md` too — read them before writing the plan file.
+
 ### Step 5b: Present and route
 
 Present the plan, mention the saved file path, and ask: **"Ready to execute? Which path?"** —
-but route the RECOMMENDATION through the supergoal gate below first. Do not offer supergoal as a
+but route the RECOMMENDATION through the **supergoal routing gate** first: recommend `/supergoal`
+only when all four of its conditions hold (unattended intent, metric-climbing shape, zero in-plan
+human gates, one coherent optimization target); otherwise recommend direct execution and keep the
+plan's `### Metric Commands` + falsifiers as the inline completion gate. The gate's full text and
+measured basis: `~/.claude/skills/supergoal/references/routing-gate.md`. Do not offer supergoal as a
 co-equal default on every plan; recommend exactly one path and say why.
-
-### Supergoal routing gate (recommend it for the right jobs only)
-
-Recommend **`/supergoal`** ONLY when ALL four hold:
-
-1. **Unattended intent** — the user wants to walk away (headless `claude -p`, overnight, "keep
-   going until"), or explicitly asked for an autonomous loop.
-2. **Metric-climbing shape** — progress IS a machine-checkable number that must move over many
-   iterations (a failing-test count, a benchmark score, a coverage ratio). Supergoal's whole
-   value is tool-backed between-turn verification of that number.
-3. **Zero in-plan human gates** — no AskUserQuestion decision, no operator-run apply/login, no
-   classifier-gated destructive op. A headless loop STALLS FOREVER at the first one; its
-   evaluator cannot answer a question or run the operator's SSO login.
-4. **One coherent optimization target** — not a program of N heterogeneous close-outs. A
-   close-out program's "metric" is a checklist, not a gradient; the loop adds ceremony, not
-   verification.
-
-Otherwise recommend **direct execution** (main thread, or parallel dispatch per Step 5a.4) and
-KEEP supergoal's disciplines inline: run the plan's `### Metric Commands` as the completion gate
-and honor the falsifiers. Mention supergoal only as the resumption vehicle if an unattended
-residue emerges later.
-
-Measured basis (a direct close-out program vs a genuine loop-shaped build, same session):
-`references/run-history.md`.
 
 ### Step 5c: Terminal-doc-on-undershoot contract (mandatory after plan execution)
 
