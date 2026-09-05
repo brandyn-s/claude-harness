@@ -1,9 +1,25 @@
 #!/usr/bin/env python3
-"""Check whether the fresh kernel and optional operator layer are ready."""
+"""Check whether the fresh kernel and optional operator layer are ready.
+
+Config checks run against --config-root (default ~/.claude): settings.json
+parses; the permission mode is acceptEdits or auto; the native sandbox
+auto-allows Bash without a blanket Bash permission; project MCP servers are
+fail-closed; the superpowers plugin is enabled (advisory); every wired command
+hook resolves to a file; every *.py directly under hooks/ parses and imports
+only names that resolve in this interpreter or beside it (static, hook code
+never runs -- added 2026-09-04 after a targeted upgrade left
+bash-security-guard.py importing a sibling the install never received, the
+guard crashed on import, the fail-closed dispatcher blocked every Bash command,
+and this doctor had reported all PASS); and, when the operator layer is
+requested, that it is complete. Host checks: Python >= 3.10, git, the Claude
+Code version floor, sandbox dependencies. Exit 1 on any FAIL.
+"""
 
 from __future__ import annotations
 
 import argparse
+import ast
+import importlib.util
 import json
 import platform
 import shutil
@@ -116,6 +132,7 @@ def inspect_config(config_root: Path) -> list[Check]:
             else ("missing " + ", ".join(missing[:5]) if missing else "no handlers"),
         )
     )
+    checks.append(inspect_hook_imports(config_root / "hooks"))
 
     operator_rule = config_root / "rules" / "operator-discipline.md"
     operator_requested = (
@@ -166,6 +183,98 @@ def inspect_config(config_root: Path) -> list[Check]:
             )
         )
     return checks
+
+
+# ── installed hooks must import only what is installed beside them ─────────
+
+_IMPORT_ERROR_CATCHERS = frozenset({"ImportError", "ModuleNotFoundError", "Exception", "BaseException"})
+
+
+def _catches_import_error(handler: ast.ExceptHandler) -> bool:
+    if handler.type is None:
+        return True
+    names = handler.type.elts if isinstance(handler.type, ast.Tuple) else [handler.type]
+    return any(isinstance(name, ast.Name) and name.id in _IMPORT_ERROR_CATCHERS for name in names)
+
+
+def _optional_import_ids(tree: ast.AST) -> set[int]:
+    """ids of import nodes inside a `try:` whose handlers catch ImportError."""
+    try_types = tuple(t for t in (getattr(ast, "Try", None), getattr(ast, "TryStar", None)) if t is not None)
+    ids: set[int] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, try_types) and any(_catches_import_error(h) for h in node.handlers):
+            for statement in node.body:
+                ids.update(id(inner) for inner in ast.walk(statement)
+                           if isinstance(inner, (ast.Import, ast.ImportFrom)))
+    return ids
+
+
+def _imported_top_level_names(node: ast.AST) -> list[str]:
+    if isinstance(node, ast.Import):
+        return [alias.name.split(".")[0] for alias in node.names]
+    if isinstance(node, ast.ImportFrom):
+        if node.module:
+            return [node.module.split(".")[0]]
+        return [alias.name for alias in node.names]  # `from . import name`
+    return []
+
+
+def _import_resolves(name: str, hooks_dir: Path) -> bool:
+    """Installed beside the hook (<name>.py or <name>/__init__.py), else findable by this interpreter."""
+    if (hooks_dir / f"{name}.py").is_file() or (hooks_dir / name / "__init__.py").is_file():
+        return True
+    try:
+        return importlib.util.find_spec(name) is not None
+    except (ImportError, ValueError):
+        return False
+
+
+def inspect_hook_imports(hooks_dir: Path) -> Check:
+    """Every *.py directly under hooks_dir must import only what is installed.
+
+    Static: each file is ast-parsed (a syntax error is a FAIL naming file and
+    line) and every top-level imported name must resolve beside the hook or via
+    importlib.util.find_spec in this interpreter; hook code never runs. An
+    import inside `try:` with an `except ImportError` handler is optional and
+    is counted, not required. 2026-09-04: an upgraded bash-security-guard.py
+    imported a sibling the install had never received, crashed on import, and
+    the fail-closed dispatcher blocked every Bash command while this doctor
+    reported all PASS.
+    """
+    hooks = sorted(p for p in hooks_dir.glob("*.py") if p.is_file()) if hooks_dir.is_dir() else []
+    failures: list[str] = []
+    optional = 0
+    for hook in hooks:
+        try:
+            tree = ast.parse(hook.read_bytes(), filename=str(hook))
+        except SyntaxError as exc:
+            failures.append(f"hook {hook.name} line {exc.lineno}: syntax error, {exc.msg}")
+            continue
+        except ValueError as exc:
+            failures.append(f"hook {hook.name}: cannot parse ({exc})")
+            continue
+        optional_ids = _optional_import_ids(tree)
+        for node in ast.walk(tree):
+            for name in _imported_top_level_names(node):
+                if id(node) in optional_ids:
+                    optional += 1
+                elif not _import_resolves(name, hooks_dir):
+                    failures.append(
+                        f"hook {hook.name} imports {name}, which is not installed beside it "
+                        f"(fix: bash install.sh and upgrade the hooks, or "
+                        f"scripts/install-profile.py --install hooks/{name}.py --apply)"
+                    )
+    if failures:
+        more = f" (+{len(failures) - 3} more)" if len(failures) > 3 else ""
+        return Check("hook imports", "FAIL", "; ".join(failures[:3]) + more)
+    if not hooks:
+        return Check("hook imports", "PASS", f"no Python hooks under {hooks_dir}")
+    count = f"{len(hooks)} hook{'' if len(hooks) == 1 else 's'}"
+    tolerated = "no optional" if not optional else f"{optional} optional"
+    return Check(
+        "hook imports", "PASS",
+        f"{count} import-checked statically; {tolerated} imports (inside try/except catching ImportError)",
+    )
 
 
 def inspect_host() -> list[Check]:
