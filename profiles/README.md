@@ -82,3 +82,18 @@ conflict keeps yours and writes the new version beside it as
 `python3 scripts/install-profile.py --target ~/.claude/settings.json --install
 rules/operator-discipline.md --apply`; a directory installs every file beneath
 it -- and `--force` overwrites regardless.
+
+A Python target under `hooks/` (or `bin/`, `scripts/`) brings its local
+dependencies along, transitively: every sibling module or package the file
+imports (found by parsing it, module level or nested) and every checkout file
+its `hooks/manifests/<name>.yaml` lists under `depends_on_files`. Each addition
+is printed once -- `also installing hooks/_environment_catalog.py (imported by
+hooks/bash-security-guard.py)` -- in preview and `--apply` alike, and is
+classified and recorded exactly like an explicit target. A name with no sibling
+file is stdlib or third-party and is ignored. Before this (2026-09-04),
+`--install hooks/bash-security-guard.py --apply` upgraded the guard without the
+`_environment_catalog` module it had started importing; the installed guard
+crashed on import and the fail-closed Bash dispatcher blocked every command
+until the module was copied in by hand. `bin/fresh_laptop_doctor.py` now also
+checks, statically, that every installed hook imports only what is installed
+beside it or resolvable by the interpreter.
