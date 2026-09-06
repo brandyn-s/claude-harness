@@ -42,6 +42,20 @@ from the 2026-09-06 evaluation.
 - `VERSION`, this file, `contracts/UPSTREAM.example.json`,
   `bin/upstream-check.py` and `docs/consuming-from-a-private-overlay.md`: the
   contract for a private overlay that vendors this repository.
+- `scripts/deidentification_residue.py`: the residue scanner as a CLI, run by
+  `.githooks/commit-msg` (commit messages), `.githooks/pre-commit` (staged files,
+  marketplace drift) and a CI step over a pull request's commit messages;
+  `skills/_shared/lesson-routing.md`: which lessons belong in the public core and
+  what is stripped before one crosses.
+- `scripts/migrate-to-core.py`: a kitchen-sink `settings.json` to the core posture
+  (sandbox on, blanket allows removed, dangerous-mode prompt restored, phrase
+  Stop blockers unregistered), preview by default, backup on `--apply`.
+- `bin/lean-core-ab.py` and `docs/plans/2026-09-06-lean-core-ab.md`: the
+  pre-registered lean-ambient-core A/B — arms, day-alternating switch, the fixed
+  decision rule and bisect order.
+- `bin/skill-usage-report.py` and `docs/skill-listing-decisions.md`: skill
+  invocation counts from transcripts and the `skillOverrides` decisions they
+  support (23 skills `name-only`).
 
 ### Changed
 
