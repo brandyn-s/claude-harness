@@ -76,7 +76,7 @@ Representative hooks:
 | Hook | Event | Blocks |
 |---|---|---|
 | `bash-pretooluse-dispatcher.py` | PreToolUse(Bash\|PowerShell) | (runs the seven unconditional Bash hooks — bash-security-guard, script-content-guard, destructive-ops-guard, git-destructive-checkout-guard, bash-tail-buffering-guard, zsh-dialect-guard, poll-loop-nudge — in one interpreter; the first exit 2 wins, a rewrite feeds the hooks after it) |
-| `script-content-guard.py` | PreToolUse(Write\|Edit) and PreToolUse(Bash) | the Bash guard's catastrophic checks applied to the body of a script file being written, and to a local script a command executes — closes the 2026-08-12 `zsh verify_probes.sh` leak path |
+| `script-content-guard.py` | PreToolUse(Write\|Edit) and PreToolUse(Bash) | the Bash guard's catastrophic checks applied to the body of a script file being written, and to a local script a command executes — closes the 2026-08-12 `zsh verify_probes.sh` leak path; Python files also get the ast taint walk (`check_python_source_exfil`) that applies the curl policy to `requests`/`urllib`/`httpx` payloads |
 | `bash-security-guard.py` | PreToolUse(Bash) | catastrophic credential, exfiltration, code-execution, security-disablement, and destructive shapes; optional policy tables |
 | `output-secret-redact.py` | PostToolUse | secrets in tool output |
 | `prompt-secret-scan.py` | UserPromptSubmit | pasted credentials |

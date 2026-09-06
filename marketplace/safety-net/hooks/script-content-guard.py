@@ -37,8 +37,11 @@ WHAT IS SCANNED, PER LANGUAGE
     are shell grammar; run over arbitrary Python in the corpus replay they
     matched `print(env)` and `(set)` as "bare environment dump" 100 times,
     almost all in tests and security tooling that MENTION commands. Python-
-    native exfiltration (`requests.post(open(...).read())`) is out of scope
-    here, as it is for the Bash guard's inline `python -c` coverage.
+    native exfiltration -- a credential file, a SECRET-shaped environment value
+    or a keychain read reaching requests/urllib/httpx/socket -- is caught by
+    the guard's `check_python_source_exfil` (ast, taint through assignments,
+    SAFE_RE-exempt hosts), applied here to the whole file and by the guard to
+    inline `python -c` bodies and heredocs.
 
 STRENGTH  (CLAUDE_SCRIPT_CONTENT_GUARD = block | advise | off; default block)
     The spec's measurement gate ran on the author's full Claude Code transcript
@@ -255,7 +258,8 @@ def scan_script(text: str, path: str = "") -> list[tuple[int, str]]:
     """Return [(line_number, BLOCKED reason)] for every statement a catastrophic check rejects."""
     guard = _guard()
     findings: list[tuple[int, str]] = []
-    statements = python_shell_statements(text) if is_python(path, text) else logical_lines(text, path)
+    python = is_python(path, text)
+    statements = python_shell_statements(text) if python else logical_lines(text, path)
     for lineno, stmt in statements:
         analysis = guard._normalize_for_matching(stmt)
         for check in guard.CATASTROPHIC_CHECKS:
@@ -263,6 +267,13 @@ def scan_script(text: str, path: str = "") -> list[tuple[int, str]]:
             if reason:
                 findings.append((lineno, reason))
                 break
+    if python:
+        # Python-native exfiltration (ast): the same predicate main() applies to
+        # inline `python -c` bodies and heredocs, here over the whole file.
+        reason = guard.check_python_source_exfil(text)
+        if reason:
+            m = re.search(r"at line (\d+)", reason)
+            findings.append((int(m.group(1)) if m else 1, reason))
     return findings
 
 
