@@ -68,7 +68,7 @@ def test_safety_net_registers_the_dispatcher_not_the_guards(safety_net):
 def test_safety_net_ships_the_dispatcher_with_every_hook_it_runs(safety_net):
     shipped = _shipped_hooks(safety_net)
     hosted = _hosted_by_dispatcher()
-    assert len(hosted) == 6, hosted
+    assert len(hosted) == 7, hosted  # script-content-guard joined 2026-09-06
     missing = [name for name in (DISPATCHER, *hosted, "run-hook") if name not in shipped]
     assert missing == [], f"safety-net file list lacks {missing}"
     for _event, _matcher, script, _timeout in _registrations(safety_net):

@@ -34,7 +34,5 @@ auth_constraint: any
 estimated_turns: "2-5"
 preconditions: []
 guardrails:
-  - "Never overwrite an existing INTENT.md's Non-goals or Decisions without an explicit retraction"
-  - "At most three AskUserQuestion calls"
-  - "Does not start the work; routes to /superplan or waits for the user"
+  - proceed-gate
 threat_model: read_only
