@@ -603,6 +603,7 @@ if ask_yn "Install the recommended fresh-laptop core? (2 rules + 4 deterministic
     hook_configs=(
         'PreToolUse|Bash|PowerShell|bash-pretooluse-dispatcher.py|30'
         'PreToolUse|Write|Edit|config-guard.py|30'
+        'PreToolUse|Write|Edit|script-content-guard.py|15'
         'PreToolUse|Read|read-deny-guard.py|15'
         'PostToolUse|mcp__.*|result-injection-guard.py|30'
     )

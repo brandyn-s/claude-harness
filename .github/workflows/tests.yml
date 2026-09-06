@@ -45,6 +45,30 @@ jobs:
       - name: Validate hook and test target paths
         run: python3 scripts/validate-hook-paths.py
 
+      # The inventory numbers in README / ARCHITECTURE / AGENTS are generated from
+      # the tree (bin/build-doc-counts.py). A hand-typed count drifts the moment a
+      # file is added; a generated one fails here instead of in a reader's trust.
+      - name: Inventory numbers in the docs match the tree
+        run: python3 bin/build-doc-counts.py --check
+
+      # Prove that gate can fail: plant a wrong number, require rejection, restore.
+      - name: Prove the doc-count gate fires
+        run: |
+          set -euo pipefail
+          cp README.md /tmp/readme.bak
+          sed -i 's|<!-- count:hooks -->[0-9,]*<!-- /count -->|<!-- count:hooks -->9999<!-- /count -->|' README.md
+          if python3 bin/build-doc-counts.py --check >/dev/null 2>&1; then
+            cp /tmp/readme.bak README.md
+            echo "::error::doc-count gate did NOT reject a planted wrong number - it is vacuous"
+            exit 1
+          fi
+          cp /tmp/readme.bak README.md
+          python3 bin/build-doc-counts.py --check >/dev/null
+          echo "doc-count gate fires on a planted wrong number, and is clean after restore"
+
+      - name: Architecture drift gate (hooks, settings, inventory rows)
+        run: python3 bin/architecture-drift-check.py
+
       # Prove that gate can fail. A validator nobody has watched reject anything is
       # a hypothesis; this one is only reachable by running it deliberately. The
       # control plants a hook manifest whose requires_rules names a rule that does

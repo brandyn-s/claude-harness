@@ -1,10 +1,14 @@
 # claude-harness
 
 A working [Claude Code](https://docs.claude.com/en/docs/claude-code) harness:
-**59 hooks**, **33 rules** (26 of them always loaded), **81 skills**, and the
-seven agent definitions that tie them together — about 1,630 source files, plus
-a generated plugin tree under `marketplace/` (another 1,069 files) that is not
-meant to be read (see [marketplace/README.md](marketplace/README.md)).
+**<!-- count:hooks -->53<!-- /count --> hook scripts** (plus <!-- count:hook_modules -->9<!-- /count --> shared modules),
+**<!-- count:rules -->34<!-- /count --> rules** (<!-- count:rules_ambient -->27<!-- /count --> of them always loaded),
+**<!-- count:skills -->82<!-- /count --> skills**, and the <!-- count:agents -->6<!-- /count --> agent definitions that
+tie them together — <!-- count:source_files -->1,647<!-- /count --> tracked source files, plus a
+generated plugin tree under `marketplace/` (another <!-- count:marketplace_files -->1,069<!-- /count -->
+files) that is not meant to be read (see [marketplace/README.md](marketplace/README.md)).
+The numbers in this file are generated from the tree by `bin/build-doc-counts.py`
+and checked in CI; if one is wrong, the build is red, not the reader.
 
 It is a configuration repo, but the reusable part is not the config. It is the
 **method**: what to do when a scanner reports zero, when a metric plateaus, when
@@ -33,14 +37,16 @@ python3 bin/fresh_laptop_doctor.py
 
 For a new machine, accept the fresh-laptop profile and the recommended core.
 The installer then offers the owner-focused Brandyn operator layer. The
-portable core installs two rules and four deterministic hooks:
+portable core installs two rules and <!-- count:fresh_core_hooks -->5<!-- /count --> deterministic hook registrations:
 
 - `outcome-over-verification.md` and `claude-md-quality.md`
 - Bash command safety (`bash-pretooluse-dispatcher.py`, which runs the Bash
-  guards and advisories in one process), config integrity, MCP
-  result-injection detection, and a Read-tool guard for secret paths
-  (`read-deny-guard.py`; the sandbox denies the same paths to Bash, so nothing
-  prompts)
+  guards and advisories in one process), the same catastrophic checks applied to
+  the body of any script file the model writes or executes
+  (`script-content-guard.py`; closes the 2026-08-12 `zsh verify_probes.sh` leak
+  path), config integrity, MCP result-injection detection, and a Read-tool guard
+  for secret paths (`read-deny-guard.py`; the sandbox denies the same paths to
+  Bash, so nothing prompts)
 - `acceptEdits` plus sandbox-auto-approved Bash; sandbox escapes require review
 - project MCP auto-activation disabled
 
@@ -89,7 +95,7 @@ endpoint rather than byte estimates, was:
 | component | measured tokens |
 |---|---|
 | always-loaded rules (31 files) | 75,413 |
-| skill listing (81 skills, 8 already suppressed to name-only) | 18,687 |
+| skill listing (81 skills at the time, 8 already suppressed to name-only) | 18,687 |
 | `CLAUDE.md` + `AGENTS.md` | 3,280 |
 | **ambient floor, before your first message** | **97,380** |
 | plus broadly-scoped rules that load in most coding sessions | ~12,000 |
@@ -98,9 +104,9 @@ endpoint rather than byte estimates, was:
 On a 200K-token context window that is **roughly half the window consumed at
 rest**. This is why the full mirror is not the fresh-laptop default. The rules
 ratchet has since moved dated narrative out of the ambient corpus behind
-anchors in `rules/incidents/`: 26 always-loaded rules, 165,868 bytes (about
-60,600 tokens by the byte proxy) as of 2026-09-04. `bin/ambient-load-report.py`
-prints the current split.
+anchors in `rules/incidents/`: <!-- count:rules_ambient -->27<!-- /count --> always-loaded rules,
+<!-- count:ambient_bytes -->168,537<!-- /count --> bytes (about <!-- count:ambient_tokens -->61,570<!-- /count --> tokens by the
+byte proxy). `bin/ambient-load-report.py` prints the current split.
 
 The skill listing also exceeds its own budget: `skillListingBudgetFraction` is
 set to 3%, which is 6,000 tokens on a 200K context against an 18,687-token
@@ -164,7 +170,7 @@ secret before it believes a clean scan.
 ```
 rules/            ambient engineering rules (+ incidents/ and manifests/)
 hooks/            PreToolUse / PostToolUse / session-lifecycle enforcement
-skills/           invocable procedures (81 of them)
+skills/           invocable procedures (<!-- count:skills -->82<!-- /count --> of them)
 agents/           subagent definitions
 contracts/        run-time contracts: environment catalog, model capabilities,
                   hook output shapes, guard residual risks
@@ -190,7 +196,7 @@ that you almost certainly do not need it. So, in order:
 | **three files** | + [`rules/verify-effectiveness.md`](rules/verify-effectiveness.md), [`rules/diagnose-before-fix.md`](rules/diagnose-before-fix.md) | The two rules that pay for themselves fastest |
 | **the argument** | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Five layers, and which of them can actually enforce anything |
 | **the receipts** | [`rules/incidents/`](rules/incidents/) | The failures each rule was written against |
-| **everything** | [`skills/README.md`](skills/README.md) | Index of all 81 skills |
+| **everything** | [`skills/README.md`](skills/README.md) | Index of all <!-- count:skills -->82<!-- /count --> skills |
 
 Taking one hook is a legitimate outcome. Nothing here requires adopting the
 whole thing, and most of it you shouldn't.

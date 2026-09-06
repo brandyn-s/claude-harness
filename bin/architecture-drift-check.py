@@ -304,6 +304,18 @@ def check_hooks(arch, settings_text, readme_text=""):
     for h in sorted({w for w in wired if w.endswith('.py')} - documented_anywhere - dispatcher_loaded):
         advisory.append(f"[A] hook `{h}` is wired in settings.json but documented neither in "
                         f"ARCHITECTURE.md's hooks table nor in hooks/README.md's inventory (undocumented)")
+    # HARD (2026-09-06): an inventory row for a hook file that does not exist.
+    # hooks/README.md is "the full registry"; a registry row with no file behind
+    # it is the drift the 2026-07-29 note predicted and exactly what the
+    # 2026-09-06 evaluation found (rows for hooks that had been deleted, none for
+    # four that exist and are wired).
+    hooks_dir = REPO / "hooks"
+    for h in sorted(readme_documented_hooks(readme_text)):
+        if not (hooks_dir / h).is_file() and not (hooks_dir / "session_start_modules" / h).is_file():
+            hard.append(f"[A] hooks/README.md inventory row names `{h}`, which does not exist under hooks/")
+    for h in sorted(documented):
+        if not (hooks_dir / h).is_file():
+            hard.append(f"[A] ARCHITECTURE.md hooks table names `{h}`, which does not exist under hooks/")
     return hard, advisory
 
 

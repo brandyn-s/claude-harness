@@ -476,7 +476,8 @@ def test_recommended_starter_installs_runnable_exec_form_hooks(tmp_path):
         for hook in group["hooks"]
         if hook.get("type") == "command"
     ]
-    assert len(registrations) == 4  # dispatcher, config-guard, read-deny-guard, result-injection-guard
+    # dispatcher, config-guard, script-content-guard (2026-09-06), read-deny-guard, result-injection-guard
+    assert len(registrations) == 5
     for event, hook in registrations:
         command = Path(hook["command"])
         assert command.is_file(), f"{event}: missing {command}"

@@ -8,9 +8,9 @@ decline them** — that second axis is the one that matters.
 
 | Layer | Loads | Model can ignore it? |
 |---|---|---|
-| **Hooks** (73 available; 3 in the default) | on matching tool calls | **No** — enforced by the runtime |
-| **Rules** (38) | always, in context | Yes (they are text) |
-| **Skills** (81) | on invocation | Yes |
+| **Hooks** (<!-- count:hooks -->53<!-- /count --> scripts; <!-- count:fresh_core_hooks -->5<!-- /count --> registrations in the fresh-laptop default) | on matching tool calls | **No** — enforced by the runtime |
+| **Rules** (<!-- count:rules -->34<!-- /count -->; <!-- count:rules_ambient -->27<!-- /count --> ambient, <!-- count:rules_scoped -->7<!-- /count --> path-scoped) | always, in context | Yes (they are text) |
+| **Skills** (<!-- count:skills -->82<!-- /count -->) | on invocation | Yes |
 | **Agents** | on dispatch | Yes |
 | **Reference docs** | on demand | Yes |
 
@@ -21,11 +21,13 @@ The inventory is not the default installation.
 See `docs/fresh-laptop-control-audit.md` for the evidence behind the split and
 the first demoted conflict.
 
-| Profile | Ambient rules | Wired hooks | Intended use |
+| Profile | Ambient rules | Hook registrations | Intended use |
 |---|---:|---:|---|
-| **Fresh laptop** | 2 | 3 | portable kernel; simple, fast, correct |
-| **Brandyn operator** | 3 | 6 | personal delivery, authority, non-progress, and secret controls |
-| **Author workstation** | 36 | 53 | explicit opt-in for the compatible advanced set |
+| **Fresh laptop** | 2 | <!-- count:fresh_core_hooks -->5<!-- /count --> | portable kernel; simple, fast, correct |
+| **Brandyn operator** | 3 | 8 | personal delivery, authority, non-progress, and secret controls |
+| **Author workstation** | <!-- count:rules_ambient -->27<!-- /count --> | <!-- count:hook_registrations -->48<!-- /count --> (<!-- count:hooks_wired -->53<!-- /count --> scripts, counting the dispatchers' children) | explicit opt-in for the compatible advanced set |
+
+Counts are generated from the tree (`bin/build-doc-counts.py --check` runs in CI).
 
 The fresh-laptop profile uses `acceptEdits` and lets sandbox-contained Bash run
 without prompts. Commands that need to escape the sandbox return to the normal
@@ -75,7 +77,9 @@ Representative hooks:
 | `read-deny-guard.py` | PreToolUse(Read) | reads of denied paths |
 | `bash-tail-buffering-guard.py` | PreToolUse(Bash) | `producer \| tail` shapes that hide output |
 | `memory-write-guard.py` | PreToolUse(Write) | oversized memory entries |
-| `session-start.py` | SessionStart | (composes startup context) |
+| `session-start.py` | SessionStart | (composes startup context: platform rules, the rehydrated acceptance ledger after a compaction, and the behavioural note for the active model from `session_start_modules/model_notes.py`) |
+| `compaction-budget.py` | PostCompact + UserPromptSubmit | (counts compactions; from the second one, nudges a `HANDOFF.md` and a fresh session — the boundary half of the deleted `never-stop-early`; advisory) |
+| `proceed-gate.py` | UserPromptSubmit | (a bare `proceed` gets a DO / NOT / CHECK restatement; a substantive ask with no `INTENT.md` gets one `/frame` nudge; `INTENT.md` bullets feed the acceptance ledger; advisory) |
 | `precompact-priorities.py` | PreCompact | (appends a fidelity checklist to the compaction summarizer's prompt; measured in `skills/_shared/compaction-eval/`) |
 
 Hooks are wired in `settings.json` — see `settings.example.json`. Default and
@@ -105,6 +109,9 @@ Load-bearing examples:
 - `check-before-change.md` — recover the rationale before changing a default.
 - `scope-discipline.md` — ship the requested deliverable before building tooling
   to make shipping easier.
+- `session-boundaries.md` — never stop for length; a completed frame ends the
+  session, not the next task; two compactions → handoff; two failed corrections →
+  rewrite. `outcome-over-verification` says when to stop, this says what to write.
 
 `rule_context_budget.py` and `rule-size-guard.py` keep this layer from growing
 without bound.
@@ -119,7 +126,7 @@ Bigger skills push detail into `references/` so `SKILL.md` stays scannable.
 `scripts/` holds deterministic helpers, because anything that must be exact
 should not be re-derived by a model each run.
 
-Clusters here: planning (`superplan`, `supergoal`), knowledge
+Clusters here: planning (`frame` → `superplan`, `supergoal`), knowledge
 (`capture`, `recall`, `distill`, `garden`), verification
 (`validate-changes`, plus the installed `superpowers:verification-before-completion`), security review
 (`semgrep`, `codeql`, `fp-check`, `threat-model`), research
@@ -145,7 +152,7 @@ that transfers.
 ```
 rules/            always-loaded contracts (+ incidents/, manifests/)
 hooks/            enforcement (+ test-hooks/, session_start_modules/, staged/)
-skills/           invocable procedures (81)
+skills/           invocable procedures (<!-- count:skills -->82<!-- /count -->)
 agents/           subagent definitions
 docs/rule-reference/   long-form rationale, on demand
 platform-rules/   host overlays (macOS / Windows)
