@@ -708,3 +708,22 @@ def test_redirect_and_is_not_read_as_backgrounding():
         "python3 ~/.claude/bin/pr-merge-verified.py 1898 --repo o/r > /tmp/v.log 2>&1; echo done"
     )
     assert code == 2, f"expected BLOCK (2>&1 is not backgrounding), got {code}"
+
+
+# ── Default capture dir must be writable inside Claude Code's native sandbox ──
+
+def test_default_capture_dir_is_sandbox_writable():
+    """Without CLAUDE_TAILBUF_DIR (unset or empty) the rewrite must capture to
+    /tmp/claude, which Claude Code's native sandbox allow-lists for writes.
+    tempfile.gettempdir() resolves to the per-user /var/folders/.../T on macOS
+    (and to the sandbox-private $TMPDIR inside a sandboxed shell); a rewrite
+    pointed there fails with "operation not permitted" as soon as the sandbox
+    is on, so every `cmd | tail -N` broke instead of being buffered
+    (measured 2026-09-05 on the operator profile)."""
+    code, out, _err = run_hook(
+        HOOK, make_bash_input("python run.py 2>&1 | tail -80"),
+        env={"CLAUDE_TAILBUF_DIR": ""},
+    )
+    assert code == 0, f"expected REWRITE (exit 0), got {code}"
+    new = _rewrite_cmd(out)
+    assert "python run.py > /tmp/claude/tailbuf_" in new, new

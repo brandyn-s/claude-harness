@@ -616,10 +616,22 @@ def check(command):
 
 def _outfile(command):
     """Deterministic temp-file path for the producer's captured output. The
-    directory is env-overridable (CLAUDE_TAILBUF_DIR). The producer's own `>`
-    redirect creates the file; we only ensure the directory exists."""
-    default_dir = os.path.join(tempfile.gettempdir(), "claude")
-    d = os.environ.get("CLAUDE_TAILBUF_DIR", default_dir)
+    directory is env-overridable (CLAUDE_TAILBUF_DIR; empty counts as unset,
+    otherwise the rewrite pointed at a bare relative filename in the cwd).
+
+    The POSIX default is /tmp/claude: Claude Code's native sandbox allow-lists
+    that directory for writes. tempfile.gettempdir() resolves to the per-user
+    /var/folders/.../T on macOS (or the sandbox-private $TMPDIR inside a
+    sandboxed shell), which the sandboxed producer cannot write -- measured
+    2026-09-05 on the operator profile: every rewritten `cmd | tail -N` died
+    with "operation not permitted" instead of being buffered. Windows keeps
+    gettempdir(): there is no /tmp. The producer's own `>` redirect creates the
+    file; we only ensure the directory exists."""
+    if os.name == "nt":
+        default_dir = os.path.join(tempfile.gettempdir(), "claude")
+    else:
+        default_dir = "/tmp/claude"
+    d = os.environ.get("CLAUDE_TAILBUF_DIR") or default_dir
     h = hashlib.sha1(command.encode("utf-8")).hexdigest()[:12]
     try:
         os.makedirs(d, exist_ok=True)
