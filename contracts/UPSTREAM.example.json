@@ -1,0 +1,22 @@
+{
+  "_comment": "Copy to the ROOT of a private overlay as UPSTREAM.json. It records which harness commit the overlay vendored and which paths are the core it must not edit. bin/upstream-check.py reads it; docs/consuming-from-a-private-overlay.md is the contract.",
+  "repo": "https://github.com/brandyn-s/claude-harness",
+  "version": "1.0.0",
+  "commit": "0000000000000000000000000000000000000000",
+  "branch": "main",
+  "paths": [
+    "hooks/",
+    "rules/",
+    "manifests/",
+    "scripts/",
+    "bin/",
+    "profiles/",
+    "contracts/",
+    "codex/",
+    "install.sh"
+  ],
+  "overrides": [
+    "hooks/protected-repos.json",
+    "contracts/environment-catalog.json"
+  ]
+}

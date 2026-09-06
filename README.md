@@ -4,7 +4,7 @@ A working [Claude Code](https://docs.claude.com/en/docs/claude-code) harness:
 **<!-- count:hooks -->53<!-- /count --> hook scripts** (plus <!-- count:hook_modules -->9<!-- /count --> shared modules),
 **<!-- count:rules -->34<!-- /count --> rules** (<!-- count:rules_ambient -->27<!-- /count --> of them always loaded),
 **<!-- count:skills -->82<!-- /count --> skills**, and the <!-- count:agents -->6<!-- /count --> agent definitions that
-tie them together — <!-- count:source_files -->1,658<!-- /count --> tracked source files, plus a
+tie them together — <!-- count:source_files -->1,665<!-- /count --> tracked source files, plus a
 generated plugin tree under `marketplace/` (another <!-- count:marketplace_files -->1,072<!-- /count -->
 files) that is not meant to be read (see [marketplace/README.md](marketplace/README.md)).
 The numbers in this file are generated from the tree by `bin/build-doc-counts.py`
@@ -188,6 +188,7 @@ bin/ scripts/     supporting tools
 tests/            hook + skill tests
 templates/        starter configs
 codex/            the Codex half: config posture patch + AGENTS.md overlay
+VERSION           the repository version; CHANGELOG.md has the entry per version
 ```
 
 Start with `ARCHITECTURE.md`, then `rules/`. `UBIQUITOUS_LANGUAGE.md` defines
@@ -271,6 +272,19 @@ telemetry pipeline, MDM fleet records and MCP-server inventory) was removed
 rather than anonymised; incident narratives still name the author's own
 repositories and the security vendors the hooks protect, which is the voice of
 a personal repo, not a leak.
+
+## Versioning, and consuming this from a private overlay
+
+`VERSION` holds the repository's version (`v<MAJOR>.<MINOR>.<PATCH>` tags on
+`main`; `CHANGELOG.md` has an entry per version). An organisation that runs this
+does so from a **private overlay** — its own configuration repository, which
+vendors the core paths here verbatim at a pinned commit recorded in
+`UPSTREAM.json` (shape: `contracts/UPSTREAM.example.json`) and layers its
+servers, repositories, skills and settings around them. `bin/upstream-check.py`
+compares the vendored files with the pin and fails CI on a fork; code flows from
+here into the overlay mechanically, and from the overlay back only as a
+de-identified lesson through the residue gate. The contract is
+[`docs/consuming-from-a-private-overlay.md`](docs/consuming-from-a-private-overlay.md).
 
 ## License
 

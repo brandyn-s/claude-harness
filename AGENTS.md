@@ -160,6 +160,17 @@ things are missing **by design** and are not bugs to fix:
   narrative in `rules/incidents/` and the long form in `docs/rule-reference/`.
   Then append a budget ledger entry.
 - **After any of the above**: `compile.py --check` and `run-tests.py -k <area>`.
+- **Anything a private overlay would notice**: a new hook, a new blocked class, a
+  changed default, a moved core path gets a line under `## [Unreleased]` in
+  `CHANGELOG.md`. `VERSION` is bumped only at release (MAJOR when the consuming
+  contract in `docs/consuming-from-a-private-overlay.md` changes, MINOR for new
+  or changed behaviour, PATCH for fixes that change no verdict);
+  `scripts/test_version_contract.py` keeps `VERSION`, the changelog, the tag and
+  `contracts/UPSTREAM.example.json` in agreement.
+- **Nothing organisation-shaped in code**: hostnames, tenant and org ids,
+  repository and team names go in the environment catalog, never in a module
+  (`hooks/README.md` §Creating New Hooks, item 6). The residue test scans every
+  tracked file and every commit message.
 
 ## 9. House style for changes
 

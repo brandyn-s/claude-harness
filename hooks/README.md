@@ -186,5 +186,19 @@ file of the same kind and stays as it is.
 3. Run unit tests against known good and bad inputs
 4. **Run retroactive testing** against 1-2 weeks of session transcripts before shipping
 5. If block rate exceeds 10%, the hook is too aggressive — tune before shipping
+6. **Nothing about a particular organisation goes in the code.** A hostname, a
+   tenant or org id, a repository name, a team's server label, an API host a
+   credential may travel to: all of it is environment data and belongs in the
+   environment catalog (`contracts/environment-catalog.example.json` shows every
+   section; `hooks/_environment_catalog.py` `load_section()` reads it), with the
+   hook a clean no-op while the section is empty. A hook that needs a new kind of
+   environment data adds a section to the catalog schema, not a constant to the
+   module. Two gates hold this: `scripts/test_deidentification_residue.py` (the
+   identifiers that have leaked before, as digests) and
+   `hooks/test-hooks/test_environment_catalog_guard.py` (vendor and server names
+   in the converted sources). The reason is in
+   `docs/consuming-from-a-private-overlay.md`: a private overlay vendors `hooks/`
+   verbatim, so an organisation-shaped constant here is either wrong for every
+   other operator or a fork for this one.
 
 See the `ship-hook` skill for the full installation workflow.
