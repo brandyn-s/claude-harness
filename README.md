@@ -4,7 +4,7 @@ A working [Claude Code](https://docs.claude.com/en/docs/claude-code) harness:
 **<!-- count:hooks -->53<!-- /count --> hook scripts** (plus <!-- count:hook_modules -->9<!-- /count --> shared modules),
 **<!-- count:rules -->34<!-- /count --> rules** (<!-- count:rules_ambient -->27<!-- /count --> of them always loaded),
 **<!-- count:skills -->82<!-- /count --> skills**, and the <!-- count:agents -->6<!-- /count --> agent definitions that
-tie them together — <!-- count:source_files -->1,674<!-- /count --> tracked source files, plus a
+tie them together — <!-- count:source_files -->1,678<!-- /count --> tracked source files, plus a
 generated plugin tree under `marketplace/` (another <!-- count:marketplace_files -->1,074<!-- /count -->
 files) that is not meant to be read (see [marketplace/README.md](marketplace/README.md)).
 The numbers in this file are generated from the tree by `bin/build-doc-counts.py`
@@ -122,7 +122,12 @@ The skill listing also exceeds its own budget: `skillListingBudgetFraction` is
 set to 3%, which is 6,000 tokens on a 200K context against an 18,687-token
 listing — **3.1x oversubscribed**. It fits on a 1M-context model. If you adopt
 wholesale on a 200K model, expect the listing to be truncated, and prefer
-marking more skills `name-only` in `skillOverrides`.
+marking more skills `name-only` in `skillOverrides`. Which ones is a measurement,
+not a taste: `bin/skill-usage-report.py` counts invocations per skill over a
+transcript directory, and [`docs/skill-listing-decisions.md`](docs/skill-listing-decisions.md)
+records what 66 days of the author's transcripts said (45 of 82 skills never
+invoked; 23 now `name-only`; the listing fits the budget only once the 38 unused
+standalone skills are hidden or deleted).
 
 ### Advanced-profile dependencies that are not included
 
