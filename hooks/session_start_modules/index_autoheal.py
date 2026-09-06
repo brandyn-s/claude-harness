@@ -46,7 +46,14 @@ from .index_staleness import _short, heal_candidates
 # concurrent_session's own windows-2022 CI leg is what found that.
 from .concurrent_session import _pid_alive
 
-CACHE_DIR = Path.home() / ".cache" / "codebase-memory-mcp"
+# code-graph's on-disk registry. The server resolves it as
+# ${CODE_GRAPH_CACHE_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/code-graph}; the
+# pre-rename `codebase-memory-mcp` directory is a graveyard the live server
+# never writes, so watching it reported only orphans (measured 2026-09-05).
+CACHE_DIR = Path(
+    os.environ.get("CODE_GRAPH_CACHE_DIR")
+    or Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache") / "code-graph"
+)
 LOCK_PATH = CACHE_DIR / ".autoheal.lock"
 STATUS_PATH = CACHE_DIR / "autoheal-status.json"
 HEAL_LOG = CACHE_DIR / "autoheal.log"

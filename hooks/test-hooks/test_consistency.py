@@ -228,3 +228,71 @@ def test_nag_corrupt_state_fails_toward_showing(tmp_path, monkeypatch):
     _write_claude_json(cj, days_ago=21)
     (tmp_path / "nag-state.json").write_text("not json", encoding="utf-8")
     assert mod.check_memory_review_overdue() is not None
+
+
+# ─── check_16: graph.json regen outcome split ───────────────────────────────
+#
+# compile.py exits non-zero for structural issues but still writes graph.json.
+# On an installed subset of the repo those are DANGLING references to components
+# that were not installed, so "written, with issues" must read as LOW, while
+# "nothing written" (compile.py missing, traceback) stays the MEDIUM failure.
+# Before the split every non-zero exit was MEDIUM and quoted the LAST output
+# line -- for a successful write that was "Size: N bytes" (2026-09-05).
+
+def _check16_tree(tmp_path, monkeypatch, compile_body):
+    root = tmp_path / "claude"
+    (root / "skills" / "one").mkdir(parents=True)
+    (root / "skills" / "one" / "SKILL.md").write_text("# one\n", encoding="utf-8")
+    (root / "skills" / "one" / "manifest.yaml").write_text("id: one\n", encoding="utf-8")
+    (root / "hooks").mkdir()
+    (root / "rules").mkdir()
+    (root / "manifests").mkdir()
+    if compile_body is not None:
+        (root / "manifests" / "compile.py").write_text(compile_body, encoding="utf-8")
+    monkeypatch.setattr(mod, "CLAUDE_DIR", root)
+    monkeypatch.setattr(mod, "HOOKS_DIR", root / "hooks")
+    monkeypatch.setattr(mod, "SKILLS_DIR", root / "skills")
+    return root
+
+
+def _regen_findings(findings):
+    return [f for f in findings if "graph.json" in f]
+
+
+def test_check16_written_with_issues_is_low_and_quotes_the_issue_line(tmp_path, monkeypatch):
+    root = _check16_tree(tmp_path, monkeypatch, (
+        "import sys, pathlib\n"
+        "pathlib.Path(sys.argv[sys.argv.index('--root') + 1], 'manifests', 'graph.json')"
+        ".write_text('{}', encoding='utf-8')\n"
+        "print('Structural issues (2):')\n"
+        "print('  DANGLING: x.requires_rules references y (not in manifest set)')\n"
+        "print('Compiled graph written')\n"
+        "print('  Size: 215,925 bytes')\n"
+        "sys.exit(2)\n"
+    ))
+    regen = _regen_findings(mod.check_16_manifest_coverage())
+    assert len(regen) == 1, regen
+    assert regen[0].startswith("[LOW] graph.json compiled with issues: Structural issues (2)"), regen[0]
+    assert "Size:" not in regen[0]
+    assert (root / "manifests" / "graph.json").exists()
+
+
+def test_check16_nonzero_without_a_write_is_medium(tmp_path, monkeypatch):
+    _check16_tree(tmp_path, monkeypatch, "import sys\nprint('boom: no yaml')\nsys.exit(1)\n")
+    regen = _regen_findings(mod.check_16_manifest_coverage())
+    assert regen == ["[MEDIUM] graph.json regen failed: boom: no yaml"], regen
+
+
+def test_check16_missing_compiler_is_medium(tmp_path, monkeypatch):
+    _check16_tree(tmp_path, monkeypatch, None)
+    regen = _regen_findings(mod.check_16_manifest_coverage())
+    assert len(regen) == 1 and regen[0].startswith("[MEDIUM] graph.json regen failed:"), regen
+
+
+def test_check16_clean_compile_is_silent(tmp_path, monkeypatch):
+    _check16_tree(tmp_path, monkeypatch, (
+        "import sys, pathlib\n"
+        "pathlib.Path(sys.argv[sys.argv.index('--root') + 1], 'manifests', 'graph.json')"
+        ".write_text('{}', encoding='utf-8')\n"
+    ))
+    assert _regen_findings(mod.check_16_manifest_coverage()) == []

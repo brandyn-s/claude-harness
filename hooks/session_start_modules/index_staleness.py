@@ -4,7 +4,7 @@ Each indexing system is its own source of truth, so this check is self-healing:
 refreshing an index through any path clears the warning on the next session start.
 
 codebase-memory-mcp: ENUMERATES the registry — every `*.db` in
-    `~/.cache/codebase-memory-mcp/` — and reads `projects.root_path` plus the
+    `~/.cache/code-graph/` — and reads `projects.root_path` plus the
     `index_identity` row. Enumeration is deliberate: a hand-maintained repo list
     silently excludes every project added after it was written. On 2026-07-29 a
     5-entry list covered 3 of 19 indexed projects, and 11 stale indexes went
@@ -27,6 +27,7 @@ but its freshness is UNKNOWABLE (usual cause is a root_path that is not a git
 checkout), and every path/timestamp rule scores it healthy.
 """
 
+import os
 import re
 import sqlite3
 import subprocess
@@ -40,7 +41,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from _environment_catalog import load_section, repo_entries
 
 CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
-CODE_GRAPH_DIR = Path.home() / ".cache" / "codebase-memory-mcp"
+# code-graph's on-disk registry. The server resolves it as
+# ${CODE_GRAPH_CACHE_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/code-graph}; the
+# pre-rename `codebase-memory-mcp` directory is a graveyard the live server
+# never writes, so watching it reported only orphans (measured 2026-09-05).
+CODE_GRAPH_DIR = Path(
+    os.environ.get("CODE_GRAPH_CACHE_DIR")
+    or Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache") / "code-graph"
+)
 CODE_SEARCH_DIR = Path.home() / ".claude_code_search" / "projects"
 
 # Registry bookkeeping DB, not a project.

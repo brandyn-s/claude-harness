@@ -767,3 +767,95 @@ def test_pick_individual_skills_asks_per_skill_and_installs_the_chosen_one(tmp_p
     installed = sorted(p.name for p in (tmp_path / ".claude" / "skills").iterdir())
     assert installed == sorted([skills[0], skills[-1], "_shared"]), installed
     assert "Installed 2 skills" in result.stdout
+
+
+def _install_sh_function(name: str) -> str:
+    """Return the text of one `name() { ... }` function from install.sh."""
+    src = INSTALLER.read_text(encoding="utf-8")
+    m = re.search(rf"\n{name}\(\) \{{\n.*?\n\}}\n", src, re.DOTALL)
+    assert m, f"install.sh no longer defines {name}()"
+    return m.group(0)
+
+
+def test_install_manifests_copies_compiler_and_one_manifest_per_installed_component(tmp_path):
+    """hooks/manifests and rules/manifests never shipped, so an installed
+    session-start reported 'Manifest coverage ... hooks 0/33, rules 0/33' and
+    'graph.json regen failed: can't open file .../manifests/compile.py' on every
+    start (2026-09-05). install_manifests() must copy compile.py plus exactly the
+    manifests for hooks/rules that are PRESENT in $CLAUDE_DIR -- the population
+    consistency.py's coverage check counts -- and nothing for absent ones."""
+    claude_dir = tmp_path / ".claude"
+    (claude_dir / "hooks").mkdir(parents=True)
+    (claude_dir / "rules").mkdir()
+    # Two hooks with manifests, one helper module without, one rule with, one rule without.
+    for hook in ("bash-security-guard.py", "config-guard.py", "_platform.py"):
+        (claude_dir / "hooks" / hook).write_text("", encoding="utf-8")
+    for rule in ("git-hygiene.md", "no-such-rule.md"):
+        (claude_dir / "rules" / rule).write_text("", encoding="utf-8")
+    assert (REPO / "hooks" / "manifests" / "bash-security-guard.yaml").is_file()
+    assert (REPO / "hooks" / "manifests" / "config-guard.yaml").is_file()
+    assert not (REPO / "hooks" / "manifests" / "_platform.yaml").exists()
+    assert (REPO / "rules" / "manifests" / "git-hygiene.yaml").is_file()
+    assert not (REPO / "rules" / "manifests" / "no-such-rule.yaml").exists()
+
+    recorded = tmp_path / "install_files.args"
+    snippet = f"""
+SCRIPT_DIR="{REPO}"
+CLAUDE_DIR="{claude_dir}"
+PYTHON_CMD="{sys.executable}"
+ok() {{ :; }}
+warn() {{ echo "WARN: $*" >&2; }}
+install_files() {{ printf '%s\\n' "$@" > "{recorded}"; }}
+{_install_sh_function("install_manifests")}
+install_manifests
+"""
+    result = run_snippet(snippet)
+    assert result.returncode == 0, result.stderr
+    copied = recorded.read_text(encoding="utf-8").split()
+    assert copied == [
+        "manifests/compile.py",
+        "hooks/manifests/bash-security-guard.yaml",
+        "hooks/manifests/config-guard.yaml",
+        "rules/manifests/git-hygiene.yaml",
+    ], copied
+    # Every copied path must exist, or install_files would abort the install.
+    missing = [rel for rel in copied if not (REPO / rel).is_file()]
+    assert missing == [], missing
+
+
+def test_install_manifests_runs_after_hooks_and_rules_are_installed():
+    """It derives its file list from what is already in $CLAUDE_DIR, so it must
+    come after install_rules and install_hooks in the top-level sequence."""
+    src = INSTALLER.read_text(encoding="utf-8")
+    calls = [ln.strip() for ln in src.splitlines()
+             if ln.strip() in {"install_rules", "install_hooks", "install_manifests"}]
+    assert calls == ["install_rules", "install_hooks", "install_manifests"], calls
+
+
+def test_install_manifests_skips_a_checkout_without_the_compiler(tmp_path):
+    """The synthetic checkouts in scripts/test_install_state.py carry no
+    manifests/ directory; the installer must skip, not abort under set -e."""
+    checkout = tmp_path / "checkout"
+    (checkout / "hooks" / "manifests").mkdir(parents=True)
+    claude_dir = tmp_path / ".claude"
+    (claude_dir / "hooks").mkdir(parents=True)
+    (claude_dir / "hooks" / "config-guard.py").write_text("", encoding="utf-8")
+    recorded = tmp_path / "install_files.args"
+    snippet = f"""
+set -e
+SCRIPT_DIR="{checkout}"
+CLAUDE_DIR="{claude_dir}"
+PYTHON_CMD="{sys.executable}"
+ok() {{ :; }}
+info() {{ echo "INFO: $*" >&2; }}
+warn() {{ echo "WARN: $*" >&2; }}
+install_files() {{ printf '%s\\n' "$@" > "{recorded}"; }}
+{_install_sh_function("install_manifests")}
+install_manifests
+echo reached-the-end
+"""
+    result = run_snippet(snippet)
+    assert result.returncode == 0, result.stderr
+    assert "reached-the-end" in result.stdout
+    assert not recorded.exists(), recorded.read_text(encoding="utf-8")
+    assert "skipping manifests" in result.stderr

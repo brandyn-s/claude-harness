@@ -26,10 +26,18 @@ derived empirically against all 19 live indexes on 2026-07-29 (every one:
 Never blocks session start on failure.
 """
 
+import os
 import sqlite3
 from pathlib import Path
 
-CACHE_DIR = Path.home() / ".cache" / "codebase-memory-mcp"
+# code-graph's on-disk registry. The server resolves it as
+# ${CODE_GRAPH_CACHE_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/code-graph}; the
+# pre-rename `codebase-memory-mcp` directory is a graveyard the live server
+# never writes, so watching it reported only orphans (measured 2026-09-05).
+CACHE_DIR = Path(
+    os.environ.get("CODE_GRAPH_CACHE_DIR")
+    or Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache") / "code-graph"
+)
 
 # `_config.db` is server state, not a project index. WAL/SHM sidecars are normal
 # runtime artifacts of an open database, never audited on their own.
