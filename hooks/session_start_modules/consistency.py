@@ -222,7 +222,6 @@ def check_7_no_dead_pipeline():
     dead_files = [
         CLAUDE_DIR / "session-metrics.jsonl",
         CLAUDE_DIR / "pending-curation.json",
-        HOOKS_DIR / "session-end.py",
     ]
     for f in dead_files:
         if f.exists():
@@ -653,6 +652,7 @@ def check_16_manifest_coverage():
                 break
 
     if needs_regen:
+        before = graph_path.stat().st_mtime if graph_path.exists() else None
         try:
             result = subprocess.run(
                 [sys.executable, str(CLAUDE_DIR / "manifests" / "compile.py"),
@@ -660,9 +660,29 @@ def check_16_manifest_coverage():
                 capture_output=True, text=True, timeout=30,
             )
             if result.returncode != 0:
-                tail = (result.stdout or result.stderr or "").strip().splitlines()
-                hint = tail[-1] if tail else "(no output)"
-                findings.append(f"[MEDIUM] graph.json regen failed: {hint[:200]}")
+                # compile.py exits non-zero for structural issues but still
+                # writes graph.json. On an installed SUBSET of the repo those
+                # issues are mostly DANGLING references to components that were
+                # not installed, so "written with issues" is a LOW housekeeping
+                # note; only "nothing written" (compile.py missing, PyYAML
+                # missing, traceback) is the MEDIUM regen failure. Before this
+                # split the finding quoted the LAST output line, which for a
+                # successful write is "Size: N bytes" (measured 2026-09-05).
+                lines = (result.stdout or result.stderr or "").strip().splitlines()
+                after = graph_path.stat().st_mtime if graph_path.exists() else None
+                written = after is not None and after != before
+                if written:
+                    summary = next(
+                        (ln for ln in lines if ln.startswith(("Structural issues", "Semantic errors"))),
+                        lines[0] if lines else "(no output)",
+                    )
+                    findings.append(
+                        f"[LOW] graph.json compiled with issues: {summary[:120]} — "
+                        f"run `python3 ~/.claude/manifests/compile.py --root ~/.claude --check`"
+                    )
+                else:
+                    hint = lines[-1] if lines else "(no output)"
+                    findings.append(f"[MEDIUM] graph.json regen failed: {hint[:200]}")
         except Exception as e:
             findings.append(f"[MEDIUM] graph.json regen error: {e}")
 

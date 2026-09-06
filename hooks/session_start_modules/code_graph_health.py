@@ -84,8 +84,8 @@ def check_code_graph_health() -> list[str]:
             findings.append(
                 f"CODE-GRAPH HEALTH: {project} has detectable corruption "
                 f"({detail}{where}). Run "
-                f"`mcp__codebase-memory-mcp__delete_project(project_name=\"{project}\")` then "
-                f"`mcp__codebase-memory-mcp__index_repository(repo_path=...)`. "
+                f"`mcp__code-graph__delete_project(project_name=\"{project}\")` then "
+                f"`mcp__code-graph__index_repository(repo_path=...)`. "
                 f"Or set CODE_GRAPH_AUTO_RECOVERY=1 + restart Claude Code "
                 f"to auto-recover on next open."
             )

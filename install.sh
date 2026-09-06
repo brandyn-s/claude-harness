@@ -356,6 +356,49 @@ wire_hooks() {
     ok "Hooks wired into settings.json"
 }
 
+install_manifests() {
+    # Component manifests feed hooks/session_start_modules/consistency.py
+    # (check_16: coverage report + graph.json regen via manifests/compile.py).
+    # Skill manifests ride inside each skill directory, so they arrive with the
+    # skill; hook and rule manifests live in sibling manifests/ directories that
+    # no installer path copied. Measured 2026-09-05 on a full install: every
+    # session start reported "Manifest coverage 81/151 -- hooks 0/33, rules
+    # 0/33" and "graph.json regen failed: can't open file .../manifests/
+    # compile.py". Copy the compiler plus one manifest per INSTALLED hook and
+    # rule, so coverage counts the same population consistency.py counts.
+    local files=(manifests/compile.py)
+    local f name
+    for f in "$CLAUDE_DIR"/hooks/*.py; do
+        [[ -f "$f" ]] || continue
+        name="$(basename "$f" .py)"
+        if [[ -f "$SCRIPT_DIR/hooks/manifests/$name.yaml" ]]; then
+            files+=("hooks/manifests/$name.yaml")
+        fi
+    done
+    for f in "$CLAUDE_DIR"/rules/*.md; do
+        [[ -f "$f" ]] || continue
+        name="$(basename "$f" .md)"
+        if [[ -f "$SCRIPT_DIR/rules/manifests/$name.yaml" ]]; then
+            files+=("rules/manifests/$name.yaml")
+        fi
+    done
+    install_files "${files[@]}"
+    ok "Installed ${#files[@]} manifest files"
+
+    # graph.json is derived and gitignored; build it now so the first session
+    # start does not have to. compile.py needs PyYAML; without it the
+    # session-start regen retries on every start and reports the failure.
+    if "$PYTHON_CMD" -c "import yaml" 2>/dev/null; then
+        if "$PYTHON_CMD" "$CLAUDE_DIR/manifests/compile.py" --root "$CLAUDE_DIR" --quiet --no-reindex; then
+            ok "Compiled $CLAUDE_DIR/manifests/graph.json"
+        else
+            warn "manifests/compile.py reported issues above; session-start will retry the regen"
+        fi
+    else
+        warn "PyYAML not importable by $PYTHON_CMD; graph.json is built at session start once it is installed"
+    fi
+}
+
 install_agents() {
     local src_dir="$SCRIPT_DIR/agents"
 
@@ -599,6 +642,7 @@ fi
 install_rules
 install_skills
 install_hooks
+install_manifests
 install_agents
 install_agent_memory
 install_architecture_doc
