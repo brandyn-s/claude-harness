@@ -233,6 +233,10 @@ Six bundles are generated: `safety-net` (the fresh-laptop core hooks),
 `planning-toolkit`, `security-scanner`, `knowledge-ops`, `code-intelligence`,
 `research-intel`. Install only what you want; skills arrive as
 `/plugin-name:skill`. Update with `/plugin marketplace update claude-harness`.
+For a reproducible install, pin the marketplace to a release tag:
+`/plugin marketplace add brandyn-s/claude-harness@v1.0.0` (the tag scheme is in
+`CHANGELOG.md`; the bundles carry their own `1.1.x` versions in each
+`plugin.json`).
 
 The remaining hook implementations in the bundle are source-available but are
 not registered automatically. Add them only after a measured need.

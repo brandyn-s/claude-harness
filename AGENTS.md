@@ -43,6 +43,24 @@ cache and cannot reference files outside its own directory, so each bundle must 
 self-contained. A change to a skill is not shipped until the bundles are rebuilt,
 and CI fails if they are stale.
 
+**Why the bundles are committed on `main` (decided 2026-09-06, revisit when the
+precondition changes).** Thirteen of the fourteen commits on one branch that day
+regenerated `marketplace/`, and the bundle diffs dwarf the source diffs. The
+alternative — a source-only `main` with bundles built by `plugins.yml` onto a
+`marketplace` branch — is possible: the marketplace command pins to a ref
+(`/plugin marketplace add owner/repo@<branch-or-tag>`, verified against the
+plugin-marketplaces reference 2026-09-06). It was not taken because (a) the
+documented install command and every existing user's marketplace registration
+point at the default branch, so the switch breaks installs until users re-add
+with `@marketplace`; and (b) a plugin `source` inside `marketplace.json` that
+points at another ref is a whole repository, and whether a sub-path of that ref
+can be a plugin is not established. The review-noise problem is handled where it
+appears: `.gitattributes` marks `marketplace/**`, the catalog and the version
+ledger `linguist-generated`, so GitHub collapses them; locally, review with
+`git diff -- . ':!marketplace' ':!.claude-plugin'`. If (b) is verified, the
+switch is a `plugins.yml` change plus a one-line README change, and users pin
+to a release tag either way (`@v1.0.0`).
+
 ## 3. Query the graph instead of grepping
 
 The repo compiles its own components into a queryable graph. This is the fastest
