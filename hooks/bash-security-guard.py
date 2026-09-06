@@ -41,7 +41,8 @@ from _environment_catalog import load_section  # noqa: E402 -- resolves via the 
 from bash_policy_tables import entries, pattern_block_reason, resolve_policy_packs  # noqa: E402 -- resolves via the sys.path insert above
 
 SEC_REMEDY = (
-    "Cheapest fix: write the code to a .py FILE and run it, and split any credential read away from any network call."
+    "Cheapest fix: write the code to a .py FILE and run it, and split any credential read away from any network call. "
+    "(Script files are inspected with these same checks when written and when executed, so the file is not a way around the block.)"
 )
 
 
@@ -1884,8 +1885,16 @@ def check_push_after_auto_merge(command, cwd):
 # because the construct lives inside quotes (`echo "..."`) that the cleaner
 # strips. Upgrades platform-constraints.md FORBIDDEN:
 # secret_env_var_expansion_in_diagnostics from soft text to a hard block.
+# Either branch order, and one level of nested expansion inside a branch. The
+# 2026-08-12 leak line was `echo "xai key: ${XK:+present (${#XK})}${XK:-ABSENT}"`:
+# the `(${#XK})` length probe nested a `}` inside the :+ branch, so the previous
+# `[^}]+` stopped early and the guard did NOT match it even inline (measured
+# 2026-09-06 while shipping script-content-guard). The staged spec called the
+# incident a scope gap rather than a regex gap; it was both.
+_ENV_BRANCH_BODY = r"(?:[^{}]|\$\{[^{}]*\})+"
 ENV_VAR_DIAGNOSTIC = re.compile(
-    r"\$\{[A-Z_][A-Z0-9_]*:\+[^}]+\}\$\{[A-Z_][A-Z0-9_]*:-[^}]+\}"
+    r"\$\{[A-Z_][A-Z0-9_]*:\+" + _ENV_BRANCH_BODY + r"\}\s*\$\{[A-Z_][A-Z0-9_]*:-" + _ENV_BRANCH_BODY + r"\}"
+    r"|\$\{[A-Z_][A-Z0-9_]*:-" + _ENV_BRANCH_BODY + r"\}\s*\$\{[A-Z_][A-Z0-9_]*:\+" + _ENV_BRANCH_BODY + r"\}"
 )
 
 
@@ -1985,6 +1994,27 @@ def check_secret_store_exposure(command):
             "secrets included. " + _SECRET_ENV_REMEDY
         )
     return None
+
+
+# Phase 1 — the catastrophic checks, in the order main() runs them. Each takes the
+# NORMALIZED command text (see _normalize_for_matching) and returns a BLOCKED reason
+# or None. This tuple is the single source for both consumers: main() below, and
+# script-content-guard.py, which applies the same predicates to the BODY of a script
+# file the model writes or executes (hooks/staged/script-file-bypasses-bash-guards
+# .spec.md — the 2026-08-12 leak went through `zsh /tmp/claude/verify_probes.sh`,
+# and a command-string guard saw only the path). A check added here is inherited by
+# both paths; a copy of the list would be two-source drift.
+CATASTROPHIC_CHECKS = (
+    check_credentials,
+    check_reverse_shell,
+    check_shell_wrapper,
+    check_ansi_c_quote_obfuscation,
+    check_exfiltration,
+    check_process_listing_secret_leak,
+    check_dangerous,
+    check_env_var_diagnostic,
+    check_secret_store_exposure,
+)
 
 
 # ── MAIN ─────────────────────────────────────────────────────────────────
@@ -2443,18 +2473,8 @@ def main():
     # They run on the normalized text (continuations joined, git global options
     # dropped, same-command path variables resolved, shell-piped literals
     # exposed); the ORIGINAL command is still what gets rewritten or logged.
-    for check in [
-        lambda: check_credentials(analysis),
-        lambda: check_reverse_shell(analysis),
-        lambda: check_shell_wrapper(analysis),
-        lambda: check_ansi_c_quote_obfuscation(analysis),
-        lambda: check_exfiltration(analysis),
-        lambda: check_process_listing_secret_leak(analysis),
-        lambda: check_dangerous(analysis),
-        lambda: check_env_var_diagnostic(analysis),
-        lambda: check_secret_store_exposure(analysis),
-    ]:
-        reason = check()
+    for check in CATASTROPHIC_CHECKS:
+        reason = check(analysis)
         if reason:
             _audit_log(command, "blocked", reason)
             print(reason + _repeat_note("bash-security-guard", SEC_REMEDY),

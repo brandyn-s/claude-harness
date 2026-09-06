@@ -4,13 +4,14 @@ event: PreToolUse
 matcher: "Bash|PowerShell"
 if_condition: null
 action_type: guard
-description: "Runs the six formerly-unconditional PreToolUse:Bash hooks in ONE interpreter, in order: bash-security-guard.py, destructive-ops-guard.py, git-destructive-checkout-guard.py, bash-tail-buffering-guard.py, zsh-dialect-guard.py, poll-loop-nudge.py. Reads the payload once; each hook runs unchanged under runpy as __main__. The first exit 2 wins and stops the chain; an updatedInput rewrite is what the remaining hooks see and the last one is emitted; additionalContext, permissionDecision (strictest wins) and systemMessage are merged into one JSON object. Writes one run-hook-format fire row per hook it ran. PowerShell payloads reach only destructive-ops-guard.py, the one hook whose matcher ever included PowerShell."
+description: "Runs the seven formerly-unconditional PreToolUse:Bash hooks in ONE interpreter, in order: bash-security-guard.py, script-content-guard.py, destructive-ops-guard.py, git-destructive-checkout-guard.py, bash-tail-buffering-guard.py, zsh-dialect-guard.py, poll-loop-nudge.py. Reads the payload once; each hook runs unchanged under runpy as __main__. The first exit 2 wins and stops the chain; an updatedInput rewrite is what the remaining hooks see and the last one is emitted; additionalContext, permissionDecision (strictest wins) and systemMessage are merged into one JSON object. Writes one run-hook-format fire row per hook it ran. PowerShell payloads reach only destructive-ops-guard.py, the one hook whose matcher ever included PowerShell."
 enforces: []
 blocks_patterns: []
 injects: null
 modifies: null
 depends_on_files:
   - bash-security-guard.py
+  - script-content-guard.py
   - destructive-ops-guard.py
   - git-destructive-checkout-guard.py
   - bash-tail-buffering-guard.py

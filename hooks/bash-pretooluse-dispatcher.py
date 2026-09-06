@@ -1,14 +1,17 @@
-"""Consolidated PreToolUse:Bash|PowerShell dispatcher — six hooks, one interpreter.
+"""Consolidated PreToolUse:Bash|PowerShell dispatcher — seven hooks, one interpreter.
 
-Runs, IN-PROCESS and in this order, the six hooks that used to be wired as separate
-unconditional PreToolUse entries in settings.json:
+Runs, IN-PROCESS and in this order, the hooks that would otherwise be wired as
+separate unconditional PreToolUse entries in settings.json:
 
   1. bash-security-guard             fail-closed catastrophic guard
-  2. destructive-ops-guard           the one guard that also covers PowerShell
-  3. git-destructive-checkout-guard
-  4. bash-tail-buffering-guard
-  5. zsh-dialect-guard
-  6. poll-loop-nudge
+  2. script-content-guard            the same catastrophic checks, applied to the BODY of
+                                     a local script the command executes (fail-closed;
+                                     added 2026-09-06, hooks/script-content-guard.py)
+  3. destructive-ops-guard           the one guard that also covers PowerShell
+  4. git-destructive-checkout-guard
+  5. bash-tail-buffering-guard
+  6. zsh-dialect-guard
+  7. poll-loop-nudge
 
 WHY. Every Bash call paid 6 x (bash run-hook + python3 start-up): 210 ms median for
 `ls -la` on the author's machine (2026-09-03), for hook bodies that total ~18 ms. One
@@ -41,7 +44,7 @@ bin/hook-fire-report.py and the guards' liveness checks see each hook exactly as
 before. The dispatcher's OWN row is written by run-hook, which launches it; writing a
 second one here would double-count it.
 
-SCOPE. All six were matched on "Bash"; destructive-ops-guard alone was "Bash|PowerShell".
+SCOPE. All seven are matched on "Bash"; destructive-ops-guard alone was "Bash|PowerShell".
 A PowerShell payload therefore reaches only destructive-ops-guard — poll-loop-nudge does
 not gate on tool_name, so running it there would have been new behaviour. A payload the
 old matchers would never have fired on runs nothing. An UNPARSEABLE payload is handed to
@@ -68,6 +71,7 @@ HOOKS_DIR = Path(__file__).resolve().parent
 #   open    allow silently                                     — the advisory hooks' policy
 GUARDS = [
     ("bash-security-guard", "bash-security-guard.py", "closed"),
+    ("script-content-guard", "script-content-guard.py", "closed"),
     ("destructive-ops-guard", "destructive-ops-guard.py", "warn"),
     ("git-destructive-checkout-guard", "git-destructive-checkout-guard.py", "open"),
     ("bash-tail-buffering-guard", "bash-tail-buffering-guard.py", "open"),

@@ -1,0 +1,50 @@
+id: script-content-guard
+type: hook
+event: PreToolUse
+matcher: "Write|Edit|Bash"
+if_condition: null
+action_type: guard
+description: "Applies bash-security-guard's catastrophic checks (the shared CATASTROPHIC_CHECKS tuple) to the body of a script file: at Write/Edit time for .sh/.bash/.zsh/.ksh/.py targets or shebang content, and at Bash time for a local script the command executes. Closes the 2026-08-12 script-file bypass."
+enforces:
+  - security-confirmations
+  - platform-constraints
+blocks_patterns:
+  - "script body containing ${VAR:+set}${VAR:-NOT SET} (either branch order, nested ${#VAR} allowed)"
+  - "script body reading ~/.aws/* ~/.ssh/* .env or other credential paths"
+  - "script body piping to a remote host or to a shell (curl|bash)"
+  - "script body with rm -rf on a broad path, reverse shells, keychain/1Password dumps, bare env dumps"
+injects: null
+modifies: null
+depends_on_files:
+  - bash-security-guard.py
+  - bash_policy_tables.py
+  - _environment_catalog.py
+depends_on_env:
+  - CLAUDE_SCRIPT_CONTENT_GUARD
+exit_codes:
+  "0": "allow; or advisory additionalContext when CLAUDE_SCRIPT_CONTENT_GUARD=advise"
+  "2": "block (default); also on load failure — fail-closed like bash-security-guard"
+output_format: json
+incidents:
+  - date: "2026-08-12"
+    summary: "The env-var diagnostic pattern the Bash guard blocks inline was written to /tmp/claude/verify_probes.sh with Write and executed as `zsh /tmp/claude/verify_probes.sh`; the guard saw only the path and two live API keys (XAI_API_KEY, a USPTO ODP key) reached the transcript. Separately, the exact leak line nested `${#XK}` inside the :+ branch and did not match the guard's regex even inline — fixed in the same change."
+    turns_wasted: 0
+    category: security
+measurement:
+  gate: "spec §Measurement gate (hooks/staged/script-file-bypasses-bash-guards.spec.md, deleted on ship; git history): replay the Write/Edit corpus; >10% fire rate is too broad; advisory strength if the incident is n=1"
+  replay_tool: bin/replay-script-content-guard.py
+  replayed_on: "2026-09-06"
+  corpus: "~/claude-transcript-backups/2026-09-06 — 933 Claude Code sessions, 2026-07-02..2026-09-06"
+  script_like_writes: 13894
+  script_like_writes_unique: 13687
+  fires: 73
+  fire_rate_pct: 0.53
+  fires_by_check: {exfiltration-guard: 27, credential-guard: 19, dangerous-command-guard: 13, secret-store-guard: 12, env-var-diagnostic-guard: 2}
+  fires_by_extension: {".sh": 56, ".py": 17}
+  env_var_diagnostic_fires: 2
+  env_var_diagnostic_fires_before_incident: 0
+  falsifier: "The diagnostic predicate is n=1 (two files, both 2026-08-12). It is not a new predicate — every family here already blocks the same text inline — so the ship is a scope closure, not a new rule, and the default stays `block` with CLAUDE_SCRIPT_CONTENT_GUARD=advise as the operator override."
+  false_positive_classes_found_and_fixed_by_the_replay:
+    - "arbitrary Python lines run through shell predicates: `print(env)` / `(set)` read as a bare environment dump (100 hits) → Python files are now scanned only for shell commands handed to exec APIs (ast)"
+    - "captured keychain reads `check_output(['security', ..., '-w'])` read as a keychain dump (847 hits) → captured commands are presented as `_=$(cmd)`, the shape the shell guard already exempts"
+  known_positive: "/tmp/claude/verify_probes.sh (2026-08-12) fires at line 8 in the replay and in hooks/test-hooks/test_script_content_guard.py"

@@ -1,13 +1,15 @@
 """Consolidated PreToolUse:Write|Edit dispatcher.
 
-Runs the five individual guards in a single process to avoid 5x Python
+Runs the six individual guards in a single process to avoid 6x Python
 startup overhead per Write/Edit (estimated 60-85ms -> 25-35ms):
 
-  1. memory-write-guard  - blocks prompt injection / oversize entries
-  2. config-guard         - blocks settings.json edits that disable hooks
-  3. worktree-enforcement - blocks subagent writes to protected repos
-  4. rule-size-guard      - enforces per-file and aggregate ambient-rule budgets
-  5. home-scratch-guard   - warns on non-dotfiles written to the home root
+  1. memory-write-guard    - blocks prompt injection / oversize entries
+  2. config-guard          - blocks settings.json edits that disable hooks
+  3. script-content-guard  - applies bash-security-guard's catastrophic checks to the
+                             body of a script file being written (added 2026-09-06)
+  4. worktree-enforcement  - blocks subagent writes to protected repos
+  5. rule-size-guard       - enforces per-file and aggregate ambient-rule budgets
+  6. home-scratch-guard    - warns on non-dotfiles written to the home root
 
 Each guard exposes a check(hook_input) function returning
   (exit_code, stderr_payload, stdout_payload)
@@ -25,7 +27,7 @@ guard must not brick all editing.
 
 Standalone hooks still work — their main() functions are unchanged.
 This dispatcher is wired into settings.json instead of registering all
-five separately.
+six separately.
 """
 
 from __future__ import annotations
@@ -45,6 +47,9 @@ HOOKS_DIR = Path(__file__).resolve().parent
 GUARDS = [
     ("memory-write-guard", "memory-write-guard.py", "open"),
     ("config-guard", "config-guard.py", "closed"),
+    # closed: a script the model is about to write must not skip inspection because
+    # the inspector failed to load; scope is script-like targets only (see the hook).
+    ("script-content-guard", "script-content-guard.py", "closed"),
     ("worktree-enforcement", "worktree-enforcement.py", "open"),
     ("rule-size-guard", "rule-size-guard.py", "open"),
     # warn-only (never returns 2); "open" so a load failure can't block editing.

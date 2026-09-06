@@ -5,12 +5,18 @@ event: PreToolUse
 matcher: "Write|Edit"
 if_condition: null
 action_type: guard
-description: "Consolidated PreToolUse:Write|Edit dispatcher."
+description: "Consolidated PreToolUse:Write|Edit dispatcher: runs memory-write-guard, config-guard, script-content-guard, worktree-enforcement, rule-size-guard and home-scratch-guard in one interpreter via each guard's check(hook_input); the first exit 2 wins."
 enforces: []  # TODO: which rules does this hook enforce?
 blocks_patterns: []  # TODO: what does it block?
 injects: null  # TODO: what context does it inject?
 modifies: null
-depends_on_files: []
+depends_on_files:
+  - memory-write-guard.py
+  - config-guard.py
+  - script-content-guard.py
+  - worktree-enforcement.py
+  - rule-size-guard.py
+  - home-scratch-guard.py
 depends_on_env: []
 exit_codes:
   "0": "allow"

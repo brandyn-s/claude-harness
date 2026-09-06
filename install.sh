@@ -111,13 +111,14 @@ install_files() {
         || { err "Copy aborted; see the error above."; exit 1; }
 }
 
-# hooks/bash-pretooluse-dispatcher.py runs these six hooks in one process, so
+# hooks/bash-pretooluse-dispatcher.py runs these seven hooks in one process, so
 # every path that wires it copies all seven as one set (a missing file aborts
 # the copy). scripts/test_install_menus.py pins this list to the dispatcher's
 # GUARDS table.
 DISPATCHER_HOOKS=(
     bash-pretooluse-dispatcher.py
     bash-security-guard.py
+    script-content-guard.py
     destructive-ops-guard.py
     git-destructive-checkout-guard.py
     bash-tail-buffering-guard.py
@@ -260,6 +261,7 @@ install_hooks() {
            hook_configs=(
                'PreToolUse|Bash|PowerShell|bash-pretooluse-dispatcher.py|30'
                'PreToolUse|Write|Edit|config-guard.py|30'
+               'PreToolUse|Write|Edit|script-content-guard.py|15'
                'PreToolUse|Read|read-deny-guard.py|15'
                'PostToolUse|mcp__.*|result-injection-guard.py|30'
            ) ;;
@@ -302,7 +304,7 @@ install_hooks() {
                    hooks+=("$name")
                fi
            done
-           # The dispatcher runs six sibling hooks in-process: picking it selects them.
+           # The dispatcher runs seven sibling hooks in-process: picking it selects them.
            if [[ " ${hooks[*]} " == *" bash-pretooluse-dispatcher.py "* ]]; then
                hooks+=("${DISPATCHER_HOOKS[@]}")
            fi ;;

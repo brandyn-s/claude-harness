@@ -30,7 +30,7 @@ def _make_sandbox_dispatcher(tmp_path, broken=(), missing=()):
     replaced with a crashing check() (`broken`) or absent (`missing`);
     every other guard becomes a benign allow-all stub. Lets the posture
     paths run end-to-end without touching the real guards."""
-    guard_files = ["memory-write-guard.py", "config-guard.py",
+    guard_files = ["memory-write-guard.py", "config-guard.py", "script-content-guard.py",
                    "worktree-enforcement.py", "rule-size-guard.py"]
     shutil.copy2(HOOKS_DIR / HOOK, tmp_path / HOOK)
     for fname in guard_files:

@@ -649,7 +649,7 @@ def test_installer_states_the_real_python_floor():
 # 2026-09-03 -- every installer path wires the Bash dispatcher, never the guards
 # ---------------------------------------------------------------------------
 def test_dispatcher_hook_set_matches_the_dispatcher_and_exists():
-    """install.sh copies the dispatcher and the six hooks it runs as ONE set.
+    """install.sh copies the dispatcher and the seven hooks it runs as ONE set.
 
     The list is hand-written in bash, so pin it to the dispatcher's own GUARDS
     table: a hook added to (or dropped from) the dispatcher without updating the
@@ -657,7 +657,7 @@ def test_dispatcher_hook_set_matches_the_dispatcher_and_exists():
     """
     src = INSTALLER.read_text(encoding="utf-8")
     hosted = _hosted_by_dispatcher()
-    assert len(hosted) == 6, hosted
+    assert len(hosted) == 7, hosted  # script-content-guard joined 2026-09-06
     assert _dispatcher_hooks(src) == [DISPATCHER, *hosted]
     for name in _dispatcher_hooks(src):
         assert (REPO / "hooks" / name).is_file(), name
