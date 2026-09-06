@@ -117,3 +117,16 @@ def test_missing_or_malformed_pin_is_a_clear_error(tmp_path):
     (d / "UPSTREAM.json").write_text(json.dumps({"repo": "x", "commit": "abc", "paths": ["hooks/"]}), encoding="utf-8")
     res = _run(d)
     assert res.returncode != 0 and "40-hex" in res.stderr
+
+
+def test_pin_can_be_read_from_outside_the_overlay(repos, tmp_path):
+    up, down, pin, tip = repos
+    (down / "UPSTREAM.json").unlink()
+    _commit_all(down, "not yet adopted")
+    external = tmp_path / "candidate.json"
+    external.write_text(json.dumps({"repo": str(up), "commit": pin, "paths": ["hooks/", "rules/"],
+                                    "overrides": ["hooks/protected-repos.json"]}), encoding="utf-8")
+    assert _run(down, "--upstream-dir", str(up)).returncode != 0, "no pin in the tree"
+    res = _run(down, "--upstream-dir", str(up), "--pin", str(external), "--json")
+    assert res.returncode == 0, res.stderr
+    assert json.loads(res.stdout)["modified"] == ["hooks/guard.py"]

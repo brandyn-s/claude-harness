@@ -49,6 +49,7 @@ USAGE
     python3 bin/upstream-check.py --fetch --check
     python3 bin/upstream-check.py --json
     python3 bin/upstream-check.py --downstream /path/to/overlay --upstream-dir /path/to/harness
+    python3 bin/upstream-check.py --downstream /path/to/overlay --pin candidate.json   # before adoption
 """
 from __future__ import annotations
 
@@ -72,8 +73,8 @@ def _git_ok(args: list[str], cwd: Path) -> bool:
     return subprocess.run(["git", *args], cwd=str(cwd), capture_output=True, text=True).returncode == 0
 
 
-def load_pin(downstream: Path) -> dict:
-    path = downstream / UPSTREAM_FILE
+def load_pin(downstream: Path, pin_file: Path | None = None) -> dict:
+    path = pin_file or (downstream / UPSTREAM_FILE)
     try:
         pin = json.loads(path.read_text(encoding="utf-8"))
     except OSError as exc:
@@ -213,6 +214,8 @@ def main() -> int:
     ap.add_argument("--downstream", default=".", help="the overlay repository (default: cwd)")
     ap.add_argument("--upstream-dir", default=None, help="a local clone of the harness to read objects from")
     ap.add_argument("--fetch", action="store_true", help="git fetch the pinned commit (and default branch) from the upstream repo")
+    ap.add_argument("--pin", default=None, help=f"read the pin from this file instead of <downstream>/{UPSTREAM_FILE} "
+                                                 f"(to classify an overlay before it has adopted the contract)")
     ap.add_argument("--check", action="store_true", help="exit 1 on modified or missing core files")
     ap.add_argument("--json", action="store_true", help="machine-readable output")
     args = ap.parse_args()
@@ -220,7 +223,7 @@ def main() -> int:
     if not _git_ok(["rev-parse", "--git-dir"], downstream):
         print(f"upstream-check: {downstream} is not a git repository", file=sys.stderr)
         return 2
-    pin = load_pin(downstream)
+    pin = load_pin(downstream, Path(args.pin).resolve() if args.pin else None)
     upstream_dir = Path(args.upstream_dir).resolve() if args.upstream_dir else None
     try:
         repo, pin_rev, tip = resolve_upstream(downstream, pin, upstream_dir, args.fetch)

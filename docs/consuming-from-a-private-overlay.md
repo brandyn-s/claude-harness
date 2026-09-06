@@ -76,6 +76,30 @@ guard suites in `hooks/test-hooks/` no longer describe what the overlay runs. Th
 two honest resolutions are re-vendoring (take the upstream file) and an upstream
 pull request (change the core for everyone, then re-vendor).
 
+### Adopting the contract on an overlay that already exists
+
+An overlay that grew beside the harness by hand-copying files will not match the
+pin on day one. Classify before committing to anything:
+
+```bash
+python3 bin/upstream-check.py --downstream ~/src/overlay --upstream-dir ~/src/claude-harness \
+        --pin candidate-UPSTREAM.json --json > classification.json
+```
+
+`--pin` reads the pin from outside the overlay, so the classification runs before
+`UPSTREAM.json` is committed there. Then triage the `modified` list in three
+piles: files whose differing lines are the organisation's identifiers (the
+harness has the de-identified, catalog-driven version — adopt it and move the
+identifiers into `environment-catalog.json`); files that differ by a few lines (a
+fix that landed on one side — take the newer, send it upstream if it was the
+overlay's); and files that diverged substantially (an overlay-specific variant —
+either an upstream PR to make the harness version configurable, or a rename out of
+the core path so it is `only-downstream` by design). `only-upstream` is what the
+overlay never vendored (profiles, newer tools) and is a decision per file;
+`only-downstream` is the overlay's own material and stays. Commit `UPSTREAM.json`
+and the CI step once `--check` is green or every remaining `modified` file is an
+explicit override.
+
 ### Updating the pin
 
 1. In a harness clone, read `CHANGELOG.md` between the pinned version and the
