@@ -1,5 +1,7 @@
 # STAGED SPEC — `iam-unsatisfiable-condition`
 
+> **Staged:** 2026-08-12 · **Owner:** @brandyn-s · **Why not yet:** the spec requires the historical-replay fire-rate measurement below before `/ship-hook`; do not install on the incident count alone. · **Ship via:** `/ship-hook` after the measurement gate; `bin/staged-spec-staleness.py` reports whether it is still pending.
+
 **Status:** STAGED, NOT INSTALLED. Requires the historical-replay fire-rate
 measurement below before `/ship-hook`. Do not install on the strength of the
 incident count alone.

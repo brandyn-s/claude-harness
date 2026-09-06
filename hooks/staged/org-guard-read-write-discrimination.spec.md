@@ -1,3 +1,5 @@
+> **Staged:** 2026-07-29 · **Owner:** @brandyn-s · **Why not yet:** detection half SHIPPED (#2009, verified 2026-08-27); the approval mechanism is a security-control change that LOOSENS the fence on one axis and needs the operator's explicit decision, not an agent's. · **Ship via:** `/ship-hook` after the measurement gate; `bin/staged-spec-staleness.py` reports whether it is still pending.
+
 <!-- STATUS BLOCK ADDED 2026-08-27 ON PRESERVATION -- READ THIS FIRST -->
 
 ## STATUS: HALF SHIPPED. Do not re-derive the read/write discriminator.

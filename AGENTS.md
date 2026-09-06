@@ -71,8 +71,10 @@ Available queries:
 Validate before you commit:
 
 ```bash
-python3 manifests/compile.py --root . --check --strict-semantic --no-reindex
+python3 manifests/compile.py --root . --check --strict-semantic
 ```
+
+(`--no-reindex` is faster but validates against the cached index; CI runs the full reindex since 2026-09-06, after the cached form passed a coverage-label drift that a fresh index caught.)
 
 It exits non-zero on dangling references and manifest/source drift. **Run it
 after touching any skill, hook, or rule.**

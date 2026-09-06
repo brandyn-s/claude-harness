@@ -37,8 +37,10 @@ jobs:
       # anything cannot report success.
       # Restores the gate the source repo had and this export lost; without it,
       # dangling manifest references accumulated with nothing complaining.
+      # No --no-reindex: the cached index passed a coverage-label drift that a fresh
+      # index caught (2026-09-06). The reindex costs seconds; the drift cost a red suite.
       - name: Validate the manifest graph
-        run: python3 manifests/compile.py --root . --check --strict-semantic --no-reindex
+        run: python3 manifests/compile.py --root . --check --strict-semantic
       - name: Prove the manifest validator's detectors still fire
         run: python3 manifests/compile.py --self-test --root .
 
@@ -86,13 +88,13 @@ jobs:
             'description: "CI drift control; never committed"' \
             'requires_rules:' \
             '  - no-such-rule-control' > "$control"
-          if python3 manifests/compile.py --root . --check --no-reindex >/dev/null 2>&1; then
+          if python3 manifests/compile.py --root . --check >/dev/null 2>&1; then
             rm -f "$control"
             echo "::error::manifest gate did NOT reject a dangling reference - it is vacuous"
             exit 1
           fi
           rm -f "$control"
-          python3 manifests/compile.py --root . --check --no-reindex >/dev/null
+          python3 manifests/compile.py --root . --check >/dev/null
           echo "manifest gate fires on a dangling reference, and is clean after removal"
 
       - name: Run the suite

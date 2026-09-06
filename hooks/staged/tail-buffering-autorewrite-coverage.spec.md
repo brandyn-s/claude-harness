@@ -1,5 +1,7 @@
 # Staged spec — extend `bash-tail-buffering-guard` auto-rewrite coverage
 
+> **Staged:** 2026-08-29 · **Owner:** @brandyn-s · **Why not yet:** install only after the historical-replay gate below passes; the evidence is one 4,578-turn session. · **Ship via:** `/ship-hook` after the measurement gate; `bin/staged-spec-staleness.py` reports whether it is still pending.
+
 **Status:** STAGED, not installed. Install via `/ship-hook` only after the
 historical-replay gate below passes.
 

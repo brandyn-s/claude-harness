@@ -1,5 +1,7 @@
 # Staged hook: tool-receipt-log
 
+> **Staged:** 2026-06-14 · **Owner:** @brandyn-s · **Why not yet:** validated prototype; the fabrication class it defends against was measured on the Opus 4.8 fallback, and cost/benefit on the September 2026 models is unmeasured (scope-discipline). · **Ship via:** `/ship-hook` after the measurement gate; `bin/staged-spec-staleness.py` reports whether it is still pending.
+
 STATUS: **STAGED — do NOT auto-install.** Validated prototype, not yet enabled (scope-discipline).
 
 ## What

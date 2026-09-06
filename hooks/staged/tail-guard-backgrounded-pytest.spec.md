@@ -1,5 +1,7 @@
 # Staged hook spec: tail-guard — add pytest/unittest to VERDICT_COMMANDS, scoped to BACKGROUNDED runs
 
+> **Staged:** 2026-08-06 · **Owner:** @brandyn-s · **Why not yet:** needs a measured count of backgrounded `pytest | tail` shapes and a check that the rewrite does not alter the task-completion notification it exists to protect. · **Ship via:** `/ship-hook` after the measurement gate; `bin/staged-spec-staleness.py` reports whether it is still pending.
+
 Target: `hooks/bash-tail-buffering-guard.py` (already installed; this extends
 `VERDICT_COMMANDS` / `check_trailing_status_swallow`'s sibling pipe check).
 

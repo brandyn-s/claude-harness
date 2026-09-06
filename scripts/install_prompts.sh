@@ -38,6 +38,15 @@
 ask_yn() {
     local prompt="$1" default="${2:-n}"
     local answer
+    # HARNESS_ASSUME_DEFAULTS=1: answer with the default and say so on stderr.
+    # Exists for `install.sh --dry-run` in CI and for reading a full install
+    # transcript without sitting at the prompts; never set it for a real install
+    # you have not read.
+    if [[ "${HARNESS_ASSUME_DEFAULTS:-0}" == "1" ]]; then
+        echo -e "${BOLD}$prompt${NC} -> default ($default)" >&2
+        [[ "$default" == "y" ]]
+        return
+    fi
     if [[ "$default" == "y" ]]; then
         # `read -rp` writes its prompt to STDERR already; the explicit redirect
         # documents the contract and keeps it true if this is ever restructured.
@@ -66,6 +75,11 @@ ask_choice() {
         done
     } >&2
 
+    if [[ "${HARNESS_ASSUME_DEFAULTS:-0}" == "1" ]]; then
+        echo "Choice -> default (1: ${options[0]})" >&2
+        echo "1"
+        return
+    fi
     read -rp "$(echo -e "${BOLD}Choice [1-${#options[@]}]:${NC} ")" choice
 
     # The ONLY stdout write in this function.

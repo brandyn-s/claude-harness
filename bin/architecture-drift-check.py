@@ -301,9 +301,12 @@ def check_hooks(arch, settings_text, readme_text=""):
     for h in sorted(documented - wired):
         hard.append(f"[A] hook `{h}` is in ARCHITECTURE.md's Layer-5 tables (active) "
                     f"but is NOT wired in settings.json")
+    # HARD since 2026-09-06 (was advisory): hooks/README.md is the registry. A wired
+    # hook with no row is how four hooks -- one of them in the fresh core -- went
+    # undocumented; the row convention only holds if the gate holds it.
     for h in sorted({w for w in wired if w.endswith('.py')} - documented_anywhere - dispatcher_loaded):
-        advisory.append(f"[A] hook `{h}` is wired in settings.json but documented neither in "
-                        f"ARCHITECTURE.md's hooks table nor in hooks/README.md's inventory (undocumented)")
+        hard.append(f"[A] hook `{h}` is wired in settings.json but documented neither in "
+                    f"ARCHITECTURE.md's hooks table nor in hooks/README.md's inventory (undocumented)")
     # HARD (2026-09-06): an inventory row for a hook file that does not exist.
     # hooks/README.md is "the full registry"; a registry row with no file behind
     # it is the drift the 2026-07-29 note predicted and exactly what the

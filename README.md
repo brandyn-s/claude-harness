@@ -4,7 +4,7 @@ A working [Claude Code](https://docs.claude.com/en/docs/claude-code) harness:
 **<!-- count:hooks -->53<!-- /count --> hook scripts** (plus <!-- count:hook_modules -->9<!-- /count --> shared modules),
 **<!-- count:rules -->34<!-- /count --> rules** (<!-- count:rules_ambient -->27<!-- /count --> of them always loaded),
 **<!-- count:skills -->82<!-- /count --> skills**, and the <!-- count:agents -->6<!-- /count --> agent definitions that
-tie them together — <!-- count:source_files -->1,650<!-- /count --> tracked source files, plus a
+tie them together — <!-- count:source_files -->1,651<!-- /count --> tracked source files, plus a
 generated plugin tree under `marketplace/` (another <!-- count:marketplace_files -->1,072<!-- /count -->
 files) that is not meant to be read (see [marketplace/README.md](marketplace/README.md)).
 The numbers in this file are generated from the tree by `bin/build-doc-counts.py`
@@ -119,10 +119,11 @@ marking more skills `name-only` in `skillOverrides`.
 Roughly ten skills require MCP servers that are not part of this repository and
 are not public:
 
-| server | skills that hard-require it |
+| dependency | skills that hard-require it |
 |---|---|
-| `memory-search` | `capture`, `distill`, `recall`, `review-learnings` |
-| `codebase-memory-mcp` | `api-ingest`, `code-explore`, `codebase-memory-exploring`, `codebase-memory-quality`, `codebase-memory-tracing`, `verify-search-result` |
+| `memory-search` (private MCP server) | `capture`, `distill`, `recall`, `review-learnings` |
+| `codebase-memory-mcp` (private MCP server) | `api-ingest`, `code-explore`, `codebase-memory-exploring`, `codebase-memory-quality`, `codebase-memory-tracing`, `verify-search-result` |
+| `superpowers@claude-plugins-official` (public plugin; `install.sh` warns when it is not enabled) | `design-evidence-first`, `debugging-hypotheses`, `legacy-code-tdd`, `review-depth-by-risk` are companions to it; `Skill(superpowers:brainstorming)` is in the author allow list |
 
 Those skills will no-op or error without their server. The
 `code-intelligence` plugin bundle is affected as a whole and is best read as a
