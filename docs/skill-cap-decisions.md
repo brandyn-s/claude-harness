@@ -27,8 +27,8 @@ classified by the same criteria (section "Next pass"). Every number in this docu
   `templates/launchd/` schedules.
 - Usage telemetry: none in the repo. `~/.claude/skill-usage.jsonl` was written by the
   retired keyword-routing hook (`skills/_shared/activation-eval/run_activation_eval.py`
-  docstring); `skills/roundtable/skill-usage-audit.py` counts invocations from session
-  transcripts that live outside the repo; the test HOME's copy holds 80 fixture records from
+  docstring); `skills/roundtable/skill-usage-audit.py` (a front over `bin/skill-usage-report.py` since
+  2026-09-06) counts invocations from session transcripts that live outside the repo; the test HOME's copy holds 80 fixture records from
   the 2026-09-03 test run (refine, superplan, gather-vendor) and is not evidence. The
   decisions rest on the three sources above.
 

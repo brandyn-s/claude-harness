@@ -79,3 +79,20 @@ def test_render_prints_no_transcript_text(tmp_path):
     text = sur.render(sur.build(root, None, tmp_path / "nope.json", skills), propose=True)
     assert "gather-alpha" in text and '"skillOverrides"' in text and "listing budget 6,000 tokens" in text
     assert "again" not in text and "go" not in text.split("skill usage over")[1].split("\n")[0]
+
+
+def test_roundtable_audit_is_a_front_over_this_tool(tmp_path):
+    """skills/roundtable/skill-usage-audit.py must not count on its own."""
+    import subprocess
+    from pathlib import Path as _P
+    repo = _P(__file__).resolve().parents[1]
+    front = repo / "skills" / "roundtable" / "skill-usage-audit.py"
+    src = front.read_text(encoding="utf-8")
+    assert "skill-usage-report.py" in src and "re.compile" not in src, "the counting lives in bin/, once"
+    skills = _skills(tmp_path)
+    root = _transcripts(tmp_path)
+    res = subprocess.run([sys.executable, str(front), "--root", str(root), "--skills", str(skills),
+                          "--settings", str(tmp_path / "none.json")], capture_output=True, text=True, timeout=120)
+    assert res.returncode == 0, res.stderr
+    assert "gather-alpha" in res.stdout and "ZERO" in res.stdout
+    assert res.stdout.splitlines()[0].startswith("Scanned 2 transcripts. 3 slash + 1 Skill-tool = 4 total")
