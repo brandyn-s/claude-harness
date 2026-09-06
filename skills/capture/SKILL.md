@@ -91,6 +91,8 @@ does the work.
 
 **Step 1: Extract knowledge from conversation**
 
+> **Home first**: the staging dir is the private overlay; a lesson about a harness hook, rule, skill or platform behaviour also belongs in the public core, de-identified — `skills/_shared/lesson-routing.md` has the table and the strip list.
+
 > **Compaction awareness**: If the conversation starts with a compaction boundary
 > (summary of earlier messages), early-session learnings may be missing from
 > context. Tool results and debugging details are not preserved in compaction

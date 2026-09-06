@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# pre-commit: the two gates that are cheap enough to run on every commit.
+#
+#   1. Residue: no organisation identifier in a staged file (the tracked-file
+#      scan runs in the suite; this catches it before it is ever committed).
+#   2. Marketplace drift: when bundled sources are staged, rebuild the bundles and
+#      require the result to be staged too -- .github/workflows/plugins.yml rejects
+#      a stale marketplace/ later, with less context.
+#
+# Install with `python3 bin/setup-githooks.py`.
+set -euo pipefail
+repo="$(git rev-parse --show-toplevel)"
+
+python3 "$repo/scripts/deidentification_residue.py" --staged --reveal
+
+if git diff --cached --name-only -- hooks/ skills/ rules/ scripts/build-marketplace.py | grep -q .; then
+  if python3 "$repo/scripts/build-marketplace.py" >/dev/null 2>&1; then
+    unstaged="$(git diff --name-only -- marketplace/ .claude-plugin/; git ls-files --others --exclude-standard -- marketplace/)"
+    if [ -n "$unstaged" ]; then
+      echo "pre-commit: bundled sources are staged but the rebuilt marketplace/ is not:" >&2
+      printf '            %s\n' $unstaged >&2
+      echo "            Stage it too: git add marketplace .claude-plugin   (HARNESS_SKIP_MARKETPLACE_CHECK=1 to bypass)" >&2
+      [ -n "${HARNESS_SKIP_MARKETPLACE_CHECK:-}" ] || exit 1
+    fi
+  else
+    echo "pre-commit: scripts/build-marketplace.py could not run here; plugins.yml will check drift in CI" >&2
+  fi
+fi
