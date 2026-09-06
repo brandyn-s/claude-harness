@@ -54,8 +54,16 @@ specific to the owner's work:
 - explicit review for Terraform, AWS, destructive Git-history, and mutating MCP
   operations;
 - one compact diagnostic/change-history/negative-search rule;
-- non-blocking repeated-failure detection; and
-- prompt and tool-output secret protection.
+- non-blocking repeated-failure detection;
+- prompt and tool-output secret protection; and
+- (2026-09-06) the session-boundary contract: `session-boundaries.md`,
+  `compaction-budget.py`, `proceed-gate.py`. Promotion-gate evidence: the week of
+  2026-08-30 (20/24/39-hour arcs, three or more compactions each; 35 of 58
+  corrective turns in six long sessions); native controls cannot express a
+  boundary; direct tests exist; cost is bounded (2,669 ambient bytes, two
+  UserPromptSubmit hooks); one owner each (`outcome-over-verification` owns
+  stopping, `session-boundaries` owns what is written before the next session).
+  Fire telemetry over the following two weeks is the confirmation.
 
 Portability policy is selected only on affected hosts, and workflow preferences
 remain opt-in. The phrase-based `promise-checker` and the contradictory

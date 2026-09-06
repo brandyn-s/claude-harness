@@ -35,6 +35,7 @@ DEFINITIONS (the parenthetical the docs carry is the load-bearing part)
     agents           agents/*.md excluding README.md and TEMPLATE.md
     manifests_coverage   "manifested/total (pct%)" over skills + hooks_files + rules
     fresh_core_hooks     hook registrations install.sh writes for menu option 1
+    operator_rules / operator_hooks   what the fresh core + operator overlay install (install.sh starter kit)
     dispatcher_bash / dispatcher_write    GUARDS rows in the two dispatchers
     source_files     files outside marketplace/ (git ls-files --cached --others --exclude-standard)
     marketplace_files    files under marketplace/ (same listing)
@@ -95,6 +96,18 @@ def _fresh_core_hooks() -> int:
     return len(re.findall(r"'[^']+'", text[j:k]))
 
 
+def _operator_layer() -> tuple[int, int]:
+    """(rules, hook registrations) the fresh core + operator overlay install."""
+    text = (REPO / "install.sh").read_text(encoding="utf-8")
+    i = text.index("starter_rules=(")
+    base_rules = len(re.findall(r"^\s*([\w.-]+\.md)\s*$", text[i:text.index(")", i)], re.M))
+    j = text.index("starter_rules+=(")
+    op_rules = len(re.findall(r"[\w.-]+\.md", text[j:text.index(")", j)]))
+    k = text.index("hook_configs+=(")
+    op_hooks = len(re.findall(r"'[^']+'", text[k:text.index(")", k)]))
+    return base_rules + op_rules, _fresh_core_hooks() + op_hooks
+
+
 def _git_files(pattern: str | None = None, exclude_prefix: str | None = None) -> int:
     # --others --exclude-standard: count what the tree HAS, not only what is staged,
     # so a freshly generated bundle file changes the number before it is committed.
@@ -143,6 +156,8 @@ def compute() -> dict[str, str]:
         "agents": str(len(agents)),
         "manifests_coverage": f"{manifested}/{total} ({100 * manifested // total}%)",
         "fresh_core_hooks": str(_fresh_core_hooks()),
+        "operator_rules": str(_operator_layer()[0]),
+        "operator_hooks": str(_operator_layer()[1]),
         "dispatcher_bash": str(len(_guards("bash-pretooluse-dispatcher.py"))),
         "dispatcher_write": str(len(_guards("write-edit-dispatcher.py"))),
         "source_files": f"{_git_files(exclude_prefix='marketplace/'):,}",

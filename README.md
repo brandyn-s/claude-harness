@@ -4,7 +4,7 @@ A working [Claude Code](https://docs.claude.com/en/docs/claude-code) harness:
 **<!-- count:hooks -->53<!-- /count --> hook scripts** (plus <!-- count:hook_modules -->9<!-- /count --> shared modules),
 **<!-- count:rules -->34<!-- /count --> rules** (<!-- count:rules_ambient -->27<!-- /count --> of them always loaded),
 **<!-- count:skills -->82<!-- /count --> skills**, and the <!-- count:agents -->6<!-- /count --> agent definitions that
-tie them together — <!-- count:source_files -->1,651<!-- /count --> tracked source files, plus a
+tie them together — <!-- count:source_files -->1,654<!-- /count --> tracked source files, plus a
 generated plugin tree under `marketplace/` (another <!-- count:marketplace_files -->1,072<!-- /count -->
 files) that is not meant to be read (see [marketplace/README.md](marketplace/README.md)).
 The numbers in this file are generated from the tree by `bin/build-doc-counts.py`
@@ -50,12 +50,18 @@ portable core installs two rules and <!-- count:fresh_core_hooks -->5<!-- /count
 - `acceptEdits` plus sandbox-auto-approved Bash; sandbox escapes require review
 - project MCP auto-activation disabled
 
-The operator layer adds one compact discipline rule, the `delivery` Bash policy
-pack, explicit review for high-consequence Terraform/AWS/Git/MCP mutations, a
-non-blocking repeated-failure detector, and prompt/tool-output secret controls.
-It does not restore the phrase-based Stop blocker or the historical ambient
-corpus, and it enables no plugins. The doctor reports the operator layer
-separately when selected.
+The operator layer — the recommended install — adds one compact discipline
+rule, the session-boundary contract (`session-boundaries.md` with
+`compaction-budget.py` and `proceed-gate.py`: a handoff at the second compaction,
+a DO / NOT / CHECK restatement on a bare `proceed`, and `INTENT.md` feeding the
+acceptance ledger), the `delivery` Bash policy pack, explicit review for
+high-consequence Terraform/AWS/Git/MCP mutations, a non-blocking repeated-failure
+detector, and prompt/tool-output secret controls: <!-- count:operator_rules -->4<!-- /count --> rules and
+<!-- count:operator_hooks -->11<!-- /count --> hook registrations in all. It does not restore the
+phrase-based Stop blocker or the historical ambient corpus, and it enables no
+plugins. The doctor reports the operator layer separately when selected.
+`bash install.sh --dry-run` prints every file and settings key either install
+would touch, and writes nothing.
 
 Environment-specific data (the MCP servers whose writes need confirmation,
 topic routes, failure-pattern files, expected servers, repo paths, session
@@ -181,6 +187,7 @@ platform-rules/   host-specific overlays (macOS / Windows)
 bin/ scripts/     supporting tools
 tests/            hook + skill tests
 templates/        starter configs
+codex/            the Codex half: config posture patch + AGENTS.md overlay
 ```
 
 Start with `ARCHITECTURE.md`, then `rules/`. `UBIQUITOUS_LANGUAGE.md` defines
@@ -270,6 +277,15 @@ a personal repo, not a leak.
 MIT — see [LICENSE](LICENSE). Third-party portions keep their own licenses and
 are listed in [THIRD_PARTY.md](THIRD_PARTY.md); the skills adapted from
 trailofbits/skills are CC BY-SA 4.0.
+
+## Codex
+
+The practice is tool-neutral; `codex/` carries the Codex half — the `config.toml`
+posture (`workspace-write`, `on-request`, `approvals_reviewer = "auto_review"`) and a
+≤ 60-line `AGENTS.md` overlay with the same frame / evidence / scope / session-boundary
+contracts and per-model notes for GPT-5.6 and GPT-6 Astra. Codex runs none of the
+hooks here, so for Codex the overlay is the whole advisory layer and the sandbox is
+the whole enforcement layer. See [`codex/README.md`](codex/README.md).
 
 ## Advanced full-mirror synchronization
 

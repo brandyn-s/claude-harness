@@ -1,0 +1,40 @@
+# ~/.codex/config.toml — the posture this harness assumes for Codex.
+#
+# Apply by hand and verify the key names against the config reference for your
+# installed Codex version (`codex --version`); the keys below were current for the
+# 0.15x line in September 2026. `--full-auto` was removed on 2026-08-07, so there
+# is no flag that restores the old posture by accident.
+#
+# WHY. A laptop that runs Claude Code inside the native sandbox with `acceptEdits`
+# and twenty deny rules, and Codex with the sandbox off and approvals off, has one
+# posture per tool and the weaker one wins. Codex's July 2026 `rm -rf $HOME`
+# incident was a review subagent under exactly that posture. The change keeps
+# Codex autonomous INSIDE the repository and makes it ask before it leaves.
+
+--- a/.codex/config.toml
++++ b/.codex/config.toml
+@@
+-approval_policy = "never"
+-sandbox_mode = "danger-full-access"
++approval_policy = "on-request"          # ask before actions outside the sandbox
++sandbox_mode = "workspace-write"        # writes limited to the project (and /tmp); network off by default
++approvals_reviewer = "auto_review"      # a reviewer model handles routine approvals so the human is asked less often
++
++[sandbox_workspace_write]
++network_access = false                  # flip to true per project via a project config when a task needs it
+
+# Per-project loosening, when a specific repo genuinely needs it, goes in that
+# repository's own .codex/config.toml — never here:
+#
+#   [sandbox_workspace_write]
+#   network_access = true
+#   writable_roots = ["/path/outside/repo"]
+#
+# Verify after applying, in any repo:
+#   codex "print the current sandbox mode and approval policy from your turn context"
+# and confirm the rollout JSONL turn_context shows
+#   "approval_policy": "on-request", "sandbox_policy": {"type": "workspace-write", ...}
+#
+# What this does NOT do: it adds no hooks, rules or ledger to Codex. Those come
+# from the AGENTS.md overlay (codex/AGENTS.overlay.md), which Codex reads per
+# project, and from the skills bin/sync-codex-skills.py mirrors.

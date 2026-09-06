@@ -57,8 +57,9 @@ python3 scripts/install-profile.py \
   --profile brandyn-operator
 ```
 
-The operator starter also installs `operator-discipline.md`, the bounded
-non-progress detector, and prompt/output secret controls. `portability` remains
+The operator starter also installs `operator-discipline.md`, `session-boundaries.md`,
+the bounded non-progress detector, prompt/output secret controls, and the two
+boundary hooks (`compaction-budget.py`, `proceed-gate.py`) with `session_ledger.py`. `portability` remains
 conditional: add it beside `delivery` on Windows/Git Bash machines. `workflow`
 remains opt-in because its preferences are not universal correctness
 boundaries.

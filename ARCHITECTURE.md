@@ -24,7 +24,7 @@ the first demoted conflict.
 | Profile | Ambient rules | Hook registrations | Intended use |
 |---|---:|---:|---|
 | **Fresh laptop** | 2 | <!-- count:fresh_core_hooks -->5<!-- /count --> | portable kernel; simple, fast, correct |
-| **Brandyn operator** | 3 | 8 | personal delivery, authority, non-progress, and secret controls |
+| **Brandyn operator** (recommended) | <!-- count:operator_rules -->4<!-- /count --> | <!-- count:operator_hooks -->11<!-- /count --> | the fresh kernel plus delivery policy, high-consequence review, non-progress and secret controls, and the session-boundary contract (`session-boundaries.md`, `compaction-budget.py`, `proceed-gate.py`) |
 | **Author workstation** | <!-- count:rules_ambient -->27<!-- /count --> | <!-- count:hook_registrations -->48<!-- /count --> (<!-- count:hooks_wired -->53<!-- /count --> scripts, counting the dispatchers' children) | explicit opt-in for the compatible advanced set |
 
 Counts are generated from the tree (`bin/build-doc-counts.py --check` runs in CI).
@@ -36,9 +36,15 @@ delivery speed without stacking auto mode, blanket Bash authority, custom
 guards, and a disabled sandbox into one difficult-to-reason-about control plane.
 
 The `brandyn-operator` overlay preserves that kernel while adding only controls
-tied to the owner's recurring work. It is the middle layer between the portable
-core and the full author mirror; it does not load the historical rule corpus or
-reinstate completion-language blocking.
+tied to the owner's recurring work. It is the recommended install: the middle
+layer between the portable core and the full author mirror. It does not load the
+historical rule corpus or reinstate completion-language blocking. Since
+2026-09-06 it also carries the boundary half of the deleted `never-stop-early`:
+`session-boundaries.md`, `compaction-budget.py` (handoff nudge from the second
+compaction) and `proceed-gate.py` (DO / NOT / CHECK on bare continuations,
+`INTENT.md` into the acceptance ledger). Those three passed the promotion gate on
+the week-of-Aug-30 evidence; their fire telemetry (`~/.claude/audit/hook-fires-*.jsonl`)
+is the two-week check that they earn their place.
 
 Organization-specific runtime capability belongs behind a separate plugin
 boundary that the profiles here do not enable: an overlay may reference an
@@ -160,6 +166,7 @@ bin/ scripts/     supporting tools
 tests/            hook and skill tests
 templates/        starter configs
 contracts/ manifests/  machine-readable component metadata
+codex/            Codex posture patch and AGENTS.md overlay (tool-neutral contracts)
 ```
 
 ## Recurring principles

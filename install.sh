@@ -597,12 +597,19 @@ if ask_yn "Install the recommended fresh-laptop core? (2 rules + 5 deterministic
         result-injection-guard.py
     )
     if (( operator_selected )); then
-        starter_rules+=(operator-discipline.md)
+        # The boundary artifacts (2026-09-06): session-boundaries.md is the
+        # boundary half of the deleted never-stop-early; compaction-budget and
+        # proceed-gate are the advisory hooks that raise it and feed the
+        # acceptance ledger (session_ledger.py) that session-start rehydrates.
+        starter_rules+=(operator-discipline.md session-boundaries.md)
         starter_hooks+=(
             atomic_write.py
             loop-detector.py
             prompt-secret-scan.py
             output-secret-redact.py
+            session_ledger.py
+            compaction-budget.py
+            proceed-gate.py
         )
     fi
 
@@ -651,6 +658,9 @@ if ask_yn "Install the recommended fresh-laptop core? (2 rules + 5 deterministic
             'PostToolUse|mcp__.*|Bash|Read|Glob|Grep|loop-detector.py|20'
             'UserPromptSubmit|.*|prompt-secret-scan.py|30'
             'PostToolUse|Bash|Read|mcp__.*|output-secret-redact.py|30'
+            'UserPromptSubmit|.*|compaction-budget.py|10'
+            'UserPromptSubmit|.*|proceed-gate.py|10'
+            'PostCompact||compaction-budget.py|10'
         )
     fi
 
