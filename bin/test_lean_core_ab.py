@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime as dt
 import importlib.util
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -148,3 +149,63 @@ def test_report_assigns_sessions_and_fires_by_arm_day(tmp_path):
     assert rep["verdict"]["decision"] == "INSUFFICIENT DATA"
     text = ab.render_report(rep)
     assert "verdict: INSUFFICIENT DATA" in text and "please do the thing" not in text
+
+
+def test_retro_reads_transcripts_directly_and_joins_rule_bytes(tmp_path):
+    import subprocess
+    root = tmp_path / "backup" / "proj"
+    root.mkdir(parents=True)
+
+    def write(name, day, model, corrected, blocked, compact):
+        rows = [
+            {"type": "user", "sessionId": name, "timestamp": f"{day}T09:00:00Z", "version": "2.1.260",
+             "message": {"role": "user", "content": "please do the thing"}},
+            {"type": "assistant", "message": {"role": "assistant", "model": model, "content": [
+                {"type": "tool_use", "name": "Bash", "input": {}}]}},
+            {"type": "user", "message": {"role": "user", "content": [
+                {"type": "tool_result", "content": "[credential-guard] BLOCKED: no" if blocked else "ok"}]}},
+            {"type": "assistant", "message": {"role": "assistant", "model": model, "content": [
+                {"type": "text", "text": "Done: 3 passed in tests/test_x.py"}]}},
+        ]
+        if compact:
+            rows.append({"type": "user", "isCompactSummary": True, "message": {"role": "user", "content": "summary"}})
+        if corrected:
+            rows.append({"type": "user", "message": {"role": "user", "content": "No, that's not what I asked"}})
+        (root / f"{name}.jsonl").write_text("\n".join(json.dumps(r) for r in rows) + "\n", encoding="utf-8")
+
+    write("s1", "2026-08-20", "claude-opus-5", corrected=True, blocked=True, compact=False)
+    write("s2", "2026-08-21", "claude-opus-5", corrected=False, blocked=False, compact=True)
+    write("s3", "2026-09-04", "claude-fable-5-1", corrected=False, blocked=False, compact=False)
+    # a sidechain file must not count as a session
+    (root / "agent.jsonl").write_text(json.dumps({"type": "user", "isSidechain": True, "timestamp": "2026-09-04T10:00:00Z",
+                                                  "message": {"role": "user", "content": "sub"}}) + "\n", encoding="utf-8")
+    # a configuration clone whose rules shrink on 2026-09-03
+    cfg = tmp_path / "cfg"
+    cfg.mkdir()
+    env = dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@e.x", GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@e.x")
+    git = lambda *a, **kw: subprocess.run(["git", "-C", str(cfg), *a], check=True, capture_output=True, env={**env, **kw})  # noqa: E731
+    git("init", "-q", "-b", "main")
+    (cfg / "rules").mkdir()
+    (cfg / "rules" / "big.md").write_text("# big\n" + "x" * 1000, encoding="utf-8")
+    (cfg / "rules" / "scoped.md").write_text("---\npaths:\n  - 'a/**'\n---\n" + "y" * 5000, encoding="utf-8")
+    git("add", "-A")
+    git("commit", "-q", "-m", "full", GIT_AUTHOR_DATE="2026-08-01T12:00:00Z", GIT_COMMITTER_DATE="2026-08-01T12:00:00Z")
+    (cfg / "rules" / "big.md").write_text("# big\n" + "x" * 100, encoding="utf-8")
+    git("add", "-A")
+    git("commit", "-q", "-m", "trim", GIT_AUTHOR_DATE="2026-09-03T12:00:00Z", GIT_COMMITTER_DATE="2026-09-03T12:00:00Z")
+
+    r = ab.retro(tmp_path / "backup", dt.datetime(2026, 9, 3, tzinfo=UTC), cfg, None)
+    assert r["sessions"] == 3
+    assert set(r["by_model"]) == {"claude-opus-5", "claude-fable-5-1"}
+    assert r["all"]["S1_safety_blocks_per_100_bash"] == round(100 / 3, 2)
+    assert r["all"]["S3_compactions_per_session"] == round(1 / 3, 2)
+    assert r["split"]["before"]["sessions"] == 2 and r["split"]["after"]["sessions"] == 1
+    assert r["split"]["before"]["P2_corrections_per_100_prompts"] == round(100 / 3, 2)
+    assert r["ambient_bytes_by_day"]["2026-08-20"] == 1006 and r["ambient_bytes_by_day"]["2026-09-04"] == 106
+    ranges = [b["ambient_bytes_range"] for b in r["by_ambient_bytes"]]
+    assert ranges == [[106, 106], [1006, 1006]]
+    assert r["split"]["decision_rule_applied_observationally"]["decision"] == "INSUFFICIENT DATA"
+    text = ab.render_retro(r)
+    assert "OBSERVATIONAL" in text and "please do the thing" not in text
+    plan_only = ab.retro(tmp_path / "backup", None, None, None, plan_models_only=True)
+    assert plan_only["sessions"] == 3

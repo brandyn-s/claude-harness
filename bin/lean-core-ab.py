@@ -27,8 +27,8 @@ COMMANDS
 
 METRICS (all from telemetry the harness already writes; nothing new is collected)
     P1  completion-evidence rate     transcript proxy: share of assistant completion
-                                     claims whose message carries evidence (a code
-                                     block, a path, a count) or follows a tool result
+                                     claims whose own text cites evidence (a code block,
+                                     a path, a count, a command result, a hash)
     P2  corrections / 100 prompts    transcript proxy: user turns that correct the
                                      model (a fixed phrase list, applied identically to
                                      both arms so its bias cancels in the ratio)
@@ -57,6 +57,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 from collections import Counter
 from pathlib import Path
@@ -236,10 +237,41 @@ def _parse_ts(value) -> dt.datetime | None:
     return t if t.tzinfo else t.replace(tzinfo=dt.timezone.utc)
 
 
+#: Guard tags whose BLOCKED line in a tool_result is a safety block (all live in
+#: bash-security-guard / destructive-ops-guard / security-write-confirm / script-content-guard).
+SAFETY_BLOCK_TAGS = ("credential-guard", "exfiltration-guard", "dangerous-command-guard", "bash-security-guard",
+                     "secret-store-guard", "env-var-diagnostic-guard", "process-listing-guard", "reverse-shell-guard",
+                     "destructive-ops-guard", "security-write-confirm", "script-content-guard", "org-guard")
+BLOCK_RE = re.compile(r"\[([a-z-]+)\] BLOCKED")
+
+
+def _tool_result_text(block: dict) -> str:
+    c = block.get("content")
+    if isinstance(c, str):
+        return c
+    if isinstance(c, list):
+        return " ".join(str(x.get("text", "")) for x in c if isinstance(x, dict))
+    return ""
+
+
 def _transcript_metrics(path: Path) -> dict:
-    """Counts only. Never returns text."""
-    m = {"prompts": 0, "corrections": 0, "tool_uses": 0, "claims": 0, "claims_with_evidence": 0,
-         "handoff": False, "start": None, "model": ""}
+    """Counts only. Never returns text.
+
+    Reads the main conversation of one transcript: prompts, corrections, tool
+    uses (and Bash uses), safety-guard BLOCKED results, completion claims and the
+    evidence beside them, compactions (isCompactSummary records), the models and
+    Claude Code version seen, the permission mode. A sidechain (subagent) file is
+    reported with sidechain=True so callers can skip it."""
+    m = {"prompts": 0, "corrections": 0, "tool_uses": 0, "bash_uses": 0, "safety_blocks": 0, "claims": 0,
+         "claims_with_evidence": 0, "claims_after_tool_result": 0, "compactions": 0, "handoff": False, "start": None, "end": None, "model": "",
+         "models": Counter(), "version": "", "permission_mode": "", "sidechain": False, "session_id": ""}
+    # Adjacency is measured in MESSAGE records that carry a text, tool_use or
+    # tool_result block. Transcripts also hold metadata records (attachment, mode,
+    # permission-mode, last-prompt, ai-title, atis-latch, ...) and thinking-only
+    # assistant records, and their density changed across Claude Code versions
+    # (2.1.220 -> 2.1.240 roughly doubled the records per turn); counting them
+    # would make "a tool result within three records" mean different things in
+    # different weeks, which is exactly the confound an arm comparison must not have.
     last_tool_result_idx = -10
     idx = 0
     try:
@@ -249,26 +281,61 @@ def _transcript_metrics(path: Path) -> dict:
                     rec = json.loads(line)
                 except ValueError:
                     continue
-                idx += 1
-                if m["start"] is None:
-                    m["start"] = _parse_ts(rec.get("timestamp"))
+                ts = _parse_ts(rec.get("timestamp"))
+                if ts:
+                    m["start"] = m["start"] or ts
+                    m["end"] = ts
+                if rec.get("isSidechain") is True:
+                    m["sidechain"] = True
+                if rec.get("isCompactSummary"):
+                    m["compactions"] += 1
+                    continue                                   # the summary is not a human prompt
+                m["session_id"] = m["session_id"] or str(rec.get("sessionId") or "")
+                m["version"] = m["version"] or str(rec.get("version") or "")
+                if rec.get("type") == "permission-mode" or rec.get("permissionMode"):
+                    m["permission_mode"] = str(rec.get("permissionMode") or rec.get("mode") or m["permission_mode"])
                 msg = rec.get("message") or {}
+                if not isinstance(msg, dict):
+                    continue
                 role = msg.get("role") or rec.get("type")
                 content = msg.get("content")
                 blocks = content if isinstance(content, list) else [{"type": "text", "text": content}] if isinstance(content, str) else []
+                substantive = [b for b in blocks if isinstance(b, dict) and b.get("type") in ("text", "tool_use", "tool_result")
+                               and (b.get("type") != "text" or str(b.get("text") or "").strip())]
+                if not substantive:
+                    continue                                   # thinking-only or metadata: not a message step
+                idx += 1
                 if role == "assistant":
-                    m["model"] = m["model"] or str(msg.get("model") or "")
+                    model = str(msg.get("model") or "")
+                    if model and not model.startswith("<"):
+                        m["models"][model] += 1
+                        m["model"] = m["model"] or model
                     text = " ".join(b.get("text", "") for b in blocks if isinstance(b, dict) and b.get("type") == "text")
-                    m["tool_uses"] += sum(1 for b in blocks if isinstance(b, dict) and b.get("type") == "tool_use")
+                    for b in blocks:
+                        if isinstance(b, dict) and b.get("type") == "tool_use":
+                            m["tool_uses"] += 1
+                            if b.get("name") == "Bash":
+                                m["bash_uses"] += 1
                     if text and CLAIM_RE.search(text):
                         m["claims"] += 1
-                        if EVIDENCE_RE.search(text) or idx - last_tool_result_idx <= 3:
+                        # Evidence is what the CLAIM ITSELF cites -- a path, a count, a
+                        # command result, a hash. "A tool result happened recently" was tried
+                        # and saturates at 98-99% in agentic sessions (nearly every text
+                        # follows a tool result), so it measured nothing.
+                        if EVIDENCE_RE.search(text):
                             m["claims_with_evidence"] += 1
+                        if idx - last_tool_result_idx <= 3:
+                            m["claims_after_tool_result"] += 1
                     if HANDOFF_RE.search(text):
                         m["handoff"] = True
                 elif role == "user":
-                    if any(isinstance(b, dict) and b.get("type") == "tool_result" for b in blocks):
+                    results = [b for b in blocks if isinstance(b, dict) and b.get("type") == "tool_result"]
+                    if results:
                         last_tool_result_idx = idx
+                        for b in results:
+                            for tag in BLOCK_RE.findall(_tool_result_text(b)):
+                                if tag in SAFETY_BLOCK_TAGS:
+                                    m["safety_blocks"] += 1
                         continue
                     text = " ".join(b.get("text", "") for b in blocks if isinstance(b, dict) and b.get("type") == "text")
                     if not text.strip() or text.lstrip().startswith("<"):
@@ -278,6 +345,9 @@ def _transcript_metrics(path: Path) -> dict:
                         m["corrections"] += 1
     except OSError:
         pass
+    if m["models"]:
+        m["model"] = m["models"].most_common(1)[0][0]
+    m["models"] = dict(m["models"])
     return m
 
 
@@ -350,6 +420,213 @@ def hook_fires(claude_dir: Path, since: dt.datetime | None) -> list[dict]:
     return rows
 
 
+# ── retrospective (observational) ───────────────────────────────────────────
+
+def _scan_transcript(path: str) -> dict:
+    m = _transcript_metrics(Path(path))
+    m["path"] = path
+    m["start"] = m["start"].isoformat() if m["start"] else None
+    m["end"] = m["end"].isoformat() if m["end"] else None
+    return m
+
+
+def transcript_sessions(root: Path, since: dt.datetime | None = None) -> list[dict]:
+    """One row per main-conversation transcript under `root` (sidechains and files
+    with no human prompt are dropped). Counts only."""
+    from concurrent.futures import ProcessPoolExecutor
+    files = [str(p) for p in root.rglob("*.jsonl")]
+    rows = []
+    with ProcessPoolExecutor() as pool:
+        for m in pool.map(_scan_transcript, files, chunksize=8):
+            if m["sidechain"] or m["prompts"] == 0 or not m["start"]:
+                continue
+            m["start"] = dt.datetime.fromisoformat(m["start"])
+            if since and m["start"] < since:
+                continue
+            rows.append(m)
+    # the same session can appear in more than one backup directory: keep the fullest copy
+    best: dict[str, dict] = {}
+    for m in rows:
+        key = m["session_id"] or m["path"]
+        if key not in best or m["prompts"] > best[key]["prompts"]:
+            best[key] = m
+    return sorted(best.values(), key=lambda m: m["start"])
+
+
+def ambient_bytes_history(config_repo: Path, start: dt.date, end: dt.date) -> dict[str, int]:
+    """date -> ambient rule bytes at the last commit of that day, from a clone of the
+    configuration repository (rules/*.md without paths: frontmatter). Read-only git."""
+    def git(*args):
+        return subprocess.run(["git", "-C", str(config_repo), *args], capture_output=True, text=True, check=True).stdout
+    out: dict[str, int] = {}
+    cache: dict[str, int] = {}
+    day = start
+    while day <= end:
+        rev = git("rev-list", "-1", f"--before={day.isoformat()}T23:59:59", "HEAD").strip()
+        if rev:
+            tree = git("rev-parse", f"{rev}:rules").strip() if _git_has(config_repo, f"{rev}:rules") else ""
+            if tree and tree not in cache:
+                total = 0
+                for line in git("ls-tree", "-l", rev, "rules/").splitlines():
+                    meta, _, path = line.partition("\t")
+                    parts = meta.split()
+                    if len(parts) < 4 or parts[1] != "blob" or not path.endswith(".md"):
+                        continue
+                    head = git("show", f"{rev}:{path}")[:1200]
+                    try:
+                        scoped = has_paths_frontmatter(head)
+                    except Exception:
+                        scoped = False
+                    if not scoped:
+                        total += int(parts[3])
+                cache[tree] = total
+            if tree:
+                out[day.isoformat()] = cache[tree]
+        day += dt.timedelta(days=1)
+    return out
+
+
+def _git_has(repo: Path, spec: str) -> bool:
+    return subprocess.run(["git", "-C", str(repo), "cat-file", "-e", spec], capture_output=True).returncode == 0
+
+
+def _aggregate(rows: list[dict]) -> dict:
+    c = Counter()
+    days = set()
+    for m in rows:
+        c["sessions"] += 1
+        days.add(m["start"].date().isoformat())
+        for k in ("prompts", "corrections", "tool_uses", "bash_uses", "safety_blocks", "claims",
+                  "claims_with_evidence", "compactions"):
+            c[k] += int(m.get(k) or 0)
+        if m.get("claims", 0) == 0 and not m.get("handoff"):
+            c["abandoned"] += 1
+    return {
+        "sessions": c["sessions"], "days": len(days),
+        "P1_completion_evidence_rate_pct": _rate(c["claims_with_evidence"], c["claims"]),
+        "P2_corrections_per_100_prompts": _rate(c["corrections"], c["prompts"]),
+        "S1_safety_blocks_per_100_bash": _rate(c["safety_blocks"], c["bash_uses"]),
+        "S2_actions_per_prompt": _rate(c["tool_uses"], c["prompts"], 1.0),
+        "S3_compactions_per_session": _rate(c["compactions"], c["sessions"], 1.0),
+        "S5_abandonment_pct": _rate(c["abandoned"], c["sessions"]),
+        "_counts": dict(c),
+    }
+
+
+def retro(root: Path, split: dt.datetime | None, config_repo: Path | None, since: dt.datetime | None,
+          plan_models_only: bool = False) -> dict:
+    """Observational read of the transcripts: the plan's metrics per period, per model,
+    and -- when a configuration clone is given -- per rule-corpus size on the session's
+    day. Every session ran under whatever rules were live that day; nothing here was
+    randomised, so this is the baseline and a dose-response sketch, not the A/B."""
+    rows = transcript_sessions(root, since)
+    if plan_models_only:
+        rows = [m for m in rows if any(tag in (m.get("model") or "").lower() for tag in PLAN_MODELS)]
+    out: dict = {"root": str(root), "sessions": len(rows), "since": since.isoformat() if since else None,
+                 "first": rows[0]["start"].date().isoformat() if rows else None,
+                 "last": rows[-1]["start"].date().isoformat() if rows else None,
+                 "plan_models_only": plan_models_only}
+    out["all"] = _aggregate(rows)
+    by_model: dict[str, list] = {}
+    for m in rows:
+        by_model.setdefault(m.get("model") or "unknown", []).append(m)
+    out["by_model"] = {k: _aggregate(v) for k, v in sorted(by_model.items(), key=lambda kv: -len(kv[1]))}
+    by_week: dict[str, list] = {}
+    for m in rows:
+        iso = m["start"].isocalendar()
+        by_week.setdefault(f"{iso[0]}-W{iso[1]:02d}", []).append(m)
+    out["by_week"] = {k: _aggregate(v) for k, v in sorted(by_week.items())}
+    if split:
+        before = [m for m in rows if m["start"] < split]
+        after = [m for m in rows if m["start"] >= split]
+        out["split"] = {"date": split.date().isoformat(), "before": _aggregate(before), "after": _aggregate(after)}
+        a, b = out["split"]["before"], out["split"]["after"]
+        metrics = {"A": {**a, "arm_days": a["days"], "flagged_model_sessions": 0},
+                   "B": {**b, "arm_days": b["days"], "flagged_model_sessions": 0}}
+        out["split"]["decision_rule_applied_observationally"] = decide(metrics)
+    if config_repo and rows:
+        hist = ambient_bytes_history(config_repo, rows[0]["start"].date(), rows[-1]["start"].date())
+        out["ambient_bytes_by_day"] = hist
+        for m in rows:
+            m["ambient_bytes"] = hist.get(m["start"].date().isoformat())
+        with_bytes = [m for m in rows if m.get("ambient_bytes")]
+        values = sorted({m["ambient_bytes"] for m in with_bytes})
+        # per-session rows (dates, model, corpus size, counts -- no text) so the JSON can be re-cut
+        out["session_rows"] = [{"date": m["start"].date().isoformat(), "model": m.get("model") or "unknown",
+                                "ambient_bytes": m.get("ambient_bytes"), "version": m.get("version"),
+                                **{k: int(m.get(k) or 0) for k in ("prompts", "corrections", "tool_uses", "bash_uses",
+                                                                    "safety_blocks", "claims", "claims_with_evidence",
+                                                                    "compactions")},
+                                "handoff": bool(m.get("handoff"))} for m in rows]
+        if values:
+            # bins: contiguous ranges of distinct corpus sizes, at most 5 bins
+            n_bins = min(5, len(values))
+            edges = [values[int(i * len(values) / n_bins)] for i in range(n_bins)] + [values[-1] + 1]
+            bins = []
+            for i in range(n_bins):
+                lo, hi = edges[i], edges[i + 1]
+                members = [m for m in with_bytes if lo <= m["ambient_bytes"] < hi]
+                if members:
+                    bins.append({"ambient_bytes_range": [lo, max(m["ambient_bytes"] for m in members)],
+                                 "dates": [min(m["start"] for m in members).date().isoformat(),
+                                           max(m["start"] for m in members).date().isoformat()],
+                                 **_aggregate(members)})
+            out["by_ambient_bytes"] = bins
+            # the same bins within each model: the dose-response the model mix would otherwise hide
+            strat: dict[str, dict] = {}
+            for model, members in by_model.items():
+                if len(members) < 15:
+                    continue
+                for b in bins:
+                    lo, hi = b["ambient_bytes_range"]
+                    sub = [m for m in members if m.get("ambient_bytes") and lo <= m["ambient_bytes"] <= hi]
+                    if len(sub) >= 5:
+                        strat[f"{model} @ {lo:,}–{hi:,} B"] = _aggregate(sub)
+            out["by_model_and_ambient_bytes"] = strat
+    return out
+
+
+def render_retro(r: dict) -> str:
+    keys = ("sessions", "days", "P1_completion_evidence_rate_pct", "P2_corrections_per_100_prompts",
+            "S1_safety_blocks_per_100_bash", "S2_actions_per_prompt", "S3_compactions_per_session", "S5_abandonment_pct")
+    short = {"sessions": "sessions", "days": "days", "P1_completion_evidence_rate_pct": "P1 evid%",
+             "P2_corrections_per_100_prompts": "P2 corr/100", "S1_safety_blocks_per_100_bash": "S1 blk/100bash",
+             "S2_actions_per_prompt": "S2 act/prompt", "S3_compactions_per_session": "S3 compact/sess",
+             "S5_abandonment_pct": "S5 aband%"}
+    fmt = lambda v: "-" if v is None else str(v)  # noqa: E731
+
+    def table(title, groups: dict):
+        lines = ["", title, f"{'group':<28}" + "".join(f"{short[k]:>16}" for k in keys)]
+        for name, agg in groups.items():
+            lines.append(f"{str(name)[:28]:<28}" + "".join(f"{fmt(agg.get(k)):>16}" for k in keys))
+        return lines
+    out = [f"retrospective read of {r['sessions']} sessions, {r['first']} → {r['last']}, under {r['root']}"
+           + ("  [plan models only]" if r.get("plan_models_only") else ""),
+           "OBSERVATIONAL: every session ran under the rules live that day; no arm was assigned."]
+    out += table("by model", r["by_model"])
+    out += table("by ISO week", r["by_week"])
+    if r.get("by_ambient_bytes"):
+        groups = {f"{b['ambient_bytes_range'][0]:,}–{b['ambient_bytes_range'][1]:,} B ({b['dates'][0]}..{b['dates'][1]})": b
+                  for b in r["by_ambient_bytes"]}
+        out += table("by ambient rule bytes on the session's day (from the configuration repo's history)", groups)
+    if r.get("by_model_and_ambient_bytes"):
+        out += table("by model × ambient rule bytes (≥ 15 sessions per model, ≥ 5 per cell)", r["by_model_and_ambient_bytes"])
+    if r.get("split"):
+        sp = r["split"]
+        out += table(f"before / after {sp['date']}", {"before": sp["before"], "after": sp["after"]})
+        v = sp["decision_rule_applied_observationally"]
+        out.append("")
+        out.append(f"decision rule applied to before→after (observational, confounded by model and task mix): {v['decision']}")
+        for name, ok in (v.get("checks") or {}).items():
+            out.append(f"  {'ok  ' if ok else 'FAIL'} {name}")
+        if v.get("why"):
+            out.append(f"  {v['why']}")
+    out.append("")
+    out.append("P1/P2/S2/S5 are regex proxies over transcripts; S1 counts guard BLOCKED tool results per 100 Bash calls; "
+               "S3 counts isCompactSummary records. None of this is the A/B; it is the denominator the A/B starts from.")
+    return "\n".join(out)
+
+
 # ── report ──────────────────────────────────────────────────────────────────
 
 def _rate(num: float, den: float, scale: float = 100.0):
@@ -361,6 +638,7 @@ def build_report(claude_dir: Path, since: dt.datetime | None) -> dict:
     per_arm = {a: Counter() for a in ("A", "B")}
     flagged = Counter()
     arm_days = {a: set() for a in ("A", "B")}
+    versions = {a: Counter() for a in ("A", "B")}
     for s in sessions(claude_dir, since):
         arm = arm_for(s["start"], log)
         if arm not in per_arm:
@@ -368,6 +646,7 @@ def build_report(claude_dir: Path, since: dt.datetime | None) -> dict:
         c = per_arm[arm]
         c["sessions"] += 1
         arm_days[arm].add(s["start"].date().isoformat())
+        versions[arm][str(s.get("version") or "unknown")] += 1
         for k in ("prompts", "corrections", "tool_uses", "claims", "claims_with_evidence", "compactions"):
             c[k] += int(s.get(k) or 0)
         if s.get("claims", 0) == 0 and not s.get("handoff"):
@@ -389,6 +668,7 @@ def build_report(claude_dir: Path, since: dt.datetime | None) -> dict:
             "sessions": c["sessions"],
             "arm_days": len(arm_days[arm]),
             "flagged_model_sessions": flagged[arm],
+            "client_versions": dict(versions[arm].most_common()),
             "P1_completion_evidence_rate_pct": _rate(c["claims_with_evidence"], c["claims"]),
             "P2_corrections_per_100_prompts": _rate(c["corrections"], c["prompts"]),
             "S1_safety_blocks_per_100_bash": _rate(c["safety_blocks"], c["bash_calls"]),
@@ -397,8 +677,15 @@ def build_report(claude_dir: Path, since: dt.datetime | None) -> dict:
             "S5_abandonment_pct": _rate(c["abandoned"], c["sessions"]),
             "_counts": dict(c),
         }
+    verdict = decide(metrics)
+    # A client version that lands on one arm's days more than the other's is a
+    # confound the proxies are known to be sensitive to (plan §Baseline).
+    top = {a: (versions[a].most_common(1)[0][0] if versions[a] else None) for a in ("A", "B")}
+    if top["A"] and top["B"] and top["A"] != top["B"]:
+        verdict["client_version_warning"] = (f"dominant Claude Code version differs by arm (A {top['A']}, B {top['B']}); "
+                                             f"extend the run two days rather than reading this as an arm effect")
     return {"since": since.isoformat() if since else None, "arm_log_entries": len(log), "arms": metrics,
-            "verdict": decide(metrics)}
+            "verdict": verdict}
 
 
 def decide(metrics: dict) -> dict:
@@ -441,7 +728,7 @@ def render_report(rep: dict) -> str:
     v = rep["verdict"]
     lines.append("")
     lines.append(f"verdict: {v['decision']}")
-    for k in ("why", "failing", "payoff"):
+    for k in ("why", "failing", "payoff", "client_version_warning"):
         if v.get(k):
             lines.append(f"  {k}: {v[k]}")
     if v.get("checks"):
@@ -488,6 +775,13 @@ def main() -> int:
     r = sub.add_parser("report")
     r.add_argument("--since", default=None, help="YYYY-MM-DD")
     r.add_argument("--json", action="store_true")
+    t = sub.add_parser("retro", help="observational baseline straight from a transcript directory")
+    t.add_argument("--transcripts", required=True, help="directory of transcripts (recursive), e.g. a backup")
+    t.add_argument("--split", default=None, help="YYYY-MM-DD: report before/after this date and apply the rule observationally")
+    t.add_argument("--rules-history", default=None, help="clone of the configuration repo: ambient rule bytes per day")
+    t.add_argument("--since", default=None, help="YYYY-MM-DD")
+    t.add_argument("--plan-models-only", action="store_true", help="keep only sessions on the models the plan names")
+    t.add_argument("--json", default=None, help="write the full result here")
     args = ap.parse_args()
     cdir = Path(args.claude_dir)
     if args.cmd == "build-lean":
@@ -511,6 +805,15 @@ def main() -> int:
     since = None
     if args.since:
         since = dt.datetime.strptime(args.since, "%Y-%m-%d").replace(tzinfo=dt.timezone.utc)
+    if args.cmd == "retro":
+        split = dt.datetime.strptime(args.split, "%Y-%m-%d").replace(tzinfo=dt.timezone.utc) if args.split else None
+        res = retro(Path(os.path.expanduser(args.transcripts)), split,
+                    Path(os.path.expanduser(args.rules_history)) if args.rules_history else None, since,
+                    args.plan_models_only)
+        print(render_retro(res))
+        if args.json:
+            Path(args.json).write_text(json.dumps(res, indent=2, sort_keys=True, default=str), encoding="utf-8")
+        return 0
     rep = build_report(cdir, since)
     print(json.dumps(rep, indent=2, sort_keys=True, default=str) if args.json else render_report(rep))
     return 0

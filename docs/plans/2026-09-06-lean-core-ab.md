@@ -14,7 +14,9 @@ completion-evidence rate or raising the correction rate.
 **Falsifiers.** A lower completion-evidence rate in the lean arm beyond the margin
 below; more corrections per prompt; more safety-hook blocks (the guards were never
 what the rules did, so a rise means the rules were doing guard work). Any one of
-these fails the decision rule and starts the bisect.
+these fails the decision rule and starts the bisect. A metric that moves at a
+Claude Code version boundary rather than an arm boundary falsifies the proxy, not
+the hypothesis (see §Baseline for the one this already happened to).
 
 **Demo line.** `python3 bin/lean-core-ab.py report --since <day 1>` prints
 `verdict: ADOPT` or `verdict: BISECT <family>` from ten arm-days and at least
@@ -81,7 +83,7 @@ flagged share differs between arms by more than ten points.
 
 | Metric | Source | Direction that supports B |
 |---|---|---|
-| **P1** completion-evidence rate: share of completion claims carrying evidence | transcript proxy in `bin/lean-core-ab.py` (a claim = an assistant message matching the fixed claim regex; evidence = a code block, a path, a count, or a tool result within three records) | not lower |
+| **P1** completion-evidence rate: share of completion claims carrying evidence | transcript proxy in `bin/lean-core-ab.py` (a claim = an assistant message matching the fixed claim regex; evidence = the claim's own text cites a code block, a path, a count, a command result or a hash) | not lower |
 | **P2** corrections per 100 human prompts | transcript proxy: user turns matching the fixed correction regex | not higher |
 | **S1** safety-hook block rate: exit 2 on `bash-security-guard`, `destructive-ops-guard`, `security-write-confirm`, `script-content-guard` per 100 Bash calls | `~/.claude/audit/hook-fires-*.jsonl` (`bash-pretooluse-dispatcher` fires are the denominator) | not higher |
 | **S2** model actions per human prompt | transcript proxy: `tool_use` blocks / prompts | lower |
@@ -128,6 +130,69 @@ margins rather than significance tests, and why the primary risk metric (P1) is
 measured per claim, not per session (claims number in the hundreds per week).
 Sessions are not independent (same human, same week); treat the result as an
 operational decision, not a paper.
+
+## Baseline and natural experiment (read 2026-09-06, before day 1)
+
+`bin/lean-core-ab.py retro` reads the metrics straight from a transcript backup
+and joins each session to the ambient rule bytes live on its day (from the
+configuration repository's history). Run over 3,403 transcripts → 521 sessions on
+the plan's models (Opus 5, Fable 5, Fable 5.1), 2026-07-05 → 09-06. Everything in
+this section is **observational**: no arm was assigned, task mix moved with the
+calendar, and the Claude Code client went through twelve versions.
+
+**What the corpus did.** The ambient corpus was 436–628 KB from July 5 to
+August 8, dropped to 153 KB on **August 9** (a reconcile pass: 36 rule files,
+−8,481 / +2,124 lines), and regrew to 206 KB by August 30 (`verify-effectiveness`
++301 lines, `rule-authoring` +229, `tdd-quality` +193, `tdd-mutation-testing`
++187, `platform-constraints` +168, …). The ratchet steps of September 3–4 changed
+it by less than 100 bytes net. So the history contains one large cut and a slow
+regrowth — a 4× range, which is more than the plan's arms will span.
+
+**The proxy had a client-version artifact, now removed.** The first P1 definition
+counted "a tool result within three transcript records" as evidence and dropped
+from 79% to 45% on **August 22** — the day the client went 2.1.226 → 2.1.240 and
+started writing roughly twice as many metadata and thinking-only records per turn,
+so three records stopped reaching back to the tool result. Nothing about rules or
+models changed that day. P1 is now the share of completion claims whose **own
+text** cites evidence (a path, a count, a command result, a hash); it reads
+36–48% across every client version with no discontinuity. Every arm comparison
+must be robust to this: the report stratifies by client version, and a proxy that
+moves at a version boundary is a bug in the proxy.
+
+**Baseline (plan models, v3 proxy).** P1 39–47% by model (Opus 5 39.0, Fable 5
+43.9, Fable 5.1 46.7); P2 0.25–0.50 corrections per 100 prompts; S1 0.6–0.9
+safety blocks per 100 Bash calls; S2 20–24 actions per prompt; S3 0.12–0.36
+compactions per session.
+
+**The August 9 cut, as a natural experiment.** Opus 5 on one client line:
+
+| window | ambient bytes | sessions | P1 | P2 | S1 | S2 |
+|---|---|---|---|---|---|---|
+| W31 (Jul 27 – Aug 2), client 2.1.220 | 509–577 KB | 80 | 38.7 | 0.15 | 0.81 | 20.1 |
+| W33 (Aug 10 – 16), client 2.1.226 | 153–173 KB | 43 | 41.0 | 0.00 | 0.86 | 23.1 |
+| W34 (Aug 17 – 23) | 174–181 KB | 25 | 39.1 | 0.00 | 0.72 | 18.0 |
+
+A 75% cut in the ambient corpus, same model, adjacent client versions: the
+evidence rate held, corrections went to zero for two weeks, safety blocks did not
+move. The decision rule applied to W31 → W33 passes all three checks. This is the
+null result the hypothesis called "acceptable and informative" — the relocated
+bytes were inert — with the caveats that the weeks were not randomised and that
+the plan's lean arm (≤ 60 KB) is a further 2.5–3× cut the history does not cover.
+
+Across the whole window, before/after August 9 (205 vs 316 sessions) passes P1
+(37.5 → 42.3) and S1 (0.70 → 0.68) and fails P2 (0.23 → 0.35), and the P2 rise is
+entirely in W35–W36 — when the corpus had regrown to 206 KB, the client churned
+through six versions, and the work turned to two weeks of harness and
+configuration refactoring. Attributing it to any one of those is not possible
+from this data; that is what the prospective run is for. Within each model, the
+smallest-corpus period (153–179 KB) is the best or tied-best on both primary
+metrics.
+
+**What this changes about the run.** Nothing in the rule. Two things in the
+procedure: the report stratifies by client version, and if the client updates
+mid-run, the day is noted in the arm log (a version change that lands on one arm's
+days more than the other's is a reason to extend the run by two days, not to edit
+the rule).
 
 ## The canary is the regression check, not the experiment
 
