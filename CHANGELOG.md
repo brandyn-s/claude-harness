@@ -55,7 +55,21 @@ from the 2026-09-06 evaluation.
   decision rule and bisect order.
 - `bin/skill-usage-report.py` and `docs/skill-listing-decisions.md`: skill
   invocation counts from transcripts and the `skillOverrides` decisions they
-  support (23 skills `name-only`).
+  support (23 skills `name-only`). `skills/roundtable/skill-usage-audit.py` is a
+  front over it.
+- `bin/lean-core-ab.py retro`: the plan's metrics straight from a transcript
+  backup, joined to the ambient rule bytes live on each session's day; the plan's
+  §Baseline records the natural experiment it found and the client-version
+  artifact it removed from the P1 proxy.
+- `bin/replay-script-content-guard.py --check` and `.githooks/pre-push`: the
+  guard replay as a gate when a push changes the guard predicates.
+- `bin/codex-posture-check.py`: the Codex install against `codex/config.toml.patch`.
+- `bin/upstream-check.py --pin`: classify an existing overlay before it adopts the
+  contract; the adoption procedure in `docs/consuming-from-a-private-overlay.md`.
+- Residue gate: two structural rules — a vendor's per-tenant subdomain, an email
+  address at a non-placeholder domain.
+- `.gitattributes`: the marketplace catalog and version ledger are
+  `linguist-generated`; `AGENTS.md` §2 records why the bundles stay committed.
 
 ### Changed
 
