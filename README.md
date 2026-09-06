@@ -4,7 +4,7 @@ A working [Claude Code](https://docs.claude.com/en/docs/claude-code) harness:
 **<!-- count:hooks -->53<!-- /count --> hook scripts** (plus <!-- count:hook_modules -->9<!-- /count --> shared modules),
 **<!-- count:rules -->34<!-- /count --> rules** (<!-- count:rules_ambient -->27<!-- /count --> of them always loaded),
 **<!-- count:skills -->82<!-- /count --> skills**, and the <!-- count:agents -->6<!-- /count --> agent definitions that
-tie them together — <!-- count:source_files -->1,678<!-- /count --> tracked source files, plus a
+tie them together — <!-- count:source_files -->1,682<!-- /count --> tracked source files, plus a
 generated plugin tree under `marketplace/` (another <!-- count:marketplace_files -->1,074<!-- /count -->
 files) that is not meant to be read (see [marketplace/README.md](marketplace/README.md)).
 The numbers in this file are generated from the tree by `bin/build-doc-counts.py`
@@ -308,7 +308,9 @@ posture (`workspace-write`, `on-request`, `approvals_reviewer = "auto_review"`) 
 ≤ 60-line `AGENTS.md` overlay with the same frame / evidence / scope / session-boundary
 contracts and per-model notes for GPT-5.6 and GPT-6 Astra. Codex runs none of the
 hooks here, so for Codex the overlay is the whole advisory layer and the sandbox is
-the whole enforcement layer. See [`codex/README.md`](codex/README.md).
+the whole enforcement layer. `bin/codex-posture-check.py` reads the installed
+`~/.codex/config.toml` and fails when the enforcement keys are not the documented
+posture. See [`codex/README.md`](codex/README.md).
 
 ## Advanced full-mirror synchronization
 

@@ -10,6 +10,23 @@ carries the other half: the **posture** Codex should run under, and the
 | `config.toml.patch` | Two-line posture change plus one table: `workspace-write`, `on-request`, `approvals_reviewer = "auto_review"`, network off by default | `~/.codex/config.toml` (apply by hand; verify keys against your installed version) |
 | `AGENTS.overlay.md` | ≤ 60 lines: frame first, evidence over assertion, scope, failure, session boundaries, sandbox expectations, per-model notes for GPT-5.6 / GPT-6 Astra, the journal ledger | append to each Codex project's `AGENTS.md`, or make it the whole file where none exists |
 
+## Checking that the patch was applied
+
+```bash
+python3 bin/codex-posture-check.py                 # ~/.codex/config.toml
+python3 bin/codex-posture-check.py --project .     # also this repo's .codex/config.toml overrides
+```
+
+The patch is applied by hand, so this is the gate: it reads the config, compares
+`approval_policy`, `sandbox_mode`, `approvals_reviewer` and
+`sandbox_workspace_write.network_access` with the posture above (profiles too — a
+safe default with an unsafe profile one flag away is the posture the flag
+selects), and exits 1 when either enforcement key drifts (`never`,
+`danger-full-access`, or unset). A per-project `network_access = true` is the
+documented override and passes. Nothing is written. On 2026-09-06 the author's own
+install failed it on both enforcement keys — the patch had been written and not
+applied — which is the reason the check exists.
+
 ## Why both halves matter
 
 A workstation that runs Claude Code inside the native sandbox with `acceptEdits`
