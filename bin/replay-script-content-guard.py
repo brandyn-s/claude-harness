@@ -19,6 +19,20 @@ committed. Read-only; touches nothing under ~/.claude except to read.
     python3 bin/replay-script-content-guard.py                 # ~/.claude/projects
     python3 bin/replay-script-content-guard.py --root <dir>    # another projects dir
     python3 bin/replay-script-content-guard.py --json out.json
+    python3 bin/replay-script-content-guard.py --check         # the pre-push gate (below)
+
+THE PRE-PUSH GATE (--check)
+    The corpus is the only oracle the guards have, and CI cannot see it; so the
+    gate runs at the keyboard. `.githooks/pre-push` calls `--check` when a push
+    touches hooks/bash-security-guard.py, hooks/script-content-guard.py or
+    hooks/bash_policy_tables.py. It fails when the fire rate is above the gate,
+    when the python-native exfiltration fires exceed the number recorded in
+    hooks/manifests/script-content-guard.yaml by more than --python-native-slack
+    (default 2), or when the analysis reports an internal error. The corpus root
+    is --root, else $CLAUDE_TRANSCRIPT_CORPUS, else the newest directory under
+    ~/claude-transcript-backups, else ~/.claude/projects. A machine with no corpus
+    at all passes with a note: an absent oracle is not a failed one, and the
+    manifest's recorded numbers are what a reviewer compares against.
 """
 from __future__ import annotations
 
@@ -109,17 +123,71 @@ def _scan_file(path_str: str) -> dict:
     return out
 
 
+MANIFEST = REPO / "hooks" / "manifests" / "script-content-guard.yaml"
+PY_NATIVE_MARK = "Python source sends"
+
+
+def default_root() -> Path | None:
+    """--root, else $CLAUDE_TRANSCRIPT_CORPUS, else the newest transcript backup, else ~/.claude/projects."""
+    env = os.environ.get("CLAUDE_TRANSCRIPT_CORPUS")
+    if env:
+        return Path(os.path.expanduser(env))
+    backups = Path.home() / "claude-transcript-backups"
+    if backups.is_dir():
+        dated = sorted(p for p in backups.iterdir() if p.is_dir() and p.name[:4].isdigit())
+        if dated:
+            return dated[-1]
+    projects = Path.home() / ".claude" / "projects"
+    return projects if projects.is_dir() else None
+
+
+def recorded_measurement() -> dict:
+    """The numbers the manifest records for the shipped predicate (a flat YAML subset)."""
+    out = {}
+    try:
+        in_block = False
+        for line in MANIFEST.read_text(encoding="utf-8").splitlines():
+            if line.startswith("measurement:"):
+                in_block = True
+                continue
+            if in_block and line and not line.startswith(" "):
+                break
+            if in_block and line.startswith("  ") and not line.startswith("    "):
+                key, _, value = line.strip().partition(":")
+                value = value.strip()
+                if value.isdigit():
+                    out[key] = int(value)
+                else:
+                    try:
+                        out[key] = float(value)
+                    except ValueError:
+                        pass
+    except OSError:
+        pass
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("--root", default=os.path.expanduser("~/.claude/projects"))
+    ap.add_argument("--root", default=None, help="transcript corpus (default: see default_root)")
     ap.add_argument("--json", help="write the machine-readable report here")
     ap.add_argument("--gate", type=float, default=10.0, help="fire-rate %% above which the predicate is too broad")
+    ap.add_argument("--check", action="store_true", help="exit 1 on regression against the manifest's recorded numbers")
+    ap.add_argument("--python-native-slack", type=int, default=2,
+                    help="--check: allowed growth in python-native exfil fires over the recorded count")
     args = ap.parse_args()
 
     os.environ["CLAUDE_SCRIPT_CONTENT_GUARD"] = "block"
     _load_hook()  # fail fast here if the hook or the guard cannot import
 
-    root = Path(args.root)
+    root = Path(os.path.expanduser(args.root)) if args.root else default_root()
+    if root is None or not root.is_dir():
+        if args.check:
+            print(f"replay --check: no transcript corpus on this machine ({root}); nothing to replay against. "
+                  f"The manifest's recorded measurement stands; a reviewer with a corpus should run this.")
+            return 0
+        print(f"replay: no transcript corpus at {root}", file=sys.stderr)
+        return 2
     files = sorted(root.glob("*/*.jsonl")) + sorted(root.glob("*/*/*.jsonl"))
     sessions = 0
     script_writes = 0
@@ -179,6 +247,30 @@ def main() -> int:
         print(f"   {d}  {t:32s} {tool:9s} {p}:{ln}")
     if len(fires) > 40:
         print(f"   ... {len(fires) - 40} more (see --json)")
+    if not args.check:
+        return 0
+
+    # ── the gate ──────────────────────────────────────────────────────────
+    py_native = sum(1 for x in fires if PY_NATIVE_MARK in (x[5] or ""))
+    recorded = recorded_measurement()
+    rec_py = recorded.get("python_native_exfil_fires")
+    rec_rate = recorded.get("fire_rate_pct")
+    problems = []
+    if report["too_broad"]:
+        problems.append(f"fire rate {rate:.2f}% is above the {args.gate}% gate")
+    if rec_py is not None and py_native > rec_py + args.python_native_slack:
+        problems.append(f"python-native exfil fires {py_native} > recorded {rec_py} + slack {args.python_native_slack}")
+    if rec_rate is not None and rate > 2 * rec_rate + 1.0:
+        problems.append(f"fire rate {rate:.2f}% is more than double the recorded {rec_rate}% (+1 point)")
+    print("")
+    print(f"replay --check: python-native fires {py_native} (recorded {rec_py}); fire rate {rate:.2f}% (recorded {rec_rate}%)")
+    if problems:
+        for pr in problems:
+            print(f"  FAIL {pr}", file=sys.stderr)
+        print("  A predicate change that moves these needs a new calibration entry in the manifest, not a push.",
+              file=sys.stderr)
+        return 1
+    print("  ok   within the recorded calibration")
     return 0
 
 
