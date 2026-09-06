@@ -36,8 +36,8 @@ DEFINITIONS (the parenthetical the docs carry is the load-bearing part)
     manifests_coverage   "manifested/total (pct%)" over skills + hooks_files + rules
     fresh_core_hooks     hook registrations install.sh writes for menu option 1
     dispatcher_bash / dispatcher_write    GUARDS rows in the two dispatchers
-    source_files     tracked files outside marketplace/  (git ls-files)
-    marketplace_files    tracked files under marketplace/
+    source_files     files outside marketplace/ (git ls-files --cached --others --exclude-standard)
+    marketplace_files    files under marketplace/ (same listing)
 
 USAGE
     python3 bin/build-doc-counts.py            # rewrite markers in place
@@ -96,8 +96,10 @@ def _fresh_core_hooks() -> int:
 
 
 def _git_files(pattern: str | None = None, exclude_prefix: str | None = None) -> int:
-    out = subprocess.run(["git", "-C", str(REPO), "ls-files"] + ([pattern] if pattern else []),
-                         capture_output=True, text=True, timeout=30)
+    # --others --exclude-standard: count what the tree HAS, not only what is staged,
+    # so a freshly generated bundle file changes the number before it is committed.
+    out = subprocess.run(["git", "-C", str(REPO), "ls-files", "--cached", "--others", "--exclude-standard"]
+                         + ([pattern] if pattern else []), capture_output=True, text=True, timeout=30)
     files = [f for f in out.stdout.splitlines() if f.strip()]
     if exclude_prefix:
         files = [f for f in files if not f.startswith(exclude_prefix)]

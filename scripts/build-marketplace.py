@@ -69,6 +69,9 @@ PLUGINS = [
                 # dispatcher, the same shape as the repository's settings.json.
                 _hook_group("bash-pretooluse-dispatcher.py", 30, "Bash|PowerShell"),
                 _hook_group("config-guard.py", 30, "Write|Edit"),
+                # Same catastrophic checks, applied to the body of a script file the
+                # model writes (the Bash-time layer runs inside the dispatcher).
+                _hook_group("script-content-guard.py", 15, "Write|Edit"),
             ],
             "PostToolUse": [
                 _hook_group("result-injection-guard.py", 30, "mcp__.*"),
@@ -77,10 +80,11 @@ PLUGINS = [
         "files": [
             # Hooks
             ("hooks/run-hook", "hooks/run-hook"),
-            # The dispatcher and the six hooks it runs in-process ship as one
+            # The dispatcher and the seven hooks it runs in-process ship as one
             # set (scripts/test_marketplace_safety_net.py pins it to GUARDS).
             ("hooks/bash-pretooluse-dispatcher.py", "hooks/bash-pretooluse-dispatcher.py"),
             ("hooks/bash-security-guard.py", "hooks/bash-security-guard.py"),
+            ("hooks/script-content-guard.py", "hooks/script-content-guard.py"),
             ("hooks/destructive-ops-guard.py", "hooks/destructive-ops-guard.py"),
             ("hooks/git-destructive-checkout-guard.py", "hooks/git-destructive-checkout-guard.py"),
             ("hooks/bash-tail-buffering-guard.py", "hooks/bash-tail-buffering-guard.py"),
@@ -1812,6 +1816,38 @@ def check_hook_import_containment() -> list:
     return problems
 
 
+_GUARDS_ROW_RE = re.compile(r'\(\s*"[^"]+",\s*"([^"]+\.py)",\s*"(closed|warn|open)"\s*\)')
+
+
+def check_dispatcher_closure() -> list:
+    """Return [(plugin, dispatcher, missing_child, posture)] for any shipped
+    dispatcher whose GUARDS table names a hook the plugin does NOT ship.
+
+    The import check above cannot see these: a dispatcher loads its children by
+    file name at run time, not by `import`. A missing "closed" child makes the
+    dispatcher block EVERY call it fronts (write-edit-dispatcher._fail_closed;
+    the Bash dispatcher's posture table), so a bundle in that state is worse than
+    dead on arrival -- it is installed and refuses all Bash or all edits. Found
+    2026-09-06 when script-content-guard joined both dispatchers and the
+    safety-net bundle shipped the dispatcher without it."""
+    problems = []
+    for plugin_def in PLUGINS:
+        hooks_dir = MARKETPLACE_DIR / plugin_def["name"] / "hooks"
+        if not hooks_dir.is_dir():
+            continue
+        shipped = {p.name for p in hooks_dir.glob("*.py")}
+        for dispatcher in sorted(hooks_dir.glob("*-dispatcher.py")):
+            text = dispatcher.read_text(encoding="utf-8", errors="ignore")
+            if "GUARDS = [" not in text:
+                continue
+            block = text[text.index("GUARDS = ["):]
+            block = block[:block.index("\n]")]
+            for child, posture in _GUARDS_ROW_RE.findall(block):
+                if child not in shipped:
+                    problems.append((plugin_def["name"], dispatcher.name, child, posture))
+    return problems
+
+
 class MarketplaceValidationError(RuntimeError):
     """A staged release failed an integrity gate before promotion."""
 
@@ -1877,6 +1913,20 @@ def _validate_built_marketplace() -> None:
             )
         raise MarketplaceValidationError("hook import containment failed")
     print("Hook import self-containment: OK")
+
+    closure_problems = check_dispatcher_closure()
+    if closure_problems:
+        sys.stderr.write(
+            f"\nERROR: {len(closure_problems)} dispatcher child hook(s) not shipped "
+            "beside their dispatcher (a missing closed child blocks every call it fronts):\n"
+        )
+        for plugin, dispatcher, child, posture in closure_problems:
+            sys.stderr.write(
+                f"  [{plugin}] hooks/{dispatcher} runs {child} ({posture}) "
+                f"— add hooks/{child} to the plugin file list\n"
+            )
+        raise MarketplaceValidationError("dispatcher closure failed")
+    print("Dispatcher closure: OK (every GUARDS child ships with its dispatcher)")
 
     contract_problems = check_model_contract_containment()
     if contract_problems:

@@ -4,8 +4,8 @@ A working [Claude Code](https://docs.claude.com/en/docs/claude-code) harness:
 **<!-- count:hooks -->53<!-- /count --> hook scripts** (plus <!-- count:hook_modules -->9<!-- /count --> shared modules),
 **<!-- count:rules -->34<!-- /count --> rules** (<!-- count:rules_ambient -->27<!-- /count --> of them always loaded),
 **<!-- count:skills -->82<!-- /count --> skills**, and the <!-- count:agents -->6<!-- /count --> agent definitions that
-tie them together — <!-- count:source_files -->1,647<!-- /count --> tracked source files, plus a
-generated plugin tree under `marketplace/` (another <!-- count:marketplace_files -->1,069<!-- /count -->
+tie them together — <!-- count:source_files -->1,650<!-- /count --> tracked source files, plus a
+generated plugin tree under `marketplace/` (another <!-- count:marketplace_files -->1,072<!-- /count -->
 files) that is not meant to be read (see [marketplace/README.md](marketplace/README.md)).
 The numbers in this file are generated from the tree by `bin/build-doc-counts.py`
 and checked in CI; if one is wrong, the build is red, not the reader.
