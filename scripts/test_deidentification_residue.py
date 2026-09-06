@@ -109,3 +109,21 @@ def test_git_hooks_call_the_scanner():
     workflow = (REPO / ".github" / "workflows" / "tests.yml").read_text(encoding="utf-8")
     assert "deidentification_residue.py --commits" in workflow, "CI scans a pull request's commit messages"
     assert "fetch-depth: 0" in workflow, "the commit-range scan needs history"
+
+
+def test_structural_rules_catch_tenant_subdomains_and_emails_but_not_placeholders():
+    """Known-positive controls for the shapes the digests cannot hold."""
+    tenant = "<vendor tenant subdomain (an organisation's own instance of a vendor product)>"
+    email = "<email address at a non-placeholder domain>"
+    for text in ("https://northwind.atlassian.net/wiki", "contoso.onmicrosoft.com", "https://mycorp.jamfcloud.com/api",
+                 "ws-northwind.slack.com", "https://northwind.us.auth0.com/authorize", "dev12345.service-now.com",
+                 "northwind.my.salesforce.com", "https://northwind.okta.com/oauth2"):
+        assert tenant in scan_text(text), text
+    for text in ("https://api.slack.com/methods", "example.atlassian.net", "docs.atlassian.net", "hooks.slack.com/services/x",
+                 "login.microsoftonline.com", "tenant.onmicrosoft.com", "your.jamfcloud.com"):
+        assert tenant not in scan_text(text), text
+    for text in ("reach me at jane.doe@somecompany.com", "cc: ops-team@northwind.io"):
+        assert email in scan_text(text), text
+    for text in ("t@example.com", "a.b@example.internal", "git@github.com:example-org/x.git", "noreply@users.noreply.github.com",
+                 "GIT_AUTHOR_EMAIL=t@e.com", "x@anthropic.com", "svc@mail.example.org", "q@thing.invalid"):
+        assert email not in scan_text(text), text

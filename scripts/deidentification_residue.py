@@ -14,8 +14,13 @@ checked in three places:
                             CI step over a pull request's commits
   staged files              .githooks/pre-commit
 
-Structural rules cover the shapes that cannot be hashed (a claude.ai per-org
-connector UUID inside an MCP tool name).
+Structural rules cover the shapes that cannot be hashed: a claude.ai per-org
+connector UUID inside an MCP tool name; a vendor's per-tenant subdomain
+(<tenant>.jamfcloud.com, <site>.atlassian.net, <workspace>.slack.com,
+<tenant>.onmicrosoft.com and the like, minus the vendor's public hosts and this
+repo's placeholder labels); an email address at any domain that is not a
+placeholder. The digests know what has leaked once; the shapes know what an
+identifier looks like before it has.
 
 USAGE
   python3 scripts/deidentification_residue.py                    # every tracked file
@@ -56,13 +61,31 @@ FORBIDDEN_TOKEN_DIGESTS = {
 }
 CONTROL_TOKEN = "residue-control-token-8f2a"
 
-# Shapes that identify an organisation without a memorable token.
+# Shapes that identify an organisation without a memorable token. The digests
+# above know only what has leaked once; these know the FORMS an identifier takes.
+_PUBLIC_LABELS = (r"api|www|app|apps|hooks|docs|developer|developers|status|support|help|login|files|cdn|static|"
+                  r"edge|slack|example|tenant|your|acme|placeholder|company|org|test|demo|sandbox|localhost")
+_TENANT_VENDORS = (r"jamfcloud\.com|servicenowservices\.com|service-now\.com|onmicrosoft\.com|sharepoint\.com|"
+                   r"okta\.com|oktapreview\.com|okta-emea\.com|atlassian\.net|slack\.com|zendesk\.com|"
+                   r"my\.salesforce\.com|splunkcloud\.com|snowflakecomputing\.com|auth0\.com|ts\.net|"
+                   r"cloudflareaccess\.com|datadoghq\.com|palantirfoundry\.com|palantirgov\.com")
+_PLACEHOLDER_EMAIL_DOMAINS = re.compile(
+    r"^(?:[a-z0-9-]+\.)*(?:example\.(?:com|org|net|internal)|[a-z0-9-]+\.(?:invalid|test|localhost)|"
+    r"github\.com|anthropic\.com|e\.com|e\.x)$", re.IGNORECASE)
 STRUCTURAL = [
     # A UUID whose first group repeats one hex digit (00000000-, ffffffff-) is an
     # obvious placeholder; that is the fixture convention used in this repo.
     (re.compile(r"mcp__(?!([0-9a-f])\1{7}-)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}__"),
      "claude.ai per-org connector UUID used as an MCP server name"),
+    # A vendor's per-tenant subdomain -- <tenant>.jamfcloud.com, <site>.atlassian.net,
+    # <workspace>.slack.com, <tenant>.onmicrosoft.com -- names the organisation as
+    # surely as its own domain does. The vendor's public hosts (api., docs., app.)
+    # and the repo's placeholder labels are not tenants.
+    (re.compile(r"\b(?!(?:" + _PUBLIC_LABELS + r")\.)[a-z0-9][a-z0-9-]{1,62}\.(?:(?:us|eu|uk|au|gov)\.)?(?:"
+                + _TENANT_VENDORS + r")\b", re.IGNORECASE),
+     "vendor tenant subdomain (an organisation's own instance of a vendor product)"),
 ]
+_EMAIL_RE = re.compile(r"\b[A-Za-z0-9._%+-]+@((?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,})\b")
 
 _TOKEN_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9]|[A-Za-z0-9]")
 
@@ -83,6 +106,13 @@ def scan_text(text: str) -> list[str]:
     for pattern, why in STRUCTURAL:
         if pattern.search(text):
             hits.append(f"<{why}>")
+    # An email address at anything but a placeholder domain is a person or an
+    # organisation; the digests cover the organisation's own domain, this covers
+    # everyone else's (a colleague's personal address in an incident narrative).
+    for m in _EMAIL_RE.finditer(text):
+        if not _PLACEHOLDER_EMAIL_DOMAINS.match(m.group(1)):
+            hits.append("<email address at a non-placeholder domain>")
+            break
     return sorted(hits)
 
 
