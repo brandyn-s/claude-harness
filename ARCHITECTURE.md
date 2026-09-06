@@ -84,7 +84,7 @@ Representative hooks:
 | `bash-tail-buffering-guard.py` | PreToolUse(Bash) | `producer \| tail` shapes that hide output |
 | `memory-write-guard.py` | PreToolUse(Write) | oversized memory entries |
 | `session-start.py` | SessionStart | (composes startup context: platform rules, the rehydrated acceptance ledger after a compaction, and the behavioural note for the active model from `session_start_modules/model_notes.py`) |
-| `compaction-budget.py` | PostCompact + UserPromptSubmit | (counts compactions; from the second one, nudges a `HANDOFF.md` and a fresh session — the boundary half of the deleted `never-stop-early`; advisory) |
+| `compaction-budget.py` | PostCompact + UserPromptSubmit | (counts compactions; from the second one, nudges a `HANDOFF.md` and a fresh session — the boundary half of the deleted `never-stop-early`; audits the compact summary against the acceptance ledger and writes `~/.claude/audit/ledger-audit-*.jsonl`, naming a dropped REJECTED entry once on the next prompt; advisory) |
 | `proceed-gate.py` | UserPromptSubmit | (a bare `proceed` gets a DO / NOT / CHECK restatement; a substantive ask with no `INTENT.md` gets one `/frame` nudge; `INTENT.md` bullets feed the acceptance ledger; advisory) |
 | `precompact-priorities.py` | PreCompact | (appends a fidelity checklist to the compaction summarizer's prompt; measured in `skills/_shared/compaction-eval/`) |
 

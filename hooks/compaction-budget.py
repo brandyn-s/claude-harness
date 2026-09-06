@@ -18,11 +18,24 @@ WHY TWO EVENTS
     PostCompact knows a compaction happened but cannot inject context (its
     stdout/systemMessage are discarded). UserPromptSubmit can. Same dispatch shape
     as compaction-continuity.py:
-      PostCompact       -> increment the per-session counter; also bump the session
-                           ledger's compaction_count when a ledger exists (the
-                           ledger carries the field but nothing writes it)
-      UserPromptSubmit  -> if count >= THRESHOLD and this count has not been
-                           announced, print the handoff nudge ONCE for this count
+      PostCompact       -> increment the per-session counter; bump the session
+                           ledger's compaction_count when a ledger exists; AUDIT the
+                           compact_summary against the ledger (session_ledger.
+                           audit_against_summary) and append the row to
+                           ~/.claude/audit/ledger-audit-YYYYMMDD.jsonl
+      UserPromptSubmit  -> if the last audit found a REJECTED entry the summary
+                           dropped, name it ONCE (the ledger itself is re-injected by
+                           SessionStart(compact); this is the explicit flag that the
+                           summary and the ledger disagree); if count >= THRESHOLD and
+                           this count has not been announced, print the handoff nudge
+                           ONCE for this count
+
+THE AUDIT IS THE MEASUREMENT
+    session_ledger.py exists on a hypothesis it deliberately does not assume: that
+    compaction drops acceptance state and the corrective turns follow. The audit
+    rows are how that hypothesis gets tested over weeks -- bin/ledger-audit-report.py
+    reads them. A row records counts and the dropped entries' text; it is a signal
+    (token containment), not a verdict.
 
 CONTRACT
     exit 0 always (UserPromptSubmit exit 2 would erase the prompt). Never blocks.
@@ -76,16 +89,24 @@ def _save(path: Path, state: dict) -> None:
         print(f"compaction-budget: state write failed: {exc}", file=sys.stderr)
 
 
-def _bump_ledger(session_id: str) -> None:
-    """Best-effort: write the compaction_count the ledger schema already carries."""
+def _bump_and_audit_ledger(session_id: str, payload: dict) -> dict | None:
+    """Best-effort: write the compaction_count the ledger schema carries, audit the
+    compact summary against the ledger, append the audit row. Returns the row (or
+    None when there is no ledger / the module is unavailable)."""
     sys.path.insert(0, str(HOOKS_DIR))
     try:
         import session_ledger as sl  # type: ignore
         ledger = sl.load(session_id)
-        if ledger is not None:
-            sl.save(sl.mark_compaction(ledger))
-    except Exception:
-        pass
+        if ledger is None:
+            return None
+        sl.save(sl.mark_compaction(ledger))
+        row = sl.audit_row(ledger, str(payload.get("compact_summary") or ""),
+                           trigger=str(payload.get("trigger") or ""))
+        sl.append_audit_row(row)
+        return row
+    except Exception as exc:
+        print(f"compaction-budget: ledger audit skipped: {exc}", file=sys.stderr)
+        return None
 
 
 def on_post_compact(payload: dict) -> int:
@@ -96,8 +117,17 @@ def on_post_compact(payload: dict) -> int:
     state["last_trigger"] = payload.get("trigger")
     state["last_at_utc"] = _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds")
     state.setdefault("nudged_at", 0)
+    row = _bump_and_audit_ledger(sid, payload)
+    if row is not None:
+        # What the next prompt needs: only the rejections the summary lost.
+        state["last_audit"] = {
+            "count": state["count"],
+            "total_entries": row["total_entries"],
+            "not_found_count": row["not_found_count"],
+            "rejected_dropped": [m["text"] for m in row["not_found"] if m["kind"] == "rejected"][:8],
+            "announced": False,
+        }
     _save(path, state)
-    _bump_ledger(sid)
     return 0
 
 
@@ -117,17 +147,37 @@ NUDGE = (
 )
 
 
+AUDIT_NOTE = (
+    "<ledger-audit>\n"
+    "The compaction summary does not mention {n} of {total} acceptance-ledger item(s), including "
+    "{r} the user EXPLICITLY REJECTED:\n{items}\n"
+    "The ledger is authoritative for user intent. Do not reintroduce these. (Token-containment "
+    "signal, shown once; the row is in ~/.claude/audit/ledger-audit-*.jsonl.)\n"
+    "</ledger-audit>"
+)
+
+
 def on_user_prompt_submit(payload: dict) -> int:
     sid = str(payload.get("session_id") or "unknown")
     path = _state_path(sid)
     state = _load(path)
+    out = []
+    audit = state.get("last_audit") or {}
+    if audit and not audit.get("announced") and audit.get("rejected_dropped"):
+        items = "\n".join(f"- {t}" for t in audit["rejected_dropped"])
+        out.append(AUDIT_NOTE.format(n=audit.get("not_found_count", 0), total=audit.get("total_entries", 0),
+                                     r=len(audit["rejected_dropped"]), items=items))
+        audit["announced"] = True
+        state["last_audit"] = audit
     count = int(state.get("count", 0))
-    if count < _threshold() or int(state.get("nudged_at", 0)) >= count:
+    if count >= _threshold() and int(state.get("nudged_at", 0)) < count:
+        state["nudged_at"] = count
+        out.append(NUDGE.format(count=count, trigger=state.get("last_trigger") or "unknown",
+                                at=state.get("last_at_utc") or "unknown"))
+    if not out:
         return 0
-    state["nudged_at"] = count
     _save(path, state)
-    print(NUDGE.format(count=count, trigger=state.get("last_trigger") or "unknown",
-                       at=state.get("last_at_utc") or "unknown"))
+    print("\n".join(out))
     return 0
 
 

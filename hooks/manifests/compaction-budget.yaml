@@ -4,11 +4,11 @@ event: PostCompact
 matcher: ""
 if_condition: null
 action_type: injector
-description: "Counts compactions per session (PostCompact) and, from the second onward, injects a handoff nudge on the next UserPromptSubmit: report evidence and stop if the frame is complete, else write HANDOFF.md and propose a fresh session. Also writes the session ledger's compaction_count."
+description: "Counts compactions per session (PostCompact) and, from the second onward, injects a handoff nudge on the next UserPromptSubmit: report evidence and stop if the frame is complete, else write HANDOFF.md and propose a fresh session. Also writes the session ledger's compaction_count, audits the compact_summary against the ledger and appends the row to ~/.claude/audit/ledger-audit-YYYYMMDD.jsonl; a REJECTED entry the summary dropped is named once on the next prompt."
 enforces:
   - session-boundaries
 blocks_patterns: []
-injects: "<compaction-budget> handoff nudge, once per compaction at or above the threshold"
+injects: "<compaction-budget> handoff nudge, once per compaction at or above the threshold; <ledger-audit> once after a compaction whose summary dropped a REJECTED ledger entry"
 modifies: null
 depends_on_files:
   - hooks/session_ledger.py

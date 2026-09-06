@@ -26,9 +26,22 @@ place for a dual-run parity window and is NOT removed by this change.
 
 LIFECYCLE (contracts verified verbatim against code.claude.com 2026-07-26)
 -------------------------------------------------------------------------
-  PreCompact                  -> persist the ledger atomically
+  every producer write        -> persist the ledger atomically (save() below)
   SessionStart(source=compact)-> inject + reconcile the ledger into model context
-  PostCompact                 -> AUDIT the compact_summary against the ledger
+                                 (session_start_modules/ledger_rehydrate.py)
+  PostCompact                 -> AUDIT the compact_summary against the ledger and
+                                 append the result to ~/.claude/audit/ledger-audit-
+                                 YYYYMMDD.jsonl (compaction-budget.py); the next
+                                 UserPromptSubmit names any REJECTED entry the
+                                 summary dropped
+
+THERE IS NO PreCompact PERSISTENCE STEP, ON PURPOSE. Every producer
+(proceed-gate.py ingesting INTENT.md, compaction-budget.py bumping the count)
+saves atomically at the moment it writes, so the ledger on disk is always current
+and a PreCompact "flush" would have nothing to flush. The registered PreCompact
+hook is precompact-priorities.py, which shapes the summarizer's prompt and does
+not touch this file. Continuous saves also mean a compaction that is never
+announced to a hook (a crash, a kill) loses nothing.
 
 `PostCompact` deliberately does NOT rehydrate: it "Runs after Claude Code
 completes a compact operation. Use this event to react to the new compacted
@@ -213,12 +226,25 @@ def mark_compaction(ledger: dict) -> dict:
     return ledger
 
 
-def render_for_injection(ledger: dict) -> str:
-    """Render the ledger as model-facing context.
+#: Injection order. FRAME FIRST: what was ruled out, then what "done" means, then
+#: how it must be done, then the rest. REJECTED leads because the documented
+#: failure mode is reintroducing an option the user already ruled out, so that
+#: section must not be the one truncated or skimmed. DELIVERABLE comes before
+#: CONSTRAINT because the done-criteria are what proceed-gate's DO/CHECK
+#: restatement and every completion claim are checked against; the constraints
+#: qualify them.
+INJECTION_ORDER = (REJECTED, DELIVERABLE, CONSTRAINT, EVIDENCE, DECISION, OPEN_QUESTION)
 
-    Ordering is deliberate: REJECTED first. The documented failure mode is
-    reintroducing an option the user already ruled out, so that section must not
-    be the one truncated or skimmed.
+#: Producers whose entries came from the task frame rather than the conversation.
+FRAME_SOURCES = frozenset({"INTENT.md"})
+
+
+def render_for_injection(ledger: dict) -> str:
+    """Render the ledger as model-facing context, frame first (INJECTION_ORDER).
+
+    Entries ingested from INTENT.md are labelled: they are the task's own
+    done-criteria and non-goals, written before the work started, and outrank a
+    paraphrase of them in any compact summary.
     """
     if not ledger:
         return ""
@@ -226,25 +252,27 @@ def render_for_injection(ledger: dict) -> str:
     if not entries:
         return ""
 
-    order = [REJECTED, CONSTRAINT, DELIVERABLE, EVIDENCE, DECISION, OPEN_QUESTION]
     labels = {
         REJECTED: "EXPLICITLY REJECTED — do not reintroduce",
-        CONSTRAINT: "CONSTRAINTS",
-        DELIVERABLE: "REQUIRED DELIVERABLES",
+        DELIVERABLE: "REQUIRED DELIVERABLES — what done means",
+        CONSTRAINT: "CONSTRAINTS — how it must be done",
         EVIDENCE: "EVIDENCE STANDARD",
         DECISION: "SETTLED DECISIONS",
         OPEN_QUESTION: "OPEN QUESTIONS",
     }
+    framed = sum(1 for e in entries if e.get("source") in FRAME_SOURCES)
 
     lines = [
         "## Acceptance ledger (recovered after compaction)",
         "",
         f"Compactions so far: {ledger.get('compaction_count', 0)}. "
-        "This is the durable record of what was asked, ruled out, and settled. "
+        "This is the durable record of what was asked, ruled out, and settled, frame "
+        "first: what is ruled out, what done means, how it must be done. "
         "Reconcile any completion claim against it; if an item below conflicts "
-        "with the compact summary, THIS LEDGER IS AUTHORITATIVE for user intent.",
+        "with the compact summary, THIS LEDGER IS AUTHORITATIVE for user intent."
+        + (f" Items marked [INTENT.md] come from the task frame ({framed})." if framed else ""),
     ]
-    for kind in order:
+    for kind in INJECTION_ORDER:
         group = [e for e in entries if e.get("kind") == kind]
         if not group:
             continue
@@ -258,7 +286,8 @@ def render_for_injection(ledger: dict) -> str:
                 mark = " [NOT satisfied]"
             restated = e.get("restated") or 0
             emphasis = f" (restated {restated}x)" if restated else ""
-            lines.append(f"- {e.get('text', '')}{mark}{emphasis}")
+            frame = f" [{e.get('source')}]" if e.get("source") in FRAME_SOURCES else ""
+            lines.append(f"- {e.get('text', '')}{mark}{emphasis}{frame}")
     return "\n".join(lines)
 
 
@@ -301,3 +330,43 @@ def audit_against_summary(ledger: dict, compact_summary: str) -> dict:
         "rejected_dropped": [m for m in missing if m["kind"] == REJECTED],
         "summary_chars": len(compact_summary or ""),
     }
+
+
+AUDIT_DIR = Path.home() / ".claude" / "audit"
+
+
+def audit_row(ledger: dict, compact_summary: str, *, trigger: str = "", now: float | None = None) -> dict:
+    """One JSONL row for ~/.claude/audit/ledger-audit-YYYYMMDD.jsonl: the audit's
+    counts plus the dropped entries themselves (kind and text), so
+    bin/ledger-audit-report.py can say WHICH rejections a summary lost, not only
+    how many. This is the measurement the module docstring promises: whether
+    compaction drops acceptance state is a question these rows answer over weeks."""
+    audit = audit_against_summary(ledger, compact_summary)
+    ts = time.time() if now is None else now
+    return {
+        "ts": ts,
+        "date": time.strftime("%Y-%m-%d", time.gmtime(ts)),
+        "session_id": (ledger or {}).get("session_id", ""),
+        "cwd": (ledger or {}).get("cwd", ""),
+        "trigger": trigger or "",
+        "compaction_count": int((ledger or {}).get("compaction_count", 0)),
+        "total_entries": audit["total_entries"],
+        "not_found_count": len(audit["not_found_in_summary"]),
+        "rejected_dropped_count": len(audit["rejected_dropped"]),
+        "not_found": [{"kind": m["kind"], "text": m["text"][:200]} for m in audit["not_found_in_summary"]],
+        "summary_chars": audit["summary_chars"],
+    }
+
+
+def append_audit_row(row: dict, audit_dir: Path | None = None) -> Path | None:
+    """Append one row to the day's ledger-audit file. Returns the path, or None on
+    failure -- never raises (this runs inside PostCompact)."""
+    base = Path(audit_dir) if audit_dir else AUDIT_DIR
+    try:
+        base.mkdir(parents=True, exist_ok=True)
+        path = base / f"ledger-audit-{time.strftime('%Y%m%d', time.gmtime(row.get('ts') or time.time()))}.jsonl"
+        with open(path, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(row, sort_keys=True) + "\n")
+        return path
+    except Exception:
+        return None
