@@ -21,9 +21,20 @@ COMMANDS
                                  (~/.claude/audit/rules-arm-log.jsonl) and write
                                  ~/.claude/run/rules-arm.env for the session hooks
     status                       which arm is live, for how many days, sessions per arm
+    restore                      end the run: rules is the full set as a real directory again
+
+    When ~/.claude is a git checkout (the private overlay), `switch` makes its working
+    tree dirty for the length of the run (rules/ appears deleted, rules.full and
+    rules.lean appear untracked). Edit rules only in a separate worktree, never in
+    ~/.claude, until `restore`; that is also the plan's "no rule edits during the run".
     report [--since DATE] [--json]
                                  the pre-registered metrics per arm and the verdict:
                                  ADOPT, BISECT <family>, or INSUFFICIENT DATA
+                                 (from SessionEnd receipts + hook-fires under ~/.claude)
+    retro --transcripts DIR [--arm-log ~/.claude/audit/rules-arm-log.jsonl]
+                                 the same verdict read straight from transcripts, for a
+                                 machine whose hooks do not write receipts; without
+                                 --arm-log, the observational baseline (below)
 
 METRICS (all from telemetry the harness already writes; nothing new is collected)
     P1  completion-evidence rate     transcript proxy: share of assistant completion
@@ -193,6 +204,27 @@ def switch(claude_dir: Path, arm: str, now: dt.datetime | None = None) -> dict:
     with open(arm_log_path(claude_dir), "a", encoding="utf-8") as fh:
         fh.write(json.dumps({"ts": stamp, "arm": arm, "target": str(target)}) + "\n")
     return {"arm": arm, "rules": str(live), "target": str(target), "ts": stamp}
+
+
+def restore(claude_dir: Path) -> dict:
+    """End the experiment: rules becomes the real directory again (the full set), and
+    rules.lean stays beside it for reference. When ~/.claude is a git checkout, this
+    is also what returns its working tree to the tracked state."""
+    live, full = rules_dir(claude_dir), claude_dir / "rules.full"
+    if not live.is_symlink():
+        return {"restored": False, "why": f"{live} is not a symlink; nothing to restore"}
+    if not full.is_dir():
+        raise SystemExit(f"lean-core-ab: {full} is missing; the live set cannot be restored automatically")
+    live.unlink()
+    full.rename(live)
+    stamp = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
+    arm_log_path(claude_dir).parent.mkdir(parents=True, exist_ok=True)
+    with open(arm_log_path(claude_dir), "a", encoding="utf-8") as fh:
+        fh.write(json.dumps({"ts": stamp, "arm": "END", "target": str(live)}) + "\n")
+    env = claude_dir / "run" / "rules-arm.env"
+    if env.exists():
+        env.unlink()
+    return {"restored": True, "rules": str(live), "ts": stamp}
 
 
 def load_arm_log(claude_dir: Path) -> list[dict]:
@@ -514,7 +546,7 @@ def _aggregate(rows: list[dict]) -> dict:
 
 
 def retro(root: Path, split: dt.datetime | None, config_repo: Path | None, since: dt.datetime | None,
-          plan_models_only: bool = False) -> dict:
+          plan_models_only: bool = False, arm_log: Path | None = None) -> dict:
     """Observational read of the transcripts: the plan's metrics per period, per model,
     and -- when a configuration clone is given -- per rule-corpus size on the session's
     day. Every session ran under whatever rules were live that day; nothing here was
@@ -536,6 +568,37 @@ def retro(root: Path, split: dt.datetime | None, config_repo: Path | None, since
         iso = m["start"].isocalendar()
         by_week.setdefault(f"{iso[0]}-W{iso[1]:02d}", []).append(m)
     out["by_week"] = {k: _aggregate(v) for k, v in sorted(by_week.items())}
+    if arm_log is not None:
+        # The prospective run, read from transcripts instead of receipts: assign each
+        # session to the arm in force at its first timestamp and apply the rule.
+        log = []
+        try:
+            for line in arm_log.read_text(encoding="utf-8").splitlines():
+                try:
+                    log.append(json.loads(line))
+                except ValueError:
+                    continue
+        except OSError:
+            log = []
+        log.sort(key=lambda r: r.get("ts", ""))
+        arms = {"A": [], "B": []}
+        versions = {"A": Counter(), "B": Counter()}
+        for m in rows:
+            arm = arm_for(m["start"], log)
+            if arm in arms:
+                arms[arm].append(m)
+                versions[arm][m.get("version") or "unknown"] += 1
+        metrics = {}
+        for arm, members in arms.items():
+            agg = _aggregate(members)
+            metrics[arm] = {**agg, "arm_days": agg["days"], "flagged_model_sessions": 0,
+                            "client_versions": dict(versions[arm].most_common())}
+        verdict = decide(metrics)
+        top = {a: (versions[a].most_common(1)[0][0] if versions[a] else None) for a in ("A", "B")}
+        if top["A"] and top["B"] and top["A"] != top["B"]:
+            verdict["client_version_warning"] = (f"dominant Claude Code version differs by arm (A {top['A']}, B {top['B']}); "
+                                                 f"extend the run two days rather than reading this as an arm effect")
+        out["by_arm"] = {"arm_log_entries": len(log), "arms": metrics, "verdict": verdict}
     if split:
         before = [m for m in rows if m["start"] < split]
         after = [m for m in rows if m["start"] >= split]
@@ -611,6 +674,17 @@ def render_retro(r: dict) -> str:
         out += table("by ambient rule bytes on the session's day (from the configuration repo's history)", groups)
     if r.get("by_model_and_ambient_bytes"):
         out += table("by model × ambient rule bytes (≥ 15 sessions per model, ≥ 5 per cell)", r["by_model_and_ambient_bytes"])
+    if r.get("by_arm"):
+        ba = r["by_arm"]
+        out += table(f"by arm (from the arm log, {ba['arm_log_entries']} switches) -- THE RUN", {"A full": ba["arms"]["A"], "B lean": ba["arms"]["B"]})
+        v = ba["verdict"]
+        out.append("")
+        out.append(f"verdict: {v['decision']}")
+        for k in ("why", "failing", "payoff", "client_version_warning"):
+            if v.get(k):
+                out.append(f"  {k}: {v[k]}")
+        for name, ok in (v.get("checks") or {}).items():
+            out.append(f"  {'ok  ' if ok else 'FAIL'} {name}")
     if r.get("split"):
         sp = r["split"]
         out += table(f"before / after {sp['date']}", {"before": sp["before"], "after": sp["after"]})
@@ -772,6 +846,7 @@ def main() -> int:
     s = sub.add_parser("switch", help="point rules at an arm")
     s.add_argument("arm", choices=["A", "B", "a", "b"])
     sub.add_parser("status")
+    sub.add_parser("restore", help="end the experiment: rules is the full set again, as a real directory")
     r = sub.add_parser("report")
     r.add_argument("--since", default=None, help="YYYY-MM-DD")
     r.add_argument("--json", action="store_true")
@@ -781,6 +856,8 @@ def main() -> int:
     t.add_argument("--rules-history", default=None, help="clone of the configuration repo: ambient rule bytes per day")
     t.add_argument("--since", default=None, help="YYYY-MM-DD")
     t.add_argument("--plan-models-only", action="store_true", help="keep only sessions on the models the plan names")
+    t.add_argument("--arm-log", default=None, help="rules-arm-log.jsonl: assign sessions to arms and apply the decision rule "
+                                                 "(the prospective run read from transcripts, when receipts are not written)")
     t.add_argument("--json", default=None, help="write the full result here")
     args = ap.parse_args()
     cdir = Path(args.claude_dir)
@@ -802,6 +879,9 @@ def main() -> int:
     if args.cmd == "status":
         print(json.dumps(status(cdir), indent=2, sort_keys=True))
         return 0
+    if args.cmd == "restore":
+        print(json.dumps(restore(cdir), indent=2, sort_keys=True))
+        return 0
     since = None
     if args.since:
         since = dt.datetime.strptime(args.since, "%Y-%m-%d").replace(tzinfo=dt.timezone.utc)
@@ -809,7 +889,7 @@ def main() -> int:
         split = dt.datetime.strptime(args.split, "%Y-%m-%d").replace(tzinfo=dt.timezone.utc) if args.split else None
         res = retro(Path(os.path.expanduser(args.transcripts)), split,
                     Path(os.path.expanduser(args.rules_history)) if args.rules_history else None, since,
-                    args.plan_models_only)
+                    args.plan_models_only, Path(os.path.expanduser(args.arm_log)) if args.arm_log else None)
         print(render_retro(res))
         if args.json:
             Path(args.json).write_text(json.dumps(res, indent=2, sort_keys=True, default=str), encoding="utf-8")

@@ -209,3 +209,39 @@ def test_retro_reads_transcripts_directly_and_joins_rule_bytes(tmp_path):
     assert "OBSERVATIONAL" in text and "please do the thing" not in text
     plan_only = ab.retro(tmp_path / "backup", None, None, None, plan_models_only=True)
     assert plan_only["sessions"] == 3
+
+
+def test_retro_with_an_arm_log_applies_the_rule_from_transcripts(tmp_path):
+    root = tmp_path / "backup" / "proj"
+    root.mkdir(parents=True)
+    log = tmp_path / "rules-arm-log.jsonl"
+    day0 = dt.datetime(2026, 9, 7, 7, 0, tzinfo=UTC)
+    lines = []
+    for d in range(12):                                    # A B A B ... for twelve days
+        lines.append(json.dumps({"ts": (day0 + dt.timedelta(days=d)).isoformat(), "arm": "A" if d % 2 == 0 else "B"}))
+    log.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    for d in range(12):
+        for k in range(2):                                  # two sessions a day -> 12 per arm
+            day = (day0 + dt.timedelta(days=d, hours=2 + k)).isoformat()
+            rows = [{"type": "user", "sessionId": f"s{d}-{k}", "timestamp": day, "version": "2.1.260",
+                     "message": {"role": "user", "content": "do it"}},
+                    {"type": "assistant", "message": {"role": "assistant", "model": "claude-opus-5", "content": [
+                        {"type": "text", "text": "Done: 4 passed in tests/test_a.py"}]}}]
+            (root / f"s{d}-{k}.jsonl").write_text("\n".join(json.dumps(r) for r in rows) + "\n", encoding="utf-8")
+    r = ab.retro(tmp_path / "backup", None, None, None, arm_log=log)
+    ba = r["by_arm"]
+    assert ba["arms"]["A"]["sessions"] == 12 and ba["arms"]["B"]["sessions"] == 12
+    assert ba["verdict"]["decision"] == "INSUFFICIENT DATA"           # 12 < 15 sessions per arm
+    assert "THE RUN" in ab.render_retro(r)
+
+
+def test_restore_returns_the_real_directory(tmp_path):
+    cdir = _rules(tmp_path)
+    ab.build_lean(cdir)
+    ab.switch(cdir, "B")
+    assert (cdir / "rules").is_symlink()
+    res = ab.restore(cdir)
+    assert res["restored"] and not (cdir / "rules").is_symlink() and (cdir / "rules" / "grading-discipline.md").exists()
+    assert not (cdir / "rules.full").exists() and (cdir / "rules.lean").is_dir()
+    assert ab.load_arm_log(cdir)[-1]["arm"] == "END"
+    assert ab.restore(cdir)["restored"] is False
