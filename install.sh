@@ -366,6 +366,13 @@ install_manifests() {
     # 0/33" and "graph.json regen failed: can't open file .../manifests/
     # compile.py". Copy the compiler plus one manifest per INSTALLED hook and
     # rule, so coverage counts the same population consistency.py counts.
+    # A checkout without the compiler (a trimmed mirror, or the synthetic
+    # checkouts scripts/test_install_state.py builds) has nothing to compile
+    # against, and a missing --install source aborts the whole install.
+    if [[ ! -f "$SCRIPT_DIR/manifests/compile.py" ]]; then
+        info "No manifests/compile.py in this checkout; skipping manifests"
+        return
+    fi
     local files=(manifests/compile.py)
     local f name
     for f in "$CLAUDE_DIR"/hooks/*.py; do

@@ -830,3 +830,32 @@ def test_install_manifests_runs_after_hooks_and_rules_are_installed():
     calls = [ln.strip() for ln in src.splitlines()
              if ln.strip() in {"install_rules", "install_hooks", "install_manifests"}]
     assert calls == ["install_rules", "install_hooks", "install_manifests"], calls
+
+
+def test_install_manifests_skips_a_checkout_without_the_compiler(tmp_path):
+    """The synthetic checkouts in scripts/test_install_state.py carry no
+    manifests/ directory; the installer must skip, not abort under set -e."""
+    checkout = tmp_path / "checkout"
+    (checkout / "hooks" / "manifests").mkdir(parents=True)
+    claude_dir = tmp_path / ".claude"
+    (claude_dir / "hooks").mkdir(parents=True)
+    (claude_dir / "hooks" / "config-guard.py").write_text("", encoding="utf-8")
+    recorded = tmp_path / "install_files.args"
+    snippet = f"""
+set -e
+SCRIPT_DIR="{checkout}"
+CLAUDE_DIR="{claude_dir}"
+PYTHON_CMD="{sys.executable}"
+ok() {{ :; }}
+info() {{ echo "INFO: $*" >&2; }}
+warn() {{ echo "WARN: $*" >&2; }}
+install_files() {{ printf '%s\\n' "$@" > "{recorded}"; }}
+{_install_sh_function("install_manifests")}
+install_manifests
+echo reached-the-end
+"""
+    result = run_snippet(snippet)
+    assert result.returncode == 0, result.stderr
+    assert "reached-the-end" in result.stdout
+    assert not recorded.exists(), recorded.read_text(encoding="utf-8")
+    assert "skipping manifests" in result.stderr
