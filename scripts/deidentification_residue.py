@@ -64,7 +64,8 @@ CONTROL_TOKEN = "residue-control-token-8f2a"
 # Shapes that identify an organisation without a memorable token. The digests
 # above know only what has leaked once; these know the FORMS an identifier takes.
 _PUBLIC_LABELS = (r"api|www|app|apps|hooks|docs|developer|developers|status|support|help|login|files|cdn|static|"
-                  r"edge|slack|example|tenant|your|acme|placeholder|company|org|test|demo|sandbox|localhost")
+                  r"edge|slack|example|tenant|your|acme|placeholder|company|org|test|demo|sandbox|localhost|"
+                  r"us|eu|uk|au|gov|de|jp|ca|us-\d|eu-\d")   # region labels are not tenants
 _TENANT_VENDORS = (r"jamfcloud\.com|servicenowservices\.com|service-now\.com|onmicrosoft\.com|sharepoint\.com|"
                    r"okta\.com|oktapreview\.com|okta-emea\.com|atlassian\.net|slack\.com|zendesk\.com|"
                    r"my\.salesforce\.com|splunkcloud\.com|snowflakecomputing\.com|auth0\.com|ts\.net|"

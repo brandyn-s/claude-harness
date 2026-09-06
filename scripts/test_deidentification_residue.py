@@ -120,7 +120,8 @@ def test_structural_rules_catch_tenant_subdomains_and_emails_but_not_placeholder
                  "northwind.my.salesforce.com", "https://northwind.okta.com/oauth2"):
         assert tenant in scan_text(text), text
     for text in ("https://api.slack.com/methods", "example.atlassian.net", "docs.atlassian.net", "hooks.slack.com/services/x",
-                 "login.microsoftonline.com", "tenant.onmicrosoft.com", "your.jamfcloud.com"):
+                 "login.microsoftonline.com", "tenant.onmicrosoft.com", "your.jamfcloud.com",
+                 "<tenant>.us.auth0.com", "us.auth0.com", "eu.okta.com"):        # a region label is not a tenant
         assert tenant not in scan_text(text), text
     for text in ("reach me at jane.doe@somecompany.com", "cc: ops-team@northwind.io"):
         assert email in scan_text(text), text
