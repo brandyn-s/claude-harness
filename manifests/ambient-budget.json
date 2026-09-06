@@ -207,6 +207,12 @@
       "rule": "platform-constraints.md",
       "bytes": -69,
       "reason": "The Microsoft Graph bullet pointed at `bin/msgraph_helper.py` and an app-only GCC High Keychain auth flow that live in another repo; the directive (never hand-roll a urllib Graph probe; one shared helper with graph_get/odata_quote; the safe= space crash) is kept and the file path and auth details are dropped. 10,633 -> 10,564 B. Oracle: 1,593/1,593 literals present with --also rules/incidents --also docs/rule-reference, no allow-drop. Negative so the freed budget cannot be silently re-spent."
+    },
+    {
+      "date": "2026-09-06",
+      "rule": "session-boundaries.md",
+      "bytes": 2669,
+      "reason": "New ambient contract, the boundary half of never-stop-early.md (deleted 2026-09-03, -2160) that outcome-over-verification's stop contract does not cover: never stop for length; a completed frame ends the session, not the next task; after two compactions write HANDOFF.md (working directory + ~/.claude/HANDOFF.md, which session-start already shows once) and propose a fresh session; after two failed corrections rewrite instead of patching. Evidence: week of 2026-08-30 arcs of 20/24/39 hours with three or more compactions each; 14-day ledger review, 35 of 58 corrective turns in six long sessions. Net of the two Sep-3 deletions (-7,194) the corpus is still 4,525 bytes smaller than before them. Enforced (advisory) by compaction-budget.py and proceed-gate.py, added in the same change."
     }
   ]
 }

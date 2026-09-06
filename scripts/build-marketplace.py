@@ -147,6 +147,9 @@ PLUGINS = [
             ("skills/superplan-status/SKILL.md", "skills/superplan-status/SKILL.md"),
             ("skills/superplan-loop/SKILL.md", "skills/superplan-loop/SKILL.md"),
             ("skills/interview/SKILL.md", "skills/interview/SKILL.md"),
+            # Frame before plan: INTENT.md (what / what not) feeding the acceptance ledger
+            ("skills/frame/SKILL.md", "skills/frame/SKILL.md"),
+            ("skills/frame/references/INTENT.template.md", "skills/frame/references/INTENT.template.md"),
             # Companions to the installed superpowers plugin (forks removed 2026-09-03)
             ("skills/design-evidence-first/SKILL.md", "skills/design-evidence-first/SKILL.md"),
             ("skills/debugging-hypotheses/SKILL.md", "skills/debugging-hypotheses/SKILL.md"),

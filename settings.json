@@ -743,6 +743,22 @@
               "compaction-continuity.py"
             ],
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "compaction-budget.py"
+            ],
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "proceed-gate.py"
+            ],
+            "timeout": 10
           }
         ]
       }
@@ -769,6 +785,14 @@
             "command": "/absolute/path/to/.claude/hooks/run-hook",
             "args": [
               "compaction-continuity.py"
+            ],
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "compaction-budget.py"
             ],
             "timeout": 10
           }

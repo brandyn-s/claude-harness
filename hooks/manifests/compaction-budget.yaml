@@ -1,0 +1,21 @@
+id: compaction-budget
+type: hook
+event: PostCompact
+matcher: ""
+if_condition: null
+action_type: injector
+description: "Counts compactions per session (PostCompact) and, from the second onward, injects a handoff nudge on the next UserPromptSubmit: report evidence and stop if the frame is complete, else write HANDOFF.md and propose a fresh session. Also writes the session ledger's compaction_count."
+enforces:
+  - session-boundaries
+blocks_patterns: []
+injects: "<compaction-budget> handoff nudge, once per compaction at or above the threshold"
+modifies: null
+depends_on_files:
+  - hooks/session_ledger.py
+depends_on_env:
+  - CLAUDE_COMPACTION_BUDGET
+exit_codes:
+  "0": "Always. Registered on PostCompact AND UserPromptSubmit; dispatches on hook_event_name."
+output_format: plaintext
+incidents:
+  - "2026-09-06 week review: 20/24/39-hour arcs with three or more compactions each; 35 of 58 corrective turns in six long sessions"

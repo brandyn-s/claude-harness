@@ -1,0 +1,22 @@
+id: proceed-gate
+type: hook
+event: UserPromptSubmit
+matcher: ""
+if_condition: null
+action_type: injector
+description: "On a bare continuation prompt (proceed / continue / do it all / fix 1,2,4) injects a DO-NOT-CHECK restatement contract; nudges /frame once per session when a substantive ask arrives with no INTENT.md; ingests INTENT.md bullets into the session ledger."
+enforces:
+  - session-boundaries
+  - scope-discipline
+blocks_patterns: []
+injects: "<proceed-gate> restatement contract; <frame-nudge> once per session; ledger ingest receipt"
+modifies: null
+depends_on_files:
+  - hooks/session_ledger.py
+depends_on_env:
+  - CLAUDE_SESSION_ID
+exit_codes:
+  "0": "Always. UserPromptSubmit exit 2 erases the prompt; this hook never blocks."
+output_format: plaintext
+incidents:
+  - "2026-09-06 week review: a third of prompts were bare continuations; done-criteria emerged over hours; session_ledger had no producer"

@@ -334,11 +334,14 @@ def main():
     # below only applies to the sources that CONTINUE an existing conversation.
     session_id = None
     session_source = ""
+    session_model = ""
     try:
         if sys.stdin and not sys.stdin.closed:
             hook_input = json.load(sys.stdin)
             session_id = hook_input.get("session_id")
             session_source = hook_input.get("source") or ""
+            # `model` is documented SessionStart input; it drives the per-model note.
+            session_model = hook_input.get("model") or ""
     except Exception:  # noqa: S110, BLE001 -- fail-open: never block session start
         pass  # fail-open: no stdin payload -> no session id
 
@@ -518,11 +521,24 @@ def main():
     except Exception:  # noqa: S110, BLE001 -- fail-open: never block session start
         pass  # fail-open: ledger rehydration is advisory
 
-    # Emit systemMessage (banner) + platform rules and/or ledger as additionalContext.
-    # Both are concatenated: overwriting one with the other would silently drop the
-    # platform rules on exactly the sessions (post-compaction) that most need them.
+    # Per-model behavioural note (session_start_modules/model_notes.py): the vendor
+    # prompting-guide corrections for the ACTIVE model only, ~400 bytes, instead of an
+    # ambient rule that would load every model's block for every model.
+    model_ctx = ""
+    try:
+        from session_start_modules.model_notes import model_notes_context
+        model_ctx, model_summary = model_notes_context(session_model)
+        if model_summary:
+            messages.append(model_summary)
+    except Exception:  # noqa: S110, BLE001 -- fail-open: never block session start
+        pass  # fail-open: the note is advisory
+
+    # Emit systemMessage (banner) + platform rules, ledger and model note as
+    # additionalContext. All are concatenated: overwriting one with another would
+    # silently drop the platform rules on exactly the sessions (post-compaction)
+    # that most need them.
     out = {"systemMessage": "\n".join(messages)}
-    combined_ctx = "\n\n".join(p for p in (platform_ctx, ledger_ctx) if p)
+    combined_ctx = "\n\n".join(p for p in (platform_ctx, ledger_ctx, model_ctx) if p)
     if combined_ctx:
         out["hookSpecificOutput"] = {
             "hookEventName": "SessionStart",
