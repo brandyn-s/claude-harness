@@ -83,4 +83,10 @@ measurement:
       fire_rate_pct: 0.53
       finding: "one python-native fire, the query-string API key above; the other 73 are the shell predicates' fires, unchanged from the first replay"
       change: "shipped"
+    - cut: "6 + operator catalog"
+      fires: 73
+      fire_rate_pct: 0.53
+      finding: "the same replay with CLAUDE_ENVIRONMENT_CATALOG pointing at a candidate safe_domains list built from the operator's own scripts (the 72 hosts named in five or more script writes): the python-native check contributes zero fires; the 73 that remain are the shell predicates' host-independent forms (pipe-to-shell, /dev/tcp, credential reads), identical to the first replay. The catalog stays on the operator's machine; nothing about it is in this repository"
+      change: "none -- this is the confirmation that the residual class is catalog-shaped, and the candidate list is the operator's to review"
+  keychain_item_name_review: "2026-09-06: the 89 distinct keychain item names in the operator's scripts were classified by _PY_NONSECRET_ITEM_RE; 23 read as identifiers, every one ending in id, url or email (client ids, tenant ids, base URLs, one address); none of the 66 secret-shaped names was misclassified and no identifier-classified name holds a credential. The filter's failure direction (a password stored under a label ending in account or user) does not occur in this corpus"
   known_positive: "/tmp/claude/verify_probes.sh (2026-08-12) fires at line 8 in the replay and in hooks/test-hooks/test_script_content_guard.py; the Python-native shapes (blocked and allowed) are pinned in hooks/test-hooks/test_python_source_exfil.py"

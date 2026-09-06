@@ -163,7 +163,11 @@ order:
    test suite points it at `hooks/test-hooks/fixtures/environment-catalog.json`.
 
 A layer that defines a section replaces that section wholesale; a section it
-omits is inherited. The shape, with placeholder names in every section, is
+omits is inherited. `bin/replay-script-content-guard.py` honours
+`CLAUDE_ENVIRONMENT_CATALOG` too, so a candidate `safe_domains` list can be
+measured against the transcript corpus before it is adopted: the exfiltration
+fires that a catalog removes are, by construction, the ones aimed at your own API
+hosts, and the ones it leaves are host-independent. The shape, with placeholder names in every section, is
 `contracts/environment-catalog.example.json`. A malformed layer is skipped with
 one stderr line: these hooks are advisory and never fail closed on their own
 configuration. `hooks/test-hooks/test_environment_catalog_guard.py` keeps vendor
