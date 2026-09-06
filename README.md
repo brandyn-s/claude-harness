@@ -4,7 +4,7 @@ A working [Claude Code](https://docs.claude.com/en/docs/claude-code) harness:
 **<!-- count:hooks -->53<!-- /count --> hook scripts** (plus <!-- count:hook_modules -->9<!-- /count --> shared modules),
 **<!-- count:rules -->34<!-- /count --> rules** (<!-- count:rules_ambient -->27<!-- /count --> of them always loaded),
 **<!-- count:skills -->82<!-- /count --> skills**, and the <!-- count:agents -->6<!-- /count --> agent definitions that
-tie them together — <!-- count:source_files -->1,669<!-- /count --> tracked source files, plus a
+tie them together — <!-- count:source_files -->1,674<!-- /count --> tracked source files, plus a
 generated plugin tree under `marketplace/` (another <!-- count:marketplace_files -->1,074<!-- /count -->
 files) that is not meant to be read (see [marketplace/README.md](marketplace/README.md)).
 The numbers in this file are generated from the tree by `bin/build-doc-counts.py`
@@ -80,7 +80,11 @@ python3 scripts/install-profile.py --apply
 ```
 
 Apply creates a timestamped backup when `~/.claude/settings.json` already
-exists, preserves unrelated settings, and writes atomically. Re-running the
+exists, preserves unrelated settings, and writes atomically. Coming from a
+configuration that grew the other way — sandbox off, blanket `Bash`/`Edit`
+allows, the dangerous-mode prompt skipped, a Stop hook that blocks on phrases —
+`python3 scripts/migrate-to-core.py` prints each change that takes it to the core
+posture with its reason, and `--apply` makes them with the same backup. Re-running the
 installer upgrades installed files you never edited, keeps the ones you did, and
 writes a conflicting upstream version beside yours as `<name>.harness-new`; the
 record is `~/.claude/.harness-install-state.json`.

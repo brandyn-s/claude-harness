@@ -20,6 +20,8 @@ time as an evaluator and the other is a historical record.
 | [macos-migration.md](macos-migration.md) | Notes from moving the harness between hosts. |
 | [sandbox-evaluation.md](sandbox-evaluation.md) | Evaluation of sandboxing options. |
 | [live-arm-measurement-plan.md](live-arm-measurement-plan.md) | Measurement design for a live A/B arm. |
+| [plans/2026-09-06-lean-core-ab.md](plans/2026-09-06-lean-core-ab.md) | The pre-registered A/B for the lean ambient rule core: arms, fixed decision rule, bisect order; `bin/lean-core-ab.py` runs it. |
+| [consuming-from-a-private-overlay.md](consuming-from-a-private-overlay.md) | The contract for an organisation that vendors this repository: core paths, `UPSTREAM.json`, `bin/upstream-check.py`, which way code flows. |
 | [code-architecture-review-2026-06-07.md](code-architecture-review-2026-06-07.md) | A dated architecture review. |
 | [research-skills-root-cause.md](research-skills-root-cause.md) | Why the five research skills showed no A/B lift on Opus 4.8 or Fable 5.1: grader artifacts, fixture ceilings, noise, and a proxy the skill forbids; per-skill recommendations. |
 
