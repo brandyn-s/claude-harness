@@ -11,7 +11,7 @@ compatibility:
   # Requires gh CLI for PR status and workflow run queries.
   requires:
     - cli: gh
-allowed-tools: AskUserQuestion Bash Edit Glob Grep Read Write mcp__codebase-memory-mcp__trace_call_path mcp__codebase-memory-mcp__index_status mcp__codebase-memory-mcp__search_code
+allowed-tools: AskUserQuestion Bash Edit Glob Grep Read Write mcp__code-graph__trace_call_path mcp__code-graph__index_status mcp__code-graph__search_code
 ---
 
 ## pr-fix

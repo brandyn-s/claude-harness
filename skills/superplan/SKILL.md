@@ -8,7 +8,7 @@ effort: max
 metadata:
   author: example-security-engineering
   version: "1.1"
-allowed-tools: AskUserQuestion Bash Edit Grep Read mcp__codebase-memory-mcp__* mcp__memory-search__memory_search
+allowed-tools: AskUserQuestion Bash Edit Grep Read mcp__code-search__* mcp__code-graph__* mcp__memory-search__memory_search
 ---
 
 ## superplan
@@ -106,7 +106,7 @@ Extract every named entity from the request and grep/read it before Phase 1. The
 | Hook | Check `~/.claude/hooks/<name>.py` exists and read its docstring |
 | Rule | Check `~/.claude/rules/<name>.md` exists |
 | MCP tool | Confirm via `~/.claude/rules/mcp-tool-names.md` (do not guess names) |
-| API endpoint | Check indexed API docs via `mcp__codebase-memory-mcp__search_code` first; fall back to live docs only if not indexed |
+| API endpoint | Check indexed API docs via `mcp__code-graph__search_code` first; fall back to live docs only if not indexed |
 | Topic file / KB page | Confirm `~/.claude/agent-memory/topics/<x>.md` or `~/Documents/knowledge-base/topics/<x>.md` exists |
 
 ### Detail subsections

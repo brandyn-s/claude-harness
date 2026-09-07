@@ -6,7 +6,7 @@ argument-hint: "[api-name] \"[use-case description]\""
 metadata:
   author: example-security-engineering
   version: "1.0"
-allowed-tools: AskUserQuestion Bash Read mcp__codebase-memory-mcp__search_code mcp__firecrawl__firecrawl_agent mcp__firecrawl__firecrawl_agent_status mcp__firecrawl__firecrawl_extract mcp__memory-search__memory_search
+allowed-tools: AskUserQuestion Bash Read mcp__code-search__search_code mcp__code-search__switch_project mcp__code-search__search_all_projects mcp__firecrawl__firecrawl_agent mcp__firecrawl__firecrawl_agent_status mcp__firecrawl__firecrawl_extract mcp__memory-search__memory_search
 effort: low
 ---
 
@@ -143,10 +143,17 @@ Check the indexed docs age:
 
 ### Step 1: Check if API docs are indexed
 
-Query the API docs project directly — the consolidated `codebase-memory-mcp` tools take `project` as a per-call parameter (no separate switch step):
+The ingested docs live in the **`code-search`** semantic index, which has one
+ACTIVE project at a time — so select it before querying. `/api-ingest` maintains
+a single canonical `api-docs` project covering every API (not one per API), so
+the API name belongs in the QUERY, not the project name:
 ```
-mcp__codebase-memory-mcp__search_code(pattern="<term>", project="api-docs-{api-name}")
+mcp__code-search__switch_project(project_path="~/Documents/api-docs")
+mcp__code-search__search_code(query="<api-name> <term>", k=10)
 ```
+To check coverage across indexes without switching, use
+`mcp__code-search__search_all_projects` (discovery only — its cross-index scores
+are not comparable).
 
 If the project doesn't exist, inform the user:
 ```

@@ -40,9 +40,9 @@ Read the PR diff and failure logs, edit only in `$WORKTREE`, run targeted tests,
 then commit. Push the detached commit to the PR's branch with an expected-SHA
 lease so a concurrent push fails safely:
 
-Before editing, call `mcp__codebase-memory-mcp__index_status`. When the repair
-repository is indexed, use `mcp__codebase-memory-mcp__search_code` for variants
-of the diagnosed pattern and `mcp__codebase-memory-mcp__trace_call_path` for
+Before editing, call `mcp__code-graph__index_status`. When the repair
+repository is indexed, use `mcp__code-graph__search_code` for variants
+of the diagnosed pattern and `mcp__code-graph__trace_call_path` for
 affected callers. When it is not indexed, state that limitation and keep the
 fix scoped to source and test evidence already read.
 

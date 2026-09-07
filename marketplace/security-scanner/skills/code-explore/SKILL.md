@@ -10,10 +10,11 @@ metadata:
   author: example-security-engineering
   version: "1.0"
 compatibility:
-  # Requires the codebase-memory-mcp server (unified text/semantic search + graph).
+  # Requires code-search (semantic/text search) + code-graph (structural graph).
   requires:
-    - mcp: codebase-memory-mcp
-allowed-tools: Read mcp__codebase-memory-mcp__detect_changes mcp__codebase-memory-mcp__get_architecture mcp__codebase-memory-mcp__get_code_snippet mcp__codebase-memory-mcp__get_graph_schema mcp__codebase-memory-mcp__list_projects mcp__codebase-memory-mcp__query_graph mcp__codebase-memory-mcp__query_security_surfaces mcp__codebase-memory-mcp__rank_by_query mcp__codebase-memory-mcp__search_code_semantic mcp__codebase-memory-mcp__search_graph mcp__codebase-memory-mcp__trace_call_path mcp__codebase-memory-mcp__find_similar_functions mcp__codebase-memory-mcp__index_status mcp__codebase-memory-mcp__search_code
+    - mcp: code-search
+    - mcp: code-graph
+allowed-tools: Read mcp__code-graph__detect_changes mcp__code-graph__get_architecture mcp__code-graph__get_code_snippet mcp__code-graph__get_graph_schema mcp__code-graph__list_projects mcp__code-search__list_projects mcp__code-graph__query_graph mcp__code-graph__query_security_surfaces mcp__code-graph__code_localize mcp__code-search__search_code mcp__code-graph__search_graph mcp__code-graph__trace_call_path mcp__code-search__find_similar_code mcp__code-graph__index_status mcp__code-search__get_index_status mcp__code-graph__search_code
 ---
 
 ## code-explore
@@ -24,32 +25,40 @@ Route code exploration queries to the right tool and chain automatically.
 
 ## Tool Inventory
 
-All tools below live on the single `codebase-memory-mcp` server — text/semantic
-search and the graph share one backend, one registry, one `project` parameter
-(no separate "active project" switch; pass `project` per call, or omit to use
-the session-detected default).
+Tools below span TWO servers with different project models — this matters:
+
+- **`code-graph`** (structure) takes `project` as a per-call parameter; omit it
+  to use the session-detected project. No switching step.
+- **`code-search`** (semantic/text) has ONE **active project** at a time. Call
+  `mcp__code-search__switch_project(project_path=...)` to move between repos, or
+  `mcp__code-search__search_all_projects` to query up to 25 indexes at once
+  (discovery only — its cross-index scores are explicitly not comparable).
+
+The two servers keep separate registries and separate indexes, so a repo can be
+indexed in one and not the other. Check both before concluding a repo is
+unindexed.
 
 ### Text / semantic search
 | Tool | Use for |
 |------|---------|
-| `mcp__codebase-memory-mcp__search_code` | Literal / regex TEXT search over indexed files (grep-shaped) — string literals, error messages, config values, imports. Set `regex=true` for pattern matching. NOT semantic — use `search_code_semantic` for meaning-based queries. |
-| `mcp__codebase-memory-mcp__search_code_semantic` | Voyage-embedding semantic search by meaning ("authentication middleware", "GPS parsing"), with `file_pattern`/`label` filters. No regex — this is meaning-based, not pattern-based. |
-| `mcp__codebase-memory-mcp__find_similar_functions` | Find functions similar to an already-indexed function BY NAME (refactor/duplicate-candidate search) — NOT a free-text search; needs an existing function name as the seed |
-| `mcp__codebase-memory-mcp__index_status` | Check if repo is indexed |
+| `mcp__code-graph__search_code` | Literal / regex TEXT search over indexed files (grep-shaped) — string literals, error messages, config values, imports. Set `regex=true` for pattern matching. NOT semantic — use `mcp__code-search__search_code` for meaning-based queries. |
+| `mcp__code-search__search_code` | Voyage-embedding semantic search by meaning ("authentication middleware", "GPS parsing"). Filters are `file_pattern` (glob) and `chunk_type` (exact match); `search_mode` is `auto`/`hybrid`/`keyword`/`semantic` and `k` is 1-100. No regex — this is meaning-based, not pattern-based. |
+| `mcp__code-search__find_similar_code` | Find code similar to a chunk you already located (refactor/duplicate-candidate search). Seeds from a **`chunk_id` returned by a previous `mcp__code-search__search_code` result** — NOT a function name and NOT free text. Run the search first, take the `chunk_id`, then call this. |
+| `mcp__code-graph__index_status` | Check if repo is indexed |
 
 ### Graph
 | Tool | Use for |
 |------|---------|
-| `mcp__codebase-memory-mcp__search_graph` | Find nodes by name/pattern |
-| `mcp__codebase-memory-mcp__query_graph` | Cypher relationship queries |
-| `mcp__codebase-memory-mcp__trace_call_path` | Trace call chains between functions |
-| `mcp__codebase-memory-mcp__get_code_snippet` | Get source + caller/callee metadata |
-| `mcp__codebase-memory-mcp__get_architecture` | Codebase overview (routes, hotspots, layers) |
-| `mcp__codebase-memory-mcp__detect_changes` | Blast radius of uncommitted changes |
-| `mcp__codebase-memory-mcp__query_security_surfaces` | Security audit (auth, sinks, crypto) |
-| `mcp__codebase-memory-mcp__rank_by_query` | PageRank top-K nodes for a symbol-list or short-keyword query. **Prefer `search_code_semantic` for natural-language queries** — `rank_by_query` collapses on common-token noise (verified 2026-05-13: "GPS data parsing reception" returned `reception` parameter in an unrelated camera-replay file as top hit). |
+| `mcp__code-graph__search_graph` | Find nodes by name/pattern |
+| `mcp__code-graph__query_graph` | Cypher relationship queries |
+| `mcp__code-graph__trace_call_path` | Trace call chains between functions |
+| `mcp__code-graph__get_code_snippet` | Get source + caller/callee metadata |
+| `mcp__code-graph__get_architecture` | Codebase overview (routes, hotspots, layers) |
+| `mcp__code-graph__detect_changes` | Blast radius of uncommitted changes |
+| `mcp__code-graph__query_security_surfaces` | Security audit (auth, sinks, crypto) |
+| `mcp__code-graph__code_localize` | PageRank top-K nodes for a symbol-list or short-keyword query. **Prefer `mcp__code-search__search_code` for natural-language queries** — `code_localize` collapses on common-token noise (verified 2026-05-13: "GPS data parsing reception" returned `reception` parameter in an unrelated camera-replay file as top hit). |
 
-**Metadata:** the unified `codebase-memory-mcp` tools return a `_metadata` envelope with `freshness` (index-vs-disk state) and `provenance` (data_source, and `model` on semantic search). The `_metadata.reranker.{applied,reason}` fields and their reason vocabulary belonged to the RETIRED Python `code-search` server and are not emitted by this server — do not key behavior on them. `search_code_semantic` errors clearly ("No embeddings available…") when `VOYAGE_API_KEY` was unset at index time; that message, not a reranker flag, is the signal to reindex.
+**Metadata:** `code-graph` tools return a `_metadata` envelope with `freshness` (index-vs-disk state) and `provenance` (`data_source`). Treat `identity_status` / `identity_reason` on `list_projects` as load-bearing: a project whose checkout moved or vanished reports `status: degraded` and answers queries from stale data. `mcp__code-search__search_code` errors clearly ("No embeddings available…") when `VOYAGE_API_KEY` was unset at index time — that message is the signal to reindex. On this host the key is injected from the macOS keychain by the `code-search-mcp-keychain` launcher, so an unset-key error means the keychain lookup failed, not that the variable was forgotten.
 
 ## When to Use This Skill vs codebase-memory-*
 
@@ -181,21 +190,19 @@ Use `k=10` per phrasing to cast a wider net.
 - Do NOT generate generic language constructs as HyDE queries (`Result<T, Error>`, `async fn`, `impl Trait`). These match thousands of chunks. Be specific to the *security-relevant pattern*.
 - Do NOT multi-phrase targeted queries ("where is function X"). Single pass is sufficient.
 
-**Dual-model consensus — mechanism unverified on the consolidated server.**
+**Dual-model consensus — available on the `code-search` backend.**
 
-The original mechanism here (`switch_project(project_path=..., provider=...)`
-to swap between a `voyage` and `voyage-context` index for the same path, run
-the query on each, merge) relied on the old code-search server's per-provider
-registry entries and its `switch_project` tool. Neither exists on
-`codebase-memory-mcp`: `list_projects` and `search_code_semantic`'s schemas
-don't advertise a provider field or parameter, so whether dual-model
-consensus survives in some other form is **unverified** — check the actual
-`list_projects` response for this project (it may carry more fields than the
-terse tool description implies) before assuming the capability is gone
-entirely. Until re-verified, treat dual-model consensus as unavailable and
-rely on multi-phrasing (Step 1.5) for recall diversity on a single model —
-it doesn't need re-verification and already provides most of the same value
-(catching results a single query phrasing misses).
+`mcp__code-search__switch_project(project_path=..., provider=...)` swaps between
+a `voyage` and a `voyage-context` index for the same path; `search_code` and
+`index_directory` also accept `provider`. So the mechanism is: index the repo
+under both providers, run the query against each, and merge — results confirmed
+by both models rank highest.
+
+Reserve it for repos where recall genuinely matters; multi-phrasing (Step 1.5)
+delivers most of the same recall diversity against a single index at a fraction
+of the indexing cost. If only one provider index exists for a path, dual-model
+consensus is unavailable for that repo — reindex with the second provider
+first rather than treating single-model results as consensus.
 
 Use `voyage` + `voyage-context` (both >0.79 MRR on Nix). Avoid Voyage + Jina for Nix
 (Jina MRR 0.638 adds noise). Check `references/search-strategies.md` for model pairing guidance.
@@ -245,12 +252,12 @@ when the target repo is inferable from the query (CWD signal, mentioned
 crate/service, explicit repo reference), and never pass `~`, `/`, `$HOME`, or
 a bare drive root as a `project`/`repo_path` value anywhere in this skill.
 
-1. **Resolve the target project name**: `mcp__codebase-memory-mcp__list_projects`
+1. **Resolve the target project name**: `mcp__code-graph__list_projects`
    — find the entry matching the query's target repo by `root_path`. If the
    target repo isn't obvious from the query and no entry obviously matches,
    ASK the user rather than guess.
 2. **Check the index exists and is healthy**:
-   - `mcp__codebase-memory-mcp__index_status(project=<name>)` — if the project
+   - `mcp__code-graph__index_status(project=<name>)` — if the project
      isn't found or `status != "ready"`, stop and tell the user "the index for
      `<path>` is missing or not ready. Run `/index-repo <path>` first." Do NOT
      attempt to call `index_repository` from this skill — indexing is the

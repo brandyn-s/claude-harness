@@ -30,12 +30,17 @@ known_phantom:
   # checking the server's source). Adding speculative entries
   # produces false positives. The two entries below were both
   # confirmed via tool-call attempts during the 2026-05 audit.
-  - name: mcp__code-graph__index_status
-    replaced_by: mcp__codebase-memory-mcp__get_architecture (returns nothing if not indexed) or mcp__codebase-memory-mcp__index_status
-    note: was cited in 8 skills before the 2026-05 audit (resolved in PR #970+). code-graph itself retired 2026-06 (consolidated into codebase-memory-mcp) — the replacement is now index_status, a real tool on the unified server.
   - name: mcp__code-search__index_status
-    replaced_by: mcp__codebase-memory-mcp__index_status
-    note: same typo class as code-graph__index_status; missing the get_ prefix. code-search itself retired 2026-06 (consolidated into codebase-memory-mcp).
+    replaced_by: mcp__code-search__get_index_status
+    note: >-
+      Missing the get_ prefix. code-search DOES expose get_index_status; the
+      unprefixed spelling has never existed. Confirmed 2026-09-07 by exact
+      ToolSearch select against the live split backend.
+      NOTE: mcp__code-graph__index_status was previously listed here as a
+      phantom on the assumption that code-graph had retired into
+      codebase-memory-mcp. That assumption no longer holds — code-graph is a
+      live, separately registered server (v0.9.3) and index_status is a REAL
+      tool on it, so the entry was removed to stop it flagging correct usage.
 
   # Class B instances (server-rename casualties), all confirmed absent by
   # empty ToolSearch `select:` on 2026-07-29. The gateway servers dropped the
@@ -94,10 +99,17 @@ known_phantom:
   # the old name persist. Track here if/when discovered.
 
 known_real:
-  # Codebase memory (search + graph, consolidated 2026-06 from the retired
-  # code-search + code-graph servers into one unified server). Glob rather
-  # than enumerated — same pattern as the github/slack sections below —
-  # so the registry doesn't go stale again as the server's tool surface grows.
+  # Code intelligence. The SPLIT pair is what is registered here:
+  #   code-search — semantic/text search (Voyage embeddings, FAISS+SQLite)
+  #   code-graph  — structural knowledge graph (v0.9.3)
+  # Globbed rather than enumerated — same pattern as the github/slack sections
+  # below — so the registry doesn't go stale as either tool surface grows.
+  - mcp__code-search__*
+  - mcp__code-graph__*
+  # Retained so a skill still citing the unified server is not flagged as a
+  # typo: codebase-memory-mcp (DeusData/codebase-memory-mcp) is a real product,
+  # it is simply NOT installed on this host. Absence is a deployment fact, not
+  # a phantom-tool fact.
   - mcp__codebase-memory-mcp__*
 
   # Memory + research

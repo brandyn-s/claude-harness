@@ -7,7 +7,7 @@ requires_tools:
   - AskUserQuestion
   - Bash
   - Read
-  - mcp__codebase-memory-mcp__search_code
+  - mcp__code-graph__search_code
   - mcp__firecrawl__firecrawl_agent
   - mcp__firecrawl__firecrawl_agent_status
   - mcp__firecrawl__firecrawl_extract

@@ -1,6 +1,6 @@
 id: api-ingest
 type: skill
-description: "Ingests API documentation from URLs, OpenAPI specs, PDFs, or Postman collections into ~/Documents/api-docs/ and indexes with codebase-memory-mcp for semantic retrieval."
+description: "Ingests API documentation from URLs, OpenAPI specs, PDFs, or Postman collections into ~/Documents/api-docs/ and indexes with code-search for semantic retrieval."
 category: knowledge
 
 requires_tools:
@@ -9,9 +9,9 @@ requires_tools:
   - Glob
   - Read
   - Write
-  - mcp__codebase-memory-mcp__index_repository
-  - mcp__codebase-memory-mcp__index_status
-  - mcp__codebase-memory-mcp__search_code_semantic
+  - mcp__code-graph__index_repository
+  - mcp__code-graph__index_status
+  - mcp__code-search__search_code
   - mcp__context7-docs__query-docs
   - mcp__context7-docs__resolve-library-id
   - mcp__firecrawl__*
