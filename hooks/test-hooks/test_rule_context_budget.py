@@ -93,3 +93,28 @@ def test_top_level_symlink_escape_fails_closed(tmp_path):
     (rules / "ambient.md").symlink_to(outside)
     with pytest.raises(budget.RuleContextBudgetError, match="symlink"):
         budget.unconditional_rule_bytes(rules)
+
+
+def test_tilde_prefixed_rules_dir_is_expanded_before_globbing(tmp_path, monkeypatch):
+    """A `~`-prefixed rules_dir must scan the real directory, not a literal "~".
+
+    Regression: `root` was expanded but the glob ran on the raw `rules_dir`, so
+    Path("~/.claude/rules") matched a literal directory named "~" (which does
+    not exist) and the scan returned 0 bytes / 0 files with no error. A budget
+    gate that reads 0 for a populated corpus hides exactly the bytes this
+    module exists to count, and the docstring promises to fail closed instead.
+    Measured 2026-09-07 against a real deployed tree: 0 vs 168,537 bytes.
+    """
+    home = tmp_path / "home"
+    rules = home / ".claude" / "rules"
+    rules.mkdir(parents=True)
+    _write(rules / "ambient.md", "a" * 4242)
+    monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setattr(Path, "home", staticmethod(lambda: home))
+
+    scanned = budget.scan_unconditional_rules(Path("~/.claude/rules"), None)
+
+    assert scanned.total_bytes == 4242, (
+        "tilde path scanned as a literal '~' directory — the false zero is back"
+    )
+    assert len(scanned.files) == 1

@@ -10,10 +10,10 @@ metadata:
   author: example-security-engineering
   version: "1.0"
 compatibility:
-  # Requires the codebase-memory-mcp server for querying the knowledge graph.
+  # Requires the code-graph server for querying the knowledge graph.
   requires:
-    - mcp: codebase-memory-mcp
-allowed-tools: mcp__codebase-memory-mcp__list_projects mcp__codebase-memory-mcp__index_repository mcp__codebase-memory-mcp__search_graph mcp__codebase-memory-mcp__query_graph mcp__codebase-memory-mcp__get_code_snippet mcp__codebase-memory-mcp__get_architecture mcp__codebase-memory-mcp__service_map
+    - mcp: code-graph
+allowed-tools: mcp__code-graph__list_projects mcp__code-graph__index_repository mcp__code-graph__search_graph mcp__code-graph__query_graph mcp__code-graph__get_code_snippet mcp__code-graph__get_architecture mcp__code-graph__get_architecture
 ---
 
 ## codebase-memory-exploring

@@ -4,10 +4,12 @@ description: 'Ingest API documentation into the searchable doc library (probes O
 when_to_use: 'Use when API documentation needs to be ingested for future reference. Accepts URLs (HTML doc sites, OpenAPI spec URLs), local files (OpenAPI JSON/YAML, PDF, Postman collections), or GitHub raw URLs. Probes for OpenAPI/llms-full.txt first (10x cheaper than scraping), falls back to Firecrawl. Stores in ~/Documents/api-docs/{api-name}/, indexes with codebase-memory-mcp for semantic retrieval. Trigger phrases: "api-ingest", "ingest API docs", "add API docs", "index this API". Do NOT use for building MCP servers from specs or for pre-coding constraint checks (use /api-preflight).'
 argument-hint: "[url-or-filepath] [--name api-name]"
 compatibility:
-  # Requires MCP servers: firecrawl, codebase-memory-mcp. Optional: context7-docs (falls back to ingesting regardless if unavailable).
+  # Requires MCP servers: firecrawl, code-graph, code-search. Optional: context7-docs (falls back to ingesting regardless if unavailable).
   requires:
-    - mcp: codebase-memory-mcp
-      tools: [index_repository, index_status, search_code_semantic]
+    - mcp: code-graph
+      tools: [index_repository, index_status]
+    - mcp: code-search
+      tools: [search_code]
     - mcp: firecrawl
   optional:
     - mcp: context7-docs
@@ -15,7 +17,7 @@ compatibility:
 metadata:
   author: example-security-engineering
   version: "1.0"
-allowed-tools: Agent AskUserQuestion Bash Glob Read Write mcp__codebase-memory-mcp__index_repository mcp__codebase-memory-mcp__index_status mcp__codebase-memory-mcp__search_code_semantic mcp__context7-docs__query-docs mcp__context7-docs__resolve-library-id mcp__firecrawl__*
+allowed-tools: Agent AskUserQuestion Bash Glob Read Write mcp__code-graph__index_repository mcp__code-graph__index_status mcp__code-search__search_code mcp__context7-docs__query-docs mcp__context7-docs__resolve-library-id mcp__firecrawl__*
 effort: medium
 ---
 
@@ -207,7 +209,7 @@ The project name is auto-derived from the path (`Users-<user>-Documents-api-docs
 — there is one canonical api-docs project; per-subdir indexing fragments it.
 
 ```
-mcp__codebase-memory-mcp__index_repository(
+mcp__code-graph__index_repository(
   repo_path="/Users/<user>/Documents/api-docs",
   force=true,
   skip_report=true
@@ -240,8 +242,9 @@ mandatory above — without it the graph grows but embeddings don't.)
 
 **Test query (semantic — Voyage embeddings, NOT grep) — this IS the verification:**
 ```
-mcp__codebase-memory-mcp__search_code_semantic(
+mcp__code-search__search_code(
   query="<api-name> authentication required scope",
+  search_mode="semantic",
   project="Users-<user>-Documents-api-docs"
 )
 ```
@@ -254,7 +257,7 @@ Confirm `embeddings_indexed` in the response rose by the new file count. Use
 rank prose by meaning.
 
 **Degradation path — codebase-memory-mcp not connected this session (MANDATORY,
-not an error).** Probe with ToolSearch (`select:mcp__codebase-memory-mcp__index_repository`);
+not an error).** Probe with ToolSearch (`select:mcp__code-graph__index_repository`);
 if empty, the server is unregistered or failed to start. In order:
 
 1. **CLI fallback (same engine, no MCP session needed):** run the index +
@@ -396,7 +399,7 @@ Index:        +{nodes_added} nodes (api-docs project, incremental)
 Total index:  {total_nodes} nodes across all APIs
 Graph:        +{N} nodes ({operations} ops, {scopes} scopes) — or warning if 0
 
-Search:  mcp__codebase-memory-mcp__search_code_semantic(query="...", project="Users-<user>-Documents-api-docs")
+Search:  mcp__code-search__search_code(query="...", search_mode="semantic", project="Users-<user>-Documents-api-docs")
 Preflight: /api-preflight {api-name} "<use case>"
 Refresh: /api-ingest {source} --name {api-name}
 ```

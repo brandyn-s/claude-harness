@@ -5,11 +5,11 @@ category: code-intel
 
 requires_tools:
   - Grep
-  - mcp__codebase-memory-mcp__detect_changes
-  - mcp__codebase-memory-mcp__get_code_snippet
-  - mcp__codebase-memory-mcp__query_graph
-  - mcp__codebase-memory-mcp__search_graph
-  - mcp__codebase-memory-mcp__trace_call_path
+  - mcp__code-graph__detect_changes
+  - mcp__code-graph__get_code_snippet
+  - mcp__code-graph__query_graph
+  - mcp__code-graph__search_graph
+  - mcp__code-graph__trace_call_path
 requires_topics: []
 requires_rules: []
 requires_skills: []

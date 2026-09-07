@@ -10,10 +10,11 @@ metadata:
   author: example-security-engineering
   version: "1.0"
 compatibility:
-  # Requires the codebase-memory-mcp server (unified text/semantic search + graph).
+  # Requires both split servers: code-search for text/semantic search, code-graph for the graph.
   requires:
-    - mcp: codebase-memory-mcp
-allowed-tools: Read mcp__codebase-memory-mcp__detect_changes mcp__codebase-memory-mcp__get_architecture mcp__codebase-memory-mcp__get_code_snippet mcp__codebase-memory-mcp__get_graph_schema mcp__codebase-memory-mcp__list_projects mcp__codebase-memory-mcp__query_graph mcp__codebase-memory-mcp__query_security_surfaces mcp__codebase-memory-mcp__rank_by_query mcp__codebase-memory-mcp__search_code_semantic mcp__codebase-memory-mcp__search_graph mcp__codebase-memory-mcp__trace_call_path mcp__codebase-memory-mcp__find_similar_functions mcp__codebase-memory-mcp__index_status mcp__codebase-memory-mcp__search_code
+    - mcp: code-search
+    - mcp: code-graph
+allowed-tools: Read mcp__code-graph__detect_changes mcp__code-graph__get_architecture mcp__code-graph__get_code_snippet mcp__code-graph__get_graph_schema mcp__code-graph__list_projects mcp__code-graph__query_graph mcp__code-graph__query_security_surfaces mcp__code-search__search_code mcp__code-graph__search_graph mcp__code-graph__trace_call_path mcp__code-search__find_similar_code mcp__code-graph__index_status mcp__code-graph__search_code
 ---
 
 ## code-explore
@@ -32,24 +33,24 @@ the session-detected default).
 ### Text / semantic search
 | Tool | Use for |
 |------|---------|
-| `mcp__codebase-memory-mcp__search_code` | Literal / regex TEXT search over indexed files (grep-shaped) — string literals, error messages, config values, imports. Set `regex=true` for pattern matching. NOT semantic — use `search_code_semantic` for meaning-based queries. |
-| `mcp__codebase-memory-mcp__search_code_semantic` | Voyage-embedding semantic search by meaning ("authentication middleware", "GPS parsing"), with `file_pattern`/`label` filters. No regex — this is meaning-based, not pattern-based. |
-| `mcp__codebase-memory-mcp__find_similar_functions` | Find functions similar to an already-indexed function BY NAME (refactor/duplicate-candidate search) — NOT a free-text search; needs an existing function name as the seed |
-| `mcp__codebase-memory-mcp__index_status` | Check if repo is indexed |
+| `mcp__code-graph__search_code` | Literal / regex TEXT search over indexed files (grep-shaped) — string literals, error messages, config values, imports. Set `regex=true` for pattern matching. NOT semantic — use `mcp__code-search__search_code` with `search_mode="semantic"` for meaning-based queries. |
+| `mcp__code-search__search_code` (`search_mode="semantic"`) | Voyage-embedding semantic search by meaning ("authentication middleware", "GPS parsing"), with a `file_pattern` filter. No regex — this is meaning-based, not pattern-based. `search_mode` also accepts `auto`, `hybrid` and `keyword`. |
+| `mcp__code-search__find_similar_code` | Find code similar to an already-indexed unit (refactor/duplicate-candidate search) — NOT a free-text search; needs an existing seed |
+| `mcp__code-graph__index_status` | Check if repo is indexed |
 
 ### Graph
 | Tool | Use for |
 |------|---------|
-| `mcp__codebase-memory-mcp__search_graph` | Find nodes by name/pattern |
-| `mcp__codebase-memory-mcp__query_graph` | Cypher relationship queries |
-| `mcp__codebase-memory-mcp__trace_call_path` | Trace call chains between functions |
-| `mcp__codebase-memory-mcp__get_code_snippet` | Get source + caller/callee metadata |
-| `mcp__codebase-memory-mcp__get_architecture` | Codebase overview (routes, hotspots, layers) |
-| `mcp__codebase-memory-mcp__detect_changes` | Blast radius of uncommitted changes |
-| `mcp__codebase-memory-mcp__query_security_surfaces` | Security audit (auth, sinks, crypto) |
-| `mcp__codebase-memory-mcp__rank_by_query` | PageRank top-K nodes for a symbol-list or short-keyword query. **Prefer `search_code_semantic` for natural-language queries** — `rank_by_query` collapses on common-token noise (verified 2026-05-13: "GPS data parsing reception" returned `reception` parameter in an unrelated camera-replay file as top hit). |
+| `mcp__code-graph__search_graph` | Find nodes by name/pattern |
+| `mcp__code-graph__query_graph` | Cypher relationship queries |
+| `mcp__code-graph__trace_call_path` | Trace call chains between functions |
+| `mcp__code-graph__get_code_snippet` | Get source + caller/callee metadata |
+| `mcp__code-graph__get_architecture` | Codebase overview (routes, hotspots, layers) |
+| `mcp__code-graph__detect_changes` | Blast radius of uncommitted changes |
+| `mcp__code-graph__query_security_surfaces` | Security audit (auth, sinks, crypto) |
+| _(no live equivalent)_ | PageRank top-K ranking (`rank_by_query`) did not survive the split back to `code-graph` + `code-search` and has no drop-in replacement. Use `mcp__code-search__search_code`, which returns scored results, for natural-language queries — which was already the standing advice here, because `rank_by_query` collapsed on common-token noise (verified 2026-05-13: "GPS data parsing reception" returned a `reception` parameter in an unrelated camera-replay file as the top hit). |
 
-**Metadata:** the unified `codebase-memory-mcp` tools return a `_metadata` envelope with `freshness` (index-vs-disk state) and `provenance` (data_source, and `model` on semantic search). The `_metadata.reranker.{applied,reason}` fields and their reason vocabulary belonged to the RETIRED Python `code-search` server and are not emitted by this server — do not key behavior on them. `search_code_semantic` errors clearly ("No embeddings available…") when `VOYAGE_API_KEY` was unset at index time; that message, not a reranker flag, is the signal to reindex.
+**Metadata:** these tools return a `_metadata` envelope with `freshness` (index-vs-disk state) and `provenance` (data_source, and `model` on semantic search). The `_metadata.reranker.{applied,reason}` fields and their reason vocabulary were not emitted by the consolidated server; re-verify them against the live `code-search` surface before keying behavior on them. Semantic search errors clearly ("No embeddings available…") when `VOYAGE_API_KEY` was unset at index time; that message, not a reranker flag, is the signal to reindex.
 
 ## When to Use This Skill vs codebase-memory-*
 
@@ -245,12 +246,12 @@ when the target repo is inferable from the query (CWD signal, mentioned
 crate/service, explicit repo reference), and never pass `~`, `/`, `$HOME`, or
 a bare drive root as a `project`/`repo_path` value anywhere in this skill.
 
-1. **Resolve the target project name**: `mcp__codebase-memory-mcp__list_projects`
+1. **Resolve the target project name**: `mcp__code-graph__list_projects`
    — find the entry matching the query's target repo by `root_path`. If the
    target repo isn't obvious from the query and no entry obviously matches,
    ASK the user rather than guess.
 2. **Check the index exists and is healthy**:
-   - `mcp__codebase-memory-mcp__index_status(project=<name>)` — if the project
+   - `mcp__code-graph__index_status(project=<name>)` — if the project
      isn't found or `status != "ready"`, stop and tell the user "the index for
      `<path>` is missing or not ready. Run `/index-repo <path>` first." Do NOT
      attempt to call `index_repository` from this skill — indexing is the

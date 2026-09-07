@@ -8,10 +8,10 @@ requires_tools:
   - Glob
   - Grep
   - Read
-  - mcp__codebase-memory-mcp__search_graph
-  - mcp__codebase-memory-mcp__index_status
-  - mcp__codebase-memory-mcp__index_repository
-  - mcp__codebase-memory-mcp__search_code
+  - mcp__code-graph__search_graph
+  - mcp__code-graph__index_status
+  - mcp__code-graph__index_repository
+  - mcp__code-graph__search_code
   - AskUserQuestion
 requires_topics:
   - security

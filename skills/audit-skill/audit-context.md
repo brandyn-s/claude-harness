@@ -72,7 +72,7 @@ purposes; when they disagree, the rule file wins.
 
 LIVE on this host (don't flag):
 
-- `mcp__codebase-memory-mcp__*` — the unified code-intelligence server
+- `mcp__code-graph__*` and `mcp__code-search__*` — the split code-intelligence servers
   (code-search + code-graph merged): search_code, search_code_semantic,
   query_graph, search_graph, trace_call_path, get_architecture,
   get_code_snippet, code_localize, index_repository, index_status,
@@ -127,7 +127,7 @@ nowhere (e.g. "no semantic search available") — the successor tools
 cover most of them.
 
 Tools that LOOK plausible but DON'T exist (do flag these):
-- `mcp__codebase-memory-mcp__get_index_status` — the unified server's
+- `mcp__code-search__get_index_status` — the unified server's
   real tool is `index_status` (the OLD code-search spelling was
   `get_index_status`; the polarity flipped in the merge — check the
   rule file when in doubt).

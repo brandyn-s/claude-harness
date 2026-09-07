@@ -4,14 +4,14 @@ description: "Verify a CALLS-edge or search result before a security-critical de
 when_to_use: "Use when a CALLS-edge claim, semantic-search top-K result, or code-localize verdict needs verification before informing a security-critical decision (auth / crypto / sanitization / taint flow / privilege boundary / secrets / access control). Reads the cited source, produces a CONFIRMED / FALSE-POSITIVE / AMBIGUOUS verdict artifact with file:line + source excerpt + rationale. Trigger phrases: \"verify this CALLS edge\", \"verify search result\", \"is this match real\", \"confirm this match\", \"audit this finding\". Do NOT use for non-security queries (architecture exploration, refactor planning) — the verification overhead isn't justified outside the security bar."
 argument-hint: "[query] [claim from search]"
 effort: low
-allowed-tools: Read Grep Glob Bash AskUserQuestion mcp__codebase-memory-mcp__get_code_snippet
+allowed-tools: Read Grep Glob Bash AskUserQuestion mcp__code-graph__get_code_snippet
 metadata:
   author: example-security-engineering
   version: "1.0"
 compatibility:
-  # Requires the codebase-memory-mcp server for the result being verified. The Read tool alone suffices if the user pasted the file:line directly.
+  # Requires a code-intelligence server for the result being verified. The Read tool alone suffices if the user pasted the file:line directly.
   requires:
-    - mcp: codebase-memory-mcp
+    - mcp: code-graph
 
 ---
 

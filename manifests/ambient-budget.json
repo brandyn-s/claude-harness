@@ -213,6 +213,12 @@
       "rule": "session-boundaries.md",
       "bytes": 2669,
       "reason": "New ambient contract, the boundary half of never-stop-early.md (deleted 2026-09-03, -2160) that outcome-over-verification's stop contract does not cover: never stop for length; a completed frame ends the session, not the next task; after two compactions write HANDOFF.md (working directory + ~/.claude/HANDOFF.md, which session-start already shows once) and propose a fresh session; after two failed corrections rewrite instead of patching. Evidence: week of 2026-08-30 arcs of 20/24/39 hours with three or more compactions each; 14-day ledger review, 35 of 58 corrective turns in six long sessions. Net of the two Sep-3 deletions (-7,194) the corpus is still 4,525 bytes smaller than before them. Enforced (advisory) by compaction-budget.py and proceed-gate.py, added in the same change."
+    },
+    {
+      "date": "2026-09-07",
+      "rule": "git-hygiene.md + subagent-verification.md + security-confirmations.md",
+      "bytes": 1172,
+      "reason": "Qualify three enforcement claims that named hooks this install profile does not deploy. Measured 2026-09-07 by /audit-architecture on an author-workstation install: git-hygiene named 5 hooks of which git-empty-push-guard, staged-additions-guard and post-merge-sync were absent; subagent-verification named subagent-stop and task-completed, both absent, on a host with ZERO SubagentStop registrations; security-confirmations named security-write-confirm as the advisory mechanism, absent. The installer's state file never recorded any of them, so the omission is a curated profile rather than a broken install and the RULE was the incorrect side. A rule asserting a deterministic backstop that is not installed is worse than silence, because it invites relying on it; each edit now states that wiring is profile-dependent and gives the one-line settings.json check that proves it. git-hygiene +602, subagent-verification +386, security-confirmations +184. Per-file sizes stay far below WARN 35,000 (largest of the three: git-hygiene at ~10.4 KB)."
     }
   ]
 }

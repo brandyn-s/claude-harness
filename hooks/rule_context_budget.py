@@ -105,7 +105,14 @@ def scan_unconditional_rules(
 
     root = rules_dir.expanduser().resolve()
     try:
-        candidates = set(rules_dir.glob("*.md"))
+        # Glob `root`, NOT `rules_dir`: globbing the unexpanded path makes a
+        # `~`-prefixed rules_dir match a literal directory named "~", which
+        # does not exist, so the scan silently returned 0 bytes / 0 files.
+        # That is precisely the hidden-bytes case this function's docstring
+        # promises to fail closed on. Measured 2026-09-07: Path("~/.claude/
+        # rules") scanned 0 while the same tree pre-expanded scanned 168,537
+        # bytes over 27 files.
+        candidates = set(root.glob("*.md"))
     except OSError as exc:
         raise RuleContextBudgetError(f"cannot enumerate rules in {rules_dir}: {exc}") from exc
 

@@ -20,7 +20,7 @@ Phase 4 re-index:
    graph but does NOT regenerate the Voyage embeddings, so the merged constraints
    would parse but stay unsearchable (verified 2026-06):
    ```
-   mcp__codebase-memory-mcp__index_repository(
+   mcp__code-graph__index_repository(
      repo_path="/Users/<user>/Documents/api-docs",
      force=true,
      skip_report=true

@@ -10,10 +10,10 @@ metadata:
   author: example-security-engineering
   version: "1.0"
 compatibility:
-  # Requires the codebase-memory-mcp server for degree filtering and quality metrics.
+  # Requires the code-graph server for degree filtering and quality metrics.
   requires:
-    - mcp: codebase-memory-mcp
-allowed-tools: mcp__codebase-memory-mcp__search_graph mcp__codebase-memory-mcp__query_graph mcp__codebase-memory-mcp__trace_call_path mcp__codebase-memory-mcp__list_projects
+    - mcp: code-graph
+allowed-tools: mcp__code-graph__search_graph mcp__code-graph__query_graph mcp__code-graph__trace_call_path mcp__code-graph__list_projects
 ---
 
 ## codebase-memory-quality
@@ -149,10 +149,10 @@ Present findings with classification in the output table:
 
 This skill assumes the target project is indexed. Before any quality query:
 
-1. Call `mcp__codebase-memory-mcp__list_projects` and confirm the target project appears with a recent timestamp.
+1. Call `mcp__code-graph__list_projects` and confirm the target project appears with a recent timestamp.
 2. If the project is **missing**: stop and tell the user "Project `<name>` is not indexed. Run `/index-repo <path>` first." Do NOT attempt to call `index_repository` from this skill — indexing is the `/index-repo` skill's job.
 3. If the project is **stale** (last indexed before recent code changes the user is asking about): warn the user and recommend re-running `/index-repo`. Proceed only if the user explicitly chooses to use the stale index.
-4. If `mcp__codebase-memory-mcp__list_projects` itself errors: report the MCP-server error verbatim and stop; the server is unavailable.
+4. If `mcp__code-graph__list_projects` itself errors: report the MCP-server error verbatim and stop; the server is unavailable.
 
 ## Key Tips
 

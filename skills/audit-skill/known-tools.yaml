@@ -28,14 +28,19 @@ known_phantom:
   # Growth policy: this list should only contain tools we have
   # *confirmed* don't exist (by attempting to call them, or by
   # checking the server's source). Adding speculative entries
-  # produces false positives. The two entries below were both
-  # confirmed via tool-call attempts during the 2026-05 audit.
-  - name: mcp__code-graph__index_status
-    replaced_by: mcp__codebase-memory-mcp__get_architecture (returns nothing if not indexed) or mcp__codebase-memory-mcp__index_status
-    note: was cited in 8 skills before the 2026-05 audit (resolved in PR #970+). code-graph itself retired 2026-06 (consolidated into codebase-memory-mcp) — the replacement is now index_status, a real tool on the unified server.
+  # produces false positives.
+  #
+  # DELISTED 2026-09-07: mcp__code-graph__index_status. It is a REAL tool on the
+  # live code-graph server, confirmed by exact ToolSearch select alongside
+  # index_health and code-search__get_index_status as positive controls. The
+  # entry dated from the 2026-06 consolidation and had gone stale when the split
+  # servers became canonical again; its own replaced_by field named the very tool
+  # it flagged, which is the tell. Leaving it listed made a correct rename emit a
+  # T1 drift finding — a phantom list that flags live tools is worse than an
+  # incomplete one, because it pushes callers off a working surface.
   - name: mcp__code-search__index_status
-    replaced_by: mcp__codebase-memory-mcp__index_status
-    note: same typo class as code-graph__index_status; missing the get_ prefix. code-search itself retired 2026-06 (consolidated into codebase-memory-mcp).
+    replaced_by: mcp__code-search__get_index_status
+    note: still a phantom — the code-search server exposes get_index_status, with the get_ prefix; index_status without it does not exist there. (code-graph DOES expose a bare index_status, so the correct name differs per server. Re-confirmed 2026-09-07 by exact select.)
 
   # Class B instances (server-rename casualties), all confirmed absent by
   # empty ToolSearch `select:` on 2026-07-29. The gateway servers dropped the
@@ -98,7 +103,8 @@ known_real:
   # code-search + code-graph servers into one unified server). Glob rather
   # than enumerated — same pattern as the github/slack sections below —
   # so the registry doesn't go stale again as the server's tool surface grows.
-  - mcp__codebase-memory-mcp__*
+  - mcp__code-graph__*
+  - mcp__code-search__*
 
   # Memory + research
   - mcp__memory-search__memory_search

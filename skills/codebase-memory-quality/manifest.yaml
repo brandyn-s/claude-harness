@@ -4,10 +4,10 @@ description: "Finds dead code, unused functions, high fan-out nodes, refactor ca
 category: code-intel
 
 requires_tools:
-  - "mcp__codebase-memory-mcp__search_graph"
-  - "mcp__codebase-memory-mcp__query_graph"
-  - "mcp__codebase-memory-mcp__trace_call_path"
-  - "mcp__codebase-memory-mcp__list_projects"
+  - "mcp__code-graph__search_graph"
+  - "mcp__code-graph__query_graph"
+  - "mcp__code-graph__trace_call_path"
+  - "mcp__code-graph__list_projects"
 requires_topics: []
 requires_rules: []
 requires_skills: []

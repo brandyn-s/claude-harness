@@ -20,7 +20,7 @@ effort: max
 metadata:
   author: example-security-engineering
   version: "1.0"
-allowed-tools: Agent AskUserQuestion Bash Glob Grep Read mcp__codebase-memory-mcp__search_graph mcp__codebase-memory-mcp__index_status mcp__codebase-memory-mcp__index_repository mcp__codebase-memory-mcp__search_code
+allowed-tools: Agent AskUserQuestion Bash Glob Grep Read mcp__code-graph__search_graph mcp__code-graph__index_status mcp__code-graph__index_repository mcp__code-graph__search_code
 compatibility:
   # Requires the codebase-memory-mcp server for evidence-grounding against
   # PSM source code. CKLB files are read from local disk; no other external
@@ -89,8 +89,8 @@ Key distinction: `/stig-verify` asks "is this finding truthful?" (grounding).
    For device-specific context, also read `<assessment-repo>/docs/<device>/`.
    Condense into a 10-15 line summary for evidence agent calls.
 
-7. **Check indexing**: Run `mcp__codebase-memory-mcp__index_status`
-   for PSM repo. If not indexed, run `mcp__codebase-memory-mcp__index_repository`.
+7. **Check indexing**: Run `mcp__code-graph__index_status`
+   for PSM repo. If not indexed, run `mcp__code-graph__index_repository`.
 
 8. **Load references**: Read `references/decision-matrix.md`,
    `references/srg-review-questions.md`, `references/reviewer-heuristics.md`.

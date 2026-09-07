@@ -7,7 +7,7 @@ effort: max
 metadata:
   author: example-security-engineering
   version: "1.0"
-allowed-tools: Glob Grep Read Write Bash mcp__codebase-memory-mcp__get_architecture mcp__codebase-memory-mcp__search_graph
+allowed-tools: Glob Grep Read Write Bash mcp__code-graph__get_architecture mcp__code-graph__search_graph
 ---
 
 # Threat Model
@@ -63,7 +63,7 @@ Build a mental model of the system before analyzing threats.
 
 Check for existing analysis artifacts that inform the threat model:
 
-- **code-graph**: If indexed (probe with `mcp__codebase-memory-mcp__get_architecture`
+- **code-graph**: If indexed (probe with `mcp__code-graph__get_architecture`
   — empty/error response means not indexed), use `search_graph` for entry
   points (label: "Function", relationship: "EXPORTS") and `get_architecture`
   for module dependency overview.
@@ -234,7 +234,7 @@ must be present in the code (GROUNDED — a *necessary* condition, not proof
 of the specific A→B edge), else the claim is UNSUBSTANTIATED and `--strict`
 fails the run; patterns too ambiguous to search are MANUAL (human-required),
 never silently passed. A Cypher intent is still emitted per claim so an
-orchestrator with `mcp__codebase-memory-mcp__query_graph` can run the stronger graph
+orchestrator with `mcp__code-graph__query_graph` can run the stronger graph
 query and append `calls_edge_verdict` records — but the deterministic
 grounding is the gate now, not the always-true emitter it replaced.
 `model_history.py` captures grounded vs unsubstantiated ratios. See

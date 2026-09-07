@@ -6,7 +6,7 @@ argument-hint: "[api-name] \"[use-case description]\""
 metadata:
   author: example-security-engineering
   version: "1.0"
-allowed-tools: AskUserQuestion Bash Read mcp__codebase-memory-mcp__search_code mcp__firecrawl__firecrawl_agent mcp__firecrawl__firecrawl_agent_status mcp__firecrawl__firecrawl_extract mcp__memory-search__memory_search
+allowed-tools: AskUserQuestion Bash Read mcp__code-graph__search_code mcp__firecrawl__firecrawl_agent mcp__firecrawl__firecrawl_agent_status mcp__firecrawl__firecrawl_extract mcp__memory-search__memory_search
 effort: low
 ---
 
@@ -145,7 +145,7 @@ Check the indexed docs age:
 
 Query the API docs project directly — the consolidated `codebase-memory-mcp` tools take `project` as a per-call parameter (no separate switch step):
 ```
-mcp__codebase-memory-mcp__search_code(pattern="<term>", project="api-docs-{api-name}")
+mcp__code-graph__search_code(pattern="<term>", project="api-docs-{api-name}")
 ```
 
 If the project doesn't exist, inform the user:

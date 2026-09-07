@@ -112,8 +112,14 @@ def test_load_known_tools_parses_registry():
         phantoms, reals = audit._load_known_tools()
     finally:
         audit._KNOWN_TOOLS_CACHE = {}
-    assert "mcp__code-graph__index_status" in phantoms
+    # Two entries from different classes, so the parse is exercised on both the
+    # per-server-typo class and the server-rename class. Do NOT pin a name that
+    # is merely plausible: mcp__code-graph__index_status was pinned here until
+    # 2026-09-07, when an exact ToolSearch select proved it is a REAL tool on the
+    # live code-graph server and it was delisted from known-tools.yaml. Assert on
+    # entries the registry actually still carries.
     assert "mcp__code-search__index_status" in phantoms
+    assert "mcp__remote-airlock__" in phantoms
     # At least one literal mcp__github__ entry or its glob umbrella
     has_github = any(
         (kind == "literal" and val.startswith("mcp__github__"))
