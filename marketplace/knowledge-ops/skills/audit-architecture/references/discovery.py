@@ -147,16 +147,28 @@ def discover_project_dir():
     root = os.path.join(HOME, '.claude', 'projects')
     if not os.path.isdir(root):
         return None
+    # EITHER marker identifies a project dir. Requiring CLAUDE.md alone made
+    # project_dir None on hosts that keep instructions at ~/.claude/CLAUDE.md,
+    # which in turn emitted memory_md_lines: 0 for a MEMORY.md that actually
+    # had 5 entries (measured 2026-09-07) — a false zero indistinguishable
+    # from a real measurement. Keep in sync with doc_accuracy_audit.py.
     cands = []
     for entry in os.listdir(root):
         p = os.path.join(root, entry)
-        if os.path.isdir(p) and os.path.isfile(os.path.join(p, 'CLAUDE.md')):
+        if not os.path.isdir(p):
+            continue
+        if (os.path.isfile(os.path.join(p, 'CLAUDE.md'))
+                or os.path.isfile(os.path.join(p, 'memory', 'MEMORY.md'))):
             cands.append((os.path.getmtime(p), p))
     return sorted(cands, reverse=True)[0][1] if cands else None
 
 
 def build():
-    result = {'base': BASE, 'errors': []}
+    # 'errors' is exit-2 territory (a parse failure that makes discovery
+    # incomplete). 'notes' carries non-fatal "this was not measured" signals
+    # so a null/absent value can never be read as a real measurement without
+    # promoting it to a hard failure.
+    result = {'base': BASE, 'errors': [], 'notes': []}
 
     servers, errs = load_servers()
     result['errors'].extend(errs)
@@ -224,7 +236,11 @@ def build():
     project_dir = discover_project_dir()
     result['project_dir'] = project_dir
     claude_md = ''
-    mem_lines = 0
+    # None, not 0: an unmeasured MEMORY.md must be distinguishable from an
+    # empty one. Emitting 0 for "could not resolve" is a false zero that
+    # reads as a real measurement downstream (grading-discipline.md:
+    # "report every zero WITH its bound").
+    mem_lines = None
     if project_dir:
         cm_path = os.path.join(project_dir, 'CLAUDE.md')
         if os.path.isfile(cm_path):
@@ -232,6 +248,14 @@ def build():
         mem_path = os.path.join(project_dir, 'memory', 'MEMORY.md')
         if os.path.isfile(mem_path):
             mem_lines = open(mem_path, encoding='utf-8').read().count('\n') + 1
+        else:
+            result['notes'].append(
+                f'MEMORY.md not measured: {mem_path} absent')
+    else:
+        result['notes'].append(
+            'MEMORY.md not measured: no project dir under '
+            f'{os.path.join(HOME, ".claude", "projects")} carries CLAUDE.md '
+            'or memory/MEMORY.md')
 
     agent_mem = {}
     am_root = os.path.join(HOME, '.claude', 'agent-memory')

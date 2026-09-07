@@ -581,10 +581,27 @@ def main():
         else:
             helpers.append(f)
 
-    test_norms = {norm(t) for t in os.listdir(TESTS) if t.startswith("test_")}
+    # test-hooks/ is absent in deployment profiles that ship hooks without
+    # their tests. That must NOT abort the run: everything below this point —
+    # including the plugin-hook inventory that #85893 makes load-bearing —
+    # used to be lost to a FileNotFoundError raised here, so an unrelated
+    # missing directory blanked the security-relevant output entirely.
+    # Per verify-effectiveness.md a skipped layer must change the reported
+    # COUNT and the exit status, never just a log line: coverage becomes
+    # UNKNOWN (not 0/N, which reads as "measured, all untested") and the
+    # run warns.
+    tests_present = os.path.isdir(TESTS)
+    if tests_present:
+        test_norms = {norm(t) for t in os.listdir(TESTS) if t.startswith("test_")}
+    else:
+        test_norms = set()
 
-    # 1b coverage (real hooks only)
-    untested = sorted(h for h in hooks if norm(h) not in test_norms)
+    # 1b coverage (real hooks only) — not computable without test-hooks/
+    untested = (
+        sorted(h for h in hooks if norm(h) not in test_norms)
+        if tests_present
+        else []
+    )
     # 1c error handling (real hooks only)
     no_try = []
     for h in hooks:
@@ -639,8 +656,21 @@ def main():
             f"{evidence}"
         )
 
+    tests_missing_message = ""
+    if not tests_present:
+        tests_missing_message = (
+            f"HOOK TEST COVERAGE UNKNOWN — {TESTS} is absent, so per-hook test "
+            f"coverage was not measured (0/{len(hooks)} would be a false zero). "
+            "Deploy the repository's hooks/test-hooks/ directory to restore this "
+            "check; the plugin-hook inventory below is unaffected."
+        )
+
     primary = (
-        plugin_error_message or schema_message or disabled_message or unknown_message
+        plugin_error_message
+        or schema_message
+        or disabled_message
+        or unknown_message
+        or tests_missing_message
     )
     if primary:
         # The most severe issue prints first so _check_all's one-line capture
@@ -660,10 +690,19 @@ def main():
         print(disabled_message)
     if unknown_message and primary != unknown_message and not plugin_errors:
         print(unknown_message)
-    print(
-        f"Hook coverage: {len(hooks) - len(untested)}/{len(hooks)} hooks have tests "
-        f"({len(helpers)} helper modules excluded)"
-    )
+    if tests_present:
+        print(
+            f"Hook coverage: {len(hooks) - len(untested)}/{len(hooks)} hooks have tests "
+            f"({len(helpers)} helper modules excluded)"
+        )
+    else:
+        if primary != tests_missing_message:
+            print(tests_missing_message)
+        print(
+            f"Hook coverage: UNKNOWN/{len(hooks)} — test-hooks/ absent "
+            f"({len(helpers)} helper modules excluded)"
+        )
+        warn = True
     for u in untested:
         print(f"    untested hook: {u}")
     print(
