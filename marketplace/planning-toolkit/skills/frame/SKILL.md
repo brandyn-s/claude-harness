@@ -91,3 +91,17 @@ Done-criteria that emerge over hours; a third of prompts being `proceed`; a
 rejected constraint re-entering after compaction because it was never written;
 plans presented as deliverables. WHY: week of 2026-08-30 review and the 14-day
 ledger review (35 of 58 corrective turns in six long sessions).
+
+## Success Criteria
+
+- `INTENT.md` exists in the working directory, created or updated — never
+  silently overwritten.
+- It names the problem, checkable done-when criteria, explicit non-goals, the
+  riskiest assumption with its probe, and what stays human.
+- Every done-when criterion is checkable by a named command or observation,
+  not by judgment.
+- Non-goals are written before implementation starts, so a later "while we're
+  here" item can be recognized as out of scope.
+- The riskiest assumption carries the cheapest probe that would refute it.
+- The session acceptance ledger reflects the frame through the proceed-gate
+  hook, so a later `proceed` resolves against written criteria.

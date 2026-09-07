@@ -85,3 +85,55 @@ test names to `python -m unittest` and reports every mutant caught.
 
 Return to `superpowers:test-driven-development` for the cycle itself and its
 verification checklist.
+
+## Examples
+
+**Example 1: inherited module with no coverage**
+User says: "Refactor `invoice_totals.py` — it has no tests."
+Actions:
+1. Write characterization tests first (step 1): feed the current inputs,
+   record whatever the function returns today, including the rounding quirk
+   that looks wrong.
+2. Pin that behavior as the baseline — the tests assert current behavior, not
+   intended behavior.
+3. Refactor; any characterization test that flips is an unintended change.
+Result: the rounding quirk was load-bearing for one caller. It surfaced as a
+red test instead of a billing incident.
+
+**Example 2: a feature spanning four layers**
+User says: "Add a `--since` flag that filters the report by date."
+Actions:
+1. Walking skeleton first (step 2): the thinnest slice that runs CLI → parser
+   → query → renderer end to end with one hardcoded date.
+2. Prove the seam, then widen each layer behind passing tests.
+3. Final acceptance test runs the literal documented invocation (step 3):
+   `report --since 2026-01-01`, not an internal `build_report(since=...)` call.
+Result: the CLI argument name was wrong in the docs. Only the literal-invocation
+test could have caught it.
+
+**Example 3: a mutation score that looks too good**
+User says: "Mutation testing says 100% caught, so the guard clause is
+redundant — delete it."
+Actions:
+1. Before believing the verdict, read
+   `docs/rule-reference/tdd-mutation-verdict-interpretation.md` (step 4).
+2. Find that the harness passes test names to `python -m unittest`, which
+   reports every mutant caught regardless of the mutation.
+3. Fix the harness, re-run, and re-read the score.
+Result: the real score was 61%, and the guard clause was the only thing
+covering a live branch. The harness was the bug.
+
+## Success Criteria
+
+- Characterization tests exist and pass against unmodified code before any
+  refactor begins, asserting current behavior rather than intended behavior.
+- For a multi-layer feature, a walking skeleton runs end to end through every
+  layer before any layer is widened.
+- Where the deliverable has a user-facing surface, an acceptance test invokes
+  it exactly as documented — real flags, real command, real endpoint or export.
+- A documented invocation that cannot be exercised is named in the test name
+  and reported as not live-verified rather than substituted.
+- No mutation-testing verdict is acted on, and no guard is deleted, before the
+  verdict-interpretation reference has been read and the harness qualified.
+- Control returns to `superpowers:test-driven-development` for the red-green-
+  refactor cycle itself.

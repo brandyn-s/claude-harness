@@ -2,7 +2,7 @@
 name: debugging-hypotheses
 description: "Companion to superpowers:systematic-debugging for bugs whose cause is not obvious after the first evidence pass: enumerate the code's unusual mechanisms, form two or more hypotheses across six failure categories, rank them by evidence tier, and run bounded parallel investigators."
 when_to_use: 'Use INSIDE superpowers:systematic-debugging, between its evidence-gathering and hypothesis phases, when the stack trace does not point straight at the bug, when a first fix did not hold, or when you notice you have only one theory. Trigger phrases: "second hypothesis", "what else could cause this", "rank the hypotheses", "investigate in parallel", "enumerate mechanisms". Do NOT use for typos, missing imports, or syntax errors, and do NOT use instead of systematic-debugging — it supplies the hypothesis discipline that skill leaves to judgment.'
-allowed-tools: Read Grep Glob Bash Agent
+allowed-tools: Read Grep Glob Bash Agent AskUserQuestion
 ---
 
 # Debugging hypotheses
@@ -98,3 +98,51 @@ adapted with budgets and a merge protocol.)
 
 Then return to `superpowers:systematic-debugging` Phase 4 to fix with a failing
 test first.
+
+## Examples
+
+**Example 1: stack trace does not point at the bug**
+User says: "The upload handler throws `KeyError: 'etag'` but the dict is
+populated two lines above."
+Actions:
+1. Enumerate mechanisms (step 1): retry wrapper re-enters the handler; the
+   response is a lazy proxy; a sibling thread mutates the dict.
+2. Form three hypotheses across categories (step 2): state (mutation),
+   concurrency (thread), boundary (lazy proxy).
+3. Rank by evidence tier (step 3): the retry wrapper is Tier 1 — the traceback
+   shows two frames of the same function.
+Result: retry-on-partial-failure re-entered with a consumed body. One
+hypothesis, ranked first by evidence rather than plausibility.
+
+**Example 2: the first fix did not hold**
+User says: "I added the null check and it still fails in staging."
+Actions:
+1. Treat the failed fix as a refutation, not a starting point — the mechanism
+   was wrong, so re-enumerate (step 1) instead of hardening the same guard.
+2. Three surviving hypotheses, each answerable by a bounded read on a
+   different surface → dispatch parallel investigators (step 4).
+3. Merge findings; two hypotheses are refuted by config, one confirmed.
+Result: staging read a different config key. Two parallel rounds maximum,
+then back to `superpowers:systematic-debugging` Phase 4.
+
+**Example 3: only one theory exists**
+User says: "It's obviously the cache."
+Actions:
+1. Notice the single-hypothesis condition and refuse to act on it (step 2).
+2. Produce a second and third mechanism before touching the cache.
+3. Rank all three; the cache falls to Tier 3 (plausible, no evidence).
+Result: the ranking, not the hunch, chooses what gets investigated first.
+
+## Success Criteria
+
+- At least two hypotheses exist before any fix is attempted, drawn from
+  different failure categories.
+- Every hypothesis carries an explicit evidence tier, and the investigation
+  order follows the tiers rather than plausibility.
+- Parallel investigation is used only when three or more hypotheses are
+  independent and each is answerable by a bounded read.
+- No more than two parallel rounds run before findings are presented to the
+  user for direction.
+- After the fix, all four prevention-checklist items are answered.
+- Control returns to `superpowers:systematic-debugging` Phase 4 for the fix
+  itself, with a failing test written first.

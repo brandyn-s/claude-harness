@@ -14,6 +14,8 @@ import re
 import subprocess
 from pathlib import Path
 
+import pytest
+
 REPO = Path(__file__).resolve().parents[1]
 SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?$")
 
@@ -42,10 +44,23 @@ def test_release_tag_if_present_points_at_a_commit_with_that_changelog_entry():
     exists = subprocess.run(["git", "rev-parse", "--verify", "--quiet", f"refs/tags/{tag}"],
                             cwd=REPO, capture_output=True, text=True).returncode == 0
     if not exists:
-        return  # unreleased in this clone; nothing to check
-    text = subprocess.run(["git", "show", f"{tag}:CHANGELOG.md"], cwd=REPO, capture_output=True,
-                          text=True, check=True).stdout
-    assert f"## [{_version()}]" in text, f"tag {tag} does not carry its own changelog entry"
+        pytest.skip(f"{tag} is unreleased in this clone; nothing to check")
+    # A PRESENT REF DOES NOT PROVE A READABLE OBJECT. A shallow or partial
+    # clone, or a fetch that raced the tag push, leaves refs/tags/<tag>
+    # resolvable while the tagged tree is absent — so `git show` exits 128 and
+    # check=True turned a clone limitation into a red main (measured
+    # 2026-09-07: this test failed on the 1.0.0 push and passed on re-run,
+    # unchanged). Read without check= and branch on the outcome, so a clone
+    # that cannot answer SKIPS visibly and only a readable tag can assert.
+    shown = subprocess.run(["git", "show", f"{tag}:CHANGELOG.md"], cwd=REPO,
+                           capture_output=True, text=True)
+    if shown.returncode != 0:
+        pytest.skip(
+            f"{tag} resolves but its CHANGELOG.md is not present in this clone "
+            f"(git show exit {shown.returncode}); run in a full clone to check"
+        )
+    assert f"## [{_version()}]" in shown.stdout, \
+        f"tag {tag} does not carry its own changelog entry"
 
 
 def test_upstream_example_names_this_version_and_the_core_paths():

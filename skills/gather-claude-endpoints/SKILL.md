@@ -614,3 +614,19 @@ DECLARATION FORM (table cell, enum bullet
 + description, `**Event Name**:` marker) and leave the value half open. Where
 a closed set is genuinely unavoidable, mark it `ACCEPTED-CLOSED` with the
 reason in the spec comment (see `hook-verdict-fields`, `otel-env-vars`).
+
+## Success Criteria
+
+- Every extractor anchors on the vendor's declaration form and leaves the value
+  half open; any closed alternation is marked `ACCEPTED-CLOSED` with a reason.
+- The probe leg stays GET-only, treats 400 as REACHABLE, and reports SKIPPED
+  rather than failing when its Keychain key is absent.
+- The observed-inventory leg runs with no credentials and no data-store
+  dependency, as a plain JSON contract.
+- `tests/test_reconcile_observed.py` passes, covering both the probe-safety and
+  the inventory contract.
+- Newly discovered endpoints are reconciled against the observed inventory, and
+  every endpoint is labeled reachable, unreachable, or unprobed — an unprobed
+  endpoint is never reported as absent.
+- Extractor changes are re-run against the preserved raw vendor corpus, not a
+  locally regenerated summary of it.

@@ -25,7 +25,9 @@ import re
 import sys
 from pathlib import Path
 
-H = os.path.expanduser("~/.claude")
+# Honor CLAUDE_CONFIG_DIR like the sibling _check_*.py helpers, so a run against
+# a worktree does not silently measure the deployed tree instead (2026-09-07).
+H = os.path.expanduser(os.environ.get("CLAUDE_CONFIG_DIR") or "~/.claude")
 HOOKS = f"{H}/hooks"
 TESTS = f"{HOOKS}/test-hooks"
 PROJECT_CWD = Path(os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd()).expanduser()
