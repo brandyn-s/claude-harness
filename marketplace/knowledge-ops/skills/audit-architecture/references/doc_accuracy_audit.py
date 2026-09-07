@@ -48,12 +48,21 @@ def discover_project_dir():
             projects_root = fallback
         else:
             return None
+    # A project dir is identified by EITHER marker. Requiring CLAUDE.md alone
+    # silently skipped the whole MEMORY.md check on hosts that keep their
+    # instructions at ~/.claude/CLAUDE.md (user-level) rather than per-project
+    # — measured 2026-09-07: MEMORY.md had 5 entries and the check reported
+    # "no MEMORY.md found". memory/MEMORY.md is the marker that actually
+    # matters to this check, so accept it too.
     candidates = []
     for entry in os.listdir(projects_root):
         proj_path = os.path.join(projects_root, entry)
         if not os.path.isdir(proj_path):
             continue
-        if not os.path.isfile(os.path.join(proj_path, 'CLAUDE.md')):
+        has_claude_md = os.path.isfile(os.path.join(proj_path, 'CLAUDE.md'))
+        has_memory_md = os.path.isfile(
+            os.path.join(proj_path, 'memory', 'MEMORY.md'))
+        if not (has_claude_md or has_memory_md):
             continue
         candidates.append((os.path.getmtime(proj_path), proj_path))
     if not candidates:
