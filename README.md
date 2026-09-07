@@ -115,7 +115,7 @@ On a 200K-token context window that is **roughly half the window consumed at
 rest**. This is why the full mirror is not the fresh-laptop default. The rules
 ratchet has since moved dated narrative out of the ambient corpus behind
 anchors in `rules/incidents/`: <!-- count:rules_ambient -->27<!-- /count --> always-loaded rules,
-<!-- count:ambient_bytes -->168,537<!-- /count --> bytes (about <!-- count:ambient_tokens -->61,570<!-- /count --> tokens by the
+<!-- count:ambient_bytes -->169,709<!-- /count --> bytes (about <!-- count:ambient_tokens -->61,998<!-- /count --> tokens by the
 byte proxy). `bin/ambient-load-report.py` prints the current split.
 
 The skill listing also exceeds its own budget: `skillListingBudgetFraction` is
