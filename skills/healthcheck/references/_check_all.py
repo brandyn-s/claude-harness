@@ -99,6 +99,24 @@ def mtime_hms(path):
         return None
 
 
+def is_source_checkout():
+    """True if H (the config dir) is a git work tree — a harness SOURCE checkout.
+
+    Discriminates the two reasons `scripts/` can be missing: a DEPLOYED install
+    never had it (install.sh does not deploy scripts/), while a source checkout
+    that lost it has a real defect. Kept equivalent to _check_manifest.py's copy
+    so a standalone `/healthcheck manifest` and a full run agree.
+    """
+    try:
+        r = subprocess.run(
+            ["git", "-C", H, "rev-parse", "--is-inside-work-tree"],
+            capture_output=True, text=True, timeout=10,
+        )
+    except Exception:  # noqa: BLE001 - orchestrator must never crash mid-run
+        return False
+    return r.returncode == 0 and r.stdout.strip() == "true"
+
+
 def run(cmd, timeout=240, cwd=None):
     try:
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=cwd)
@@ -118,7 +136,7 @@ def strip_prefix(line):
     """Drop a leading 'Label: ' and a leading 'PASS/WARN/FAIL — ' a helper prints,
     so the orchestrator's own status column isn't duplicated."""
     line = re.sub(r"^[A-Za-z][\w +\-/]*:\s*", "", line, count=1)
-    line = re.sub(r"^(PASS|WARN|FAIL)\s*[—-]+\s*", "", line)
+    line = re.sub(r"^(PASS|WARN|FAIL|N/A)\s*[—-]+\s*", "", line)
     return line.strip()
 
 
@@ -284,14 +302,28 @@ def main():
 
     progress("[10/11] manifest…")
     rc, out, err = run(["python3", f"{REF}/_check_manifest.py"])
-    m_status = {0: "PASS", 1: "WARN"}.get(rc, "FAIL")
+    # 3 = NOT APPLICABLE (see _check_manifest.NOT_APPLICABLE). "N/A" is neither
+    # a FAIL nor a WARN, so the verdict tally below ignores it while the row
+    # still shows the reader that nothing was measured.
+    m_status = {0: "PASS", 1: "WARN", 3: "N/A"}.get(rc, "FAIL")
     results.append(("Manifest", m_status, cap(out, err, rc)))
     if m_status == "FAIL" and stale:
         wip_fail.append("Manifest")
 
     progress("[11/11] indexes…")
-    rc, out, err = run(["python3", f"{SCRIPTS}/verify-indexes.py"])
-    results.append(("Indexes", "PASS" if rc == 0 else "FAIL", cap(out, err, rc)))
+    verifier = f"{SCRIPTS}/verify-indexes.py"
+    if not os.path.isfile(verifier) and not is_source_checkout():
+        # Same deployment-profile case as Manifest above: install.sh does not
+        # deploy scripts/, so the verifier is absent by design. It used to read
+        # as a hard FAIL on every run against ~/.claude.
+        results.append((
+            "Indexes", "N/A",
+            f"verify-indexes.py not deployed ({SCRIPTS}); index integrity is "
+            "checked from a harness checkout or via /index-repo --audit",
+        ))
+    else:
+        rc, out, err = run(["python3", verifier])
+        results.append(("Indexes", "PASS" if rc == 0 else "FAIL", cap(out, err, rc)))
 
     # ---- join the background pytest (heartbeat every 30s) -------------------
     if hooks_proc is not None and hooks_log is not None:

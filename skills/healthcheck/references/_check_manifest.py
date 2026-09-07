@@ -25,6 +25,7 @@ import ast
 import json
 import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -404,6 +405,35 @@ def check_marketplace_drift() -> tuple[list[str], list[str]]:
     return warn, fail
 
 
+NOT_APPLICABLE = 3  # distinct from PASS(0)/WARN(1)/FAIL(2): the check cannot apply here
+
+
+def _is_source_checkout() -> bool:
+    """True if CLAUDE_DIR is a git work tree, i.e. a harness SOURCE checkout.
+
+    This is the discriminator between the two reasons `scripts/` can be absent:
+
+      * a DEPLOYED install (`~/.claude`) — `install.sh` deliberately does not
+        deploy `scripts/`, so the build script was never meant to be here and
+        this check does not apply;
+      * a SOURCE checkout missing its own tooling — a real defect that must
+        stay a FAIL, which is what caught the 2026-05-22 broken bundle.
+
+    Deliberately NOT "does scripts/ exist": that would make the check's own
+    precondition its verdict, so a checkout that lost the directory would
+    report not-applicable instead of failing. Git-work-tree-ness is a property
+    of what the directory IS, independent of the thing being measured.
+    """
+    try:
+        r = subprocess.run(
+            ["git", "-C", str(CLAUDE_DIR), "rev-parse", "--is-inside-work-tree"],
+            capture_output=True, text=True, timeout=10,
+        )
+    except (subprocess.SubprocessError, OSError):
+        return False
+    return r.returncode == 0 and r.stdout.strip() == "true"
+
+
 def main():
     # Installed marketplace plugins do not ship the repository's source tree
     # or build script. Validate their generated dependency evidence directly
@@ -424,9 +454,21 @@ def main():
     # Preflight: both checks depend on BUILD_SCRIPT existing. Emit a clean
     # error rather than a raw FileNotFoundError traceback when it's absent.
     if not BUILD_SCRIPT.exists():
-        print(f"Manifest+Drift: ERROR - build script not found: {BUILD_SCRIPT}")
-        print("  Expected location: ~/.claude/scripts/build-marketplace.py")
-        print("  If running outside a deployed ~/.claude, set HOME to the deployed root.")
+        if not _is_source_checkout():
+            # Deployed harness install: scripts/ is not part of the install by
+            # design, so there is nothing here to measure. Report it as
+            # NOT-APPLICABLE rather than FAIL — an absent instrument is not a
+            # failing check, and calling it one trained the reader to ignore a
+            # permanently red row (measured 2026-09-07 against ~/.claude).
+            print(f"Manifest+Drift: N/A - not a harness source checkout ({CLAUDE_DIR})")
+            print(f"  {BUILD_SCRIPT} is absent and CLAUDE_CONFIG_DIR is not a git work tree.")
+            print("  install.sh does not deploy scripts/; marketplace integrity is a")
+            print("  property of the repository, so run this against a checkout:")
+            print("    CLAUDE_CONFIG_DIR=/path/to/claude-harness python3 _check_manifest.py")
+            sys.exit(NOT_APPLICABLE)
+        print(f"Manifest+Drift: FAIL - build script not found: {BUILD_SCRIPT}")
+        print("  CLAUDE_CONFIG_DIR IS a git work tree, so this checkout is missing")
+        print("  its own tooling — that is a real defect, not a deployment profile.")
         sys.exit(2)
     if not SKILLS.is_dir():
         print(f"Manifest+Drift: ERROR - skills directory not found: {SKILLS}")
