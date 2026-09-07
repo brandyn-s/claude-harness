@@ -114,8 +114,11 @@ GUARD pattern="approve it" when this agent authored_or_pushed_the_change:
   REFUSE self-approval; identify the independent reviewer or handoff command.
 
 # ─── ENFORCEMENT AND ON-DEMAND ROUTING ───
-# `security-write-confirm` is advisory detection; server-side OPA is authorization.
-# Neither proves consent. Skill-local confirmation steps remain in force.
+# `security-write-confirm` is advisory detection WHERE INSTALLED (absent on some
+# profiles — measured 2026-09-07); server-side OPA is authorization. Neither proves
+# consent, and its absence removes only the notification, never the STEP_1 duty to
+# state tool, action and target yourself. Skill-local confirmation steps remain in
+# force.
 # Relevant skills: `/investigate`, `/triage`, `/security-alerts`,
 # `/bulk-api-script`, `/invite-to-workspace`, `/provision`.
 # Detailed tool mappings and recovery: docs/rule-reference/security-confirmations.md
