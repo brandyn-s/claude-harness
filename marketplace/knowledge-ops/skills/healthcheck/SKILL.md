@@ -525,13 +525,36 @@ python3 ${CLAUDE_PLUGIN_ROOT}/skills/healthcheck/references/_check_manifest.py
 ```
 
 Exit codes: 0 = PASS, 1 = WARN-only, **2 = FAIL** (broken bundle requires
-manifest edit, not just rebuild). The helper parses `PLUGINS` via AST (not
-regex) so `scripts/`, `test-fixtures/`, and non-published files are correctly
-excluded from drift comparison.
+manifest edit, not just rebuild), **3 = NOT APPLICABLE**. The helper parses
+`PLUGINS` via AST (not regex) so `scripts/`, `test-fixtures/`, and
+non-published files are correctly excluded from drift comparison.
+
+**Exit 3 (N/A) — run against a deployed install.** `install.sh` does not deploy
+`scripts/`, so `build-marketplace.py` is absent from `~/.claude` by design and
+there is nothing here to measure. The check used to report FAIL for that, on
+every run; a permanently red row for an absent instrument trains the reader to
+skip the check that matters when it *does* fail.
+
+The discriminator is whether `CLAUDE_CONFIG_DIR` is a **git work tree** — a
+property of what the directory IS, not of the thing being measured:
+
+| `CLAUDE_CONFIG_DIR` | build script | verdict |
+|---|---|---|
+| not a work tree (deployed install) | absent | **N/A** (exit 3) |
+| work tree (source checkout) | present | measured normally |
+| work tree (source checkout) | **absent** | **FAIL** (exit 2) |
+
+That last row is why the test is not "does `scripts/` exist": keying on the
+directory would make the check's own precondition its verdict, so a checkout
+that lost its tooling would report not-applicable instead of failing — retiring
+the detector that caught the 2026-05-22 broken bundle. To measure marketplace
+integrity, point the check at a checkout:
+`CLAUDE_CONFIG_DIR=/path/to/claude-harness`.
 
 Report:
 - `"Manifest+Drift: PASS"` if exit 0
 - `"Manifest+Drift: WARN — {N} drift/unregistered"` if exit 1
+- `"Manifest+Drift: N/A"` if exit 3 (deployed install; not a source checkout)
 - `"Manifest+Drift: FAIL — {N} broken bundle"` if exit 2 (treat as a real
   failure; the marketplace is shipping missing files)
 
@@ -546,6 +569,14 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify-indexes.py
 ```
 
 Exit 0 = clean. Exit 2 = corruption detected; stdout lists each issue.
+
+**Reported N/A on a deployed install.** `verify-indexes.py` lives in `scripts/`,
+which `install.sh` does not deploy, so against `~/.claude` the script is absent
+by design. The orchestrator applies the same git-work-tree discriminator as
+Check 10 and reports `N/A` rather than FAIL. The decision lives in
+`_check_all.py` because here it is the verifier *itself* that is missing. Index
+integrity is checked from a harness checkout, or via `/index-repo --audit`
+against the live registry.
 
 What the script checks:
 - SQLite `PRAGMA integrity_check` on every code-graph `*.db` and code-search `metadata.db` + `fts5.db`
