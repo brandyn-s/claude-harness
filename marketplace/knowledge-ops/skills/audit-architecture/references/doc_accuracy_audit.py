@@ -252,6 +252,26 @@ def load_actual_state():
     return state
 
 
+NOTE = 'NOTE'  # findings tagged NOTE are informational: printed, never counted
+
+
+def _is_source_checkout():
+    """True if `base` is a work tree, i.e. a harness SOURCE checkout.
+
+    Same discriminator the healthcheck helpers use, for the same reason: it
+    separates "this tooling was never deployed here" from "this checkout is
+    missing its own tooling".
+    """
+    try:
+        r = subprocess.run(
+            ['git', '-C', base, 'rev-parse', '--is-inside-work-tree'],
+            capture_output=True, text=True, timeout=10,
+        )
+    except (subprocess.SubprocessError, OSError):
+        return False
+    return r.returncode == 0 and r.stdout.strip() == 'true'
+
+
 def _audit_generated_counts():
     """Delegate ARCHITECTURE.md's inventory numbers to the gate that owns them.
 
@@ -261,6 +281,13 @@ def _audit_generated_counts():
     """
     tool = os.path.join(base, 'bin', 'build-doc-counts.py')
     if not os.path.isfile(tool):
+        if not _is_source_checkout():
+            # install.sh does not deploy bin/, so the gate was never meant to
+            # be here. ARCHITECTURE.md's counts are a property of the
+            # repository; verify them from a checkout.
+            return [(NOTE,
+                     'inventory counts not verifiable here: bin/build-doc-counts.py '
+                     'is not deployed. Run the audit from a harness checkout.')]
         return [('ARCHITECTURE.md',
                  f'count gate not found at {tool} — inventory numbers are UNVERIFIED')]
     try:
@@ -333,8 +360,8 @@ def audit_architecture_md(state):
                 findings.append(('ARCHITECTURE.md', f'MCP server `{srv}` not documented'))
     elif state['mcp_servers']:
         findings.append(
-            ('ARCHITECTURE.md',
-             f"note: {len(state['mcp_servers'])} host MCP server(s) configured; "
+            (NOTE,
+             f"{len(state['mcp_servers'])} host MCP server(s) configured; "
              "ARCHITECTURE.md has no MCP section, so it makes no claim to check")
         )
 
@@ -486,7 +513,10 @@ def main():
     for orphan in state.get('orphan_hooks', []):
         orphan_findings.append(('REVERSE', f'Orphan hook: {orphan} exists in hooks/ but is not registered in settings.json'))
 
-    all_findings = arch_findings + claude_findings + mem_findings + orphan_findings
+    every = arch_findings + claude_findings + mem_findings + orphan_findings
+    notes = [(s, m) for s, m in every if s == NOTE]
+    all_findings = [(s, m) for s, m in every if s != NOTE]
+    arch_findings = [(s, m) for s, m in arch_findings if s != NOTE]
 
     # Human-readable output
     print('=== DOCUMENTATION ACCURACY AUDIT ===', file=sys.stderr)
@@ -517,6 +547,11 @@ def main():
             print(f'  {f_msg}', file=sys.stderr)
 
     print(file=sys.stderr)
+    if notes:
+        print('', file=sys.stderr)
+        print(f'Notes ({len(notes)}, not counted as drift):', file=sys.stderr)
+        for _, n_msg in notes:
+            print(f'  {n_msg}', file=sys.stderr)
     if all_findings:
         print(f'Total: {len(all_findings)} documentation drift issues', file=sys.stderr)
     else:
@@ -529,6 +564,7 @@ def main():
         'memory_md': {'issues': len(mem_findings), 'lines': mem_lines, 'links': mem_links,
                       'findings': [{'msg': m} for _, m in mem_findings]},
         'orphan_hooks': {'issues': len(orphan_findings), 'findings': [{'msg': m} for _, m in orphan_findings]},
+        'notes': [{'msg': m} for _, m in notes],
         'total_issues': len(all_findings),
     }
     json.dump(output, sys.stdout, indent=2)
