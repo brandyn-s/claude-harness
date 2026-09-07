@@ -5,7 +5,7 @@ lock or modify any index. Exits 0 if clean, 2 if any corruption detected.
 
 Checks performed:
 
-    code-graph (~/.cache/codebase-memory-mcp/*.db)
+    code-graph (~/.cache/code-graph/*.db)
       - SQLite PRAGMA integrity_check (page-level corruption)
       - Orphan edges (source_id or target_id not in nodes)
       - Orphan embeddings (node_id not in nodes)
@@ -27,12 +27,23 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import pickle
 import sqlite3
 import sys
 from pathlib import Path
 
-CG_CACHE = Path.home() / ".cache" / "codebase-memory-mcp"
+# code-graph's on-disk registry, resolved exactly as the server and the
+# session_start_modules hooks resolve it:
+#   ${CODE_GRAPH_CACHE_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/code-graph}
+# This file was the last straggler still pointing at the pre-rename
+# `codebase-memory-mcp` directory — a graveyard the live server never writes.
+# Scanning it found 0 project DBs and printed a clean PASS, so Check 11 was a
+# silent no-op for code-graph (fixed 2026-09-07; the hooks were fixed 2026-09-05).
+CG_CACHE = Path(
+    os.environ.get("CODE_GRAPH_CACHE_DIR")
+    or Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache") / "code-graph"
+)
 CS_PROJECTS = Path.home() / ".claude_code_search" / "projects"
 
 
@@ -222,7 +233,8 @@ def main(argv: list[str] | None = None) -> int:
             cs_errors.extend(check_codesearch_project(proj))
 
     all_errors = cg_errors + cs_errors
-    n_cg = len(list(CG_CACHE.glob("*.db"))) if CG_CACHE.exists() else 0
+    cg_cache_present = CG_CACHE.exists()
+    n_cg = len(list(CG_CACHE.glob("*.db"))) if cg_cache_present else 0
     n_cs = len(cs_projects)
 
     busy = [e for e in all_errors if e.startswith(_BUSY)]
@@ -250,9 +262,10 @@ def main(argv: list[str] | None = None) -> int:
         if busy:
             print(f"  (+ {len(busy)} transient lock/busy, not counted as corruption — see WARN below)")
         print()
+        cleanup = Path(__file__).resolve().parent / "cleanup-indexes.py"
         print("To clean up aborted indexes or duplicates, review and run:")
-        print("  python ~/.claude/scripts/cleanup-indexes.py            # dry-run")
-        print("  python ~/.claude/scripts/cleanup-indexes.py --execute  # delete")
+        print(f"  python3 {cleanup}            # dry-run")
+        print(f"  python3 {cleanup} --execute  # delete")
         return 2
 
     if busy:
@@ -261,7 +274,16 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  {e}")
         return 0
 
-    print(f"Indexes: PASS — {n_cg} code-graph DBs + {n_cs} code-search projects clean")
+    # Print the RESOLVED path when nothing was found. A zero with no bound cannot
+    # distinguish "nothing indexed yet" from "pointed at the wrong directory" —
+    # which is exactly how a stale CG_CACHE read as a clean PASS (fixed 2026-09-07).
+    if not cg_cache_present:
+        print(f"Indexes: WARN — code-graph cache directory not found: {CG_CACHE}")
+        print(f"  ({n_cs} code-search projects clean; code-graph NOT measured)")
+        print("  If code-graph is registered, this path is wrong or it has never indexed.")
+        return 0
+    suffix = f" (code-graph cache: {CG_CACHE})" if n_cg == 0 else ""
+    print(f"Indexes: PASS — {n_cg} code-graph DBs + {n_cs} code-search projects clean{suffix}")
     return 0
 
 
