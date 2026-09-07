@@ -35,7 +35,7 @@ Invoke when:
   "`validate_request → check_csrf` is the only CSRF entrypoint")
 - A semantic-search top-K result is about to be cited as evidence in a
   security audit
-- A `code_localize` / `code_localize_agent` verdict will drive a finding
+- A `code_localize` verdict will drive a finding
 - ANY tool result is being read as authoritative for an auth / crypto /
   sanitization / taint / privilege / secrets / access-control claim
 
@@ -224,7 +224,7 @@ RATIONALE: The chunk parses query strings but performs no input
 
 ### Example 3: localize verdict
 
-User pastes: "code_localize_agent ranked these top 5 for query 'where is
+User pastes: "code_localize ranked these top 5 for query 'where is
 admin role checked': handlers/admin.rs (0.92), services/auth.rs (0.78),
 db/users.rs (0.61), middleware/rbac.rs (0.55), config/policies.toml (0.42)."
 
