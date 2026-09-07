@@ -105,15 +105,33 @@ This host does NOT use the per-domain owning-agent design that Phase 2's
   tools except Agent) serves every MCP domain; the other agents
   (api-ingest-worker, semgrep-scanner, the fp-check trio) are task-scoped.
   Do not flag a server for lacking a dedicated owning agent.
-- **C5 (agent memory entries): N/A for `worker`.** Accumulation happens in
-  the topics tier (`agent-memory/topics/*.md`, ~90 files, actively
-  updated), not in `agent-memory/worker/`. An empty `worker/` directory is
-  by design, not an unused agent. Task-scoped subagents are deliberately
-  stateless (no `memory:` field) — do not flag L2 for them either.
+- **C5 (agent memory entries): N/A for `worker`.** Accumulation is expected
+  in the topics tier (`agent-memory/topics/*.md`), not in
+  `agent-memory/worker/`, so an empty `worker/` directory is by design, not
+  an unused agent. Task-scoped subagents are deliberately stateless (no
+  `memory:` field) — do not flag L2 for them either.
+  **Do NOT read this as "the topics tier is populated."** This file used to
+  assert a specific two-digit file count and called the tier actively
+  updated; on 2026-09-07 an audit measured a host with ZERO topic files and
+  no `agent-memory/topics/` directory at all. The count is not restated here
+  on purpose — a hardcoded number is what went stale, and repeating it even
+  as history would keep matching a grep for it;
+  the stale count was the stated reason C5 was N/A, so it suppressed a real
+  finding. `agent-memory/` ships EMPTY by design (see ARCHITECTURE.md §5), so
+  an empty tier is the DEFAULT state of a fresh install, not an anomaly.
+  MEASURE the tier before relying on either reading:
+  `ls ~/.claude/agent-memory/topics/*.md 2>/dev/null | wc -l`.
 - **C4 (topic file)** remains meaningful, but per compare-by-need it is
-  inventory unless a concrete friction incident exists. **C2 (routing rule)**
-  is retired: skills route natively by frontmatter description, and
-  tavily/exa/firecrawl routing is owned by the `web-search-preference` rule.
+  inventory unless a concrete friction incident exists. One such incident IS
+  on record: ambient rules give direct orders to read specific topic files
+  (`mcp-tool-names.md` — "Read agent-memory/topics/tailscale.md before
+  conclusions or writes"; `api-doc-lookup.md` — "read
+  agent-memory/topics/<vendor>.md"), and `agent-delegation.md` routes
+  delegated work by topic file. On a host with an empty tier those orders
+  dead-end, so C4 is a real finding there rather than inventory.
+  **C2 (routing rule)** is retired: skills route natively by frontmatter
+  description, and tavily/exa/firecrawl routing is owned by the
+  `web-search-preference` rule.
 
 ## What to do when uncertain
 
