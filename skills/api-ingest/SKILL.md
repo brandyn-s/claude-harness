@@ -253,7 +253,7 @@ Expected: a top result whose `file` starts with `{api-name}/` (e.g.
 `{api-name}/reference.md`). If the new API does NOT appear (only previously-ingested
 APIs return), the embeddings did not regenerate — re-run Phase 4 with `force=true`.
 Confirm `embeddings_indexed` in the response rose by the new file count. Use
-`search_code_semantic`, not `search_code` — the latter is grep-shaped and won't
+`search_code` with `search_mode="semantic"`, not the default keyword mode — plain keyword search is grep-shaped and won't
 rank prose by meaning.
 
 **Degradation path — `code-search` not connected this session (MANDATORY,

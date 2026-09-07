@@ -72,12 +72,22 @@ purposes; when they disagree, the rule file wins.
 
 LIVE on this host (don't flag):
 
-- `mcp__codebase-memory-mcp__*` — the unified code-intelligence server
-  (code-search + code-graph merged): search_code, search_code_semantic,
-  query_graph, search_graph, trace_call_path, get_architecture,
-  get_code_snippet, code_localize, index_repository, index_status,
-  index_health, list_projects, delete_project, query_security_surfaces,
-  service_map, and more — see the rule file.
+- `mcp__code-graph__*` — structural graph server: query_graph, search_graph,
+  get_graph_schema, trace_call_path, trace_data_flow, get_architecture,
+  get_code_snippet, code_localize, degree_filter, explain_symbol,
+  detect_changes, compare_project_indexes, get_review_context,
+  index_repository, index_status, index_health, list_projects,
+  delete_project, query_security_surfaces, query_stig_evidence, manage_adr,
+  generate_report, and more — see the rule file.
+- `mcp__code-search__*` — text/semantic search server: search_code (with
+  `search_mode` auto|hybrid|keyword|semantic), find_similar_code,
+  get_file_context, search_code_evidence, index_directory,
+  get_index_status, list_projects, switch_project.
+  NOTE: `mcp__codebase-memory-mcp__*` was listed here as LIVE until
+  2026-09-07. It is RETIRED — the 2026-06 consolidation was reversed and the
+  split pair above is canonical. Listing it under "don't flag" actively
+  suppressed the true finding, so treat any `codebase-memory-mcp` reference
+  as drift.
 - `mcp__memory-search__*` — memory_search, memory_search_batch,
   memory_check_duplicate, memory_stats, memory_stale, memory_reindex,
   checkpoint_save/resume/list

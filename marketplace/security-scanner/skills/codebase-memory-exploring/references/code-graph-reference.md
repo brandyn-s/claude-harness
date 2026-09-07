@@ -8,9 +8,9 @@
 | `list_projects` | List all indexed projects with timestamps and counts |
 | `delete_project` | Remove a project from the graph |
 | `search_graph` | Structured search with filters (name, label, degree, file pattern) |
-| `search_code_semantic` | Voyage-embedding semantic search by MEANING (no regex). Use for intent queries like "authentication middleware". |
+| `search_code` with `search_mode="semantic"` | Voyage-embedding semantic search by MEANING (no regex). Use for intent queries like "authentication middleware". Lives on `code-search`; `search_mode` also accepts `auto`, `hybrid`, `keyword`. |
 | `search_code` | Literal / regex TEXT search over indexed files (grep-shaped; set `regex=true` for patterns). This is the pattern-matching tool. |
-| `rank_by_query` | PageRank top-K nodes for a symbol-list or short-keyword query. Prefer `search_code_semantic` for natural-language queries — `rank_by_query` collapses on common-token noise. |
+| _(retired: `rank_by_query`)_ | PageRank top-K ranking did not survive the re-split and has no equivalent. Use `search_code`, which returns scored results — already the standing advice, since `rank_by_query` collapsed on common-token noise. |
 | `trace_call_path` | BFS call chain traversal (exact name match required). Supports `risk_labels=true` for impact classification. |
 | `detect_changes` | Map git diff to affected symbols + blast radius with risk scoring |
 | `query_graph` | Cypher-like graph queries. Default 200-row cap, raisable via `max_rows` (up to 10000); response includes `effective_cap` always and `capped: true` when truncated. |
@@ -19,10 +19,10 @@
 | `get_graph_schema` | Returns schema and aggregate node/edge counts across the graph |
 | `index_status` | Returns current indexing status and statistics for a project |
 | `index_health` | Checks indexing health and data consistency |
-| `service_map` | Structured enumeration of services grouped by domain, with `depends_on` lists plus route/security counts in one call |
+| _(retired: `service_map`)_ | Use `get_architecture(aspects=["services"])`; the standalone service-map tool has no equivalent on `code-graph` |
 | `get_code_snippet` | Read source code by qualified name |
 | `code_localize` | Localize code to a specific scope via agentic LLM-driven exploration |
-| `code_localize_agent` | Agentic code localization variant with multi-step reasoning |
+| _(retired: `code_localize_agent`)_ | Use `code_localize`; the agentic multi-step variant has no equivalent |
 
 Note: To check indexing status, use `index_status` or `get_architecture` (returns empty if the project is not indexed). To get aggregate node/edge counts and schema information, use `get_graph_schema` or run `search_graph` per label and sum the totals.
 
@@ -95,7 +95,7 @@ MATCH (m:Module)-[:IMPORTS]->(n:Module) WHERE m.name = 'alerting' RETURN n.name 
 
 ## Regex-Powered Search (No Full-Text Index Needed)
 
-`search_graph` (name/qn patterns) and `search_code` (`regex=true`) support full Go regex, making full-text search indexes unnecessary. `search_code_semantic` is meaning-based and takes NO regex. Regex patterns provide precise, composable queries that cover all common discovery scenarios:
+`search_graph` (name/qn patterns) and `search_code` (`regex=true`) support full Go regex, making full-text search indexes unnecessary. Semantic mode is meaning-based and takes NO regex. Regex patterns provide precise, composable queries that cover all common discovery scenarios:
 
 ### search_graph — name_pattern / qn_pattern
 
@@ -153,11 +153,11 @@ search_code(pattern="(?i)(POST|PUT).*\\/api\\/v[0-9]\\/orders", regex=true)
 | Cross-service edges | `query_graph` with Cypher |
 | Impact of local changes | `detect_changes()` |
 | Risk-classified trace | `trace_call_path(risk_labels=true)` |
-| Service inventory | `service_map(project="...")` |
+| Service inventory | `get_architecture(project="...", aspects=["services"])` |
 | Security surfaces | `query_security_surfaces` |
-| PageRank by query | `rank_by_query` (symbols/keywords; not natural language) |
+| PageRank by query | _(retired — no equivalent; use `search_code`'s scored results)_ |
 | Text / regex search | `search_code` (`regex=true`) or Grep |
-| Meaning-based search | `search_code_semantic` |
+| Meaning-based search | `search_code` with `search_mode="semantic"` |
 
 > **Related:** code-explore (routing), codebase-memory-exploring, codebase-memory-quality, codebase-memory-tracing
 

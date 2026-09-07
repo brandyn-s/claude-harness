@@ -2,7 +2,7 @@
 
 name: codebase-memory-exploring
 description: "Explore codebase structure — modules, functions, classes, routes — via the code graph."
-when_to_use: 'Use when asked to explore codebase structure, list functions or classes, show API endpoints, or understand how code is organized. Queries the code-graph knowledge graph for modules, routes, and relationships. Trigger phrases: "explore the codebase", "understand the architecture", "what functions exist", "show me the structure", "how is the code organized", "find functions matching", "search for classes", "list all routes", "show API endpoints". Do NOT use for semantic text search (use /code-explore or search_code_semantic), code quality analysis (use /codebase-memory-quality), or indexing (use /index-repo).'
+when_to_use: 'Use when asked to explore codebase structure, list functions or classes, show API endpoints, or understand how code is organized. Queries the code-graph knowledge graph for modules, routes, and relationships. Trigger phrases: "explore the codebase", "understand the architecture", "what functions exist", "show me the structure", "how is the code organized", "find functions matching", "search for classes", "list all routes", "show API endpoints". Do NOT use for semantic text search (use /code-explore, or search_code in semantic mode), code quality analysis (use /codebase-memory-quality), or indexing (use /index-repo).'
 effort: low
 model: sonnet
 argument-hint: '[query, e.g. "list all API endpoints", "show module structure"]'
@@ -40,10 +40,10 @@ If already indexed, skip — auto-sync keeps the graph fresh.
 
 ### Step 2: Get a structural overview
 
-**For "what services exist" / service-map queries, start with `service_map`** — it returns a structured enumeration of services grouped by domain, with `depends_on` lists and route/security counts in one call:
+**For "what services exist" / service-map queries, use `get_architecture` with the `services` aspect** — `service_map` was a tool on the retired consolidated server and has no equivalent on `code-graph`:
 
 ```
-service_map(project="<name>")
+get_architecture(project="<name>", aspects=["services"])
 ```
 
 For package boundaries, hotspots, entry points, and HTTP cross-service edges, use `get_architecture` (below).
@@ -58,7 +58,7 @@ Returns a service/module-level architecture map: top-level packages, their relat
 
 For raw node/edge counts when `get_architecture` doesn't surface the needed granularity, prefer targeted `search_graph` calls (e.g., `search_graph(label="Route")` then count, or `search_graph(label="Function", name_pattern=".*_test$")` for test functions). For aggregate counts across labels, run `search_graph` per label and sum the totals — see `references/code-graph-reference.md`.
 
-**HTTP_CALLS caveat**: The `services` aspect of `get_architecture` undercounts inter-service communication — zenoh/MCAP/pub-sub/CLI subprocess paths produce no HTTP_CALLS edges. Cross-reference architecture docs and `service_map`'s `depends_on` lists. See `code-explore`'s service/module identification anti-patterns for measurement evidence (PSM 2026-05-07: 3 HTTP_CALLS edges total, 2/3 FP).
+**HTTP_CALLS caveat**: The `services` aspect of `get_architecture` undercounts inter-service communication — zenoh/MCAP/pub-sub/CLI subprocess paths produce no HTTP_CALLS edges. Cross-reference architecture docs and the `services` aspect's own edges. See `code-explore`'s service/module identification anti-patterns for measurement evidence (PSM 2026-05-07: 3 HTTP_CALLS edges total, 2/3 FP).
 
 ### Step 3: Find specific code elements
 
@@ -110,8 +110,8 @@ search_graph(label="Module", qn_pattern=".*\\.services\\..*")
 
 - Searching for **string literals** or error messages → `search_code` (grep-shaped) or Grep
 - Finding a file by exact name → Glob
-- For regex-scanned content (TODO/FIXME markers, secrets, patterns) → `search_code` with `regex=true` (NOT `search_code_semantic` — that tool is meaning-based and takes no regex; a regex passed to it is embedded as prose and returns cosine neighbors, not matches)
-- The graph indexes structural elements (nodes, relationships); for text-pattern searches within code, use `search_code` (`regex=true`); for meaning-based search use `search_code_semantic`
+- For regex-scanned content (TODO/FIXME markers, secrets, patterns) → `search_code` with `regex=true` (NOT `search_code` with `search_mode="semantic"` — meaning-based search takes no regex; a regex passed to it is embedded as prose and returns cosine neighbors, not matches)
+- The graph indexes structural elements (nodes, relationships); for text-pattern searches within code, use `search_code` (`regex=true`); for meaning-based search use `search_code` with `search_mode="semantic`
 
 ## Key Tips
 

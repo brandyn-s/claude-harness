@@ -93,15 +93,15 @@ Skip this step for targeted queries ("what calls function X?", "where is file Y?
 
 | Query pattern | Type | Primary tool |
 |--------------|------|-------------|
-| "Where is the X code?" | Conceptual | search_code_semantic (meaning); search_code for a known literal/symbol |
-| "Find the X implementation" | Conceptual | search_code_semantic (meaning); search_code for a known literal/symbol |
+| "Where is the X code?" | Conceptual | search_code(search_mode="semantic") for meaning; plain `search_code` for a known literal/symbol |
+| "Find the X implementation" | Conceptual | search_code(search_mode="semantic") for meaning; plain `search_code` for a known literal/symbol |
 | "Find all definitions of `<exact symbol>`" | Exact-symbol | **Grep** with regex (e.g., `^(pub )?(struct\|enum\|type)\s+<Name>\b`) — cheaper and more precise than graph for known identifiers; fall back to `search_graph(name_pattern="^<Name>$")` if Grep returns ambiguous results |
 | "Find all Rust `fn new` / constructors / `impl X { fn new(...)`" | Rust idiom | **graph** `search_graph(label="Method", name_pattern="^new$")` OR **Grep** `^\s*(pub\s+)?(async\s+)?fn\s+new\s*[(<]`. **NOT semantic search** — embedding anchors on TypeScript "constructor" vocab and misses Rust `fn new` entirely (verified 2026-05-13: top-5 hits were all TS constructors). |
 | "Find `todo!()` / `unimplemented!()` / `panic!("not impl")` stubs" | Rust idiom | **Grep** `(todo!\|unimplemented!)\s*\(` — precise. **NOT semantic search** — semantic for "todo unimplemented stub" returns unrelated semantic neighbors (NMEA file headers in PSM eval, no actual stub call sites). |
 | "Find `#[derive(<Trait>)]` types" | Rust idiom | **Grep** `#\[derive\([^)]*<Trait>` — precise. **NOT graph** — `decorator_tags CONTAINS 'derive'` returns 0 even with 47+ derive blocks present (extraction gap, see knowledge-base/plans/2026-05-13-test-battery-n2-n4 N2). |
 | "Find `macro_rules!` definitions" | Rust idiom | **Grep** `^macro_rules!\s+\w+` — precise. `search_code` also works (found `defcan/message_builder`, `libio/sync_macros`, etc.) but slower; Grep returns counts + file list directly. |
-| "How does X work?" | Conceptual | search_code_semantic (meaning) |
-| "Show me X patterns" | Conceptual | search_code_semantic (meaning); search_code regex for a literal pattern |
+| "How does X work?" | Conceptual | search_code(search_mode="semantic") for meaning |
+| "Show me X patterns" | Conceptual | search_code(search_mode="semantic") for meaning; `search_code` regex for a literal pattern |
 | "Find all X" / "audit Y" | **Broad** | search_code (multi-phrasing) |
 | "What is X?" / "What does X do?" / "Tell me about X" | **Identification** | graph: search_graph + paginate + edge queries — see Step 1.6 |
 | "What calls X?" | Structural | graph: query_graph CALLS inbound |
@@ -223,12 +223,12 @@ Run the tool identified in Step 1 (or the multi-phrasing pipeline from Step 1.5 
 
 | After this result... | Follow up with... |
 |---------------------|-------------------|
-| `search_code`/`search_code_semantic` found a function | Graph: `query_graph` CALLS inbound to see who calls it |
-| `search_code`/`search_code_semantic` found a function | Graph: `get_code_snippet` with include_neighbors=true for callers/callees |
+| `search_code` (any mode) found a function | Graph: `query_graph` CALLS inbound to see who calls it |
+| `search_code` (any mode) found a function | Graph: `get_code_snippet` with include_neighbors=true for callers/callees |
 | `search_code` result is truncated | Graph: `get_code_snippet` by qualified name for full source |
 | Graph found callers/callees by name | `search_code` to understand what a caller does |
 | Graph found a node | Read tool with file:line for the exact implementation |
-| "How does X work?" partially answered | `find_similar_functions(name=<the function already found>)` for related/refactor-adjacent code |
+| "How does X work?" partially answered | `find_similar_code` seeded with the function already found, for related/refactor-adjacent code |
 
 ### Step 4: Present combined answer
 
@@ -272,7 +272,7 @@ an unscoped search.
 ## Examples
 
 **"Where's the rate limiting code?"**
-1. Conceptual -> semantic: `search_code_semantic(query="rate limiting")` -> finds `check_rate_limit` at claude-proxy:902
+1. Conceptual -> semantic: `search_code(query="rate limiting", search_mode="semantic")` -> finds `check_rate_limit` at claude-proxy:902
 2. Chain -> graph: `query_graph("MATCH (f)-[:CALLS]->(g) WHERE g.name = 'check_rate_limit' RETURN f.name LIMIT 10")` -> shows callers
 3. Answer: "Rate limiting is in `check_rate_limit()` at claude-proxy/claude_proxy.py:902. Called by `proxy_messages()` during request handling."
 
@@ -283,7 +283,7 @@ an unscoped search.
 
 **"Understand the authentication system"**
 1. Overview -> graph: `get_architecture(aspects=["routes", "services"])` -> service map
-2. Conceptual -> semantic: `search_code_semantic(query="authentication logic")` -> finds `_build_oauth`, `_authorize_tool_call`
+2. Conceptual -> semantic: `search_code(query="authentication logic", search_mode="semantic")` -> finds `_build_oauth`, `_authorize_tool_call`
 3. Structural -> graph: `trace_call_path(function_name="_authorize_tool_call")` -> auth call chain
 4. Answer: combined narrative
 
@@ -297,7 +297,7 @@ six known code-graph pitfalls, and the Deep Architecture Review template pointer
 ## Success Criteria
 
 - Pre-flight Check completed: target project resolved via `list_projects`, index status verified `ready`; `project` passed explicitly on every subsequent call
-- Query routed to the correct tool (search_code/search_code_semantic for conceptual, graph tools for structural)
+- Query routed to the correct tool (`search_code`, semantic mode for conceptual, graph tools for structural)
 - Results include file paths and line numbers for navigation
 - Auto-chaining applied when the primary result needs context from the other tool
 - For structural queries: caller/callee chains, risk classification, or degree metrics provided

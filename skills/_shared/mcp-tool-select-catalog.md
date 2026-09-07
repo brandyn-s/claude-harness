@@ -42,16 +42,16 @@ exact live select establishes whether that candidate is registered now.
 | **Memory search** | select:mcp__memory-search__memory_search,mcp__memory-search__memory_search_batch |
 | **Memory dedup / stats / stale / reindex** | select:mcp__memory-search__memory_check_duplicate,mcp__memory-search__memory_stats,mcp__memory-search__memory_stale,mcp__memory-search__memory_reindex |
 | **Checkpoints** | select:mcp__memory-search__checkpoint_save,mcp__memory-search__checkpoint_resume,mcp__memory-search__checkpoint_list |
-| **Code text search** | select:mcp__codebase-memory-mcp__search_code |
-| **Code semantic search** | select:mcp__codebase-memory-mcp__search_code_semantic |
-| **Code graph query** | select:mcp__codebase-memory-mcp__query_graph,mcp__codebase-memory-mcp__search_graph,mcp__codebase-memory-mcp__get_graph_schema |
-| **Code architecture / tracing** | select:mcp__codebase-memory-mcp__get_architecture,mcp__codebase-memory-mcp__trace_call_path,mcp__codebase-memory-mcp__trace_data_flow,mcp__codebase-memory-mcp__service_map |
-| **Code localization / ranking** | select:mcp__codebase-memory-mcp__code_localize,mcp__codebase-memory-mcp__code_localize_agent,mcp__codebase-memory-mcp__rank_by_query |
-| **Change context / review** | select:mcp__codebase-memory-mcp__get_relevant_context,mcp__codebase-memory-mcp__get_review_context,mcp__codebase-memory-mcp__get_affected_tests,mcp__codebase-memory-mcp__get_change_coupling,mcp__codebase-memory-mcp__detect_changes,mcp__codebase-memory-mcp__diff_graph |
-| **Code quality / structure** | select:mcp__codebase-memory-mcp__degree_filter,mcp__codebase-memory-mcp__detect_cycles,mcp__codebase-memory-mcp__find_similar_functions,mcp__codebase-memory-mcp__explain_symbol,mcp__codebase-memory-mcp__explain_service |
-| **Code indexing / projects** | select:mcp__codebase-memory-mcp__index_repository,mcp__codebase-memory-mcp__index_status,mcp__codebase-memory-mcp__index_health,mcp__codebase-memory-mcp__list_projects,mcp__codebase-memory-mcp__delete_project |
-| **STIG / security surfaces** | select:mcp__codebase-memory-mcp__query_security_surfaces,mcp__codebase-memory-mcp__query_stig_evidence |
-| **ADRs / rationale / reports** | select:mcp__codebase-memory-mcp__manage_adr,mcp__codebase-memory-mcp__find_rationale,mcp__codebase-memory-mcp__generate_report,mcp__codebase-memory-mcp__visualize |
+| **Code text search** | select:mcp__code-search__search_code (`search_mode: keyword`) |
+| **Code semantic search** | select:mcp__code-search__search_code (`search_mode: semantic`) |
+| **Code graph query** | select:mcp__code-graph__query_graph,mcp__code-graph__search_graph,mcp__code-graph__get_graph_schema |
+| **Code architecture / tracing** | select:mcp__code-graph__get_architecture,mcp__code-graph__trace_call_path,mcp__code-graph__trace_data_flow |
+| **Code localization / ranking** | select:mcp__code-graph__code_localize,mcp__code-search__code_localize,mcp__code-search__search_code |
+| **Change context / review** | select:mcp__code-graph__get_review_context,mcp__code-graph__detect_changes,mcp__code-graph__compare_project_indexes,mcp__code-search__get_file_context |
+| **Code quality / structure** | select:mcp__code-graph__degree_filter,mcp__code-graph__explain_symbol,mcp__code-search__find_similar_code |
+| **Code indexing / projects** | select:mcp__code-graph__index_repository,mcp__code-graph__index_status,mcp__code-graph__index_health,mcp__code-graph__list_projects,mcp__code-graph__delete_project,mcp__code-search__index_directory,mcp__code-search__get_index_status |
+| **STIG / security surfaces** | select:mcp__code-graph__query_security_surfaces,mcp__code-graph__query_stig_evidence |
+| **ADRs / rationale / reports** | select:mcp__code-graph__manage_adr,mcp__code-graph__generate_report |
 | **Linear issues** | select:mcp__linear-server__list_issues,mcp__linear-server__save_issue,mcp__linear-server__get_issue,mcp__linear-server__get_issue_status,mcp__linear-server__list_issue_statuses,mcp__linear-server__list_issue_labels |
 | **Linear projects / initiatives / milestones** | select:mcp__linear-server__list_projects,mcp__linear-server__get_project,mcp__linear-server__save_project,mcp__linear-server__list_initiatives,mcp__linear-server__get_initiative,mcp__linear-server__list_milestones,mcp__linear-server__get_milestone |
 | **Linear status updates** | select:mcp__linear-server__save_status_update,mcp__linear-server__get_status_updates |
@@ -119,8 +119,27 @@ Do not route to these without a current live probe proving that the status chang
 - mcp__exa__web_search_advanced_exa, mcp__exa__get_code_context_exa, and
   mcp__exa__crawling_exa. Exa consolidated to web_search_exa and web_fetch_exa;
   domain/operator search moved to Firecrawl.
-- mcp__code-search__* and mcp__code-graph__*. Their successor was
-  codebase-memory-mcp on this host.
+- mcp__codebase-memory-mcp__*. The 2026-06 consolidation that merged
+  code-search + code-graph into this one server was REVERSED: the split pair
+  is canonical again as of 2026-09 and `codebase-memory-mcp` returns an empty
+  exact select here. Route graph, trace, architecture and indexing work to
+  mcp__code-graph__*, and text/semantic search to mcp__code-search__*.
+  (Direction confirmed 2026-09-07 by exact select with positive controls. This
+  entry previously asserted the OPPOSITE — that the split pair's "successor was
+  codebase-memory-mcp" — which pointed every reader of this catalog away from
+  the only two code-intel servers that exist.)
+- These `codebase-memory-mcp` tools have NO live equivalent on either split
+  server. They are capability LOSSES, not renames, so a caller needs a
+  different approach rather than a substituted name: `detect_cycles`,
+  `get_affected_tests`, `get_change_coupling`, `service_map`,
+  `explain_service`, `find_rationale`, `visualize`, `rank_by_query`,
+  `code_localize_agent`, `get_relevant_context`. Nearest available surfaces,
+  none of them drop-in: cycle and coupling questions become
+  `mcp__code-graph__query_graph` Cypher over the `FILE_CHANGES_WITH` edge and
+  its `r.coupling_score` property; service and rationale questions become
+  `mcp__code-graph__get_architecture` and `mcp__code-graph__manage_adr`;
+  ranking falls back to `mcp__code-search__search_code`, which returns scored
+  results.
 - mcp__arxiv-mcp-server__*. This was a Windows-era local server.
 - Slack connector GUID prefixes. Use the currently registered alias discovered
   from the live surface.
