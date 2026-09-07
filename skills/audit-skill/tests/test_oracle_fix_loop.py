@@ -70,7 +70,7 @@ def test_verify_fix_against_refs_VERIFIED(tmp_path):
 
     # Pre: bug present
     target.write_text(
-        "---\nname: example\nallowed-tools: Read mcp__code-graph__index_status\n---\n# body\n",
+        "---\nname: example\nallowed-tools: Read mcp__code-search__index_status\n---\n# body\n",
         encoding="utf-8",
     )
     pre_sha = _commit_all(tmp_path, "pre: contains phantom tool")
@@ -87,10 +87,10 @@ def test_verify_fix_against_refs_VERIFIED(tmp_path):
         code="T1",
         severity="drift",
         label="behavior-fix",
-        description="known-phantom mcp__code-graph__index_status reference",
+        description="known-phantom mcp__code-search__index_status reference",
         reproducer=Reproducer(
             type="grep",
-            command="grep -q 'mcp__code-graph__index_status' skill.md",
+            command="grep -q 'mcp__code-search__index_status' skill.md",
         ),
     )
     result = verify_against_refs(f, tmp_path, pre_sha, post_sha)
@@ -123,7 +123,7 @@ def test_verify_fix_against_refs_STALE_PRE(tmp_path):
         description="hallucinated phantom tool",
         reproducer=Reproducer(
             type="grep",
-            command="grep -q 'mcp__code-graph__index_status' skill.md",
+            command="grep -q 'mcp__code-search__index_status' skill.md",
         ),
     )
     result = verify_against_refs(f, tmp_path, pre_sha, post_sha)
@@ -141,7 +141,7 @@ def test_verify_fix_against_refs_FIX_INEFFECTIVE(tmp_path):
 
     # Pre: bug present
     target.write_text(
-        "---\nname: example\nallowed-tools: Read mcp__code-graph__index_status\n---\n",
+        "---\nname: example\nallowed-tools: Read mcp__code-search__index_status\n---\n",
         encoding="utf-8",
     )
     pre_sha = _commit_all(tmp_path, "pre: phantom present")
@@ -159,7 +159,7 @@ def test_verify_fix_against_refs_FIX_INEFFECTIVE(tmp_path):
         description="known-phantom reference",
         reproducer=Reproducer(
             type="grep",
-            command="grep -q 'mcp__code-graph__index_status' skill.md",
+            command="grep -q 'mcp__code-search__index_status' skill.md",
         ),
     )
     result = verify_against_refs(f, tmp_path, pre_sha, post_sha)

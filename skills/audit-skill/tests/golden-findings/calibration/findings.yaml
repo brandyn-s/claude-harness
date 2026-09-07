@@ -38,7 +38,7 @@ findings:
     reproducer:
       type: grep
       command: |
-        grep -q 'mcp__code-graph__index_status' skills/audit-skill/tests/golden-findings/calibration/true_fixture/SKILL.md
+        grep -q 'mcp__code-search__index_status' skills/audit-skill/tests/golden-findings/calibration/true_fixture/SKILL.md
 
   - skill: true-fixture
     code: P1
@@ -143,12 +143,12 @@ findings:
     code: T1
     severity: drift
     label: behavior-fix
-    description: known-phantom mcp__code-graph__index_status appears in frontmatter allowed-tools
+    description: known-phantom mcp__code-search__index_status appears in frontmatter allowed-tools
     expected_fires: true
     reproducer:
       type: grep
       command: |
-        grep -q 'allowed-tools:.*mcp__code-graph__index_status' skills/audit-skill/tests/golden-findings/calibration/true_fixture/SKILL.md
+        grep -q 'allowed-tools:.*mcp__code-search__index_status' skills/audit-skill/tests/golden-findings/calibration/true_fixture/SKILL.md
 
   - skill: true-fixture
     code: P1
@@ -246,7 +246,7 @@ findings:
     reproducer:
       type: grep
       command: |
-        grep -qE '^allowed-tools:.*mcp__code-graph__index_status' skills/audit-skill/tests/golden-findings/calibration/false_fixture/SKILL.md
+        grep -qE '^allowed-tools:.*mcp__code-search__index_status' skills/audit-skill/tests/golden-findings/calibration/false_fixture/SKILL.md
 
   - skill: false-fixture
     code: C2

@@ -2,7 +2,7 @@
 name: dirty-skill
 description: A fixture that intentionally violates multiple audit checks.
 argument-hint: "[target]"
-allowed-tools: Bash Read mcp__exa__web_search_exa mcp__code-graph__index_status mcp__unused__never_invoked
+allowed-tools: Bash Read mcp__exa__web_search_exa mcp__code-search__index_status mcp__unused__never_invoked
 ---
 
 ## dirty-skill
@@ -21,7 +21,7 @@ python ${CLAUDE_SKILL_DIR}/scripts/run.py
 
 Uses `mcp__exa__web_search_exa` in the body (so M2 doesn't fire on Exa);
 the other two MCP tools in allowed-tools are intentionally unused.
-The phantom `mcp__code-graph__index_status` triggers T1.
+The phantom `mcp__code-search__index_status` triggers T1.
 
 P1 trigger — unresolved template placeholder: see [docs]({baseDir}/references/orphan.md).
 Also `<your-claude-project>` here exercises the alternate P1 pattern.

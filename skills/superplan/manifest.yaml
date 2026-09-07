@@ -8,6 +8,7 @@ requires_tools:
   - Edit
   - Grep
   - Read
+  - mcp__code-graph__*
   - mcp__code-search__*
   - mcp__memory-search__memory_search
 requires_topics:

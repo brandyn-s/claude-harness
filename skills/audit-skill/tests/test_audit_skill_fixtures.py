@@ -91,7 +91,7 @@ def test_dirty_skill_fires_expected_checks():
         "M2",   # mcp__unused__never_invoked declared but unused
         "M3",   # manifest.yaml has # TODO placeholder
         "M4",   # MCP tools in allowed-tools missing from manifest requires_tools
-        "T1",   # mcp__code-graph__index_status (known-phantom)
+        "T1",   # mcp__code-search__index_status (known-phantom)
         "C2",   # /tmp/ in bash docs
         "C5",   # run.py: .read_text() without encoding='utf-8'
         "C6",   # run.py: argparse help with unescaped `25%`

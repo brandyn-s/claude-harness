@@ -4,7 +4,7 @@ description: "Explores codebase structure, lists functions and classes, shows AP
 category: code-intel
 
 requires_tools:
-  - "mcp__code-search__*"
+  - "mcp__code-graph__*"
 requires_topics: []
 requires_rules: []
 requires_skills: []

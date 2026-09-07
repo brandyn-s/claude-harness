@@ -112,8 +112,13 @@ def test_load_known_tools_parses_registry():
         phantoms, reals = audit._load_known_tools()
     finally:
         audit._KNOWN_TOOLS_CACHE = {}
-    assert "mcp__code-graph__index_status" in phantoms
     assert "mcp__code-search__index_status" in phantoms
+    # Pins the 2026-09-07 correction: code-graph is a live, separately registered
+    # server (v0.9.3) and index_status is a REAL tool on it. It was previously
+    # listed as a phantom on the assumption code-graph had retired into
+    # codebase-memory-mcp; that entry flagged correct usage in code-explore and
+    # index-repo. If it ever returns to known_phantom, this fails loudly.
+    assert "mcp__code-graph__index_status" not in phantoms
     # At least one literal mcp__github__ entry or its glob umbrella
     has_github = any(
         (kind == "literal" and val.startswith("mcp__github__"))
