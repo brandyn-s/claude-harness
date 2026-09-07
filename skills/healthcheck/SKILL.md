@@ -539,7 +539,7 @@ Report:
 
 ## Check 11: MCP Index Integrity (`indexes`)
 
-Filesystem-level corruption scan across code-graph (`~/.cache/codebase-memory-mcp/*.db`) and code-search (`~/.claude_code_search/projects/*/index/`). Faster than `/index-repo --audit` and catches orphans the registry audit misses; does not need any MCP server running.
+Filesystem-level corruption scan across code-graph (`~/.cache/code-graph/*.db`, overridable via `CODE_GRAPH_CACHE_DIR`/`XDG_CACHE_HOME`) and code-search (`~/.claude_code_search/projects/*/index/`). Faster than `/index-repo --audit` and catches orphans the registry audit misses; does not need any MCP server running.
 
 ```bash
 python3 $HOME/.claude/scripts/verify-indexes.py
