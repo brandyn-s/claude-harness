@@ -6,12 +6,12 @@ category: code-intel
 requires_tools:
   - Bash
   - Read
-  - mcp__code-graph__delete_project
-  - mcp__code-graph__index_health
-  - mcp__code-graph__index_repository
-  - mcp__code-graph__index_status
-  - mcp__code-graph__list_projects
-  - mcp__code-graph__query_graph
+  - mcp__codebase-memory-mcp__delete_project
+  - mcp__codebase-memory-mcp__index_health
+  - mcp__codebase-memory-mcp__index_repository
+  - mcp__codebase-memory-mcp__index_status
+  - mcp__codebase-memory-mcp__list_projects
+  - mcp__codebase-memory-mcp__query_graph
   - mcp__code-graph__delete_project
   - mcp__code-graph__get_architecture
   - mcp__code-graph__list_projects

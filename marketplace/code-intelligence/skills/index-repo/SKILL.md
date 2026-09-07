@@ -18,7 +18,7 @@ compatibility:
       fallback: "Use the unified codebase-memory-mcp backend path"
     - mcp: code-graph
       fallback: "Use the unified codebase-memory-mcp backend path"
-allowed-tools: AskUserQuestion Bash Read mcp__code-graph__delete_project mcp__code-graph__index_health mcp__code-graph__index_repository mcp__code-graph__index_status mcp__code-graph__list_projects mcp__code-graph__query_graph mcp__code-graph__delete_project mcp__code-graph__get_architecture mcp__code-graph__list_projects mcp__code-graph__query_graph mcp__code-search__delete_project mcp__code-search__index_directory mcp__code-search__list_projects
+allowed-tools: AskUserQuestion Bash Read mcp__codebase-memory-mcp__delete_project mcp__codebase-memory-mcp__index_health mcp__codebase-memory-mcp__index_repository mcp__codebase-memory-mcp__index_status mcp__codebase-memory-mcp__list_projects mcp__codebase-memory-mcp__query_graph mcp__code-graph__delete_project mcp__code-graph__get_architecture mcp__code-graph__list_projects mcp__code-graph__query_graph mcp__code-search__delete_project mcp__code-search__index_directory mcp__code-search__list_projects
 ---
 
 ## index-repo
@@ -62,7 +62,7 @@ If neither a path nor `--audit` is provided, ask the user what they want.
    below the repository root without guessing from `.git` shape.
 
 3. **Backend detection.** ToolSearch for
-   `select:mcp__code-graph__index_repository`. If found, this
+   `select:mcp__codebase-memory-mcp__index_repository`. If found, this
    host runs the **unified backend** — use the Unified backend section
    below and SKIP the split-backend section. If not
    found, ToolSearch for `select:mcp__code-search__index_directory` and
@@ -80,7 +80,7 @@ code-search index, no provider pairs, no `--single` flag.
 **Index** (using the path verified in Steps 1-2):
 
 ```
-mcp__code-graph__index_repository(repo_path=<path>, mode="full", skip_report=true)
+mcp__codebase-memory-mcp__index_repository(repo_path=<path>, mode="full", skip_report=true)
 ```
 
 `mode="full"` is the server default — the split-backend Nix carve-out
@@ -95,7 +95,7 @@ report AND the repo ignores or tracks it (`git check-ignore -q
 ARCHITECTURE_REPORT.md`).
 
 **Validation gate (HARD — same bar as Step 8):**
-- `mcp__code-graph__index_status(project=<generated-name>)` —
+- `mcp__codebase-memory-mcp__index_status(project=<generated-name>)` —
   FAIL unless `status == "ready"`, `nodes > 0`, and `indexed_at` is
   newer than the indexing call. WARN if `edges == 0` with `nodes > 0`.
 - FAIL if the `.db` file is missing or zero-byte at
@@ -104,7 +104,7 @@ ARCHITECTURE_REPORT.md`).
   "repo is ready" message.
 
 **Audit (`--audit`):**
-1. Call `mcp__code-graph__list_projects` for the full registry:
+1. Call `mcp__codebase-memory-mcp__list_projects` for the full registry:
    `root_path`, `nodes`, `edges`, `indexed_at`, `db_path`, `status`,
    `identity_status`, `identity_reason`, and `index_identity`.
 2. Run the repository's read-only filesystem/SQLite verifier and retain its
@@ -140,12 +140,12 @@ ARCHITECTURE_REPORT.md`).
      no earlier integrity/path rule fired.
    - **UNKNOWN** — any other combination (for example `pending`, a persistent
      verifier lock, or a non-ready status with nonzero nodes). Do not delete;
-     call `mcp__code-graph__index_health(project=<name>)` and report
+     call `mcp__codebase-memory-mcp__index_health(project=<name>)` and report
      the unresolved state.
 4. Print one table grouped by classification with `identity_reason`, verifier
    detail, and the exact proposed command. Do not execute any remediation
    without per-entry approval. Delete with
-   `mcp__code-graph__delete_project(project_name=<name>)`; re-index
+   `mcp__codebase-memory-mcp__delete_project(project_name=<name>)`; re-index
    only with `mode="full", skip_report=true`.
 
 Do not re-index merely because the server binary was upgraded:
