@@ -99,6 +99,15 @@ PURE_PIPELINE_SKILLS = {
     "red-team-axes",             # axis enumeration + analysis report
     "run-status",                # read-only status report (cf. superplan-status)
     "search-campaign",           # dispatch orchestrator, no operator prompt
+    # Server-shipped by code-graph, not by this repo (they live in
+    # cmd/code-graph/assets/skills/). They surfaced here only once code-graph
+    # PR #6 ADDED `allowed-tools` — this check fires only when that key
+    # exists, so declaring the tool set is what exposed them. All four are
+    # read-only graph queries with no decision gate; bodies read 2026-09-07.
+    "code-graph-exploring",      # structural query pipeline
+    "code-graph-quality",        # dead-code / fan-out report
+    "code-graph-reference",      # lookup material, not a workflow
+    "code-graph-tracing",        # call-path query pipeline
 }
 
 # Skills that are `context: fork` AND legitimately dispatch Agents. The Tier-C
