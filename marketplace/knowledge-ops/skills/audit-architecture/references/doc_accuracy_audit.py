@@ -252,6 +252,28 @@ def load_actual_state():
     return state
 
 
+def _audit_generated_counts():
+    """Delegate ARCHITECTURE.md's inventory numbers to the gate that owns them.
+
+    Returns [] when every generated marker matches the tree. A non-zero exit is
+    reported verbatim; a MISSING tool is reported too, because a check that
+    cannot run is not a check that passed.
+    """
+    tool = os.path.join(base, 'bin', 'build-doc-counts.py')
+    if not os.path.isfile(tool):
+        return [('ARCHITECTURE.md',
+                 f'count gate not found at {tool} — inventory numbers are UNVERIFIED')]
+    try:
+        r = subprocess.run([sys.executable, tool, '--check'],
+                           capture_output=True, text=True, timeout=120, cwd=base)
+    except (subprocess.SubprocessError, OSError) as e:
+        return [('ARCHITECTURE.md', f'count gate could not run ({e}) — inventory UNVERIFIED')]
+    if r.returncode == 0:
+        return []
+    detail = (r.stdout + r.stderr).strip().splitlines() or ['no output']
+    return [('ARCHITECTURE.md', f'generated count drift: {line}') for line in detail[:20]]
+
+
 def audit_architecture_md(state):
     """Check ARCHITECTURE.md against actual state."""
     findings = []
@@ -263,20 +285,28 @@ def audit_architecture_md(state):
         findings.append(('ARCHITECTURE.md', f'ARCHITECTURE.md not found at {arch_path}'))
         return findings
 
-    # 1. Skills: check every skill on disk is mentioned somewhere in ARCHITECTURE.md
-    for skill in state['skills']:
-        if skill not in arch:
-            findings.append(('ARCHITECTURE.md', f'Skill `{skill}` not mentioned anywhere'))
+    # 1 + 3. Inventory: ARCHITECTURE.md is NOT a catalogue.
+    #
+    # These two checks used to require every skill name and every rule filename
+    # to appear literally in ARCHITECTURE.md. That matched an older doc which
+    # carried inventory tables. The doc is now deliberately narrative — it says
+    # what each layer IS and quotes GENERATED `<!-- count:* -->` markers — so
+    # the per-name requirement produced 95 findings against a tree that two
+    # independent instruments called clean (`bin/architecture-drift-check.py`:
+    # OK; `bin/build-doc-counts.py --check`: 31 markers match). Rescoped
+    # 2026-09-07 with the operator's decision on which contract is real.
+    #
+    # Counts are delegated, not reimplemented here. `bin/build-doc-counts.py`
+    # owns them and is gated by scripts/test_doc_counts.py with a vacuity floor,
+    # an every-key-is-computed test, and a planted-wrong-number mutation test.
+    # Re-adding a comparison here would be the second source of truth that
+    # COUNT_CONTRACTS was emptied on 2026-07-29 to remove.
+    findings.extend(_audit_generated_counts())
 
-    # 2. Agents: verify count claim
+    # 2. Agents: verify a prose count claim if the doc still makes one.
     m = re.search(r'has (\d+) agents? defined', arch)
     if m and int(m.group(1)) != len(state['agents']):
         findings.append(('ARCHITECTURE.md', f'Agent count: doc says {m.group(1)}, actual {len(state["agents"])}'))
-
-    # 3. Rules: check every rule file is in the rules table
-    for rule in state['rules']:
-        if rule not in arch:
-            findings.append(('ARCHITECTURE.md', f'Rule `{rule}` not documented'))
 
     # 4. Topic files: check every topic is in the Tier 1 table
     tier1_section = arch[arch.find('Tier 1: Topic files'):arch.find('Tier 2: Pattern files')]
@@ -284,10 +314,29 @@ def audit_architecture_md(state):
         if topic not in tier1_section:
             findings.append(('ARCHITECTURE.md', f'Topic `{topic}` not in Tier 1 table'))
 
-    # 5. MCP servers: check each actual server is mentioned
-    for srv in state['mcp_servers']:
-        if srv not in arch:
-            findings.append(('ARCHITECTURE.md', f'MCP server `{srv}` not documented'))
+    # 5. MCP servers: only meaningful if the doc CLAIMS to document servers.
+    #
+    # `state['mcp_servers']` is read from the OPERATOR'S HOST config
+    # (~/.claude.json, ~/.mcp.json) — host runtime state, never
+    # CLAUDE_CONFIG_DIR. So an unconditional check compares one machine's
+    # registered servers against a repository document, and fires for every
+    # server any operator ever adds. This repo's ARCHITECTURE.md has no MCP
+    # section at all, which is why code-graph, code-search and linear-server
+    # were reported as undocumented (2026-09-07).
+    #
+    # Gate on the doc making the claim rather than deleting the check: where an
+    # MCP section EXISTS the bidirectional comparison is still worth having,
+    # and a doc that added one later gets the check back automatically.
+    if re.search(r'(?im)^#{1,4}[^\n]*\bMCP\b', arch) or 'mcpServers' in arch:
+        for srv in state['mcp_servers']:
+            if srv not in arch:
+                findings.append(('ARCHITECTURE.md', f'MCP server `{srv}` not documented'))
+    elif state['mcp_servers']:
+        findings.append(
+            ('ARCHITECTURE.md',
+             f"note: {len(state['mcp_servers'])} host MCP server(s) configured; "
+             "ARCHITECTURE.md has no MCP section, so it makes no claim to check")
+        )
 
     # 6. Hook count accuracy: not checked. The doc has hook tables per event
     # type and no total is compared here.
