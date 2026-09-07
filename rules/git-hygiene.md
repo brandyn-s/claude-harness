@@ -146,9 +146,15 @@ GUARD pattern="local is behind origin/main, so copy the edited files onto main":
   unmerged content. Surface the divergence; never silently revert it.
 
 # ─── ENFORCEMENT AND ON-DEMAND ROUTING ───
-# Hooks (`bash-security-guard`, `git-empty-push-guard`, `staged-additions-guard`,
-# `worktree-enforcement`, `post-merge-sync`) cover deterministic subsets only;
-# behavioral checks remain required where a hook cannot prove intent, remote or
-# deployment state, or process freshness.
+# Hooks cover deterministic subsets only; behavioral checks remain required where
+# a hook cannot prove intent, remote or deployment state, or process freshness.
+# WHICH hooks are wired is PROFILE-DEPENDENT — verify before relying on one:
+#   python3 -c "import json,os;print(sorted(h['command'].split()[-1] for e in json.load(open(os.path.expanduser('~/.claude/settings.json')))['hooks'].values() for m in e for h in m['hooks']))"
+# `bash-security-guard` and `worktree-enforcement` are in the fresh-laptop core.
+# `git-empty-push-guard`, `staged-additions-guard` and `post-merge-sync` exist in
+# the repository but are NOT installed by every profile (measured 2026-09-07: absent
+# on an author-workstation install), so treat their protection as UNPROVEN until the
+# command above lists them. A rule that names an uninstalled guard invites relying
+# on a backstop that is not there.
 # Skills: `/work`, `/ship`, `/pr-fix`, `/cross-repo`, `/pull-repos`.
 # Detail and recovery procedures: docs/rule-reference/git-hygiene.md

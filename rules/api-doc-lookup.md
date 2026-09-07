@@ -4,7 +4,8 @@ INVARIANT contract_before_implementation_or_instrumentation
 
 Before an unfamiliar call/client, negative capability claim, or live instrumentation:
 
-1. Search memory by endpoint/operation/parameter; read agent-memory/topics/<vendor>.md.
+1. Search memory by endpoint/operation/parameter; read agent-memory/topics/<vendor>.md
+   if that tier is populated (`agent-memory/` ships empty; an absent file is not a miss).
 2. Inspect ~/Documents/api-docs/<vendor>/ now; remembered inventory/counts decay.
 3. Read raw vendor/OpenAPI/Postman evidence for auth, permissions, real parameter names/ranges, pagination, response shape, and deployment/tier limits. Dereference parameter refs.
 4. If absent, run /api-ingest <docs-url> --name <api-name>; use /api-preflight for prerequisite chains.

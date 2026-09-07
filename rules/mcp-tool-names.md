@@ -10,9 +10,9 @@ INVARIANT live_surface_over_static_catalog
 TAILSCALE:
 - The MCP covers EXAMPLE only, not CORP. Fleet/person claims require both tailnets (CORP via direct REST/Keychain) and identity reconciliation.
 - User DELETE is unsupported (405/admin console only); API revocation is suspend_user + expire_device_key. Device DELETE works. Policy is HuJSON.
-- Read agent-memory/topics/tailscale.md before conclusions or writes.
+- Read agent-memory/topics/tailscale.md before conclusions or writes, when present.
 
 NETCLOUD:
 - limit maxes at 500; follow meta.next. Invalid fields return bodyless 409: retry without fields, inspect names, then narrow. Groups require fields to avoid oversized configuration.
 - Reads can expose ICCID/IMSI/IMEI/phone numbers; minimize fields. Local-stdio writes have an advisory but no OPA: name target + verb and confirm.
-- Read agent-memory/topics/netcloud.md before conclusions or writes.
+- Read agent-memory/topics/netcloud.md before conclusions or writes, when present.

@@ -98,7 +98,12 @@ GUARD pattern="dispatch several isolated writers in parallel":
 
 # ─── ENFORCEMENT AND ON-DEMAND ROUTING ───
 # `worktree-enforcement`, `subagent-stop`, and `task-completed` provide partial,
-# deterministic evidence. They do not prove semantic correctness or full coverage.
+# deterministic evidence WHERE INSTALLED. They do not prove semantic correctness or
+# full coverage. `subagent-stop` and `task-completed` are not in every profile, and
+# a profile can carry ZERO SubagentStop registrations (measured 2026-09-07), in which
+# case the parent session's own verification is the ONLY evidence. Check
+# `hooks.SubagentStop` in the active settings.json before treating either as a
+# backstop; the STEP gates above are unconditional either way.
 # Relevant skills: `/subagent-driven-development`, `/audit-fix`,
 # `/verification-before-completion`, `/validate-changes`.
 # Related rule: `subagent-tool-discipline.md` (child-side read/citation discipline).
