@@ -18,17 +18,14 @@
     "verify-search-result",
     "threat-model",
     "code-explore",
-    "codebase-memory-exploring",
     "evaluate-repos",
     "gather-repos"
   ],
   "requires_skills": {
     "agentic-actions-auditor": [],
     "code-explore": [
-      "codebase-memory-exploring",
       "evaluate-repos"
     ],
-    "codebase-memory-exploring": [],
     "codeql": [],
     "differential-review": [],
     "evaluate-repos": [

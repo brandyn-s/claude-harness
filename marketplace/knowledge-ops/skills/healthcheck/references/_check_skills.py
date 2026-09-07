@@ -77,9 +77,6 @@ LOCAL_RESERVED_EXCEPTIONS = _ci_exempt_names()
 PURE_PIPELINE_SKILLS = {
     "cc-monitor",                # read-routing only
     "code-explore",              # query pipeline
-    "codebase-memory-exploring", # query pipeline
-    "codebase-memory-quality",   # query pipeline
-    "codebase-memory-tracing",   # query pipeline
     "harness-prune",             # report-only by design (no in-place edits)
     "pull-repos",                # mechanical fetch+rebase sweep
     "supergoal-pause",           # state-flip utility

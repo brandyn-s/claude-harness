@@ -78,7 +78,7 @@ query_graph(query="MATCH (a)-[r:USAGE]->(b) WHERE b.name = 'ProcessOrder' RETURN
 5. **`WITH ... COUNT(*)` aggregation may silently return raw un-aggregated rows** up to the 200-row cap on older code-graph versions (verified 2026-05-07 against PSM). The query parses but the GROUP BY semantics don't apply — you get 200 raw matches that look like an answer but aren't. To detect: compare returned row count to the source MATCH cardinality; if equal, aggregation didn't engage. Workaround: use `search_graph` with `min_degree`/`max_degree` filters for counting, or post-process raw rows in the caller.
 6. **`IN [list]`, `IS NULL`, `IS NOT NULL` are supported** (B1: 2026-05-07; IS NULL/IS NOT NULL: Plan 3 Phase A 2026-05-06). `WHERE n.name IN ['a', 'b']`, `WHERE n.docstring IS NOT NULL`, and `WHERE n.start_line IS NULL` all work. `IN` lists must be string or number literals; empty lists are rejected at parse time.
 
-> For full Cypher syntax reference, edge types, and node labels: see `~/.claude/skills/codebase-memory-exploring/references/code-graph-reference.md`
+> For full Cypher syntax reference, edge types, and node labels: see the `code-graph-reference` skill that the code-graph server installs (`~/.claude/skills/code-graph-reference/SKILL.md``
 
 ## Deep Architecture Review
 

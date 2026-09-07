@@ -309,10 +309,6 @@ PLUGINS = [
         "files": [
             ("skills/code-explore/SKILL.md", "skills/code-explore/SKILL.md"),
             ("skills/code-explore/references/search-strategies.md", "skills/code-explore/references/search-strategies.md"),
-            ("skills/codebase-memory-exploring/SKILL.md", "skills/codebase-memory-exploring/SKILL.md"),
-            ("skills/codebase-memory-exploring/references/code-graph-reference.md", "skills/codebase-memory-exploring/references/code-graph-reference.md"),
-            ("skills/codebase-memory-quality/SKILL.md", "skills/codebase-memory-quality/SKILL.md"),
-            ("skills/codebase-memory-tracing/SKILL.md", "skills/codebase-memory-tracing/SKILL.md"),
             ("skills/index-repo/SKILL.md", "skills/index-repo/SKILL.md"),
             # Doc generation / MCP / API tooling
             ("skills/docgen/SKILL.md", "skills/docgen/SKILL.md"),

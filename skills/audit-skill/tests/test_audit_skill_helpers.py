@@ -315,15 +315,15 @@ def test_find_cross_skill_citations_matches_simple_form():
 def test_find_cross_skill_citations_skips_middle_of_hyphenated_name():
     """The lookbehind must exclude `-` so the regex doesn't match the
     `memory-exploring/references/...` substring inside the longer
-    `codebase-memory-exploring/references/...` path. This was an H4
+    `code-explore/references/...` path. This was an H4
     false-positive on the first version of the check."""
     audit = _load_audit_module()
-    text = ("See ~/.claude/skills/codebase-memory-exploring/references/"
+    text = ("See ~/.claude/skills/code-explore/references/"
             "code-graph-reference.md")
     refs = list(audit.find_cross_skill_citations(text))
     # Should match the full skill name once, not the suffix.
     skill_names = [s for _ln, s, _r in refs]
-    assert "codebase-memory-exploring" in skill_names
+    assert "code-explore" in skill_names
     assert "memory-exploring" not in skill_names
     assert "exploring" not in skill_names
 

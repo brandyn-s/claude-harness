@@ -7,9 +7,6 @@
   ],
   "packaged_skills": [
     "code-explore",
-    "codebase-memory-exploring",
-    "codebase-memory-quality",
-    "codebase-memory-tracing",
     "index-repo",
     "api-ingest",
     "api-preflight",
@@ -20,12 +17,8 @@
     "api-ingest": [],
     "api-preflight": [],
     "code-explore": [
-      "codebase-memory-exploring",
       "evaluate-repos"
     ],
-    "codebase-memory-exploring": [],
-    "codebase-memory-quality": [],
-    "codebase-memory-tracing": [],
     "evaluate-repos": [
       "gather-repos"
     ],
@@ -36,16 +29,12 @@
   },
   "root_skills": [
     "code-explore",
-    "codebase-memory-exploring",
-    "codebase-memory-quality",
-    "codebase-memory-tracing",
     "index-repo",
     "api-ingest",
     "api-preflight"
   ],
   "schema_version": 1,
   "shared_assets": [
-    "stats.py",
-    "tuning-notes.md"
+    "stats.py"
   ]
 }

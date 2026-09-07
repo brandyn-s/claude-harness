@@ -22,7 +22,6 @@ requires_topics: []
 requires_rules:
   - search-efficiency
 requires_skills:
-  - codebase-memory-exploring
   - evaluate-repos
 requires_auth: []
 input_contract:

@@ -29,7 +29,7 @@ Do NOT use this skill for:
 - Initial vulnerability discovery (use /semgrep or /codeql — same guidance as the frontmatter)
 - General code review without a known pattern to search for
 - Writing fix recommendations (use /pr-fix instead)
-- Understanding unfamiliar code (use /code-explore or /codebase-memory-exploring for deep comprehension first)
+- Understanding unfamiliar code (use /code-explore, or the code-graph server's code-graph-exploring skill, for deep comprehension first)
 
 ## The Five-Step Process
 

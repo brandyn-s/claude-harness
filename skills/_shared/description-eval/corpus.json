@@ -15,7 +15,18 @@
       "requests": 78
     },
     "cost_usd": 1.211182,
-    "generation_errors": {}
+    "generation_errors": {},
+    "pruned": {
+      "date": "2026-09-07",
+      "removed_subjects": [
+        "codebase-memory-exploring",
+        "codebase-memory-quality",
+        "codebase-memory-tracing"
+      ],
+      "removed_items": 9,
+      "reason": "Subjects retired from this repository. meta.skills/positives_per_skill/usage above describe the ORIGINAL 2026-09-04 generation run and are deliberately NOT rewritten — the dated results-2026-09-04-*.json files are scored against that run, so editing the generation record would misrepresent them. Items were filtered, not regenerated.",
+      "note_on_rerun": "A re-run is NOT a gate for the retirement. These three scored 3/3 recall with 0 collisions in the 2026-09-04 baseline, and the code-graph-* family that shared their trigger phrases verbatim never appeared in the routing table at all — the table is built from this repository's skills/, not from ~/.claude/skills/. So the eval never observed the collision, and a post-retirement run would compare against an already-collision-free baseline. Separate finding: the instrument's population is repo-derived, so any skill a sibling tool installs into ~/.claude/skills/ is invisible to it."
+    }
   },
   "items": [
     {
@@ -214,60 +225,6 @@
       "id": "code-explore-3",
       "request": "I need a rundown of how our auth flow works end to end, from the code, not the docs.",
       "expected": "code-explore",
-      "kind": "positive"
-    },
-    {
-      "id": "codebase-memory-exploring-1",
-      "request": "What services does this repo have, and how are they organized?",
-      "expected": "codebase-memory-exploring",
-      "kind": "positive"
-    },
-    {
-      "id": "codebase-memory-exploring-2",
-      "request": "I just cloned this monorepo and need to get my bearings—can you show me the top-level modules, how many services exist, and which ones depend on each other before I start making changes?",
-      "expected": "codebase-memory-exploring",
-      "kind": "positive"
-    },
-    {
-      "id": "codebase-memory-exploring-3",
-      "request": "Can you list all the REST endpoints this app exposes and point me to the handler code for each one?",
-      "expected": "codebase-memory-exploring",
-      "kind": "positive"
-    },
-    {
-      "id": "codebase-memory-quality-1",
-      "request": "Can you find any unused functions in our mcp-servers repo that are safe to delete?",
-      "expected": "codebase-memory-quality",
-      "kind": "positive"
-    },
-    {
-      "id": "codebase-memory-quality-2",
-      "request": "We've got a legacy service module that's grown huge over time and I suspect a lot of dead code and overly complex functions are hiding in there — can you scan it and give me a prioritized list of what to clean up first?",
-      "expected": "codebase-memory-quality",
-      "kind": "positive"
-    },
-    {
-      "id": "codebase-memory-quality-3",
-      "request": "I want to know if there are files in our codebase that always get modified together even though they live in totally different folders, since that might mean there's some hidden dependency we don't know about.",
-      "expected": "codebase-memory-quality",
-      "kind": "positive"
-    },
-    {
-      "id": "codebase-memory-tracing-1",
-      "request": "Who calls the ProcessOrder function and where are those calls located?",
-      "expected": "codebase-memory-tracing",
-      "kind": "positive"
-    },
-    {
-      "id": "codebase-memory-tracing-2",
-      "request": "I need to modify the ValidateToken function but I'm worried about breaking things — it's used across multiple services and I don't know all the places it gets invoked. Can you find everything upstream and downstream of it, ideally with a sense of risk level?",
-      "expected": "codebase-memory-tracing",
-      "kind": "positive"
-    },
-    {
-      "id": "codebase-memory-tracing-3",
-      "request": "We think if the shared Redis client drops connections it could cascade badly — can you figure out every endpoint or service that would actually feel that failure, not just the immediate callers?",
-      "expected": "codebase-memory-tracing",
       "kind": "positive"
     },
     {

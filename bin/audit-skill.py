@@ -837,7 +837,7 @@ def find_cross_skill_citations(md_text):
 
     The lookbehind excludes `\\w` and `-` so the matcher doesn't fire
     in the middle of a hyphenated skill name (e.g., the substring
-    `memory-exploring/references/...` inside `codebase-memory-exploring/...`
+    `explore/references/...` inside `code-explore/...`
     would otherwise produce a false positive). It DOES allow `/` so
     `~/.claude/skills/persona/references/X.md`-style absolute paths
     still match starting at the `skills/` prefix; finditer's
