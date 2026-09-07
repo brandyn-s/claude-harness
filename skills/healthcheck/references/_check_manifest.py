@@ -247,6 +247,37 @@ def as_published(text: str, suffix: str, rewrites: list[tuple[str, str]]) -> str
 
 LOCAL_ONLY_SKILLS = {"lab-deploy", "agentic-search", "audit-fix", "audit-skill"}
 
+# ── CURATED-EXPORT BASELINE ───────────────────────────────────────────
+# This repository is a curated subset of a larger private configuration, and
+# build-marketplace.py's _prune_manifest_to_existing_sources() drops these
+# declared-but-absent sources at build time, LOUDLY, by design. The PLUGINS
+# manifest keeps declaring them so the private overlay can still build them.
+#
+# So a declared source under one of these skills is EXPECTED, not a broken
+# bundle. Before this baseline existed the check reported 98 FAILs (23 phantom
+# registrations + 75 missing sources) while the `plugins` CI job was green —
+# an independent instrument disagreeing with it (measured 2026-09-07).
+#
+# This is a BASELINE, not a narrowed detector: an absence OUTSIDE this set is
+# still a FAIL, which is what catches the real case (2026-05-22, a renamed
+# audit-patterns.md shipping a broken bundle). And the baseline is gated on
+# staleness — a name here that reappears on disk FAILS, so the entry has to be
+# removed rather than silently masking a future regression.
+CURATED_EXPORT_ABSENT = {
+    "cc-monitor", "cross-repo", "docgen", "enterprise-ai-monitor",
+    "gather-internal-intel", "guardrail", "investigate", "invite-to-workspace",
+    "linear-status", "mcp-create", "mcp-diagnose", "mcp-forge-audit",
+    "mcp-forge-build", "obsidian", "openai-monitor",
+    "outlook-capability-intake", "provision", "pull-repos", "security-alerts",
+    "stig-assess", "stig-verify", "vendor-breach", "weekly-update",
+}
+
+
+def _curated_away(src_rel: str) -> bool:
+    """True if `src_rel` belongs to a skill this export deliberately omits."""
+    m = re.match(r"skills/([^/]+)/", src_rel)
+    return bool(m and m.group(1) in CURATED_EXPORT_ABSENT)
+
 
 def check_registration() -> tuple[list[str], list[str]]:
     """Check 10: skills on disk vs PLUGINS list.
@@ -274,14 +305,25 @@ def check_registration() -> tuple[list[str], list[str]]:
                 registered.add(m.group(1))
     unregistered = on_disk - registered - LOCAL_ONLY_SKILLS
     phantoms = registered - on_disk
+    expected_absent = phantoms & CURATED_EXPORT_ABSENT
+    phantoms = phantoms - CURATED_EXPORT_ABSENT
+    # Print the baseline on every run: a silently subtracted baseline is a
+    # coverage lie, a printed one is a backlog.
     print(f"Manifest: {len(on_disk)} on disk, {len(registered)} registered, "
-          f"{len(LOCAL_ONLY_SKILLS)} local-only.")
+          f"{len(LOCAL_ONLY_SKILLS)} local-only, "
+          f"{len(expected_absent)}/{len(CURATED_EXPORT_ABSENT)} curated-export absences.")
+    # Staleness gate: a baselined name back on disk means the entry is obsolete.
+    for name in sorted(CURATED_EXPORT_ABSENT & on_disk):
+        fail.append(
+            f"FAIL manifest: '{name}' is in CURATED_EXPORT_ABSENT but IS on disk "
+            "— remove it from that baseline in _check_manifest.py"
+        )
     for name in sorted(unregistered):
         warn.append(f"WARN manifest: skill '{name}' on disk but not in PLUGINS")
     for name in sorted(phantoms):
         fail.append(f"FAIL manifest: skill '{name}' registered but absent on disk (broken bundle)")
     if not (unregistered or phantoms):
-        print("  PASS - no unregistered, no phantoms")
+        print("  PASS - no unregistered, no unexpected phantoms")
     return warn, fail
 
 
@@ -301,6 +343,7 @@ def check_marketplace_drift() -> tuple[list[str], list[str]]:
     drifted = 0
     checked = 0
     transformed = 0
+    curated_missing = 0
     rewrites = parse_path_rewrites()
     if not rewrites:
         # Fail loud rather than silently degrading to a raw byte compare: without
@@ -318,6 +361,9 @@ def check_marketplace_drift() -> tuple[list[str], list[str]]:
             src_file = CLAUDE_DIR / src_rel
             tgt_file = plugin_dir / dst_rel
             if not src_file.exists():
+                if _curated_away(src_rel):
+                    curated_missing += 1
+                    continue
                 fail.append(f"FAIL drift: source missing: {src_rel} (referenced by plugin '{plugin['name']}')")
                 drifted += 1
                 continue
@@ -350,7 +396,8 @@ def check_marketplace_drift() -> tuple[list[str], list[str]]:
                 continue
     print(
         f"Marketplace drift: {checked} files compared, {drifted} drifted "
-        f"({transformed} differ only by the builder's intended path rewrites)."
+        f"({transformed} differ only by the builder's intended path rewrites, "
+        f"{curated_missing} absent by curated-export design)."
     )
     if drifted == 0:
         print("  PASS - source and marketplace are in lockstep")

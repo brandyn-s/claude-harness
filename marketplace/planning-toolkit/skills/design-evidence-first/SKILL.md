@@ -94,3 +94,55 @@ into the plan.
 
 Hand the evidence, the checkpoint result, and the triaged ideas to
 `superpowers:brainstorming`, then to `superpowers:writing-plans`.
+
+## Examples
+
+**Example 1: the question is already answered on disk**
+User says: "I want to add a retry wrapper around the Graph client."
+Actions:
+1. Before asking anything (step 1), grep the repo and memory: a shared
+   `graph_get` helper already owns retry, and a rule forbids hand-rolled
+   `urllib` Graph probes.
+2. Present the finding as the opening move, not a question.
+3. One interpretation checkpoint (step 2): "you want retry on the existing
+   helper's callers, not a new wrapper — correct?"
+Result: the design starts from what exists. No clarifying question was spent
+on something the repository already recorded.
+
+**Example 2: a significant design with two plausible shapes**
+User says: "Design the skill-registration format."
+Actions:
+1. Answer from evidence first (step 1): two prior formats exist in git history,
+   one retired with a recorded reason.
+2. Dispatch competing-constraint agents (step 3) — one biased toward the
+   smallest diff, one toward validation strength, one toward zero new sources
+   of truth.
+3. Compare the three interface sketches in prose and recommend a hybrid.
+Result: the trade-off between drift risk and migration cost is explicit
+instead of averaged away by a single voice.
+
+**Example 3: idea list arrives longer than the deliverable**
+User says: "While we're here, we could also add a linter, a registry, and a
+dashboard."
+Actions:
+1. Tag each idea Critical, High, Nice, or Skip (step 4).
+2. Linter = High (validates the contract being designed); registry = Skip
+   (second source of truth); dashboard = Nice.
+3. Drop the Skip item rather than carrying it into the plan as a backlog entry.
+Result: three ideas become one, and the plan handed to
+`superpowers:writing-plans` contains no speculative generality.
+
+## Success Criteria
+
+- Transcripts, memory, git history, and existing code are searched before the
+  first clarifying question is asked.
+- Findings from that search open the conversation; questions cover only what
+  the evidence could not settle.
+- Exactly one interpretation checkpoint is validated before design work
+  proceeds.
+- For a significant design, at least two competing-constraint sketches exist,
+  each with an interface, a usage example, what it hides, and its trade-offs.
+- Every idea carries a Critical / High / Nice / Skip tag, and Skip-tagged
+  ideas do not appear in the handoff.
+- The evidence, checkpoint result, and triaged ideas are handed to
+  `superpowers:brainstorming` before any plan is written.

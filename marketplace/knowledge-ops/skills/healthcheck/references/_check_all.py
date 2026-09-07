@@ -36,7 +36,11 @@ import time
 from datetime import datetime
 
 REF = os.path.dirname(os.path.abspath(__file__))   # this skill's references/ dir
-H = os.path.expanduser("~/.claude")
+# Honor CLAUDE_CONFIG_DIR like every sibling _check_*.py does. Without it an
+# invocation against a worktree still probed ~/.claude, so Check 1b and Check 11
+# measured the DEPLOYED tree while every other row measured the worktree, and a
+# missing script there rendered as a measured FAIL (2026-09-07).
+H = os.path.expanduser(os.environ.get("CLAUDE_CONFIG_DIR") or "~/.claude")
 HOME = os.path.expanduser("~")
 AUDIT = f"{H}/skills/audit-architecture/references/doc_accuracy_audit.py"
 SCRIPTS = f"{H}/scripts"
@@ -118,8 +122,22 @@ def strip_prefix(line):
     return line.strip()
 
 
-def cap(out):
-    return strip_prefix(first_line(out))
+def cap(out, err="", rc=0):
+    """First line of a helper's stdout, or — when it produced none and failed —
+    its stderr, tagged so an ABSENT INSTRUMENT cannot read as a measured result.
+
+    2026-09-07: `_check_hooks_aux.py` crashed with a traceback and
+    `verify-indexes.py` was missing entirely. Both rendered as a bare `WARN — `
+    and `FAIL — ` with no text, which is indistinguishable from a real finding
+    the reader simply cannot see. stderr was captured by run() and discarded.
+    """
+    line = strip_prefix(first_line(out))
+    if line:
+        return line
+    if rc != 0:
+        detail = first_line(err) or f"no output, exit {rc}"
+        return f"CHECK DID NOT RUN — {detail}"
+    return line
 
 
 def progress(msg):
@@ -200,7 +218,7 @@ def main():
     wip_fail = []  # FAILs that are drift/manifest WIP-type (only down-weighted when stale)
 
     progress("[0/11] freshness…")
-    rc, out, _ = run(["python3", f"{REF}/_check_freshness.py"])
+    rc, out, err = run(["python3", f"{REF}/_check_freshness.py"])
     stale = rc == 1
     results.append(("Freshness", "PASS" if rc == 0 else "WARN",
                     strip_prefix(first_line(out, "freshness indeterminate"))))
@@ -226,16 +244,16 @@ def main():
         results.append(("Hooks", "WARN", "skipped (--no-hooks)"))
 
     progress("[1b] hook coverage + error handling…")
-    rc, out, _ = run(["python3", f"{REF}/_check_hooks_aux.py"])
-    results.append(("Hook-aux", "PASS" if rc == 0 else "WARN", cap(out)))
+    rc, out, err = run(["python3", f"{REF}/_check_hooks_aux.py"])
+    results.append(("Hook-aux", "PASS" if rc == 0 else "WARN", cap(out, err, rc)))
 
     progress("[2/11] config…")
-    rc, out, _ = run(["python3", f"{REF}/_check_config.py"])
-    results.append(("Config", "PASS" if rc == 0 else "FAIL", cap(out)))
+    rc, out, err = run(["python3", f"{REF}/_check_config.py"])
+    results.append(("Config", "PASS" if rc == 0 else "FAIL", cap(out, err, rc)))
 
     progress("[3/11] skills…")
-    rc, out, _ = run(["python3", f"{REF}/_check_skills.py"])
-    results.append(("Skills", {0: "PASS", 1: "WARN"}.get(rc, "FAIL"), cap(out)))
+    rc, out, err = run(["python3", f"{REF}/_check_skills.py"])
+    results.append(("Skills", {0: "PASS", 1: "WARN"}.get(rc, "FAIL"), cap(out, err, rc)))
 
     progress("[4+6] memory + drift (doc-accuracy)…")
     drift, memory = check_drift_and_memory()
@@ -247,8 +265,8 @@ def main():
     results.append(("Memory", *memory))
 
     progress("[5/11] paths…")
-    rc, out, _ = run(["python3", f"{REF}/check_paths.py"])
-    msg = cap(out)
+    rc, out, err = run(["python3", f"{REF}/check_paths.py"])
+    msg = cap(out, err, rc)
     lo = check_local_only_hooks()
     if lo:
         msg += f"; {len(lo)} local-only hook(s) (#50243): {', '.join(lo)}"
@@ -257,23 +275,23 @@ def main():
     results.append(("Drift", *drift))
 
     progress("[8/11] targets…")
-    rc, out, _ = run(["python3", f"{REF}/_check_targets.py"])
-    results.append(("Targets", "PASS" if rc == 0 else "WARN", cap(out)))
+    rc, out, err = run(["python3", f"{REF}/_check_targets.py"])
+    results.append(("Targets", "PASS" if rc == 0 else "WARN", cap(out, err, rc)))
 
     progress("[9/11] orphans…")
-    rc, out, _ = run(["python3", f"{REF}/_check_orphans.py"])
-    results.append(("Orphans", "PASS" if rc == 0 else "WARN", cap(out)))
+    rc, out, err = run(["python3", f"{REF}/_check_orphans.py"])
+    results.append(("Orphans", "PASS" if rc == 0 else "WARN", cap(out, err, rc)))
 
     progress("[10/11] manifest…")
-    rc, out, _ = run(["python3", f"{REF}/_check_manifest.py"])
+    rc, out, err = run(["python3", f"{REF}/_check_manifest.py"])
     m_status = {0: "PASS", 1: "WARN"}.get(rc, "FAIL")
-    results.append(("Manifest", m_status, cap(out)))
+    results.append(("Manifest", m_status, cap(out, err, rc)))
     if m_status == "FAIL" and stale:
         wip_fail.append("Manifest")
 
     progress("[11/11] indexes…")
-    rc, out, _ = run(["python3", f"{SCRIPTS}/verify-indexes.py"])
-    results.append(("Indexes", "PASS" if rc == 0 else "FAIL", cap(out)))
+    rc, out, err = run(["python3", f"{SCRIPTS}/verify-indexes.py"])
+    results.append(("Indexes", "PASS" if rc == 0 else "FAIL", cap(out, err, rc)))
 
     # ---- join the background pytest (heartbeat every 30s) -------------------
     if hooks_proc is not None and hooks_log is not None:

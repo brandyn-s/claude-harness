@@ -206,13 +206,47 @@ def pytest_collected_targets() -> set[str]:
                 path = token.split("::")[0].strip("'\"").rstrip("/")
                 if path:
                     targets.add(path)
+        # A workflow may not name pytest at all: this repo runs
+        # `python3 scripts/run-tests.py`, which DISCOVERS test directories and
+        # invokes pytest per directory. The regex above finds no `pytest` token,
+        # so targets came back empty and all 26 scripts/test_*.py read as
+        # orphans (measured 2026-09-07) — the exact false-orphan class this
+        # function was added to prevent, one indirection further out.
+        # Ask the runner itself which directories it collects; it is the
+        # authoritative instrument, and it derives them from its own location.
+        if "run-tests.py" in text:
+            targets |= _runner_collected_dirs()
     return targets
+
+
+def _runner_collected_dirs() -> set[str]:
+    """Directories `scripts/run-tests.py` collects, asked of the runner itself.
+
+    Returns the sentinel {"*"} when the runner exists but cannot be
+    introspected: an unmeasurable collector must not silently become 26
+    confident "not referenced anywhere" claims that recommend deleting tests.
+    """
+    runner = SCRIPTS_DIR / "run-tests.py"
+    if not runner.is_file():
+        return set()
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("_hc_run_tests", runner)
+        if spec is None or spec.loader is None:
+            return {"*"}
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return set(module.test_dirs())
+    except Exception:  # noqa: BLE001 - an unreadable runner means unmeasurable
+        return {"*"}
 
 
 def _pytest_consumes(name: str, targets: set[str]) -> bool:
     """True if a CI pytest invocation collects scripts/<name>."""
     if not (name.startswith("test_") or name == "conftest.py"):
         return False
+    if "*" in targets:  # collector present but not introspectable
+        return True
     return bool({"scripts", ".", f"scripts/{name}"} & targets)
 
 
@@ -346,6 +380,36 @@ def check_ci_workflow_integrity() -> list[str]:
     return issues
 
 
+def _rev(ref: str) -> str:
+    """Resolved sha of `ref` in CLAUDE_DIR, or "" when it does not resolve."""
+    try:
+        r = subprocess.run(
+            ["git", "-C", str(CLAUDE_DIR), "rev-parse", "--verify", "--quiet", ref],
+            capture_output=True, text=True, timeout=5,
+        )
+        return r.stdout.strip() if r.returncode == 0 else ""
+    except (subprocess.SubprocessError, OSError):
+        return ""
+
+
+def _branches_checked_out() -> set[str]:
+    """Branch names currently checked out in any worktree of this repository."""
+    names: set[str] = set()
+    try:
+        r = subprocess.run(
+            ["git", "-C", str(CLAUDE_DIR), "worktree", "list", "--porcelain"],
+            capture_output=True, text=True, timeout=5,
+        )
+        if r.returncode != 0:
+            return names
+        for line in r.stdout.splitlines():
+            if line.startswith("branch "):
+                names.add(line.split(" ", 1)[1].strip().removeprefix("refs/heads/"))
+    except (subprocess.SubprocessError, OSError):
+        return names
+    return names
+
+
 def check_stale_branches() -> tuple[list[str], int]:
     """9e: count local branches merged into main."""
     issues: list[str] = []
@@ -363,11 +427,44 @@ def check_stale_branches() -> tuple[list[str], int]:
         ]
         # Filter out 'main' itself
         branches = [b for b in branches if b != "main"]
-        if branches:
-            issues.append(f"9e stale branches: {len(branches)} merged into main (safe to delete)")
-            for b in branches[:5]:
+
+        # `--merged` is an ANCESTRY test, and a branch with no commits yet is an
+        # ancestor of main too. Reported unqualified, that told the operator a
+        # freshly cut working branch was "safe to delete" (measured 2026-09-07).
+        # git-hygiene requires containment evidence with a lines>0 guard before
+        # any deletion, so exclude both inconclusive shapes and stop claiming
+        # safety this check cannot establish.
+        active = _branches_checked_out()
+        main_tip = _rev("main")
+        deletable, held, empty = [], [], []
+        for b in branches:
+            if b in active:
+                held.append(b)
+            elif main_tip and _rev(b) == main_tip:
+                empty.append(b)
+            else:
+                deletable.append(b)
+
+        if deletable:
+            issues.append(
+                f"9e stale branches: {len(deletable)} contained in main "
+                "(deletion CANDIDATES — prove containment with `git cherry` first)"
+            )
+            for b in deletable[:5]:
                 issues.append(f"    - {b}")
-        return issues, len(branches)
+        if held:
+            issues.append(
+                f"9e stale branches: {len(held)} skipped — checked out in a worktree (active work)"
+            )
+            for b in held[:5]:
+                issues.append(f"    - {b} [ACTIVE]")
+        if empty:
+            issues.append(
+                f"9e stale branches: {len(empty)} skipped — at main's tip, no unique commits (inconclusive)"
+            )
+            for b in empty[:5]:
+                issues.append(f"    - {b} [NO WORK YET]")
+        return issues, len(deletable)
     except (subprocess.SubprocessError, OSError):
         return issues, 0
 

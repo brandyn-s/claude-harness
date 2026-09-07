@@ -94,6 +94,25 @@ PURE_PIPELINE_SKILLS = {
     "refine",                    # prompt-enrichment transform
     "sharp-edges",               # footgun analysis report
     "threat-model",              # produces a threat-model artifact (report)
+    # Triaged 2026-09-07: each body was read for a decision gate and has none.
+    # Declaring AskUserQuestion on a skill that never asks is worse than the
+    # WARN — it advertises an interaction the skill does not have.
+    "legacy-code-tdd",           # TDD guidance companion, no in-run branch
+    "monitor",                   # append-only flaw/observation event logger
+    "red-team-axes",             # axis enumeration + analysis report
+    "run-status",                # read-only status report (cf. superplan-status)
+    "search-campaign",           # dispatch orchestrator, no operator prompt
+}
+
+# Skills that are `context: fork` AND legitimately dispatch Agents. The Tier-C
+# rule below assumes the combination is drift; for these it is a documented
+# design with the trade-off written into the body (deep-dive's LLM jury needs
+# disjoint-model dispatch, and the skill states the fork/remote-MCP limitation
+# and the dispatch-prohibited fallback at the point of use). Reviewed
+# 2026-09-07 — an exemption with a reason beats editing a skill that already
+# recorded its choice.
+FORK_WITH_AGENT_OK = {
+    "deep-dive",                 # cross-model jury; fork limits documented in-body
 }
 
 # Matched-pair XML tag pattern. Only flag `<tag>...</tag>` where the
@@ -195,7 +214,9 @@ def _check_one_skill(skill_dir: Path) -> tuple[list[str], list[str]]:
     if not re.search(r"^#+\s+Success\s+Criteria", body, re.MULTILINE | re.IGNORECASE):
         tier_bc.append(f"{skill_name}: no `## Success Criteria` section (Tier C / local)")
 
-    if fm.get("context") == "fork" and re.search(r"\bAgent\s+tool\b", body):
+    if (fm.get("context") == "fork"
+            and skill_name not in FORK_WITH_AGENT_OK
+            and re.search(r"\bAgent\s+tool\b", body)):
         tier_bc.append(f"{skill_name}: context:fork but body references Agent tool (Tier C / local)")
 
     allowed = fm.get("allowed-tools")
