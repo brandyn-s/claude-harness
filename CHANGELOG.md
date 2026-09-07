@@ -12,6 +12,15 @@ Before 1.0.0 the history is narrative: [`docs/EVOLUTION.md`](docs/EVOLUTION.md).
 
 ## [Unreleased]
 
+### Fixed
+
+- `bin/lean-core-ab.py` and `bin/skill-usage-report.py` scanned transcripts over an
+  unbounded `ProcessPoolExecutor()` (one worker per core). Under the full suite on a
+  busy machine (Python 3.14) a reaped worker raised `BrokenProcessPool` and killed the
+  map, failing six unrelated `bin/` tests together; the same pool would break a retro
+  over a full corpus. Bounded to `min(8, cpu_count)` like `replay-script-content-guard.py`,
+  serial for small inputs, serial fallback if a worker still dies. No verdict changes.
+
 ## [1.0.0] — 2026-09-06
 
 First versioned release. Everything below landed on the `fix/eval-1-2-3` branch

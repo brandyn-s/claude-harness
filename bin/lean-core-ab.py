@@ -83,6 +83,29 @@ except Exception:  # pragma: no cover - only when the module is missing beside t
 
 CLAUDE_DIR = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude")
 
+
+def _pooled_map(fn, items, chunksize):
+    """Map `fn` over `items`: parallel for large inputs, serial otherwise.
+
+    An unbounded ``ProcessPoolExecutor()`` spawns one worker per core; on a busy
+    machine a reaped worker raises ``BrokenProcessPool`` and kills the whole run
+    (seen on Python 3.14 running the full suite). Cap the workers the way
+    ``bin/replay-script-content-guard.py`` does, skip the pool for small inputs
+    (test fixtures, small corpora), and fall back to serial if it still breaks.
+    """
+    items = list(items)
+    workers = max(1, min(8, os.cpu_count() or 2))
+    if len(items) <= 2 * workers:
+        return [fn(x) for x in items]
+    from concurrent.futures import ProcessPoolExecutor
+    from concurrent.futures.process import BrokenProcessPool
+    try:
+        with ProcessPoolExecutor(max_workers=workers) as pool:
+            return list(pool.map(fn, items, chunksize=chunksize))
+    except BrokenProcessPool:
+        return [fn(x) for x in items]
+
+
 #: Arm B's ambient set. Everything ambient that is NOT here is a SCOPE rule: it
 #: matters inside a skill and is read by that skill from references/, not loaded
 #: on every prompt. Trimming the keepers is the ratchet plan's job, not this tool's.
@@ -465,17 +488,15 @@ def _scan_transcript(path: str) -> dict:
 def transcript_sessions(root: Path, since: dt.datetime | None = None) -> list[dict]:
     """One row per main-conversation transcript under `root` (sidechains and files
     with no human prompt are dropped). Counts only."""
-    from concurrent.futures import ProcessPoolExecutor
     files = [str(p) for p in root.rglob("*.jsonl")]
     rows = []
-    with ProcessPoolExecutor() as pool:
-        for m in pool.map(_scan_transcript, files, chunksize=8):
-            if m["sidechain"] or m["prompts"] == 0 or not m["start"]:
-                continue
-            m["start"] = dt.datetime.fromisoformat(m["start"])
-            if since and m["start"] < since:
-                continue
-            rows.append(m)
+    for m in _pooled_map(_scan_transcript, files, 8):
+        if m["sidechain"] or m["prompts"] == 0 or not m["start"]:
+            continue
+        m["start"] = dt.datetime.fromisoformat(m["start"])
+        if since and m["start"] < since:
+            continue
+        rows.append(m)
     # the same session can appear in more than one backup directory: keep the fullest copy
     best: dict[str, dict] = {}
     for m in rows:

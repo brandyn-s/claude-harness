@@ -40,7 +40,6 @@ import os
 import re
 import sys
 from collections import Counter, defaultdict
-from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -95,24 +94,45 @@ def _scan_file(path: str) -> dict:
     return {"path": path, "slash": dict(slash), "auto": dict(auto), "date": first_date}
 
 
+def _pooled_map(fn, items, chunksize):
+    """Map `fn` over `items`: parallel for large inputs, serial otherwise.
+
+    An unbounded ``ProcessPoolExecutor()`` spawns one worker per core; on a busy
+    machine a reaped worker raises ``BrokenProcessPool`` and kills the whole run
+    (seen on Python 3.14 running the full suite). Cap the workers the way
+    ``bin/replay-script-content-guard.py`` does, skip the pool for small inputs
+    (test fixtures, small corpora), and fall back to serial if it still breaks.
+    """
+    items = list(items)
+    workers = max(1, min(8, os.cpu_count() or 2))
+    if len(items) <= 2 * workers:
+        return [fn(x) for x in items]
+    from concurrent.futures import ProcessPoolExecutor
+    from concurrent.futures.process import BrokenProcessPool
+    try:
+        with ProcessPoolExecutor(max_workers=workers) as pool:
+            return list(pool.map(fn, items, chunksize=chunksize))
+    except BrokenProcessPool:
+        return [fn(x) for x in items]
+
+
 def scan(root: Path, since: str | None) -> tuple[dict, int, int]:
     files = [str(p) for p in root.rglob("*.jsonl")]
     per_skill: dict[str, dict] = defaultdict(lambda: {"slash": 0, "auto": 0, "sessions": set(), "first": None, "last": None})
     sessions_scanned = 0
-    with ProcessPoolExecutor() as pool:
-        for res in pool.map(_scan_file, files, chunksize=16):
-            date = res["date"]
-            if since and date and date < since:
-                continue
-            sessions_scanned += 1
-            for kind in ("slash", "auto"):
-                for name, n in res[kind].items():
-                    row = per_skill[name]
-                    row[kind] += n
-                    row["sessions"].add(res["path"])
-                    if date:
-                        row["first"] = min(row["first"] or date, date)
-                        row["last"] = max(row["last"] or date, date)
+    for res in _pooled_map(_scan_file, files, 16):
+        date = res["date"]
+        if since and date and date < since:
+            continue
+        sessions_scanned += 1
+        for kind in ("slash", "auto"):
+            for name, n in res[kind].items():
+                row = per_skill[name]
+                row[kind] += n
+                row["sessions"].add(res["path"])
+                if date:
+                    row["first"] = min(row["first"] or date, date)
+                    row["last"] = max(row["last"] or date, date)
     return per_skill, len(files), sessions_scanned
 
 
