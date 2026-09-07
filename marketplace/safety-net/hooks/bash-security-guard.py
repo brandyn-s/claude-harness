@@ -22,6 +22,7 @@ Live-probed 2026-09-03 on Claude Code 2.1.259: the former top-level
 original command ran, so every auto-fix had been a silent no-op.
 """
 
+import ast
 import hashlib
 import json
 import os
@@ -41,7 +42,8 @@ from _environment_catalog import load_section  # noqa: E402 -- resolves via the 
 from bash_policy_tables import entries, pattern_block_reason, resolve_policy_packs  # noqa: E402 -- resolves via the sys.path insert above
 
 SEC_REMEDY = (
-    "Cheapest fix: write the code to a .py FILE and run it, and split any credential read away from any network call."
+    "Cheapest fix: write the code to a .py FILE and run it, and split any credential read away from any network call. "
+    "(Script files are inspected with these same checks when written and when executed, so the file is not a way around the block.)"
 )
 
 
@@ -1884,8 +1886,16 @@ def check_push_after_auto_merge(command, cwd):
 # because the construct lives inside quotes (`echo "..."`) that the cleaner
 # strips. Upgrades platform-constraints.md FORBIDDEN:
 # secret_env_var_expansion_in_diagnostics from soft text to a hard block.
+# Either branch order, and one level of nested expansion inside a branch. The
+# 2026-08-12 leak line was `echo "xai key: ${XK:+present (${#XK})}${XK:-ABSENT}"`:
+# the `(${#XK})` length probe nested a `}` inside the :+ branch, so the previous
+# `[^}]+` stopped early and the guard did NOT match it even inline (measured
+# 2026-09-06 while shipping script-content-guard). The staged spec called the
+# incident a scope gap rather than a regex gap; it was both.
+_ENV_BRANCH_BODY = r"(?:[^{}]|\$\{[^{}]*\})+"
 ENV_VAR_DIAGNOSTIC = re.compile(
-    r"\$\{[A-Z_][A-Z0-9_]*:\+[^}]+\}\$\{[A-Z_][A-Z0-9_]*:-[^}]+\}"
+    r"\$\{[A-Z_][A-Z0-9_]*:\+" + _ENV_BRANCH_BODY + r"\}\s*\$\{[A-Z_][A-Z0-9_]*:-" + _ENV_BRANCH_BODY + r"\}"
+    r"|\$\{[A-Z_][A-Z0-9_]*:-" + _ENV_BRANCH_BODY + r"\}\s*\$\{[A-Z_][A-Z0-9_]*:\+" + _ENV_BRANCH_BODY + r"\}"
 )
 
 
@@ -1985,6 +1995,837 @@ def check_secret_store_exposure(command):
             "secrets included. " + _SECRET_ENV_REMEDY
         )
     return None
+
+
+# ── PYTHON SOURCE EXFILTRATION (ast) ─────────────────────────────────────
+#
+# The shell predicates above see `python -c "..."` bodies, heredocs and script
+# files only as text. PYTHON_EXFIL is a one-line heuristic (`python…requests…open(`).
+# 94 % of the script-like writes in the 2026-09-06 corpus replay were .py, and none
+# of the shell grammar applies to `requests.post(url, data=open(expanduser(
+# "~/.aws/credentials")).read())`. This walks the AST instead.
+#
+# THE POLICY IS THE CURL POLICY, ONE GRAMMAR OVER. CURL_ENV_SECRET (above) treats a
+# secret in a DATA/FORM flag as exfiltration and a secret in an auth header as normal
+# API authentication. The Python spelling of that line:
+#
+#   allowed   a secret in an auth channel -- `headers=`, `auth=`, `cookies=`, the
+#             headers slot of urllib's Request() / http.client's request() -- to ANY
+#             host. `headers={"Authorization": f"Bearer {tok}"}` is `-H "Authorization:
+#             Bearer $TOKEN"`. Calibration: the first cut of this check flagged every
+#             bearer-token header to a host outside SAFE_RE in the corpus (277 fires,
+#             all the documented pattern); this cut flags none of them.
+#   blocked   the same secret in the request BODY (`data=`, `json=`, `files=`,
+#             `content=`, positional data), in `params=`, or in the URL itself,
+#             unless every host the call names matches SAFE_RE (built-ins plus the
+#             catalog's `safe_domains`) -- exactly `curl -d "$TOKEN" https://x`.
+#   allowed   the OAuth 2.0 credential grant: a body with `grant_type` /
+#             `client_secret` / `refresh_token` keys POSTed to a URL that names a
+#             token endpoint (`/oauth2/v2.0/token`, `/oauth/token`, `oauth.v2.access`).
+#             The client secret is SUPPOSED to travel in that body; 338 of the 459
+#             files the second cut flagged were this exchange with Entra, CrowdStrike,
+#             Jamf, Atlassian or Slack. Both halves must hold -- a grant-shaped body
+#             to an unrelated URL, or a token URL with a non-grant body, still blocks.
+#   blocked   credential-FILE contents (open()/read_text() of a SENSITIVE path) and
+#             captured keychain / 1Password reads (`check_output(["security", …, "-w"])`,
+#             `op read`) reaching a payload -- `-d @~/.aws/credentials`, `-d "$(security
+#             … -w)"`. Any other file's contents reaching a payload directly
+#             (`files={"f": open(p)}`, `data=open(p).read()`) -- `-d @file`.
+#
+#   sources   os.environ[...] / os.environ.get() / os.getenv() of a SECRET-shaped
+#             name; open()/Path().read_*() of a SENSITIVE path; a captured keychain
+#             or 1Password read; a module function whose `return` is any of these.
+#   taint     a name assigned from a source, transitively: f-strings, dicts,
+#             .strip(), "Bearer " + tok, json.dumps({...}), `with … as fh`, a
+#             parameter of a module function called with a tainted argument,
+#             `d["k"] = tok` (the dict), `self.token = tok` (that attribute, not
+#             every attribute of self). Names are FUNCTION-SCOPED (_PyScopes): the
+#             `r` that holds a keychain read in kc() is not the `r` that holds a
+#             Request in get(). The RESULT of a network call is a response, not the
+#             secret: `resp = requests.get(url, headers=auth)` taints nothing.
+#   sinks     HTTP verbs on requests / httpx / aiohttp / session / client objects, a
+#             URL literal, or a name bound to one; urllib urlopen() / Request();
+#             http.client request(); socket send*(). The host of an http.client
+#             connection or an httpx/aiohttp client with a base_url counts as its URL.
+#
+# Applied by main() to inline -c bodies and python heredocs, and by
+# script-content-guard.py to .py files -- one predicate, three surfaces. Reading a
+# secret into a variable is never flagged; handing it to the network in a payload is.
+# Out of scope, by design: taint through imports, through attribute stores on
+# objects the module did not create, and through string operations the AST cannot
+# see (exec/eval). Those need the sandbox, not a guard.
+
+_PY_HTTP_VERBS = frozenset({"get", "post", "put", "patch", "delete", "head", "options",
+                            "request", "send", "sendall", "sendto", "urlopen", "Request", "fetch"})
+_PY_NET_ROOTS = frozenset({"requests", "httpx", "aiohttp", "urllib", "urllib2", "urllib3",
+                           "http", "socket", "sock", "session", "client", "s", "sess", "conn",
+                           "connection", "api"})
+# Keywords that carry authentication or transport settings, not payload. A secret
+# here is the Python spelling of `curl -H "Authorization: Bearer $TOKEN"`.
+_PY_AUTH_KEYWORDS = frozenset({"headers", "auth", "cookies", "cert", "verify", "timeout",
+                               "proxies", "proxy", "stream", "allow_redirects",
+                               "follow_redirects", "hooks", "method", "extensions",
+                               "trust_env", "ssl", "ssl_context", "context", "cafile",
+                               "capath", "cadefault", "unverifiable", "origin_req_host"})
+# Positional slots that are headers rather than payload, by callee tail:
+#   urllib.request.Request(url, data, headers, …) / requests.Request(method, url, headers, …)
+#   http.client.*Connection.request(method, url, body, headers)
+_PY_AUTH_POSITIONAL = {"Request": frozenset({2}), "request": frozenset({3})}
+# Attribute stores that are auth channels: `session.headers[...] = …`, `session.auth = …`.
+_PY_AUTH_ATTRS = frozenset({"headers", "auth", "cookies"})
+# Constructors whose first string argument names the host every later call goes to.
+_PY_CONNECTION_CTORS = frozenset({"HTTPSConnection", "HTTPConnection", "Client", "AsyncClient",
+                                  "ClientSession", "Session"})
+_PY_FILE_READ_TAILS = frozenset({"read", "read_text", "read_bytes", "readlines", "readline"})
+_PY_OPEN_FNS = frozenset({"open", "io.open", "codecs.open", "gzip.open", "bz2.open", "lzma.open"})
+_PY_SUBPROCESS_CAPTURE = frozenset({"check_output", "getoutput", "getstatusoutput", "run", "Popen"})
+_SECRET_ENV_FULL_RE = re.compile(r"^" + _SECRET_ENV_NAME + r"$")
+_PY_URL_SCHEMES = ("http://", "https://", "ws://", "wss://")
+
+_PY_KIND_CRED_FILE = "the contents of a credential file"
+_PY_KIND_SECRET_ENV = "a SECRET/TOKEN/KEY environment variable"
+_PY_KIND_KEYCHAIN = "a keychain/1Password read"
+_PY_KIND_FILE = "the contents of a local file"
+
+# The OAuth 2.0 credential grant, recognised by BOTH halves: a body carrying one of
+# these keys, and a URL whose visible text names a token endpoint.
+_PY_OAUTH_GRANT_KEYS = frozenset({"grant_type", "client_secret", "client_assertion",
+                                  "refresh_token", "code_verifier", "device_code"})
+_PY_TOKEN_ENDPOINT_RE = re.compile(r"oauth|/token\b|access_token|/connect/|/auth/token", re.IGNORECASE)
+# Keychain / config items that are identifiers, not secrets: they belong in URL paths.
+_PY_NONSECRET_ITEM_RE = re.compile(
+    r"(?:^|[-_./ :])(?:id|org|orgid|tenant|tenant[-_]?id|url|host|hostname|base|base[-_]?url|realm|domain|"
+    r"site|cid|client[-_]?id|region|scope|user(?:name)?|email|account|workspace|team|instance)$",
+    re.IGNORECASE,
+)
+# A dict key that names a secret (case-insensitive, substring): cfg["client_secret"].
+_PY_SECRET_KEY_RE = re.compile(_SECRET_ENV_NAME, re.IGNORECASE)
+# str methods whose ARGUMENTS are search patterns: the result does not carry them.
+_PY_PATTERN_METHODS = frozenset({"split", "rsplit", "partition", "rpartition", "startswith", "endswith",
+                                 "count", "find", "rfind", "index", "rindex", "removeprefix",
+                                 "removesuffix", "strip", "lstrip", "rstrip", "search", "match",
+                                 "fullmatch", "findall", "finditer", "compile"})
+
+
+def _py_dotted(node):
+    """'a.b.c' for a Name/Attribute chain, else ''. A call in the chain keeps its
+    parentheses: requests.Session().post -> 'requests.Session().post'."""
+    parts = []
+    while isinstance(node, ast.Attribute):
+        parts.append(node.attr)
+        node = node.value
+    if isinstance(node, ast.Name):
+        parts.append(node.id)
+        return ".".join(reversed(parts))
+    if isinstance(node, ast.Call):
+        inner = _py_dotted(node.func)
+        head = (inner + "()") if inner else "()"
+        return ".".join([head] + list(reversed(parts))) if parts else head
+    return ""
+
+
+def _py_str_consts(node):
+    for sub in ast.walk(node):
+        if isinstance(sub, ast.Constant) and isinstance(sub.value, str):
+            yield sub.value
+        elif isinstance(sub, ast.JoinedStr):
+            for v in sub.values:
+                if isinstance(v, ast.Constant) and isinstance(v.value, str):
+                    yield v.value
+
+
+def _py_chain_prefixes(node):
+    """'self.token' -> ('self', 'self.token'); a Name -> (name,). Empty for anything
+    that is not a plain Name/Attribute chain."""
+    chain = _py_dotted(node)
+    if not chain or "(" in chain:
+        return ()
+    parts = chain.split(".")
+    return tuple(".".join(parts[: i + 1]) for i in range(len(parts)))
+
+
+def _py_walk_pruned(node, prune):
+    """ast.walk that does not descend into subtrees `prune` accepts."""
+    stack = [node]
+    while stack:
+        cur = stack.pop()
+        yield cur
+        for child in ast.iter_child_nodes(cur):
+            if not prune(child):
+                stack.append(child)
+
+
+def _py_url_consts(node):
+    return [c for c in _py_str_consts(node) if c.lower().startswith(_PY_URL_SCHEMES)]
+
+
+def _py_url_text(node):
+    """The URL an expression spells, with its literal parts joined: f"https://login…/{tid}/
+    oauth2/v2.0/token" -> "https://login…//oauth2/v2.0/token", so both the host and the
+    path are visible to SAFE_RE and the token-endpoint check. None when no URL literal."""
+    if isinstance(node, ast.JoinedStr):
+        text = "".join(_py_str_consts(node))
+    elif isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+        text = "".join(_py_str_consts(node))
+    elif isinstance(node, ast.Constant) and isinstance(node.value, str):
+        text = node.value
+    elif isinstance(node, ast.Call) and _py_dotted(node.func).endswith(".format"):
+        text = "".join(_py_str_consts(node.func.value))
+    else:
+        urls = _py_url_consts(node)
+        return urls[0] if urls else None
+    return text if text.lower().startswith(_PY_URL_SCHEMES) else None
+
+
+def _py_is_file_read(node) -> bool:
+    """open(...) itself, open(...).read(), Path(...).read_text(), fh.read() -- the
+    expression whose VALUE is a file's contents (or a handle a sink will read)."""
+    if not isinstance(node, ast.Call):
+        return False
+    fn = _py_dotted(node.func)
+    tail = fn.rsplit(".", 1)[-1]
+    if fn in _PY_OPEN_FNS:
+        return True
+    if tail in _PY_FILE_READ_TAILS and isinstance(node.func, ast.Attribute):
+        return True                                        # x.read() / Path(...).read_text()
+    return False
+
+
+def _py_file_read_target(node):
+    """The path expression a file read names, when it is syntactically visible."""
+    if not isinstance(node, ast.Call):
+        return None
+    fn = _py_dotted(node.func)
+    tail = fn.rsplit(".", 1)[-1]
+    if fn in _PY_OPEN_FNS:
+        return node.args[0] if node.args else None
+    if tail in ("read_text", "read_bytes") and isinstance(node.func, ast.Attribute):
+        return node.func.value                             # Path("~/.aws/credentials").read_text()
+    if tail in _PY_FILE_READ_TAILS and isinstance(node.func, ast.Attribute):
+        inner = node.func.value                            # open("...").read()
+        if isinstance(inner, ast.Call) and _py_dotted(inner.func) in _PY_OPEN_FNS:
+            return inner.args[0] if inner.args else None
+    return None
+
+
+def _py_sensitive_path(target, sensitive_names) -> bool:
+    if target is None:
+        return False
+    if any(SENSITIVE_FILES.search(c) or SENSITIVE_RE.search(c) for c in _py_str_consts(target)):
+        return True
+    return any(p in sensitive_names for sub in ast.walk(target) for p in _py_chain_prefixes(sub))
+
+
+def _py_keychain_item(argv_consts):
+    """The item name a keychain read asks for: the token after -s / -a / -l, else the
+    last non-flag token. None when the name is not a literal."""
+    toks = [c for c in argv_consts if c]
+    for flag in ("-s", "-a", "-l"):
+        if flag in toks:
+            i = toks.index(flag)
+            if i + 1 < len(toks) and not toks[i + 1].startswith("-"):
+                return toks[i + 1]
+    return None
+
+
+def _py_nonsecret_item(name) -> bool:
+    """An identifier-shaped keychain / config item: a tenant id, org id, base URL,
+    client id. It lives in the keychain for convenience, not because it is a secret,
+    and it belongs in URL paths -- `f"{BASE}/oauth2/token"`, `/orgs/{ORG}/users`."""
+    return bool(name) and bool(_PY_NONSECRET_ITEM_RE.search(name))
+
+
+def _py_source_kind(node, sensitive_names=frozenset(), source_funcs=None, const_of=None):
+    """The kind of secret a single expression node READS, else None. `const_of`
+    resolves a Name bound to a string literal (SERVICE = "x"; kc(SERVICE))."""
+    source_funcs = source_funcs or {}
+    const_of = const_of or (lambda e: e.value if isinstance(e, ast.Constant) and isinstance(e.value, str) else None)
+    if isinstance(node, ast.Subscript):                    # os.environ["AWS_SECRET_ACCESS_KEY"]
+        if _py_dotted(node.value).endswith("environ"):
+            if any(_SECRET_ENV_FULL_RE.match(c) for c in _py_str_consts(node.slice)):
+                return _PY_KIND_SECRET_ENV
+        return None
+    if not isinstance(node, ast.Call):
+        return None
+    fn = _py_dotted(node.func)
+    tail = fn.rsplit(".", 1)[-1]
+    if tail in source_funcs:
+        item = const_of(node.args[0]) if node.args else None
+        if item is not None and _py_nonsecret_item(item):
+            return None                                     # kc("tenant-id"): an identifier, not a secret
+        return source_funcs[tail]
+    if _py_sensitive_path(_py_file_read_target(node), sensitive_names):
+        return _PY_KIND_CRED_FILE
+    if tail == "getenv" or (tail == "get" and fn.endswith("environ.get")):
+        if node.args and any(_SECRET_ENV_FULL_RE.match(c) for c in _py_str_consts(node.args[0])):
+            return _PY_KIND_SECRET_ENV
+    if tail in _PY_SUBPROCESS_CAPTURE and node.args:
+        argv0 = node.args[0]
+        if isinstance(argv0, (ast.List, ast.Tuple)):
+            consts = [const_of(e) or "" for e in argv0.elts]
+        else:
+            consts = list(_py_str_consts(argv0))
+        argv = " ".join(consts)
+        if KEYCHAIN_DUMP_RE.search(argv) or ONEPASSWORD_REVEAL_RE.search(argv):
+            if _py_nonsecret_item(_py_keychain_item(consts)):
+                return None
+            return _PY_KIND_KEYCHAIN
+    return None
+
+
+def _py_is_sink(node, url_names=None) -> bool:
+    if not isinstance(node, ast.Call):
+        return False
+    fn = _py_dotted(node.func)
+    if not fn:
+        return False
+    tail = fn.rsplit(".", 1)[-1]
+    root = fn.split(".", 1)[0].rstrip("()")
+    if tail in ("urlopen", "Request"):
+        return True
+    if tail not in _PY_HTTP_VERBS:
+        return False
+    if root in _PY_NET_ROOTS:
+        return True
+    payload = list(node.args) + [k.value for k in node.keywords]
+    if any(_py_url_consts(a) for a in payload):
+        return True
+    return bool(url_names) and any(isinstance(a, ast.Name) and a.id in url_names for a in payload)
+
+
+def _py_payload_args(node):
+    """Argument expressions of a sink call that carry payload: the URL (a secret in
+    its query string), positional data/body, and every keyword that is not an
+    auth/transport setting. `**kwargs` counts as payload (the conservative reading)."""
+    tail = _py_dotted(node.func).rsplit(".", 1)[-1]
+    auth_positions = _PY_AUTH_POSITIONAL.get(tail, frozenset())
+    for i, a in enumerate(node.args):
+        if i not in auth_positions:
+            yield a
+    for k in node.keywords:
+        if k.arg is None or k.arg not in _PY_AUTH_KEYWORDS:
+            yield k.value
+
+
+def _py_const_key(node):
+    """The literal key of d["k"] / d.get("k", …), else None."""
+    if isinstance(node, ast.Subscript):
+        sl = node.slice
+        if isinstance(sl, ast.Constant) and isinstance(sl.value, (str, int)) and not isinstance(sl.value, bool):
+            return node.value, sl.value
+        return node.value, None
+    if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "get" and node.args:
+        first = node.args[0]
+        if isinstance(first, ast.Constant) and isinstance(first.value, str):
+            return node.func.value, first.value
+        return node.func.value, None
+    return None
+
+
+def _py_flow_children(node):
+    """The sub-expressions a VALUE flows through. Where the AST is precise about what
+    does not flow, use it: the test of a conditional expression, a comparison's
+    result, the search pattern of .replace()/.split()/.startswith(), a hash digest,
+    a length. `b.replace(TOKEN, "<redacted>")` returns text with the secret REMOVED --
+    the corpus's third cut flagged 90 files through exactly that helper."""
+    if isinstance(node, ast.IfExp):
+        return [node.body, node.orelse]
+    if isinstance(node, (ast.Compare, ast.Lambda, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+        return []
+    if isinstance(node, ast.Call):
+        fn = _py_dotted(node.func)
+        tail = fn.rsplit(".", 1)[-1]
+        receiver = [node.func.value] if isinstance(node.func, ast.Attribute) else []
+        if tail in ("replace", "sub", "subn"):
+            return receiver + list(node.args[1:]) + [k.value for k in node.keywords]
+        if tail in _PY_PATTERN_METHODS:
+            return receiver
+        if fn.startswith(("hashlib.", "hmac.")) or tail in ("hexdigest", "digest", "len", "bool",
+                                                            "isinstance", "hasattr", "type", "id"):
+            return []
+        return [node.func] + list(node.args) + [k.value for k in node.keywords]
+    if isinstance(node, ast.Subscript):
+        return [node.value]
+    return list(ast.iter_child_nodes(node))
+
+
+class _PyScopes:
+    """Function-local namespaces for the taint walk. Python's rule: a name stored
+    anywhere in a function is local to it; otherwise it is the enclosing scope's.
+    Without this, `r = subprocess.run([...security...])` inside kc() and
+    `r = Request(url, headers=...)` inside get() are the same `r`, and the corpus
+    replay's second cut flagged 106 files on exactly that collision."""
+
+    def __init__(self, tree):
+        self.scope_of: dict[int, str] = {}
+        self.locals_of: dict[str, set] = {"": set()}
+        self.fn_key: dict[int, str] = {}
+        self.fn_of_key: dict[str, ast.AST] = {}
+        self._globals: dict[str, set] = {}
+        self._assign(tree, "")
+        for scope, names in self._globals.items():
+            self.locals_of.get(scope, set()).difference_update(names)
+
+    def _assign(self, node, scope):
+        for child in ast.iter_child_nodes(node):
+            if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+                key = f"{scope}/{getattr(child, 'name', 'lambda')}@{child.lineno}"
+                self.scope_of[id(child)] = scope
+                self.fn_key[id(child)] = key
+                self.fn_of_key[key] = child
+                self.locals_of.setdefault(key, set())
+                self._assign(child, key)
+                continue
+            self.scope_of[id(child)] = scope
+            if isinstance(child, ast.Name) and isinstance(child.ctx, (ast.Store, ast.Del)):
+                self.locals_of.setdefault(scope, set()).add(child.id)
+            elif isinstance(child, ast.arg):
+                self.locals_of.setdefault(scope, set()).add(child.arg)
+            elif isinstance(child, ast.Global):
+                self._globals.setdefault(scope, set()).update(child.names)
+            self._assign(child, scope)
+
+    def scope(self, node) -> str:
+        return self.scope_of.get(id(node), "")
+
+    def resolve(self, scope: str, name: str) -> str:
+        """The scope a name refers to from `scope`: the innermost enclosing function
+        that stores it, else the module. self/cls chains are object state shared by
+        every method, so they resolve to the module."""
+        if name in ("self", "cls"):
+            return ""
+        s = scope
+        while True:
+            if name in self.locals_of.get(s, ()):
+                return s
+            if not s:
+                return ""
+            s = s.rsplit("/", 1)[0]
+
+    def key(self, scope: str, chain: str):
+        return (self.resolve(scope, chain.split(".", 1)[0]), chain)
+
+
+def check_python_source_exfil(source: str):
+    """Block Python source that hands a credential or secret-shaped value to the network.
+
+    Returns the BLOCKED reason or None. Unparseable source returns None (the text
+    predicates still apply to it elsewhere), and so does source that trips a bug in
+    this analysis: the hooks that call it are fail-closed, and an internal error here
+    must not become a block of every Python file the model writes. The error is
+    reported on stderr so it is visible in the transcript and the hook telemetry."""
+    try:
+        tree = ast.parse(source or "")
+    except (SyntaxError, ValueError):
+        return None
+    try:
+        return _check_python_source_exfil(tree)
+    except (RecursionError, Exception) as exc:  # noqa: BLE001 -- analysis bug, not a verdict
+        print(f"[exfiltration-guard] python-source analysis error ({type(exc).__name__}: {exc}); "
+              f"text predicates still apply", file=sys.stderr)
+        return None
+
+
+def _check_python_source_exfil(tree):
+
+    scopes = _PyScopes(tree)
+    tainted: dict[tuple, str] = {}        # (scope, dotted chain) -> kind; transitive, secret kinds only
+    dict_keys: dict[tuple, dict] = {}     # (scope, name) -> {literal key: kind or None} for dict literals we saw
+    file_names: set[tuple] = set()        # (scope, name) bound DIRECTLY to a file read (one hop, any path)
+    sensitive_names: set[tuple] = set()   # (scope, name) bound to a SENSITIVE path literal
+    url_names: dict[tuple, str] = {}      # (scope, name) -> URL literal (scheme + host [+ path]) it was bound to
+    text_names: dict[tuple, str] = {}     # (scope, name) -> joined literal text of a path-like f-string / concat
+    const_names: dict[tuple, str] = {}    # (scope, name) -> string literal it was bound to
+    dict_consts: dict[tuple, dict] = {}   # (scope, name) -> {literal key: string literal} for dict literals of strings
+    oauth_names: set[tuple] = set()       # (scope, name) bound to an OAuth grant body (grant_type / client_secret keys)
+    source_funcs: dict[str, str] = {}     # functions whose return value is a secret -> kind
+    func_dicts: dict[str, dict] = {}      # functions that return a dict literal -> {key: kind}
+    funcs = {n.name: n for n in ast.walk(tree) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))}
+    call_sites: dict[str, list] = {}      # function name -> [(call node, caller scope)]
+    SCOPED = (tainted, dict_keys, file_names, sensitive_names, url_names, text_names, const_names,
+              dict_consts, oauth_names)
+
+    def local_call(node):
+        """A call to a function this module defines: f(...), self.f(...), cls.f(...)."""
+        if not isinstance(node, ast.Call):
+            return None
+        if isinstance(node.func, ast.Name) and node.func.id in funcs:
+            return funcs[node.func.id]
+        if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) \
+                and node.func.value.id in ("self", "cls") and node.func.attr in funcs:
+            return funcs[node.func.attr]
+        return None
+
+    for node in ast.walk(tree):
+        fdef = local_call(node)
+        if fdef is not None:
+            call_sites.setdefault(fdef.name, []).append((node, scopes.scope(node)))
+
+    def names_in(node, scope):
+        return [scopes.key(scope, sub.id) for sub in ast.walk(node) if isinstance(sub, ast.Name)]
+
+    def urls_of(node, scope):
+        urls = _py_url_consts(node)
+        urls += [url_names[k] for k in names_in(node, scope) if k in url_names]
+        return urls
+
+    def texts_of(node, scope):
+        keys = names_in(node, scope)
+        return (list(_py_str_consts(node)) + [text_names[k] for k in keys if k in text_names]
+                + [const_names[k] for k in keys if k in const_names])
+
+    def is_sink(node):
+        if local_call(node) is not None:
+            return False                                    # a module function named get()/post() is not the library
+        return _py_is_sink(node, {k[1] for k in url_names})
+
+    def const_resolver(scope):
+        def const_of(e):
+            if isinstance(e, ast.Constant) and isinstance(e.value, str):
+                return e.value
+            if isinstance(e, ast.Name):
+                return const_names.get(scopes.key(scope, e.id))
+            keyed = _py_const_key(e)                        # SERVICES["org_id"]: the literal, else the key's name
+            if keyed is not None and isinstance(keyed[0], ast.Name) and isinstance(keyed[1], str):
+                return dict_consts.get(scopes.key(scope, keyed[0].id), {}).get(keyed[1], keyed[1])
+            return None
+        return const_of
+
+    def flow_kind(node, scope):
+        """The secret kind an expression's VALUE carries, or None."""
+        if is_sink(node):
+            return None                                     # a network call's value is the response
+        sens = {k[1] for k in sensitive_names if k[0] == scopes.resolve(scope, k[1])}
+        kind = _py_source_kind(node, sens, source_funcs, const_resolver(scope))
+        if kind:
+            return kind
+        if local_call(node) is not None:
+            return None                                     # a local function's value is its return, not its arguments
+        for prefix in _py_chain_prefixes(node):
+            k = scopes.key(scope, prefix)
+            if k in tainted:
+                return tainted[k]
+        keyed = _py_const_key(node)
+        if keyed is not None and isinstance(keyed[0], ast.Name):
+            base, key = keyed
+            bk = scopes.key(scope, base.id)
+            if key is not None and bk in dict_keys:
+                return dict_keys[bk].get(key)               # precise: we saw the literal
+            if bk in tainted:
+                if key is None or not isinstance(key, str) or _PY_SECRET_KEY_RE.search(key):
+                    return tainted[bk]                      # cfg["client_secret"], cfg[k], pair[0]
+                return None                                 # cfg["base_url"] of an opaque tainted dict
+            return None
+        for child in _py_flow_children(node):
+            kind = flow_kind(child, scope)
+            if kind:
+                return kind
+        return None
+
+    def dict_literal_kinds(node, scope):
+        """Per-element kinds of a container literal: {"k": v} by key, (a, b) / [a, b] by
+        index, {...}[vendor] and `x if c else y` as the merge of their alternatives.
+        None for anything else -- an opaque value is judged whole."""
+        if isinstance(node, ast.Dict):
+            out = {}
+            for k, v in zip(node.keys, node.values):
+                if isinstance(k, ast.Constant) and isinstance(k.value, (str, int)):
+                    out[k.value] = flow_kind(v, scope)
+            return out
+        if isinstance(node, (ast.Tuple, ast.List)):
+            return {i: flow_kind(v, scope) for i, v in enumerate(node.elts)}
+        alternatives = None
+        if isinstance(node, ast.Subscript) and isinstance(node.value, ast.Dict):
+            alternatives = node.value.values                # {...}[vendor]: one of the values
+        elif isinstance(node, ast.IfExp):
+            alternatives = [node.body, node.orelse]
+        if alternatives is None:
+            return None
+        merged, any_known = {}, False
+        for alt in alternatives:
+            dk = dict_literal_kinds(alt, scope)
+            if dk is None:
+                return None
+            any_known = True
+            for k, v in dk.items():
+                merged[k] = merged.get(k) or v
+        return merged if any_known else None
+
+    def bind(target, kind, scope):
+        """Record taint for an assignment target. `d["k"] = tok` taints d (and the key);
+        `self.tok = tok` taints self.tok only; stores into an auth channel
+        (`session.headers[...]`, `session.auth`) taint nothing -- they are the header pattern."""
+        if isinstance(target, (ast.Tuple, ast.List)):
+            for elt in target.elts:
+                bind(elt, kind, scope)
+            return
+        if isinstance(target, ast.Starred):
+            bind(target.value, kind, scope)
+            return
+        base = target.value if isinstance(target, ast.Subscript) else target
+        chain = _py_dotted(base)
+        if not chain or "(" in chain:
+            return
+        parts = chain.split(".")
+        if parts[0] in ("os", "sys", "globals", "locals") or parts[0] == "environ":
+            return                                          # os.environ["X"] = tok sets a child's env
+        if any(part in _PY_AUTH_ATTRS for part in parts[1:]):
+            return
+        k = scopes.key(scope, chain)
+        tainted[k] = kind
+        if isinstance(target, ast.Subscript) and isinstance(target.slice, ast.Constant) and isinstance(target.slice.value, str):
+            dict_keys.setdefault(k, {})[target.slice.value] = kind
+
+    def is_file_payload(node, scope) -> bool:
+        for sub in ast.walk(node):
+            if _py_is_file_read(sub):
+                return True
+            if isinstance(sub, ast.Name) and scopes.key(scope, sub.id) in file_names:
+                return True
+        return False
+
+    def is_oauth_grant(node, scope) -> bool:
+        if any(c in _PY_OAUTH_GRANT_KEYS for c in _py_str_consts(node)):
+            return True
+        return any(k in oauth_names for k in names_in(node, scope))
+
+    def note_value(k, value, scope):
+        """Everything an assignment or an argument binding tells us about a name."""
+        text = _py_url_text(value)
+        urls = [text] if text else urls_of(value, scope)
+        if isinstance(value, ast.Call) and _py_dotted(value.func).rsplit(".", 1)[-1] in _PY_CONNECTION_CTORS:
+            consts = [c for c in _py_str_consts(value) if c and " " not in c and "/" not in c]
+            if consts and not urls:
+                urls = ["https://" + consts[0]]
+        if urls:
+            url_names[k] = urls[0]
+        joined = "".join(texts_of(value, scope)) if isinstance(value, (ast.JoinedStr, ast.BinOp, ast.Constant)) else ""
+        if "/" in joined:
+            text_names[k] = joined
+        if isinstance(value, ast.Constant) and isinstance(value.value, str):
+            const_names[k] = value.value
+        elif isinstance(value, ast.Name) and scopes.key(scope, value.id) in const_names:
+            const_names[k] = const_names[scopes.key(scope, value.id)]
+        elif isinstance(value, ast.Dict):
+            strs = {kk.value: vv.value for kk, vv in zip(value.keys, value.values)
+                    if isinstance(kk, ast.Constant) and isinstance(kk.value, str)
+                    and isinstance(vv, ast.Constant) and isinstance(vv.value, str)}
+            if strs:
+                dict_consts[k] = strs
+        sens = {x[1] for x in sensitive_names if x[0] == scopes.resolve(scope, x[1])}
+        if _py_sensitive_path(value, sens) and not _py_is_file_read(value):
+            sensitive_names.add(k)
+        if _py_is_file_read(value) or (
+            isinstance(value, ast.Call) and isinstance(value.func, ast.Attribute)
+            and _py_is_file_read(value.func.value)
+        ):
+            file_names.add(k)                               # body = open(p).read() / .read().decode()
+        if is_oauth_grant(value, scope):
+            oauth_names.add(k)
+        dk = dict_literal_kinds(value, scope)
+        if dk is not None:
+            dict_keys[k] = dk
+        else:
+            fdef = local_call(value)
+            if fdef is not None and fdef.name in func_dicts:
+                dict_keys[k] = dict(func_dicts[fdef.name])
+
+    def visit_binding(node, scope):
+        """Assignments and with-targets: what a statement tells us about the names it binds."""
+        if isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign)):
+            value = node.value
+            if value is None:
+                return
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            pairs = []                                      # (target, value) with tuple unpacking resolved
+            for t in targets:
+                if isinstance(t, (ast.Tuple, ast.List)) and isinstance(value, (ast.Tuple, ast.List)) \
+                        and len(t.elts) == len(value.elts):
+                    pairs += list(zip(t.elts, value.elts))  # KEY, ORG = kc("key"), kc("org-id")
+                else:
+                    pairs.append((t, value))
+            for t, v in pairs:
+                if isinstance(t, ast.Name):
+                    note_value(scopes.key(scope, t.id), v, scope)
+                if isinstance(t, (ast.Tuple, ast.List)):
+                    dk = dict_literal_kinds(v, scope)      # base, hdr = {...}[vendor]: per-element kinds
+                    if dk is not None:
+                        for i, elt in enumerate(t.elts):
+                            if dk.get(i):
+                                bind(elt, dk[i], scope)
+                        continue
+                kind = flow_kind(v, scope)
+                if kind:
+                    bind(t, kind, scope)
+        elif isinstance(node, ast.withitem) and node.optional_vars is not None:
+            kind = flow_kind(node.context_expr, scope)
+            if kind:
+                bind(node.optional_vars, kind, scope)
+            elif _py_is_file_read(node.context_expr):
+                for name in ast.walk(node.optional_vars):
+                    if isinstance(name, ast.Name):
+                        file_names.add(scopes.key(scope, name.id))   # with open(p) as fh
+
+    def site_bindings(call, fdef):
+        """(param, argument expression) pairs for one call of a module function,
+        defaults filled in for parameters the call leaves out."""
+        params = [a.arg for a in fdef.args.posonlyargs + fdef.args.args]
+        if isinstance(call.func, ast.Attribute) and params and params[0] in ("self", "cls"):
+            params = params[1:]
+        bound = {params[i]: a for i, a in enumerate(call.args) if i < len(params)}
+        bound.update({k.arg: k.value for k in call.keywords if k.arg})
+        defaults = fdef.args.defaults
+        for p, d in zip(params[len(params) - len(defaults):], defaults):
+            bound.setdefault(p, d)
+        for kwarg, d in zip(fdef.args.kwonlyargs, fdef.args.kw_defaults):
+            if d is not None:
+                bound.setdefault(kwarg.arg, d)
+        return bound
+
+    def bind_params(fscope, bound, site_scope):
+        for pname, a in bound.items():
+            note_value((fscope, pname), a, site_scope)
+            kind = flow_kind(a, site_scope)
+            if kind:
+                tainted[(fscope, pname)] = kind
+
+    # Iterate to a fixed point: assignments may reference names bound later, a
+    # function's return may depend on a parameter tainted by a later call.
+    for _ in range(5):
+        before = tuple(len(x) for x in SCOPED) + (len(source_funcs), len(func_dicts))
+        for node in ast.walk(tree):
+            scope = scopes.scope(node)
+            visit_binding(node, scope)
+            fdef = local_call(node)
+            if fdef is not None:
+                bind_params(scopes.fn_key.get(id(fdef), ""), site_bindings(node, fdef), scope)
+            elif isinstance(node, ast.Return) and node.value is not None:
+                owner = scopes.fn_of_key.get(scope)
+                if owner is None or not hasattr(owner, "name"):
+                    continue
+                dk = dict_literal_kinds(node.value, scope)
+                if dk is not None:
+                    func_dicts.setdefault(owner.name, dk)
+                kind = flow_kind(node.value, scope)
+                if kind:
+                    source_funcs.setdefault(owner.name, kind)
+        after = tuple(len(x) for x in SCOPED) + (len(source_funcs), len(func_dicts))
+        if after == before:
+            break
+
+    def judge(node, scope):
+        """The kind a sink call transmits, or None -- evaluated with the bindings in force."""
+        payload = list(_py_payload_args(node))
+        all_args = list(node.args) + [k.value for k in node.keywords]
+        urls = [u for a in all_args for u in urls_of(a, scope)]
+        callee_root = scopes.key(scope, _py_dotted(node.func).split(".", 1)[0])
+        if callee_root in url_names:
+            urls.append(url_names[callee_root])
+        if urls and all(SAFE_RE.search(u) for u in urls):
+            return None
+        # The OAuth credential grant: the client secret / refresh token POSTed to the
+        # identity provider's token endpoint. Sending it there IS the protocol -- the
+        # Python spelling of `curl -d "client_secret=$SECRET" https://login…/oauth2/token`
+        # -- and 338 of the 459 files the second corpus cut flagged were exactly this.
+        # Both halves must hold: a grant-shaped body AND a token-endpoint URL.
+        endpoint_text = " ".join(t for a in all_args for t in texts_of(a, scope)) + " " + " ".join(urls)
+        if _PY_TOKEN_ENDPOINT_RE.search(endpoint_text) and any(is_oauth_grant(a, scope) for a in payload):
+            return None
+        kind = next((k for k in (flow_kind(a, scope) for a in payload) if k), None)
+        if kind is None and any(is_file_payload(a, scope) for a in payload):
+            kind = _PY_KIND_FILE
+        return kind
+
+    def judge_per_call_site(node, scope, fdef):
+        """A sink inside a wrapper -- `def http(m, u, data=None): Request(u, data=data)` --
+        is judged once per call of the wrapper, with that call's arguments bound to the
+        parameters, instead of once with every call's arguments merged (which made the
+        token-endpoint POST and the Graph GET the same request). Blocks if any call does."""
+        fscope = scopes.fn_key[id(fdef)]
+        saved = [({k: v for k, v in d.items() if k[0] == fscope} if isinstance(d, dict)
+                  else {k for k in d if k[0] == fscope}) for d in SCOPED]
+        try:
+            for call, site_scope in call_sites[fdef.name]:
+                for d in SCOPED:
+                    for k in [k for k in d if k[0] == fscope]:
+                        d.pop(k) if isinstance(d, dict) else d.discard(k)
+                bind_params(fscope, site_bindings(call, fdef), site_scope)
+                for _ in range(3):
+                    before = tuple(len(x) for x in SCOPED)
+                    for sub in ast.walk(fdef):
+                        if scopes.scope(sub) == fscope:
+                            visit_binding(sub, fscope)
+                    if tuple(len(x) for x in SCOPED) == before:
+                        break
+                kind = judge(node, scope)
+                if kind:
+                    return kind
+            return None
+        finally:
+            for d, snap in zip(SCOPED, saved):
+                for k in [k for k in d if k[0] == fscope]:
+                    d.pop(k) if isinstance(d, dict) else d.discard(k)
+                d.update(snap)
+
+    for node in ast.walk(tree):
+        if not is_sink(node):
+            continue
+        scope = scopes.scope(node)
+        fdef = scopes.fn_of_key.get(scope)
+        if fdef is not None and hasattr(fdef, "name") and call_sites.get(fdef.name):
+            kind = judge_per_call_site(node, scope, fdef)
+        else:
+            kind = judge(node, scope)
+        if kind:
+            return (
+                f"[exfiltration-guard] BLOCKED: Python source sends {kind} to the network "
+                f"({_py_dotted(node.func) or 'network call'} at line {getattr(node, 'lineno', '?')}: "
+                f"it reaches the request body, params or URL, and the host is not in SAFE_RE). "
+                f"Reading a secret into a variable is fine, and a secret in an Authorization "
+                f"header, auth=, or an OAuth token request is the documented API pattern; "
+                f"transmitting it in a payload needs the user's explicit approval. Ask before "
+                f"sending local credentials externally, or add the operator's own API hosts to "
+                f"the environment catalog's safe_domains."
+            )
+    return None
+
+
+def check_python_bodies_exfil(command):
+    """main() adapter: inline `python -c` bodies and python heredocs in a command."""
+    bodies = []
+    m = _INLINE_PYTHON_BODY_RE.search(command)
+    if m:
+        body = m.group(1) if m.group(1) is not None else m.group(2)
+        bodies.append(body.replace('\\"', '"') if m.group(1) is not None else body)
+    for heredoc in _HEREDOC_PYTHON_RE.finditer(command):
+        bodies.append(heredoc.group(2))
+    for body in bodies:
+        reason = check_python_source_exfil(body)
+        if reason:
+            return reason
+    return None
+
+
+# Phase 1 — the catastrophic checks, in the order main() runs them. Each takes the
+# NORMALIZED command text (see _normalize_for_matching) and returns a BLOCKED reason
+# or None. This tuple is the single source for both consumers: main() below, and
+# script-content-guard.py, which applies the same predicates to the BODY of a script
+# file the model writes or executes (hooks/staged/script-file-bypasses-bash-guards
+# .spec.md — the 2026-08-12 leak went through `zsh /tmp/claude/verify_probes.sh`,
+# and a command-string guard saw only the path). A check added here is inherited by
+# both paths; a copy of the list would be two-source drift.
+CATASTROPHIC_CHECKS = (
+    check_credentials,
+    check_reverse_shell,
+    check_shell_wrapper,
+    check_ansi_c_quote_obfuscation,
+    check_exfiltration,
+    check_process_listing_secret_leak,
+    check_dangerous,
+    check_env_var_diagnostic,
+    check_secret_store_exposure,
+    check_python_bodies_exfil,
+)
 
 
 # ── MAIN ─────────────────────────────────────────────────────────────────
@@ -2443,18 +3284,8 @@ def main():
     # They run on the normalized text (continuations joined, git global options
     # dropped, same-command path variables resolved, shell-piped literals
     # exposed); the ORIGINAL command is still what gets rewritten or logged.
-    for check in [
-        lambda: check_credentials(analysis),
-        lambda: check_reverse_shell(analysis),
-        lambda: check_shell_wrapper(analysis),
-        lambda: check_ansi_c_quote_obfuscation(analysis),
-        lambda: check_exfiltration(analysis),
-        lambda: check_process_listing_secret_leak(analysis),
-        lambda: check_dangerous(analysis),
-        lambda: check_env_var_diagnostic(analysis),
-        lambda: check_secret_store_exposure(analysis),
-    ]:
-        reason = check()
+    for check in CATASTROPHIC_CHECKS:
+        reason = check(analysis)
         if reason:
             _audit_log(command, "blocked", reason)
             print(reason + _repeat_note("bash-security-guard", SEC_REMEDY),

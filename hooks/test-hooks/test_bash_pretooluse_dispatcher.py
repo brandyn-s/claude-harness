@@ -49,6 +49,7 @@ REPO = HOOKS_DIR.parent
 RUN_HOOK = HOOKS_DIR / "run-hook"
 ORDER = [
     "bash-security-guard.py",
+    "script-content-guard.py",
     "destructive-ops-guard.py",
     "git-destructive-checkout-guard.py",
     "bash-tail-buffering-guard.py",
@@ -177,8 +178,8 @@ def test_a_block_from_the_second_hook_stops_the_chain_there(tmp_path):
     assert "[destructive-ops-guard] BLOCKED (Bash)" in err
     assert out == ""
     rows = _rows(tmp_path)
-    assert _names(rows) == ["bash-security-guard.py", "destructive-ops-guard.py"], rows
-    assert [r["exit"] for r in rows] == [0, 2]
+    assert _names(rows) == ["bash-security-guard.py", "script-content-guard.py", "destructive-ops-guard.py"], rows
+    assert [r["exit"] for r in rows] == [0, 0, 2]
 
 
 def test_benign_command_prints_nothing_and_exits_zero(tmp_path):
@@ -252,7 +253,7 @@ def test_through_run_hook_the_dispatcher_row_appears_exactly_once(tmp_path):
     assert done.returncode == 0, done.stderr
     names = _names(_rows(tmp_path))
     assert names.count(HOOK) == 1, names
-    assert names[:6] == ORDER, names  # the six land before the launcher's own row
+    assert names[:len(ORDER)] == ORDER, names  # the guards land before the launcher's own row
 
 
 # ── REAL guards: PowerShell scope ────────────────────────────────────────
@@ -337,7 +338,9 @@ def test_exit_one_forwards_stderr_and_the_chain_continues(tmp_path):
     assert rc == 0
     assert "oops from git guard" in err
     assert seen.exists()
-    assert [r["exit"] for r in rows] == [0, 0, 1, 0, 0, 0]
+    expected = [0] * len(ORDER)
+    expected[ORDER.index("git-destructive-checkout-guard.py")] = 1
+    assert [r["exit"] for r in rows] == expected
 
 
 def test_exit_zero_stderr_passes_through_unchanged(tmp_path):
@@ -381,14 +384,14 @@ def test_crash_in_destructive_ops_guard_is_loud_but_fails_open(tmp_path):
     assert rc == 0
     assert "[destructive-ops-guard] WARNING: guard crashed (RuntimeError: boom); command allowed unchecked." in err
     assert _names(rows) == ORDER
-    assert rows[1]["exit"] == 1
+    assert rows[ORDER.index("destructive-ops-guard.py")]["exit"] == 1
 
 
 def test_crash_in_an_advisory_hook_is_silent_and_fails_open(tmp_path):
     rc, out, err, rows = _run_sandbox(tmp_path, {"zsh-dialect-guard.py": _CRASH_AT_IMPORT})
     assert (rc, out, err) == (0, "", "")
     assert _names(rows) == ORDER
-    assert rows[4]["exit"] == 1
+    assert rows[ORDER.index("zsh-dialect-guard.py")]["exit"] == 1
 
 
 def test_missing_advisory_hook_file_is_skipped_silently(tmp_path):
@@ -482,7 +485,7 @@ def test_dispatcher_owns_exactly_the_unconditional_bash_pretooluse_hooks(setting
     own = [(matcher, cond, timeout) for matcher, script, cond, timeout in entries if script == HOOK]
     assert own == [("Bash|PowerShell", None, 30)], own
 
-    assert inside == ORDER  # the six, in the order settings.json used to evaluate them
+    assert inside == ORDER  # the seven, in evaluation order (script-content-guard added 2026-09-06)
     assert mod.RUNS_ON_POWERSHELL == {"destructive-ops-guard"}
     for filename in inside:
         assert (HOOKS_DIR / filename).is_file(), filename

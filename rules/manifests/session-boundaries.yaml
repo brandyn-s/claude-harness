@@ -1,0 +1,31 @@
+id: session-boundaries
+type: rule
+description: "Sessions end at task boundaries, not at length: never abandon work because the context is long; close a finished task with a written handoff so the next session starts clean."
+applies_to:
+  - "every session"
+  - "task completion and the start of a different task"
+  - "sessions that have compacted twice"
+  - "repeated corrections on the same point"
+trigger_conditions:
+  - "the impulse to stop because the conversation is long, or to present a plan and wait"
+  - "the framed task's done-criteria are met and evidenced"
+  - "the second compaction of a session (compaction-budget nudge)"
+  - "the same correction has been made twice and the behaviour recurred"
+required_actions:
+  - "stop only for the user, a runtime capacity report, a real blocker, or completion"
+  - "report completion with evidence and stop; give the next task a fresh session and frame"
+  - "after two compactions write HANDOFF.md in the working directory, copy to ~/.claude/HANDOFF.md, propose a fresh session, keep working until answered"
+  - "after two failed corrections write the lesson into the handoff and propose a clean start"
+prohibited_actions:
+  - "stopping because the session is long or a context percentage was imagined"
+  - "presenting a plan as the deliverable"
+  - "proposing a new session without a written handoff"
+  - "starting the next task in a context whose frame is complete"
+enforcement_coverage: partial
+incidents:
+  - date: "2026-09-06"
+    summary: "Week of 2026-08-30 review: arcs of 20, 24 and 39 hours each crossed three or more compactions; the 14-day ledger review found 35 of 58 corrective turns in six long sessions. never-stop-early.md had forbidden the fresh-session proposal outright and was deleted 2026-09-03 for contradicting outcome-over-verification; nothing then said what to write at a boundary."
+    turns_wasted: 0
+    category: process
+created_date: "2026-09-06"
+last_validated: "2026-09-06"

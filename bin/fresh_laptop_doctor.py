@@ -166,18 +166,23 @@ def inspect_config(config_root: Path) -> list[Check]:
             "loop-detector.py",
             "prompt-secret-scan.py",
             "output-secret-redact.py",
+            # boundary artifacts, promoted 2026-09-06
+            "compaction-budget.py",
+            "proceed-gate.py",
         }
+        boundary_rule = config_root / "rules" / "session-boundaries.md"
         operator_ok = (
             "delivery" in packs
             and review_boundaries_ok
             and required_scripts.issubset(wired_scripts)
             and operator_rule.is_file()
+            and boundary_rule.is_file()
         )
         checks.append(
             Check(
                 "operator layer",
                 "PASS" if operator_ok else "FAIL",
-                "delivery policy, auto-mode review boundaries, non-progress, and secret controls active"
+                "delivery policy, auto-mode review boundaries, non-progress, secret, and session-boundary controls active"
                 if operator_ok
                 else "operator layer is partially installed or misconfigured",
             )

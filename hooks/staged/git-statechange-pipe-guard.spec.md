@@ -1,5 +1,7 @@
 # Staged hook spec: git-statechange-pipe-guard
 
+> **Staged:** 2026-08-24 · **Owner:** @brandyn-s · **Why not yet:** n=2 in one session; needs the historical-replay fire rate for `git <state-changing> | grep -m/-q | head -n` shapes before a block is justified (the tail-buffering guard's own gate). · **Ship via:** `/ship-hook` after the measurement gate; `bin/staged-spec-staleness.py` reports whether it is still pending.
+
 ## Problem (measured 2026-08-24, twice in one session)
 `git worktree add ... 2>&1 | grep -m1 <pat>` — grep exits at first match,
 git receives SIGPIPE MID-CHECKOUT, and the result is a ghost worktree:

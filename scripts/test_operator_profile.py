@@ -127,10 +127,14 @@ def test_installer_deploys_operator_rule_and_hooks(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stdout + result.stderr
     config = tmp_path / "home" / ".claude"
     assert (config / "rules" / "operator-discipline.md").is_file()
+    assert (config / "rules" / "session-boundaries.md").is_file()
     for name in (
         "loop-detector.py",
         "prompt-secret-scan.py",
         "output-secret-redact.py",
+        "compaction-budget.py",
+        "proceed-gate.py",
+        "session_ledger.py",
     ):
         assert (config / "hooks" / name).is_file()
     settings = json.loads((config / "settings.json").read_text(encoding="utf-8"))
@@ -143,6 +147,9 @@ def test_installer_deploys_operator_rule_and_hooks(tmp_path: Path) -> None:
     assert ("PostToolUse", "loop-detector.py") in installed
     assert ("UserPromptSubmit", "prompt-secret-scan.py") in installed
     assert ("PostToolUse", "output-secret-redact.py") in installed
+    assert ("UserPromptSubmit", "compaction-budget.py") in installed
+    assert ("UserPromptSubmit", "proceed-gate.py") in installed
+    assert ("PostCompact", "compaction-budget.py") in installed
 
     doctor = subprocess.run(
         [

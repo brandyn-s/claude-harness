@@ -208,6 +208,32 @@ def test_block_env_var_diagnostic_one_zero():
     assert rc == 2
 
 
+def test_block_env_var_diagnostic_exact_2026_08_12_incident_line():
+    """The line that leaked two live keys nests `${#XK}` inside the :+ branch.
+
+    The pre-2026-09-06 pattern stopped at the inner `}` and let this exact line
+    through even inline, so the script-file scan built for it would have inherited
+    a predicate that never fired on its own known-positive."""
+    cmd = 'echo "xai key: ${XK:+present (${#XK})}${XK:-ABSENT}"'
+    rc, _, stderr = run_hook(HOOK, make_bash_input(cmd))
+    assert rc == 2
+    assert "env-var-diagnostic-guard" in stderr
+
+
+def test_block_env_var_diagnostic_reversed_branch_order():
+    """`${V:-x}${V:+y}` leaks the value through the :- branch just the same."""
+    cmd = 'echo "${EXA_API_KEY:-unset}${EXA_API_KEY:+ (set)}"'
+    rc, _, _ = run_hook(HOOK, make_bash_input(cmd))
+    assert rc == 2
+
+
+def test_allow_env_var_plain_default_expansion():
+    """A lone ${VAR:-default} is ordinary shell defaulting, not the diagnostic pair."""
+    cmd = 'PORT="${PORT:-8080}"; echo "listening on $PORT"'
+    rc, _, _ = run_hook(HOOK, make_bash_input(cmd))
+    assert rc == 0
+
+
 def test_allow_env_var_safe_check():
     """The safe [ -n "$VAR" ] form is the recommended alternative."""
     cmd = '[ -n "$EXA_API_KEY" ] && echo SET || echo NOT SET'

@@ -212,14 +212,29 @@
     "linear-server"
   ],
   "skillOverrides": {
+    "audit-architecture": "name-only",
+    "audit-fix": "name-only",
+    "audit-rules": "name-only",
     "capture": "name-only",
     "distill": "name-only",
     "garden": "name-only",
+    "gather-claude": "name-only",
+    "gather-intel": "name-only",
+    "gather-openai-endpoints": "name-only",
+    "gather-repos": "name-only",
+    "gather-research": "name-only",
+    "gather-vendor": "name-only",
     "mega-capture": "name-only",
     "mega-distill": "name-only",
     "retro": "name-only",
+    "scout": "name-only",
+    "scout-frontier": "name-only",
+    "scout-skills": "name-only",
     "ship": "name-only",
-    "superplan": "name-only"
+    "superplan": "name-only",
+    "superplan-loop": "name-only",
+    "superplan-status": "name-only",
+    "threat-model": "name-only"
   },
   "hooks": {
     "Notification": [
@@ -743,6 +758,22 @@
               "compaction-continuity.py"
             ],
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "compaction-budget.py"
+            ],
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "proceed-gate.py"
+            ],
+            "timeout": 10
           }
         ]
       }
@@ -769,6 +800,14 @@
             "command": "/absolute/path/to/.claude/hooks/run-hook",
             "args": [
               "compaction-continuity.py"
+            ],
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "/absolute/path/to/.claude/hooks/run-hook",
+            "args": [
+              "compaction-budget.py"
             ],
             "timeout": 10
           }

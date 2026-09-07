@@ -49,6 +49,7 @@ def test_recommended_install_builds_portable_core_in_empty_config(tmp_path: Path
     assert {hook["args"][0] for hook in handlers} == {
         "bash-pretooluse-dispatcher.py",
         "config-guard.py",
+        "script-content-guard.py",   # 2026-09-06: script bodies get the Bash guard's checks
         "result-injection-guard.py",
         "read-deny-guard.py",
     }

@@ -1,0 +1,92 @@
+id: script-content-guard
+type: hook
+event: PreToolUse
+matcher: "Write|Edit|Bash"
+if_condition: null
+action_type: guard
+description: "Applies bash-security-guard's catastrophic checks (the shared CATASTROPHIC_CHECKS tuple) to the body of a script file: at Write/Edit time for .sh/.bash/.zsh/.ksh/.py targets or shebang content, and at Bash time for a local script the command executes. Python files additionally get the Python-native exfiltration check (check_python_source_exfil: an ast taint walk from credential files, SECRET-shaped env vars and keychain reads to request bodies, params and URLs). Closes the 2026-08-12 script-file bypass."
+enforces:
+  - security-confirmations
+  - platform-constraints
+blocks_patterns:
+  - "script body containing ${VAR:+set}${VAR:-NOT SET} (either branch order, nested ${#VAR} allowed)"
+  - "script body reading ~/.aws/* ~/.ssh/* .env or other credential paths"
+  - "script body piping to a remote host or to a shell (curl|bash)"
+  - "script body with rm -rf on a broad path, reverse shells, keychain/1Password dumps, bare env dumps"
+  - "Python source that sends a credential file, a SECRET/TOKEN/KEY env var, a keychain/1Password read, or a local file's contents in a request body, params= or URL to a host outside SAFE_RE (auth headers, auth=, and the OAuth credential grant to a token endpoint are the documented pattern and pass)"
+injects: null
+modifies: null
+depends_on_files:
+  - bash-security-guard.py
+  - bash_policy_tables.py
+  - _environment_catalog.py
+depends_on_env:
+  - CLAUDE_SCRIPT_CONTENT_GUARD
+exit_codes:
+  "0": "allow; or advisory additionalContext when CLAUDE_SCRIPT_CONTENT_GUARD=advise"
+  "2": "block (default); also on load failure — fail-closed like bash-security-guard"
+output_format: json
+incidents:
+  - date: "2026-08-12"
+    summary: "The env-var diagnostic pattern the Bash guard blocks inline was written to /tmp/claude/verify_probes.sh with Write and executed as `zsh /tmp/claude/verify_probes.sh`; the guard saw only the path and two live API keys (XAI_API_KEY, a USPTO ODP key) reached the transcript. Separately, the exact leak line nested `${#XK}` inside the :+ branch and did not match the guard's regex even inline — fixed in the same change."
+    turns_wasted: 0
+    category: security
+measurement:
+  gate: "spec §Measurement gate (hooks/staged/script-file-bypasses-bash-guards.spec.md, deleted on ship; git history): replay the Write/Edit corpus; >10% fire rate is too broad; advisory strength if the incident is n=1"
+  replay_tool: bin/replay-script-content-guard.py
+  replayed_on: "2026-09-06"
+  corpus: "~/claude-transcript-backups/2026-09-06 — 933 Claude Code sessions, 2026-07-02..2026-09-06"
+  catalog: "built-in SAFE_DOMAINS only (no environment catalog in the replay environment) — the stricter direction; an operator's safe_domains can only lower these numbers"
+  script_like_writes: 13894
+  script_like_writes_unique: 13687
+  fires: 74
+  fire_rate_pct: 0.53
+  fires_by_check: {exfiltration-guard: 28, credential-guard: 19, dangerous-command-guard: 13, secret-store-guard: 12, env-var-diagnostic-guard: 2}
+  fires_by_extension: {".sh": 56, ".py": 18}
+  python_native_exfil_fires: 1
+  python_native_exfil_fire_detail: "one script that put an API key in a URL query string to a non-SAFE_RE host (its own comment notes the header form is the alternative) — the check's intended verdict"
+  analysis_errors: 0
+  env_var_diagnostic_fires: 2
+  env_var_diagnostic_fires_before_incident: 0
+  falsifier: "The diagnostic predicate is n=1 (two files, both 2026-08-12). It is not a new predicate — every family here already blocks the same text inline — so the ship is a scope closure, not a new rule, and the default stays `block` with CLAUDE_SCRIPT_CONTENT_GUARD=advise as the operator override. The Python-native check is a new predicate; its calibration is below and its policy is the existing curl policy (CURL_ENV_SECRET), so it adds no rule either."
+  false_positive_classes_found_and_fixed_by_the_replay:
+    - "arbitrary Python lines run through shell predicates: `print(env)` / `(set)` read as a bare environment dump (100 hits) → Python files are now scanned only for shell commands handed to exec APIs (ast)"
+    - "captured keychain reads `check_output(['security', ..., '-w'])` read as a keychain dump (847 hits) → captured commands are presented as `_=$(cmd)`, the shape the shell guard already exempts"
+  python_native_exfil_calibration:
+    - cut: 1
+      fires: 350
+      fire_rate_pct: 2.52
+      finding: "every bearer-token header to a host outside SAFE_RE flagged (277 files, all the documented API pattern), plus `.get()` chains on responses read as sinks"
+      change: "auth channels (headers=, auth=, cookies=, the headers slot of Request()/request()) are never payload — the curl -H policy, one grammar over; sinks need a network root or a URL"
+    - cut: 2
+      fires: 544
+      fire_rate_pct: 3.92
+      finding: "338 files were the OAuth 2.0 client-credentials grant (client secret POSTed to login.microsoftonline / CrowdStrike / Jamf / Atlassian / Slack token endpoints); 106 were a name collision — the `r` holding a keychain read in kc() and the `r` holding a Request in get()"
+      change: "the credential grant (grant-shaped body AND token-endpoint URL) is the protocol and passes; names are function-scoped (_PyScopes)"
+    - cut: 3
+      fires: 169
+      fire_rate_pct: 1.22
+      finding: "90 files reached a URL through a redaction helper `b.replace(TOKEN, '<red>')`; identifiers kept in the keychain (tenant id, org id, base URL) interpolated into URL paths; config dicts judged whole so cfg['base_url'] carried cfg['client_secret']'s taint"
+      change: "value-flow semantics per node (a .replace() search pattern, a comparison, a hash do not flow); identifier-shaped keychain items are not secrets; dict literals are tracked per key"
+    - cut: 4
+      fires: 105
+      fire_rate_pct: 0.76
+      finding: "wrapper functions — `def http(m, u, data=None)` — judged once with every call site's arguments merged, so the token-endpoint POST and the Graph GET were one request; local function results inherited their arguments' taint"
+      change: "a sink inside a wrapper is judged once per call site with that call's arguments bound; a local function's value is its return, not its arguments"
+    - cut: 5
+      fires: 76
+      fire_rate_pct: 0.55
+      finding: "service names looked up through a dict (kc(SERVICES['org_id'])), vendor tables `base, hdr = {...}[vendor]` unpacked as one tainted value, `oauth.v2.access` passed as a method-name argument to a slack_api() wrapper; one analysis crash (int index) that fail-closed would have turned into a block of every Python write"
+      change: "constants resolve through names and dict literals; tuple targets bind per element; endpoint text includes bound constants; analysis errors degrade to no verdict with a stderr note (0 in the final replay)"
+    - cut: 6
+      fires: 74
+      fire_rate_pct: 0.53
+      finding: "one python-native fire, the query-string API key above; the other 73 are the shell predicates' fires, unchanged from the first replay"
+      change: "shipped"
+    - cut: "6 + operator catalog"
+      fires: 73
+      fire_rate_pct: 0.53
+      finding: "the same replay with CLAUDE_ENVIRONMENT_CATALOG pointing at a candidate safe_domains list built from the operator's own scripts (the 72 hosts named in five or more script writes): the python-native check contributes zero fires; the 73 that remain are the shell predicates' host-independent forms (pipe-to-shell, /dev/tcp, credential reads), identical to the first replay. The catalog stays on the operator's machine; nothing about it is in this repository"
+      change: "none -- this is the confirmation that the residual class is catalog-shaped, and the candidate list is the operator's to review"
+  keychain_item_name_review: "2026-09-06: the 89 distinct keychain item names in the operator's scripts were classified by _PY_NONSECRET_ITEM_RE; 23 read as identifiers, every one ending in id, url or email (client ids, tenant ids, base URLs, one address); none of the 66 secret-shaped names was misclassified and no identifier-classified name holds a credential. The filter's failure direction (a password stored under a label ending in account or user) does not occur in this corpus"
+  known_positive: "/tmp/claude/verify_probes.sh (2026-08-12) fires at line 8 in the replay and in hooks/test-hooks/test_script_content_guard.py; the Python-native shapes (blocked and allowed) are pinned in hooks/test-hooks/test_python_source_exfil.py"

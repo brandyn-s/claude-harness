@@ -274,6 +274,8 @@ Full procedure and empirical example: `references/cross-cutting-audit.md`.
 
 ## Step 2: Classify by Persistence Tier
 
+Before the tier: is the lesson's home the public core or the private overlay? `skills/_shared/lesson-routing.md` decides that per lesson and lists what must be stripped before a core write.
+
 For each pain point, classify using this matrix:
 
 | Tier | Name | Criteria | Target | Invocation action |

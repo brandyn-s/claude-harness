@@ -1,10 +1,14 @@
 # claude-harness
 
 A working [Claude Code](https://docs.claude.com/en/docs/claude-code) harness:
-**59 hooks**, **33 rules** (26 of them always loaded), **81 skills**, and the
-seven agent definitions that tie them together — about 1,630 source files, plus
-a generated plugin tree under `marketplace/` (another 1,069 files) that is not
-meant to be read (see [marketplace/README.md](marketplace/README.md)).
+**<!-- count:hooks -->53<!-- /count --> hook scripts** (plus <!-- count:hook_modules -->9<!-- /count --> shared modules),
+**<!-- count:rules -->34<!-- /count --> rules** (<!-- count:rules_ambient -->27<!-- /count --> of them always loaded),
+**<!-- count:skills -->82<!-- /count --> skills**, and the <!-- count:agents -->6<!-- /count --> agent definitions that
+tie them together — <!-- count:source_files -->1,682<!-- /count --> tracked source files, plus a
+generated plugin tree under `marketplace/` (another <!-- count:marketplace_files -->1,074<!-- /count -->
+files) that is not meant to be read (see [marketplace/README.md](marketplace/README.md)).
+The numbers in this file are generated from the tree by `bin/build-doc-counts.py`
+and checked in CI; if one is wrong, the build is red, not the reader.
 
 It is a configuration repo, but the reusable part is not the config. It is the
 **method**: what to do when a scanner reports zero, when a metric plateaus, when
@@ -33,23 +37,31 @@ python3 bin/fresh_laptop_doctor.py
 
 For a new machine, accept the fresh-laptop profile and the recommended core.
 The installer then offers the owner-focused Brandyn operator layer. The
-portable core installs two rules and four deterministic hooks:
+portable core installs two rules and <!-- count:fresh_core_hooks -->5<!-- /count --> deterministic hook registrations:
 
 - `outcome-over-verification.md` and `claude-md-quality.md`
 - Bash command safety (`bash-pretooluse-dispatcher.py`, which runs the Bash
-  guards and advisories in one process), config integrity, MCP
-  result-injection detection, and a Read-tool guard for secret paths
-  (`read-deny-guard.py`; the sandbox denies the same paths to Bash, so nothing
-  prompts)
+  guards and advisories in one process), the same catastrophic checks applied to
+  the body of any script file the model writes or executes
+  (`script-content-guard.py`; closes the 2026-08-12 `zsh verify_probes.sh` leak
+  path), config integrity, MCP result-injection detection, and a Read-tool guard
+  for secret paths (`read-deny-guard.py`; the sandbox denies the same paths to
+  Bash, so nothing prompts)
 - `acceptEdits` plus sandbox-auto-approved Bash; sandbox escapes require review
 - project MCP auto-activation disabled
 
-The operator layer adds one compact discipline rule, the `delivery` Bash policy
-pack, explicit review for high-consequence Terraform/AWS/Git/MCP mutations, a
-non-blocking repeated-failure detector, and prompt/tool-output secret controls.
-It does not restore the phrase-based Stop blocker or the historical ambient
-corpus, and it enables no plugins. The doctor reports the operator layer
-separately when selected.
+The operator layer — the recommended install — adds one compact discipline
+rule, the session-boundary contract (`session-boundaries.md` with
+`compaction-budget.py` and `proceed-gate.py`: a handoff at the second compaction,
+a DO / NOT / CHECK restatement on a bare `proceed`, and `INTENT.md` feeding the
+acceptance ledger), the `delivery` Bash policy pack, explicit review for
+high-consequence Terraform/AWS/Git/MCP mutations, a non-blocking repeated-failure
+detector, and prompt/tool-output secret controls: <!-- count:operator_rules -->4<!-- /count --> rules and
+<!-- count:operator_hooks -->11<!-- /count --> hook registrations in all. It does not restore the
+phrase-based Stop blocker or the historical ambient corpus, and it enables no
+plugins. The doctor reports the operator layer separately when selected.
+`bash install.sh --dry-run` prints every file and settings key either install
+would touch, and writes nothing.
 
 Environment-specific data (the MCP servers whose writes need confirmation,
 topic routes, failure-pattern files, expected servers, repo paths, session
@@ -68,7 +80,11 @@ python3 scripts/install-profile.py --apply
 ```
 
 Apply creates a timestamped backup when `~/.claude/settings.json` already
-exists, preserves unrelated settings, and writes atomically. Re-running the
+exists, preserves unrelated settings, and writes atomically. Coming from a
+configuration that grew the other way — sandbox off, blanket `Bash`/`Edit`
+allows, the dangerous-mode prompt skipped, a Stop hook that blocks on phrases —
+`python3 scripts/migrate-to-core.py` prints each change that takes it to the core
+posture with its reason, and `--apply` makes them with the same backup. Re-running the
 installer upgrades installed files you never edited, keeps the ones you did, and
 writes a conflicting upstream version beside yours as `<name>.harness-new`; the
 record is `~/.claude/.harness-install-state.json`.
@@ -89,7 +105,7 @@ endpoint rather than byte estimates, was:
 | component | measured tokens |
 |---|---|
 | always-loaded rules (31 files) | 75,413 |
-| skill listing (81 skills, 8 already suppressed to name-only) | 18,687 |
+| skill listing (81 skills at the time, 8 already suppressed to name-only) | 18,687 |
 | `CLAUDE.md` + `AGENTS.md` | 3,280 |
 | **ambient floor, before your first message** | **97,380** |
 | plus broadly-scoped rules that load in most coding sessions | ~12,000 |
@@ -98,25 +114,31 @@ endpoint rather than byte estimates, was:
 On a 200K-token context window that is **roughly half the window consumed at
 rest**. This is why the full mirror is not the fresh-laptop default. The rules
 ratchet has since moved dated narrative out of the ambient corpus behind
-anchors in `rules/incidents/`: 26 always-loaded rules, 165,868 bytes (about
-60,600 tokens by the byte proxy) as of 2026-09-04. `bin/ambient-load-report.py`
-prints the current split.
+anchors in `rules/incidents/`: <!-- count:rules_ambient -->27<!-- /count --> always-loaded rules,
+<!-- count:ambient_bytes -->168,537<!-- /count --> bytes (about <!-- count:ambient_tokens -->61,570<!-- /count --> tokens by the
+byte proxy). `bin/ambient-load-report.py` prints the current split.
 
 The skill listing also exceeds its own budget: `skillListingBudgetFraction` is
 set to 3%, which is 6,000 tokens on a 200K context against an 18,687-token
 listing — **3.1x oversubscribed**. It fits on a 1M-context model. If you adopt
 wholesale on a 200K model, expect the listing to be truncated, and prefer
-marking more skills `name-only` in `skillOverrides`.
+marking more skills `name-only` in `skillOverrides`. Which ones is a measurement,
+not a taste: `bin/skill-usage-report.py` counts invocations per skill over a
+transcript directory, and [`docs/skill-listing-decisions.md`](docs/skill-listing-decisions.md)
+records what 66 days of the author's transcripts said (45 of 82 skills never
+invoked; 23 now `name-only`; the listing fits the budget only once the 38 unused
+standalone skills are hidden or deleted).
 
 ### Advanced-profile dependencies that are not included
 
 Roughly ten skills require MCP servers that are not part of this repository and
 are not public:
 
-| server | skills that hard-require it |
+| dependency | skills that hard-require it |
 |---|---|
-| `memory-search` | `capture`, `distill`, `recall`, `review-learnings` |
-| `codebase-memory-mcp` | `api-ingest`, `code-explore`, `codebase-memory-exploring`, `codebase-memory-quality`, `codebase-memory-tracing`, `verify-search-result` |
+| `memory-search` (private MCP server) | `capture`, `distill`, `recall`, `review-learnings` |
+| `codebase-memory-mcp` (private MCP server) | `api-ingest`, `code-explore`, `codebase-memory-exploring`, `codebase-memory-quality`, `codebase-memory-tracing`, `verify-search-result` |
+| `superpowers@claude-plugins-official` (public plugin; `install.sh` warns when it is not enabled) | `design-evidence-first`, `debugging-hypotheses`, `legacy-code-tdd`, `review-depth-by-risk` are companions to it; `Skill(superpowers:brainstorming)` is in the author allow list |
 
 Those skills will no-op or error without their server. The
 `code-intelligence` plugin bundle is affected as a whole and is best read as a
@@ -164,7 +186,7 @@ secret before it believes a clean scan.
 ```
 rules/            ambient engineering rules (+ incidents/ and manifests/)
 hooks/            PreToolUse / PostToolUse / session-lifecycle enforcement
-skills/           invocable procedures (81 of them)
+skills/           invocable procedures (<!-- count:skills -->82<!-- /count --> of them)
 agents/           subagent definitions
 contracts/        run-time contracts: environment catalog, model capabilities,
                   hook output shapes, guard residual risks
@@ -174,6 +196,8 @@ platform-rules/   host-specific overlays (macOS / Windows)
 bin/ scripts/     supporting tools
 tests/            hook + skill tests
 templates/        starter configs
+codex/            the Codex half: config posture patch + AGENTS.md overlay
+VERSION           the repository version; CHANGELOG.md has the entry per version
 ```
 
 Start with `ARCHITECTURE.md`, then `rules/`. `UBIQUITOUS_LANGUAGE.md` defines
@@ -190,7 +214,7 @@ that you almost certainly do not need it. So, in order:
 | **three files** | + [`rules/verify-effectiveness.md`](rules/verify-effectiveness.md), [`rules/diagnose-before-fix.md`](rules/diagnose-before-fix.md) | The two rules that pay for themselves fastest |
 | **the argument** | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Five layers, and which of them can actually enforce anything |
 | **the receipts** | [`rules/incidents/`](rules/incidents/) | The failures each rule was written against |
-| **everything** | [`skills/README.md`](skills/README.md) | Index of all 81 skills |
+| **everything** | [`skills/README.md`](skills/README.md) | Index of all <!-- count:skills -->82<!-- /count --> skills |
 
 Taking one hook is a legitimate outcome. Nothing here requires adopting the
 whole thing, and most of it you shouldn't.
@@ -209,6 +233,10 @@ Six bundles are generated: `safety-net` (the fresh-laptop core hooks),
 `planning-toolkit`, `security-scanner`, `knowledge-ops`, `code-intelligence`,
 `research-intel`. Install only what you want; skills arrive as
 `/plugin-name:skill`. Update with `/plugin marketplace update claude-harness`.
+For a reproducible install, pin the marketplace to a release tag:
+`/plugin marketplace add brandyn-s/claude-harness@v1.0.0` (the tag scheme is in
+`CHANGELOG.md`; the bundles carry their own `1.1.x` versions in each
+`plugin.json`).
 
 The remaining hook implementations in the bundle are source-available but are
 not registered automatically. Add them only after a measured need.
@@ -258,11 +286,35 @@ rather than anonymised; incident narratives still name the author's own
 repositories and the security vendors the hooks protect, which is the voice of
 a personal repo, not a leak.
 
+## Versioning, and consuming this from a private overlay
+
+`VERSION` holds the repository's version (`v<MAJOR>.<MINOR>.<PATCH>` tags on
+`main`; `CHANGELOG.md` has an entry per version). An organisation that runs this
+does so from a **private overlay** — its own configuration repository, which
+vendors the core paths here verbatim at a pinned commit recorded in
+`UPSTREAM.json` (shape: `contracts/UPSTREAM.example.json`) and layers its
+servers, repositories, skills and settings around them. `bin/upstream-check.py`
+compares the vendored files with the pin and fails CI on a fork; code flows from
+here into the overlay mechanically, and from the overlay back only as a
+de-identified lesson through the residue gate. The contract is
+[`docs/consuming-from-a-private-overlay.md`](docs/consuming-from-a-private-overlay.md).
+
 ## License
 
 MIT — see [LICENSE](LICENSE). Third-party portions keep their own licenses and
 are listed in [THIRD_PARTY.md](THIRD_PARTY.md); the skills adapted from
 trailofbits/skills are CC BY-SA 4.0.
+
+## Codex
+
+The practice is tool-neutral; `codex/` carries the Codex half — the `config.toml`
+posture (`workspace-write`, `on-request`, `approvals_reviewer = "auto_review"`) and a
+≤ 60-line `AGENTS.md` overlay with the same frame / evidence / scope / session-boundary
+contracts and per-model notes for GPT-5.6 and GPT-6 Astra. Codex runs none of the
+hooks here, so for Codex the overlay is the whole advisory layer and the sandbox is
+the whole enforcement layer. `bin/codex-posture-check.py` reads the installed
+`~/.codex/config.toml` and fails when the enforcement keys are not the documented
+posture. See [`codex/README.md`](codex/README.md).
 
 ## Advanced full-mirror synchronization
 

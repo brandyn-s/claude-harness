@@ -30,7 +30,9 @@ def main():
         ["git", "-C", repo, "config", "core.hooksPath", ".githooks"]
     )
     print("ok: core.hooksPath set to .githooks (this clone)")
-    print("    pre-commit will now block on marketplace drift.")
+    print("    pre-commit: residue scan of staged files + marketplace drift when bundled sources are staged")
+    print("    commit-msg: residue scan of the commit message (scripts/deidentification_residue.py)")
+    print("    pre-push:   guard replay against the local transcript corpus when guard predicates change")
 
 
 if __name__ == "__main__":

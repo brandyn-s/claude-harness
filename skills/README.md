@@ -1,6 +1,6 @@
 # Skills index
 
-81 skills. **Generated from each `SKILL.md` frontmatter -- do not
+82 skills. **Generated from each `SKILL.md` frontmatter -- do not
 hand-edit; regenerate instead.**
 
 A skill is a procedure Claude invokes by matching your request against the
@@ -35,6 +35,7 @@ Bigger skills push detail into `references/` and deterministic helpers into
 | [`distill`](./distill/SKILL.md) | Extract a session's errors, failed approaches, and workarounds into governed persistence targets. | references, scripts |
 | [`evaluate-repos`](./evaluate-repos/SKILL.md) | Evaluate external patterns against our architecture with advocate/skeptic agent pairs. | references, tests |
 | [`fp-check`](./fp-check/SKILL.md) | Verify a suspected security bug as TRUE or FALSE positive, with documented evidence. | references |
+| [`frame`](./frame/SKILL.md) | Write the frame before the work: problem, checkable done-when, non-goals, riskiest assumption, what stays human — as INTENT.md in the repo. | references |
 | [`garden`](./garden/SKILL.md) | Curate the knowledge base — run a health check and auto-resolve every curation issue. | references, scripts, tests |
 | [`gather-claude`](./gather-claude/SKILL.md) | Sync the architecture with what Anthropic shipped — new Claude Code features, fixes, and deprecations. | references, scripts, tests |
 | [`gather-claude-endpoints`](./gather-claude-endpoints/SKILL.md) | Detect drift in Anthropic's data-collection surface — OTel signals, Compliance API, Admin API, Analytics APIs, webhooks, rate limits, and documented exclusions —... | references, scripts, tests |

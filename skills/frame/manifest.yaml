@@ -1,0 +1,38 @@
+id: frame
+type: skill
+description: "Write the frame before the work: problem, checkable done-when, non-goals, riskiest assumption, what stays human — as INTENT.md, feeding the session acceptance ledger."
+category: planning
+requires_tools:
+  - AskUserQuestion
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+requires_topics: []
+requires_rules:
+  - scope-discipline
+  - session-boundaries
+  - outcome-over-verification
+requires_skills:
+  - superplan
+  - interview
+requires_auth: []
+input_contract:
+  parameters:
+    task:
+      type: string
+      required: false
+      description: "One-line statement of the task; elicited if absent"
+  scope_from: argument
+output_contract:
+  produces: [intent_document, ledger_entries]
+  format: markdown_file
+side_effects: [writes_files]
+execution_context: main_thread
+auth_constraint: any
+estimated_turns: "2-5"
+preconditions: []
+guardrails:
+  - proceed-gate
+threat_model: read_only

@@ -1,5 +1,7 @@
 # Staged hook spec: extend staged-additions-guard — ignored files under an added directory
 
+> **Staged:** 2026-08-24 · **Owner:** @brandyn-s · **Why not yet:** n=1 (mcp-servers PR #1293); needs a replay count of `git add <dir>` commits that silently dropped ignored files before extending an if-gated commit-time guard. · **Ship via:** `/ship-hook` after the measurement gate; `bin/staged-spec-staleness.py` reports whether it is still pending.
+
 ## Problem (measured 2026-08-24, mcp-servers PR #1293)
 `git add <new-dir>` on a directory containing gitignored files is a SILENT
 PARTIAL no-op (exit 0). The repo-wide `*.json` ignore dropped 4 eval fixtures

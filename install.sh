@@ -9,7 +9,9 @@ set -e
 # Usage:
 #   git clone https://github.com/brandyn-s/claude-harness.git
 #   cd claude-harness
-#   bash install.sh
+#   bash install.sh              # interactive install
+#   bash install.sh --dry-run    # same walk, prints every write, touches nothing
+#   HARNESS_ASSUME_DEFAULTS=1 bash install.sh --dry-run   # non-interactive preview
 
 BLUE='\033[0;34m'
 GREEN='\033[0;32m'
@@ -21,7 +23,26 @@ NC='\033[0m'
 CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+# --dry-run: walk the whole installer, print every file it WOULD write and every
+# settings key it WOULD touch, and write nothing. The installer is the one
+# artifact a stranger has to trust before any gate has run; this lets them read
+# it the way scripts/install-profile.py already lets them preview a profile.
+# Prompts still ask unless HARNESS_ASSUME_DEFAULTS=1 (see scripts/install_prompts.sh).
+DRY_RUN=0
+for _arg in "$@"; do
+    case "$_arg" in
+        --dry-run) DRY_RUN=1 ;;
+        -h|--help)
+            echo "usage: bash install.sh [--dry-run]"
+            echo "  --dry-run   print every file and settings key the install would touch; write nothing"
+            echo "  HARNESS_ASSUME_DEFAULTS=1 answers every prompt with its default (non-interactive)"
+            exit 0 ;;
+        *) echo "unknown argument: $_arg (try --help)" >&2; exit 2 ;;
+    esac
+done
+
 info()  { echo -e "${BLUE}[info]${NC} $1"; }
+dry()   { echo -e "${YELLOW}[dry-run]${NC} would $1"; }
 ok()    { echo -e "${GREEN}[ok]${NC} $1"; }
 warn()  { echo -e "${YELLOW}[warn]${NC} $1"; }
 err()   { echo -e "${RED}[error]${NC} $1"; }
@@ -68,6 +89,10 @@ check_claude_version() {
 
 ensure_runtime_floor() {
     local settings_file="$CLAUDE_DIR/settings.json"
+    if (( DRY_RUN )); then
+        dry "set settings.json minimumVersion to at least 2.1.223 ($settings_file)"
+        return 0
+    fi
     if [[ ! -f "$settings_file" ]]; then
         echo '{}' > "$settings_file"
     fi
@@ -106,18 +131,21 @@ install_files() {
     (( $# )) || return 0
     local install_args=()
     for f in "$@"; do install_args+=(--install "$f"); done
+    local apply_args=(--apply)
+    (( DRY_RUN )) && apply_args=()   # preview: install-profile.py classifies every file, writes none
     "$PYTHON_CMD" "$SCRIPT_DIR/scripts/install-profile.py" \
-        --target "$CLAUDE_DIR/settings.json" --apply "${install_args[@]}" \
+        --target "$CLAUDE_DIR/settings.json" "${apply_args[@]}" "${install_args[@]}" \
         || { err "Copy aborted; see the error above."; exit 1; }
 }
 
-# hooks/bash-pretooluse-dispatcher.py runs these six hooks in one process, so
+# hooks/bash-pretooluse-dispatcher.py runs these seven hooks in one process, so
 # every path that wires it copies all seven as one set (a missing file aborts
 # the copy). scripts/test_install_menus.py pins this list to the dispatcher's
 # GUARDS table.
 DISPATCHER_HOOKS=(
     bash-pretooluse-dispatcher.py
     bash-security-guard.py
+    script-content-guard.py
     destructive-ops-guard.py
     git-destructive-checkout-guard.py
     bash-tail-buffering-guard.py
@@ -260,6 +288,7 @@ install_hooks() {
            hook_configs=(
                'PreToolUse|Bash|PowerShell|bash-pretooluse-dispatcher.py|30'
                'PreToolUse|Write|Edit|config-guard.py|30'
+               'PreToolUse|Write|Edit|script-content-guard.py|15'
                'PreToolUse|Read|read-deny-guard.py|15'
                'PostToolUse|mcp__.*|result-injection-guard.py|30'
            ) ;;
@@ -302,7 +331,7 @@ install_hooks() {
                    hooks+=("$name")
                fi
            done
-           # The dispatcher runs six sibling hooks in-process: picking it selects them.
+           # The dispatcher runs seven sibling hooks in-process: picking it selects them.
            if [[ " ${hooks[*]} " == *" bash-pretooluse-dispatcher.py "* ]]; then
                hooks+=("${DISPATCHER_HOOKS[@]}")
            fi ;;
@@ -321,7 +350,7 @@ install_hooks() {
         files+=("hooks/$shared")
     done
     install_files "${files[@]}"
-    chmod +x "$dest_dir/run-hook"
+    if (( DRY_RUN )); then dry "chmod +x $dest_dir/run-hook"; else chmod +x "$dest_dir/run-hook"; fi
     ok "Copied ${#hooks[@]} hook files to $dest_dir/"
 
     # The author-workstation bundle ships catalog-reading hooks (session-start,
@@ -343,6 +372,15 @@ install_hooks() {
 wire_hooks() {
     local settings_file="$CLAUDE_DIR/settings.json"
     local configs=("$@")
+
+    if (( DRY_RUN )); then
+        local cfg
+        for cfg in "${configs[@]}"; do
+            # EVENT|matcher|script|timeout, exactly as wire_hooks.py would register it
+            dry "register hook [$cfg] in $settings_file"
+        done
+        return 0
+    fi
 
     # Ensure settings.json exists
     if [[ ! -f "$settings_file" ]]; then
@@ -456,6 +494,7 @@ install_environment_catalog() {
         warn "Missing $src (incomplete checkout?) -- environment catalog not seeded"
         return
     fi
+    if (( DRY_RUN )); then dry "seed $dest from $src (once; never overwritten)"; return 0; fi
     cp "$src" "$dest"  # seed-once: guarded above, never overwrites
     ok "Seeded $dest (every section empty; fill it from contracts/environment-catalog.example.json)"
 }
@@ -501,9 +540,9 @@ then
 fi
 
 if [[ ! -d "$CLAUDE_DIR" ]]; then
-    mkdir -p "$CLAUDE_DIR"
-    info "Created $CLAUDE_DIR"
+    if (( DRY_RUN )); then dry "create $CLAUDE_DIR"; else mkdir -p "$CLAUDE_DIR"; info "Created $CLAUDE_DIR"; fi
 fi
+(( DRY_RUN )) && info "DRY RUN: nothing below is written; every line marked [dry-run] is a write the real install would make."
 
 operator_selected=0
 if ask_yn "Apply the fresh-laptop settings profile (fast edits + native sandbox)?" "y"; then
@@ -512,15 +551,17 @@ if ask_yn "Apply the fresh-laptop settings profile (fast edits + native sandbox)
         operator_selected=1
         profile_args+=(--profile brandyn-operator)
     fi
+    profile_apply=(--apply)
+    (( DRY_RUN )) && profile_apply=()   # preview prints the managed keys and writes nothing
     "$PYTHON_CMD" "$SCRIPT_DIR/scripts/install-profile.py" \
-        "${profile_args[@]}" --target "$CLAUDE_DIR/settings.json" --apply
+        "${profile_args[@]}" --target "$CLAUDE_DIR/settings.json" "${profile_apply[@]}"
 fi
 
 ensure_runtime_floor
 
 # Quick install option
-if ask_yn "Install the recommended fresh-laptop core? (2 rules + 4 deterministic hooks)" "y"; then
-    mkdir -p "$CLAUDE_DIR/rules" "$CLAUDE_DIR/hooks"
+if ask_yn "Install the recommended fresh-laptop core? (2 rules + 5 deterministic hook registrations)" "y"; then
+    if (( DRY_RUN )); then dry "create $CLAUDE_DIR/rules and $CLAUDE_DIR/hooks"; else mkdir -p "$CLAUDE_DIR/rules" "$CLAUDE_DIR/hooks"; fi
 
     # The starter-kit manifest. SINGLE SOURCE OF TRUTH for both the collision
     # inventory and the copy loop (audit finding M2, 2026-07-26).
@@ -556,12 +597,19 @@ if ask_yn "Install the recommended fresh-laptop core? (2 rules + 4 deterministic
         result-injection-guard.py
     )
     if (( operator_selected )); then
-        starter_rules+=(operator-discipline.md)
+        # The boundary artifacts (2026-09-06): session-boundaries.md is the
+        # boundary half of the deleted never-stop-early; compaction-budget and
+        # proceed-gate are the advisory hooks that raise it and feed the
+        # acceptance ledger (session_ledger.py) that session-start rehydrates.
+        starter_rules+=(operator-discipline.md session-boundaries.md)
         starter_hooks+=(
             atomic_write.py
             loop-detector.py
             prompt-secret-scan.py
             output-secret-redact.py
+            session_ledger.py
+            compaction-budget.py
+            proceed-gate.py
         )
     fi
 
@@ -582,12 +630,12 @@ if ask_yn "Install the recommended fresh-laptop core? (2 rules + 4 deterministic
     # Classified copy (see install_files above): untouched copies upgrade, your
     # edits are kept, a conflict leaves <name>.harness-new beside your version.
     install_files "${starter_files[@]}"
-    chmod +x "$CLAUDE_DIR/hooks/run-hook"
+    if (( DRY_RUN )); then dry "chmod +x $CLAUDE_DIR/hooks/run-hook"; else chmod +x "$CLAUDE_DIR/hooks/run-hook"; fi
 
     if (( operator_selected )); then
-        ok "Fresh-laptop core + operator layer installed (3 rules + 7 hook registrations)"
+        ok "Fresh-laptop core + operator layer $( (( DRY_RUN )) && echo previewed || echo installed) (${#starter_rules[@]} rules; hook registrations listed below)"
     else
-        ok "Fresh-laptop core installed (2 rules + 4 hook registrations)"
+        ok "Fresh-laptop core $( (( DRY_RUN )) && echo previewed || echo installed) (${#starter_rules[@]} rules; hook registrations listed below)"
     fi
     fi  # idempotency guard
 
@@ -601,6 +649,7 @@ if ask_yn "Install the recommended fresh-laptop core? (2 rules + 4 deterministic
     hook_configs=(
         'PreToolUse|Bash|PowerShell|bash-pretooluse-dispatcher.py|30'
         'PreToolUse|Write|Edit|config-guard.py|30'
+        'PreToolUse|Write|Edit|script-content-guard.py|15'
         'PreToolUse|Read|read-deny-guard.py|15'
         'PostToolUse|mcp__.*|result-injection-guard.py|30'
     )
@@ -609,6 +658,9 @@ if ask_yn "Install the recommended fresh-laptop core? (2 rules + 4 deterministic
             'PostToolUse|mcp__.*|Bash|Read|Glob|Grep|loop-detector.py|20'
             'UserPromptSubmit|.*|prompt-secret-scan.py|30'
             'PostToolUse|Bash|Read|mcp__.*|output-secret-redact.py|30'
+            'UserPromptSubmit|.*|compaction-budget.py|10'
+            'UserPromptSubmit|.*|proceed-gate.py|10'
+            'PostCompact||compaction-budget.py|10'
         )
     fi
 
@@ -621,7 +673,9 @@ if ask_yn "Install the recommended fresh-laptop core? (2 rules + 4 deterministic
     fi
 
     if ask_yn "Wire these hooks into settings.json?" "y"; then
-        if (( ${#missing_starter_hooks[@]} )); then
+        if (( DRY_RUN )); then
+            wire_hooks "${hook_configs[@]}"   # prints the registrations; the copy above was a preview too
+        elif (( ${#missing_starter_hooks[@]} )); then
             warn "Not wiring starter hooks: the starter copy was incomplete (${missing_starter_hooks[0]} missing or unusable)."
         else
             wire_hooks "${hook_configs[@]}"
@@ -633,9 +687,11 @@ if ask_yn "Install the recommended fresh-laptop core? (2 rules + 4 deterministic
     # .git/hooks/. This was the known install.sh gap from the 2026-06-10
     # review; bin/setup-githooks.py existed but nothing invoked it.
     if [[ -d "$SCRIPT_DIR/.githooks" ]] && ask_yn "Activate this clone's .githooks/ (pre-push marketplace-drift gate)?" "y"; then
+        if (( DRY_RUN )); then dry "git config core.hooksPath .githooks in $SCRIPT_DIR"; else
         (cd "$SCRIPT_DIR" && git config core.hooksPath .githooks) \
             && ok "githooks activated (core.hooksPath=.githooks)" \
             || warn "could not set core.hooksPath (not a git checkout?)"
+        fi
     fi
 
     echo ""
@@ -658,8 +714,10 @@ install_architecture_doc
 if [[ -f "$SCRIPT_DIR/CLAUDE.template.md" ]]; then
     if [[ ! -f "$CLAUDE_DIR/CLAUDE.md" ]]; then
         if ask_yn "Install CLAUDE.template.md as your CLAUDE.md?"; then
+            if (( DRY_RUN )); then dry "copy CLAUDE.template.md to $CLAUDE_DIR/CLAUDE.md"; else
             cp "$SCRIPT_DIR/CLAUDE.template.md" "$CLAUDE_DIR/CLAUDE.md"
             ok "Installed CLAUDE.md (customize it for your workflow)"
+            fi
         fi
     else
         info "CLAUDE.md already exists — skipping template"

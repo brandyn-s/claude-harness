@@ -260,12 +260,14 @@ def test_check_hooks_documented_but_unwired_is_hard():
     assert any("ghost.py" in h and "NOT wired" in h for h in hard)
 
 
-def test_check_hooks_wired_but_undocumented_is_advisory_only():
+def test_check_hooks_wired_but_undocumented_is_hard():
+    """HARD since 2026-09-06 (was advisory): hooks/README.md is the registry, and
+    four wired hooks -- one in the fresh core -- had no row when it was advisory."""
     arch = "## Layer 5\n#### PreToolUse\n| x | (none) | command | y |\n### Rules\n"
     settings_text = r'"command": "\"$HOME/.claude/hooks/run-hook\" extra.py"'
     hard, advisory = _mod.check_hooks(arch, settings_text)
-    assert hard == []
-    assert any("extra.py" in a and "undocumented" in a for a in advisory)
+    assert any("extra.py" in h and "undocumented" in h for h in hard)
+    assert not any("extra.py" in a for a in advisory)
 
 
 def test_hook_timeouts_key_exec_form_by_script_not_dispatcher():
@@ -452,8 +454,8 @@ def test_check_hooks_treats_readme_rows_as_documented():
         r'"command": "\"$HOME/.claude/hooks/run-hook\" nowhere.py"' "\n"
     )
     readme = "## Hook Inventory\n| `inventory-only.py` | PostToolUse | z | w |\n"
-    _hard, advisory = _mod.check_hooks(arch, settings_text, readme)
-    flagged = {a for a in advisory if "undocumented" in a}
-    assert any("`nowhere.py`" in a for a in flagged), advisory
-    assert not any("`inventory-only.py`" in a for a in flagged), advisory
-    assert not any("`guard.py`" in a for a in flagged), advisory
+    hard, _advisory = _mod.check_hooks(arch, settings_text, readme)
+    flagged = {h for h in hard if "undocumented" in h}
+    assert any("`nowhere.py`" in h for h in flagged), hard
+    assert not any("`inventory-only.py`" in h for h in flagged), hard
+    assert not any("`guard.py`" in h for h in flagged), hard

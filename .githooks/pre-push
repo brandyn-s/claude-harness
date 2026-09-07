@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# pre-push: replay the guards against the local transcript corpus when a push
+# changes them.
+#
+# The corpus is the only oracle the guard predicates have, and CI cannot see it
+# (it is the operator's own sessions). So the gate runs here, at the keyboard,
+# and only when it matters: a push that touches bash-security-guard.py,
+# script-content-guard.py or bash_policy_tables.py. Seven seconds over ~3,400
+# transcripts. It fails on a fire rate above the 10% gate, on python-native
+# exfiltration fires growing past the number recorded in the hook's manifest, or
+# on an analysis error. A machine with no corpus passes with a note.
+#
+# Install with `python3 bin/setup-githooks.py`. Bypass once with
+# HARNESS_SKIP_REPLAY=1 (and say why in the PR).
+set -euo pipefail
+repo="$(git rev-parse --show-toplevel)"
+zero=0000000000000000000000000000000000000000
+changed=""
+while read -r _local_ref local_sha _remote_ref remote_sha; do
+  [ "$local_sha" = "$zero" ] && continue                     # branch deletion
+  if [ "$remote_sha" = "$zero" ]; then
+    range="$(git merge-base "$local_sha" origin/HEAD 2>/dev/null || git rev-list --max-parents=0 "$local_sha" | tail -1)..$local_sha"
+  else
+    range="$remote_sha..$local_sha"
+  fi
+  changed+="$(git diff --name-only "$range" -- hooks/bash-security-guard.py hooks/script-content-guard.py hooks/bash_policy_tables.py 2>/dev/null || true)"$'\n'
+done
+if [ -z "$(printf '%s' "$changed" | tr -d '[:space:]')" ]; then
+  exit 0
+fi
+if [ -n "${HARNESS_SKIP_REPLAY:-}" ]; then
+  echo "pre-push: guard files changed; replay skipped by HARNESS_SKIP_REPLAY" >&2
+  exit 0
+fi
+echo "pre-push: guard predicates changed in this push; replaying the corpus (bin/replay-script-content-guard.py --check)" >&2
+python3 "$repo/bin/replay-script-content-guard.py" --check

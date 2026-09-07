@@ -25,7 +25,7 @@ prohibited_actions:
   - "use sunk cost to justify continuing infrastructure that wasn't asked for"
   - "reset the outcome clock by adding verification"
   - "let a temporary or one-off harness grow uncontrolled"
-enforcement_coverage: none
+enforcement_coverage: partial  # proceed-gate (2026-09-06) restates DO/NOT/CHECK on bare continuations; advisory
 incidents:
   - date: "2026-04-24"
     summary: "Azure Automation NetSuite sync: user asked to schedule sync; built 17-tool MCP over ~3 hours before the sync was deployed. az CLI scripts could have shipped in ~1 hour"

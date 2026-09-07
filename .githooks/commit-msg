@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# commit-msg: no organisation identifier enters a commit message.
+#
+# This repository is the public core of a private configuration
+# (docs/consuming-from-a-private-overlay.md). A lesson that crosses from the
+# overlay into the core carries the shape, not the instance -- and a commit
+# message is the one surface the file scanners never see. The denylist is held
+# as digests in scripts/deidentification_residue.py. Install with
+# `python3 bin/setup-githooks.py` (sets core.hooksPath to .githooks).
+set -euo pipefail
+repo="$(git rev-parse --show-toplevel)"
+if ! python3 "$repo/scripts/deidentification_residue.py" --message-file "$1" --reveal; then
+  echo "commit-msg: the message names something that must not leave the private overlay." >&2
+  echo "            Describe the shape, not the instance (host, tenant, ticket, person, codename)." >&2
+  exit 1
+fi

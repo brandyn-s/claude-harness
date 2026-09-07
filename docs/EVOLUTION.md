@@ -2,7 +2,7 @@
 
 > Chronological record of what was built, what was tried, what evidence drove each decision, and what changed. For current-state documentation, see ARCHITECTURE.md.
 >
-> Last updated: 2026-03-03.
+> Last updated: 2026-09-06. Entries between March and August live in the private source repository's history; this public log resumes at the rebuild.
 
 ---
 
@@ -222,10 +222,31 @@ Implementation: six reversible phases in PRs #78-88. Old artifacts deleted only 
 
 ---
 
+## August 31 - September 6: Public rebuild, fresh-laptop core, and the boundary artifacts
+
+| Date | Decision | Evidence |
+|------|----------|---------|
+| Aug 31 | Initial public commit as a curated export; 32 environment-bound skills removed; identifiers neutralised; gitleaks with a known-positive control in CI | Squashed history; `.gitleaks.toml` allowlist pinned to two fixture files |
+| Sep 1-3 | Fresh-laptop profile: 2 rules + Bash dispatcher, config-guard, read-deny-guard, result-injection-guard; `acceptEdits` + sandbox auto-allow instead of `auto` + blanket Bash | `docs/fresh-laptop-control-audit.md`: 97,380 measured ambient tokens; `promise-checker` vs `outcome-over-verification` conflict |
+| Sep 3 | `never-stop-early` and `validate-to-improve` deleted; rules ratchet plan written (198,971 B -> 50-60 KB band) | `docs/rules-ratchet-plan.md`; ambient-budget ledger rows -2,160 / -5,034 |
+| Sep 3-4 | Skill body-cap decisions: compaction banners removed from skill bodies; WORKFLOW skills split, PERIODIC exempt; `compaction-continuity.py` carries the re-invoke reminder instead | `docs/skill-cap-decisions.md`; `scripts/token-audit.py` |
+| Sep 4 | Manifest gate restored in CI with a self-test; ruff pinned to a correctness core at zero findings | `manifests/compile.py --self-test`; `scripts/test_ruff_clean.py` |
+| Sep 6 | `script-content-guard.py`: the Bash guard's catastrophic checks applied to script files at Write time and execute time; the guard's `ENV_VAR_DIAGNOSTIC` fixed for nested expansions | Staged spec of 2026-08-12 (two live keys leaked via `zsh verify_probes.sh`); corpus replay over 933 sessions: 73 fires in 13,894 script writes (0.53%) |
+| Sep 6 | `check_python_source_exfil`: an ast taint walk for Python source (credential files, `SECRET`-shaped env vars, keychain reads → request bodies, `params=`, URLs), applied to `.py` files, `python -c` bodies and heredocs. Auth headers and the OAuth credential grant pass; a secret in a payload to a host outside `SAFE_RE` blocks | 94% of script-like writes in the corpus are `.py`, and the shell grammar sees none of `requests.post(url, data=open(...).read())`. Six calibration cuts against the same 13,894-write corpus took the check from 350 fires (every bearer header) to 1 (an API key in a query string); the history is in the hook's manifest |
+| Sep 6 | Ledger completion: PostCompact audits the compact summary against the acceptance ledger and appends `~/.claude/audit/ledger-audit-YYYYMMDD.jsonl` (`compaction-budget.py`); a dropped REJECTED entry is named once on the next prompt; `bin/ledger-audit-report.py` rolls the rows up; `render_for_injection` is frame-first (rejected → what done means → how) and labels INTENT.md-sourced entries | `session_ledger.py` promised a PostCompact audit in its docstring and nothing performed it — the hypothesis it was built on (compaction drops acceptance state) had no instrument. Continuous atomic saves make a PreCompact persistence step unnecessary; the docstring now says so instead of promising one |
+| Sep 6 | Boundary half of the deleted `never-stop-early`: `rules/session-boundaries.md`, `compaction-budget.py`, `proceed-gate.py`, `skills/frame`, per-model note at SessionStart; the acceptance ledger gets its first producer | Week of Aug 30: arcs of 20/24/39 h with three or more compactions; 35 of 58 corrective turns in six long sessions; a third of prompts bare continuations |
+| Sep 6 | Inventory numbers in README / ARCHITECTURE / AGENTS generated from the tree (`bin/build-doc-counts.py`) and gated in CI; phantom `hooks/README.md` rows made a hard drift failure | Evaluation found README 59 hooks / seven agents, ARCHITECTURE 73 hooks / 38 rules, AGENTS coverage 180/192 against a tree of 61 / 6 / 33 / 162-173 |
+
+**What the rebuild kept from March:** the hook-over-rule principle, the manifest graph, the incident-backed rules. **What it reversed:** the assumption that a rule earns its ambient place by having been written. The promotion gate in `docs/fresh-laptop-control-audit.md` is now the entry condition, and the ambient corpus is bounded by a ledger whose ceiling is derived, not pinned.
+
+---
+
 ## Recurring Patterns
 
 - When a design choice "makes sense" but usage data contradicts it, trust the data. Domain agents, domain-specific skills, and interactive Q&A capture all failed this test.
 - If it must always happen, make it a hook. If it should usually happen, make it a rule. Every major safety improvement came from converting a rule to a hook.
+- A guard that inspects one surface is bypassed by the adjacent surface its own advice points at (command text vs. script files, 2026-08-12). When a control's remedy text says "do X instead", X needs the same control.
+- Numbers in prose drift on the next file add; generate them or do not print them (2026-07-29 note, re-learned 2026-09-06).
 - Ship, measure, correct. The API Gateway went through 5 failed approaches. The agent model lasted two weeks. The mcp-create pipeline accumulated 32 fixes. Reversible phased migrations are the right default.
 - Spend time on research before building. Source-code verification of the gateway landscape saved us from adopting a platform with fabricated OBO claims.
 - Operational knowledge and strategic knowledge need different storage. Topic files for "Airlock's type field must be a list." Knowledge base for "we chose OBO because of GCC High audit requirements."

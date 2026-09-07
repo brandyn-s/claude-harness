@@ -16,6 +16,9 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+          # The residue scan over a pull request's commit MESSAGES needs the
+          # commits themselves, not a depth-1 snapshot of the tree.
+          fetch-depth: 0
 
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
@@ -37,13 +40,49 @@ jobs:
       # anything cannot report success.
       # Restores the gate the source repo had and this export lost; without it,
       # dangling manifest references accumulated with nothing complaining.
+      # No --no-reindex: the cached index passed a coverage-label drift that a fresh
+      # index caught (2026-09-06). The reindex costs seconds; the drift cost a red suite.
       - name: Validate the manifest graph
-        run: python3 manifests/compile.py --root . --check --strict-semantic --no-reindex
+        run: python3 manifests/compile.py --root . --check --strict-semantic
       - name: Prove the manifest validator's detectors still fire
         run: python3 manifests/compile.py --self-test --root .
 
       - name: Validate hook and test target paths
         run: python3 scripts/validate-hook-paths.py
+
+      # The file scanner runs in the suite; a commit message is the one surface it
+      # never sees, and a public repository's history cannot be un-published. The
+      # .githooks/commit-msg hook catches this at the keyboard; this is the same
+      # check for a contributor who did not install it. Tokens are masked in the log.
+      - name: No organisation identifiers in the pull request's commit messages
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: python3 scripts/deidentification_residue.py --commits "${BASE_SHA}..HEAD"
+
+      # The inventory numbers in README / ARCHITECTURE / AGENTS are generated from
+      # the tree (bin/build-doc-counts.py). A hand-typed count drifts the moment a
+      # file is added; a generated one fails here instead of in a reader's trust.
+      - name: Inventory numbers in the docs match the tree
+        run: python3 bin/build-doc-counts.py --check
+
+      # Prove that gate can fail: plant a wrong number, require rejection, restore.
+      - name: Prove the doc-count gate fires
+        run: |
+          set -euo pipefail
+          cp README.md /tmp/readme.bak
+          sed -i 's|<!-- count:hooks -->[0-9,]*<!-- /count -->|<!-- count:hooks -->9999<!-- /count -->|' README.md
+          if python3 bin/build-doc-counts.py --check >/dev/null 2>&1; then
+            cp /tmp/readme.bak README.md
+            echo "::error::doc-count gate did NOT reject a planted wrong number - it is vacuous"
+            exit 1
+          fi
+          cp /tmp/readme.bak README.md
+          python3 bin/build-doc-counts.py --check >/dev/null
+          echo "doc-count gate fires on a planted wrong number, and is clean after restore"
+
+      - name: Architecture drift gate (hooks, settings, inventory rows)
+        run: python3 bin/architecture-drift-check.py
 
       # Prove that gate can fail. A validator nobody has watched reject anything is
       # a hypothesis; this one is only reachable by running it deliberately. The
@@ -62,13 +101,13 @@ jobs:
             'description: "CI drift control; never committed"' \
             'requires_rules:' \
             '  - no-such-rule-control' > "$control"
-          if python3 manifests/compile.py --root . --check --no-reindex >/dev/null 2>&1; then
+          if python3 manifests/compile.py --root . --check >/dev/null 2>&1; then
             rm -f "$control"
             echo "::error::manifest gate did NOT reject a dangling reference - it is vacuous"
             exit 1
           fi
           rm -f "$control"
-          python3 manifests/compile.py --root . --check --no-reindex >/dev/null
+          python3 manifests/compile.py --root . --check >/dev/null
           echo "manifest gate fires on a dangling reference, and is clean after removal"
 
       - name: Run the suite

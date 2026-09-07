@@ -12,6 +12,7 @@
     "superplan-status",
     "superplan-loop",
     "interview",
+    "frame",
     "design-evidence-first",
     "debugging-hypotheses",
     "legacy-code-tdd",
@@ -28,6 +29,10 @@
     "bulk-api-script": [],
     "debugging-hypotheses": [],
     "design-evidence-first": [],
+    "frame": [
+      "superplan",
+      "interview"
+    ],
     "interview": [],
     "legacy-code-tdd": [],
     "pr-fix": [],
@@ -73,6 +78,7 @@
     "superplan-status",
     "superplan-loop",
     "interview",
+    "frame",
     "design-evidence-first",
     "debugging-hypotheses",
     "legacy-code-tdd",
