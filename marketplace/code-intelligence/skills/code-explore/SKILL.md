@@ -2,7 +2,7 @@
 
 name: code-explore
 description: "Find and understand code by meaning, combining semantic search with structural graph context."
-when_to_use: 'Use when asked to find code by meaning, understand how something works, or explore code needing both semantic search and structural analysis. Routes to text/semantic search for conceptual queries and auto-chains with graph tools for context. Trigger phrases: "find code", "where is", "how does", "show me the", "find the implementation", "understand this codebase". Do NOT use for structural-only queries — use /codebase-memory-tracing for call chains and callers, /codebase-memory-quality for dead code and fan-out, /codebase-memory-exploring for codebase structure. Also not for file reading (use Read), simple grep (use Grep), or non-code questions.'
+when_to_use: 'Use when asked to find code by meaning, understand how something works, or explore code needing both semantic search and structural analysis. Routes to text/semantic search for conceptual queries and auto-chains with graph tools for context. Trigger phrases: "find code", "where is", "how does", "show me the", "find the implementation", "understand this codebase". Do NOT use for file reading (use Read), simple grep (use Grep), or non-code questions. For structural-only queries the code-graph server ships its own skills (code-graph-tracing, code-graph-quality, code-graph-exploring) with deeper per-domain workflows.'
 argument-hint: "[natural language code query]"
 effort: low
 model: sonnet
@@ -60,15 +60,25 @@ unindexed.
 
 **Metadata:** `code-graph` tools return a `_metadata` envelope with `freshness` (index-vs-disk state) and `provenance` (`data_source`). Treat `identity_status` / `identity_reason` on `list_projects` as load-bearing: a project whose checkout moved or vanished reports `status: degraded` and answers queries from stale data. `mcp__code-search__search_code` errors clearly ("No embeddings available…") when `VOYAGE_API_KEY` was unset at index time — that message is the signal to reindex. On this host the key is injected from the macOS keychain by the `code-search-mcp-keychain` launcher, so an unset-key error means the keychain lookup failed, not that the variable was forgotten.
 
-## When to Use This Skill vs codebase-memory-*
+## When to Use This Skill vs the code-graph server's own skills
 
-This skill handles **conceptual** and **mixed** queries that need text/semantic search or both search + structural tools chained together. For **structural-only** queries that only need the graph, use the specialized skill directly:
+This skill handles **conceptual** and **mixed** queries that need text/semantic
+search, or both search and structural tools chained together. For
+**structural-only** queries that only need the graph, the `code-graph` server
+installs its own per-domain skills and they carry deeper workflows
+(verification steps, risk classification, pagination) than this router's
+one-liner table:
 
-- Call chains, callers, callees, impact analysis → `/codebase-memory-tracing`
-- Dead code, fan-out, fan-in, coupling analysis → `/codebase-memory-quality`
-- Codebase structure, function inventory, route listing → `/codebase-memory-exploring`
+- Call chains, callers, callees, impact analysis → `code-graph-tracing`
+- Dead code, fan-out, fan-in, coupling analysis → `code-graph-quality`
+- Codebase structure, function inventory, route listing → `code-graph-exploring`
 
-The specialized skills provide deeper workflows (verification steps, risk classification, pagination) that this router's one-liner routing table cannot match.
+Those are named WITHOUT a leading slash on purpose: they ship with the server,
+not in this repository, so a `/`-prefixed citation would be a dangling chain
+reference to `scripts/validate-skill-chains.py`. This repository previously
+carried its own `codebase-memory-*` fork of them; it was retired 2026-09-07
+because `code-graph install` deletes those directory names as its own legacy on
+every run, so the fork could not survive on any host running both installers.
 
 ## Routing Decision Tree
 

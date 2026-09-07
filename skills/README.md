@@ -1,6 +1,6 @@
 # Skills index
 
-82 skills. **Generated from each `SKILL.md` frontmatter -- do not
+79 skills. **Generated from each `SKILL.md` frontmatter -- do not
 hand-edit; regenerate instead.**
 
 A skill is a procedure Claude invokes by matching your request against the
@@ -23,9 +23,6 @@ Bigger skills push detail into `references/` and deterministic helpers into
 | [`bulk-api-script`](./bulk-api-script/SKILL.md) | Generate a Python script for bulk API operations (100+ results) instead of MCP pagination. | - |
 | [`capture`](./capture/SKILL.md) | Record session decisions, lessons, and breakthroughs as dated entries in the digital garden. | references |
 | [`code-explore`](./code-explore/SKILL.md) | Find and understand code by meaning, combining semantic search with structural graph context. | references |
-| [`codebase-memory-exploring`](./codebase-memory-exploring/SKILL.md) | Explore codebase structure — modules, functions, classes, routes — via the code graph. | references |
-| [`codebase-memory-quality`](./codebase-memory-quality/SKILL.md) | Find dead code, unused functions, and high-fan-out refactor candidates via the code graph. | references |
-| [`codebase-memory-tracing`](./codebase-memory-tracing/SKILL.md) | Trace call chains, callers/callees, and change impact via the code graph. | - |
 | [`codeql`](./codeql/SKILL.md) | Deep dataflow and taint-tracking security analysis with CodeQL. | references |
 | [`context-budget`](./context-budget/SKILL.md) | Audit token overhead from loaded skills, rules, MCP tools, hooks, and CLAUDE.md. | - |
 | [`debugging-hypotheses`](./debugging-hypotheses/SKILL.md) | Companion to superpowers:systematic-debugging for bugs whose cause is not obvious after the first evidence pass: enumerate the code's unusual mechanisms, form two... | - |

@@ -10,7 +10,7 @@ decline them** — that second axis is the one that matters.
 |---|---|---|
 | **Hooks** (<!-- count:hooks -->53<!-- /count --> scripts; <!-- count:fresh_core_hooks -->5<!-- /count --> registrations in the fresh-laptop default) | on matching tool calls | **No** — enforced by the runtime |
 | **Rules** (<!-- count:rules -->34<!-- /count -->; <!-- count:rules_ambient -->27<!-- /count --> ambient, <!-- count:rules_scoped -->7<!-- /count --> path-scoped) | always, in context | Yes (they are text) |
-| **Skills** (<!-- count:skills -->82<!-- /count -->) | on invocation | Yes |
+| **Skills** (<!-- count:skills -->79<!-- /count -->) | on invocation | Yes |
 | **Agents** | on dispatch | Yes |
 | **Reference docs** | on demand | Yes |
 
@@ -158,7 +158,7 @@ that transfers.
 ```
 rules/            always-loaded contracts (+ incidents/, manifests/)
 hooks/            enforcement (+ test-hooks/, session_start_modules/, staged/)
-skills/           invocable procedures (<!-- count:skills -->82<!-- /count -->)
+skills/           invocable procedures (<!-- count:skills -->79<!-- /count -->)
 agents/           subagent definitions
 docs/rule-reference/   long-form rationale, on demand
 platform-rules/   host overlays (macOS / Windows)

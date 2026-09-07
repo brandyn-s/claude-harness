@@ -3,7 +3,7 @@
 A working [Claude Code](https://docs.claude.com/en/docs/claude-code) harness:
 **<!-- count:hooks -->53<!-- /count --> hook scripts** (plus <!-- count:hook_modules -->9<!-- /count --> shared modules),
 **<!-- count:rules -->34<!-- /count --> rules** (<!-- count:rules_ambient -->27<!-- /count --> of them always loaded),
-**<!-- count:skills -->82<!-- /count --> skills**, and the <!-- count:agents -->6<!-- /count --> agent definitions that
+**<!-- count:skills -->79<!-- /count --> skills**, and the <!-- count:agents -->6<!-- /count --> agent definitions that
 tie them together — <!-- count:source_files -->1,682<!-- /count --> tracked source files, plus a
 generated plugin tree under `marketplace/` (another <!-- count:marketplace_files -->1,074<!-- /count -->
 files) that is not meant to be read (see [marketplace/README.md](marketplace/README.md)).
@@ -137,7 +137,7 @@ are not public:
 | dependency | skills that hard-require it |
 |---|---|
 | `memory-search` (private MCP server) | `capture`, `distill`, `recall`, `review-learnings` |
-| `codebase-memory-mcp` (private MCP server) | `api-ingest`, `code-explore`, `codebase-memory-exploring`, `codebase-memory-quality`, `codebase-memory-tracing`, `verify-search-result` |
+| `code-graph` + `code-search` (public MCP servers) | `api-ingest`, `code-explore`, `index-repo`, `verify-search-result` |
 | `superpowers@claude-plugins-official` (public plugin; `install.sh` warns when it is not enabled) | `design-evidence-first`, `debugging-hypotheses`, `legacy-code-tdd`, `review-depth-by-risk` are companions to it; `Skill(superpowers:brainstorming)` is in the author allow list |
 
 Those skills will no-op or error without their server. The
@@ -186,7 +186,7 @@ secret before it believes a clean scan.
 ```
 rules/            ambient engineering rules (+ incidents/ and manifests/)
 hooks/            PreToolUse / PostToolUse / session-lifecycle enforcement
-skills/           invocable procedures (<!-- count:skills -->82<!-- /count --> of them)
+skills/           invocable procedures (<!-- count:skills -->79<!-- /count --> of them)
 agents/           subagent definitions
 contracts/        run-time contracts: environment catalog, model capabilities,
                   hook output shapes, guard residual risks
@@ -214,7 +214,7 @@ that you almost certainly do not need it. So, in order:
 | **three files** | + [`rules/verify-effectiveness.md`](rules/verify-effectiveness.md), [`rules/diagnose-before-fix.md`](rules/diagnose-before-fix.md) | The two rules that pay for themselves fastest |
 | **the argument** | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Five layers, and which of them can actually enforce anything |
 | **the receipts** | [`rules/incidents/`](rules/incidents/) | The failures each rule was written against |
-| **everything** | [`skills/README.md`](skills/README.md) | Index of all <!-- count:skills -->82<!-- /count --> skills |
+| **everything** | [`skills/README.md`](skills/README.md) | Index of all <!-- count:skills -->79<!-- /count --> skills |
 
 Taking one hook is a legitimate outcome. Nothing here requires adopting the
 whole thing, and most of it you shouldn't.

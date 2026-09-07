@@ -202,8 +202,7 @@ install_skills() {
                     )
     local knowledge=(distill recall garden retrospective review-learnings
                      validate-changes healthcheck)
-    local codeintel=(code-explore codebase-memory-exploring codebase-memory-quality
-                     codebase-memory-tracing index-repo)
+    local codeintel=(code-explore index-repo)
     local research=(gather-intel gather-repos evaluate-repos scout scout-skills
                     gather-claude gather-research deep-dive)
 

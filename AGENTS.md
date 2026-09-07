@@ -75,7 +75,7 @@ Available queries:
 
 | Query | Answers |
 |---|---|
-| `coverage` | how many components have manifests (currently <!-- count:manifests_coverage -->167/178 (93%)<!-- /count -->) |
+| `coverage` | how many components have manifests (currently <!-- count:manifests_coverage -->164/175 (93%)<!-- /count -->) |
 | `enforcement_chain` | which hook actually enforces a given rule |
 | `unenforced_rules` | rules with **no** mechanical backing — advisory only |
 | `hooks_for_tool <Tool>` | every hook that fires for a tool |
