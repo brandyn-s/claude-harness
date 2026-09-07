@@ -8,8 +8,8 @@ requires_tools:
   - Read
   - Write
   - Bash
-  - mcp__codebase-memory-mcp__get_architecture
-  - mcp__codebase-memory-mcp__search_graph
+  - mcp__code-graph__get_architecture
+  - mcp__code-graph__search_graph
 requires_topics: []
 requires_rules: []
 requires_skills: []
@@ -33,4 +33,4 @@ preconditions:
 guardrails: []
 threat_model: writes_local
 prose_only_tools:  # mentioned in SKILL.md prose, deliberately not used (B9/F4; reconcile-skill-tools honors this)
-  - mcp__codebase-memory-mcp__query_graph  # describes a downstream orchestrator's optional capability, not this skill's usage
+  - mcp__code-graph__query_graph  # describes a downstream orchestrator's optional capability, not this skill's usage

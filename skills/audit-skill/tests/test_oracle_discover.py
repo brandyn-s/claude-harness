@@ -47,15 +47,15 @@ def test_phase1_reproducer_infers_for_h4():
 def test_phase1_reproducer_infers_for_t1():
     """T1 (phantom MCP tool) → grep on the skill dir. The grep
     command regex-escapes the hyphen for safety, so the literal
-    match in the command will be ``mcp__code\\-graph__index_status``
+    match in the command will be ``mcp__code\\-search__index_status``
     — this test accepts either form."""
     _, _, infer = _load_oracle()
     r = infer("T1", "example",
-              "reference to known-phantom MCP tool 'mcp__code-graph__index_status'")
+              "reference to known-phantom MCP tool 'mcp__code-search__index_status'")
     assert r.type == "grep"
     # Escaped or unescaped — both are valid for the inferred grep.
-    assert "mcp__code-graph__index_status" in r.command or \
-           "mcp__code\\-graph__index_status" in r.command
+    assert "mcp__code-search__index_status" in r.command or \
+           "mcp__code\\-search__index_status" in r.command
 
 
 def test_phase1_reproducer_infers_for_p1_baseDir():

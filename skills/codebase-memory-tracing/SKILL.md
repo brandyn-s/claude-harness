@@ -10,10 +10,10 @@ metadata:
   author: example-security-engineering
   version: "1.0"
 compatibility:
-  # Requires the codebase-memory-mcp server for call chain traversal.
+  # Requires code-graph (structural graph).
   requires:
-    - mcp: codebase-memory-mcp
-allowed-tools: Grep mcp__codebase-memory-mcp__detect_changes mcp__codebase-memory-mcp__get_code_snippet mcp__codebase-memory-mcp__query_graph mcp__codebase-memory-mcp__search_graph mcp__codebase-memory-mcp__trace_call_path
+    - mcp: code-graph
+allowed-tools: Grep mcp__code-graph__detect_changes mcp__code-graph__get_code_snippet mcp__code-graph__query_graph mcp__code-graph__search_graph mcp__code-graph__trace_call_path
 ---
 
 ## codebase-memory-tracing

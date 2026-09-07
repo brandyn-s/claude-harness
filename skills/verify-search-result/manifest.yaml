@@ -8,7 +8,7 @@ requires_tools:
   - "Glob"
   - "Grep"
   - "Read"
-  - "mcp__codebase-memory-mcp__*"
+  - "mcp__code-graph__get_code_snippet"
   - "AskUserQuestion"
 requires_topics:
   - security.md

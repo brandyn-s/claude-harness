@@ -11,7 +11,7 @@ required_codes:
   - D3c  # scripts/orphan.py never referenced
   - M1   # argument-hint "[X]" brackets but manifest required:true
   - M2   # mcp__unused__never_invoked declared but unused
-  - T1   # known-phantom mcp__code-graph__index_status
+  - T1   # known-phantom mcp__code-search__index_status
   - C1   # scripts/run.py imports fcntl without platform guard
   - C4   # scripts/run.py uses literal "$HOME" string
   - C2   # /tmp/ in bash docs

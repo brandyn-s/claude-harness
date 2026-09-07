@@ -4,20 +4,20 @@ description: "Find code by meaning or understand how something works. Routes to 
 category: code-intel
 requires_tools:
   - Read
-  - mcp__codebase-memory-mcp__detect_changes
-  - mcp__codebase-memory-mcp__get_architecture
-  - mcp__codebase-memory-mcp__get_code_snippet
-  - mcp__codebase-memory-mcp__get_graph_schema
-  - mcp__codebase-memory-mcp__list_projects
-  - mcp__codebase-memory-mcp__query_graph
-  - mcp__codebase-memory-mcp__query_security_surfaces
-  - mcp__codebase-memory-mcp__rank_by_query
-  - mcp__codebase-memory-mcp__search_code_semantic
-  - mcp__codebase-memory-mcp__search_graph
-  - mcp__codebase-memory-mcp__trace_call_path
-  - mcp__codebase-memory-mcp__find_similar_functions
-  - mcp__codebase-memory-mcp__index_status
-  - mcp__codebase-memory-mcp__search_code
+  - mcp__code-graph__detect_changes
+  - mcp__code-graph__get_architecture
+  - mcp__code-graph__get_code_snippet
+  - mcp__code-graph__get_graph_schema
+  - mcp__code-graph__list_projects
+  - mcp__code-graph__query_graph
+  - mcp__code-graph__query_security_surfaces
+  - mcp__code-graph__code_localize
+  - mcp__code-search__search_code
+  - mcp__code-graph__search_graph
+  - mcp__code-graph__trace_call_path
+  - mcp__code-search__find_similar_code
+  - mcp__code-graph__index_status
+  - mcp__code-graph__search_code
 requires_topics: []
 requires_rules:
   - search-efficiency
@@ -45,4 +45,4 @@ preconditions:
 guardrails: []
 threat_model: read_only
 prose_only_tools:  # mentioned in SKILL.md prose, deliberately not used (B9/F4; reconcile-skill-tools honors this)
-  - mcp__codebase-memory-mcp__index_repository  # Pre-flight Check step 2 — 'Do NOT attempt to call index_repository from this skill'
+  - mcp__code-graph__index_repository  # Pre-flight Check step 2 — 'Do NOT attempt to call index_repository from this skill'

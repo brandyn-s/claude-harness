@@ -20,7 +20,7 @@ literal string and ignores backtick context would falsely fire.
 echo "safe-line"
 ```
 
-The string `mcp__code-graph__index_status` is mentioned here only
+The string `mcp__code-search__index_status` is mentioned here only
 because it appears in our known-tools.yaml registry as a known-phantom
 — this skill does NOT invoke it. A reproducer that just greps for
 the name without checking it's referenced from the body's tool-use

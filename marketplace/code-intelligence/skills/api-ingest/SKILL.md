@@ -1,13 +1,15 @@
 ---
 name: api-ingest
 description: 'Ingest API documentation into the searchable doc library (probes OpenAPI/llms.txt, falls back to Firecrawl scraping).'
-when_to_use: 'Use when API documentation needs to be ingested for future reference. Accepts URLs (HTML doc sites, OpenAPI spec URLs), local files (OpenAPI JSON/YAML, PDF, Postman collections), or GitHub raw URLs. Probes for OpenAPI/llms-full.txt first (10x cheaper than scraping), falls back to Firecrawl. Stores in ~/Documents/api-docs/{api-name}/, indexes with codebase-memory-mcp for semantic retrieval. Trigger phrases: "api-ingest", "ingest API docs", "add API docs", "index this API". Do NOT use for building MCP servers from specs or for pre-coding constraint checks (use /api-preflight).'
+when_to_use: 'Use when API documentation needs to be ingested for future reference. Accepts URLs (HTML doc sites, OpenAPI spec URLs), local files (OpenAPI JSON/YAML, PDF, Postman collections), or GitHub raw URLs. Probes for OpenAPI/llms-full.txt first (10x cheaper than scraping), falls back to Firecrawl. Stores in ~/Documents/api-docs/{api-name}/, indexes with code-search for semantic retrieval. Trigger phrases: "api-ingest", "ingest API docs", "add API docs", "index this API". Do NOT use for building MCP servers from specs or for pre-coding constraint checks (use /api-preflight).'
 argument-hint: "[url-or-filepath] [--name api-name]"
 compatibility:
-  # Requires MCP servers: firecrawl, codebase-memory-mcp. Optional: context7-docs (falls back to ingesting regardless if unavailable).
+  # Requires MCP servers: firecrawl + code-search (the semantic index the api-docs
+  # project lives in). Optional: context7-docs (falls back to ingesting regardless
+  # if unavailable).
   requires:
-    - mcp: codebase-memory-mcp
-      tools: [index_repository, index_status, search_code_semantic]
+    - mcp: code-search
+      tools: [index_directory, get_index_status, search_code]
     - mcp: firecrawl
   optional:
     - mcp: context7-docs
@@ -15,7 +17,7 @@ compatibility:
 metadata:
   author: example-security-engineering
   version: "1.0"
-allowed-tools: Agent AskUserQuestion Bash Glob Read Write mcp__codebase-memory-mcp__index_repository mcp__codebase-memory-mcp__index_status mcp__codebase-memory-mcp__search_code_semantic mcp__context7-docs__query-docs mcp__context7-docs__resolve-library-id mcp__firecrawl__*
+allowed-tools: Agent AskUserQuestion Bash Glob Read Write mcp__code-search__index_directory mcp__code-search__get_indexing_progress mcp__code-search__get_index_status mcp__code-search__search_code mcp__context7-docs__query-docs mcp__context7-docs__resolve-library-id mcp__firecrawl__*
 effort: medium
 ---
 
@@ -25,7 +27,7 @@ Convert API documentation from any source into indexed, searchable markdown
 that Claude can query during future sessions.
 
 **Output**: `~/Documents/api-docs/{api-name}/`
-**Index**: single `api-docs` project in codebase-memory-mcp (Voyage embeddings)
+**Index**: single `api-docs` project in `code-search` (Voyage embeddings)
 
 ---
 
@@ -200,32 +202,33 @@ After `reference.md` and `constraints.md` exist, emit `llms-full.txt` (concatena
 
 ---
 
-## Phase 4: Index with codebase-memory-mcp (improvement 4)
+## Phase 4: Index with code-search (improvement 4)
 
 **Always index the parent directory `~/Documents/api-docs` with `force=true`.**
 The project name is auto-derived from the path (`Users-<user>-Documents-api-docs`)
 — there is one canonical api-docs project; per-subdir indexing fragments it.
 
 ```
-mcp__codebase-memory-mcp__index_repository(
-  repo_path="/Users/<user>/Documents/api-docs",
-  force=true,
-  skip_report=true
+mcp__code-search__index_directory(
+  directory_path="/Users/<user>/Documents/api-docs",
+  incremental=false
 )
 ```
 
-- **`force=true` is REQUIRED, not optional, for this skill** (verified 2026-06):
-  an incremental run (omitting `force`) updates the GRAPH layer (node/edge counts
-  grow) but does **NOT** regenerate the Voyage EMBEDDINGS for new files — so the
-  new API's docs parse structurally yet are **silently unsearchable** by semantic
-  query (`embeddings_indexed` stays flat; the test query returns only the old
-  APIs). Because semantic prose retrieval is the entire point of this index,
-  `force=true` (full re-embed of all api-docs) is mandatory on every ingest. The
-  full re-embed of a handful of small markdown files is a few seconds — cheap.
-- `skip_report=true` stops the tool writing `ARCHITECTURE_REPORT.md` into the
-  docs dir (Phase 5 cleanup would otherwise have to remove it).
-- Do **not** pass `mode="fast"` — fast mode skips docs/large files, the opposite
-  of what we want; the default `full` mode embeds the markdown.
+- **`incremental=false` is REQUIRED, not optional, for this skill.** It is the
+  split-backend equivalent of the old unified `force=true`: `incremental` defaults
+  to TRUE, and an incremental run can leave newly added files without Voyage
+  EMBEDDINGS — so the new API's docs are **silently unsearchable** by semantic
+  query while the test query still returns only the older APIs. Because semantic
+  prose retrieval is the entire point of this index, a full re-embed is mandatory
+  on every ingest. Re-embedding a handful of small markdown files takes seconds.
+- `index_directory` is ASYNCHRONOUS: it returns `job_id` with `index_ready=false`.
+  Poll `mcp__code-search__get_indexing_progress` until it completes, then verify
+  with `mcp__code-search__get_index_status` — do NOT treat the initial return as
+  a finished index.
+- No report parameter is needed on this backend: `code-search` writes its
+  artifacts under its own cache and never drops `ARCHITECTURE_REPORT.md` into the
+  docs directory the way the graph indexer does.
 - Markdown files are embedded as `Module` nodes via Voyage `voyage-4-large`.
 
 `index_repository` returns when indexing completes (synchronous) — no polling
@@ -240,7 +243,7 @@ mandatory above — without it the graph grows but embeddings don't.)
 
 **Test query (semantic — Voyage embeddings, NOT grep) — this IS the verification:**
 ```
-mcp__codebase-memory-mcp__search_code_semantic(
+mcp__code-search__search_code(
   query="<api-name> authentication required scope",
   project="Users-<user>-Documents-api-docs"
 )
@@ -253,39 +256,31 @@ Confirm `embeddings_indexed` in the response rose by the new file count. Use
 `search_code_semantic`, not `search_code` — the latter is grep-shaped and won't
 rank prose by meaning.
 
-**Degradation path — codebase-memory-mcp not connected this session (MANDATORY,
-not an error).** Probe with ToolSearch (`select:mcp__codebase-memory-mcp__index_repository`);
+**Degradation path — `code-search` not connected this session (MANDATORY,
+not an error).** Probe with ToolSearch (`select:mcp__code-search__index_directory`);
 if empty, the server is unregistered or failed to start. In order:
 
-1. **CLI fallback (same engine, no MCP session needed):** run the index +
-   verification through the binary directly. The Voyage key must be in env for
-   embeddings to regenerate — mirror the launcher's Keychain pattern in a
-   SCRIPT FILE (inline `$(security ...)` substitution is classifier-blocked;
-   a written script that exports and never prints the value is the sanctioned
-   shape, same as `~/.local/bin/codebase-memory-mcp-launch`):
+1. **Diagnose the server.** `code-search-mcp` exposes a `doctor` subcommand that
+   checks configuration, storage, and provider reachability:
 
    ```bash
-   # in a written .zsh script: export VOYAGE_API_KEY from Keychain, then
-   ~/.local/bin/codebase-memory-mcp cli index_repository \
-     '{"repo_path": "/Users/<user>/Documents/api-docs", "force": true, "skip_report": true}'
-   ~/.local/bin/codebase-memory-mcp cli search_code_semantic \
-     '{"query": "<api-name> authentication required scope", "project": "Users-<user>-Documents-api-docs"}'
+   ~/.local/bin/code-search-mcp doctor
    ```
 
-   The same verification contract applies: the new API's files must appear and
-   `embeddings_indexed` must rise. NOTE: the binary's `--help` tool list is
-   STALE — `search_code_semantic` and the `force`/`skip_report` params exist
-   even though help omits them (verified 2026-08-22, v0.7.0-example.3).
-2. **Neither MCP nor CLI available:** record `SEMANTIC-INDEX-DEFERRED` in the
-   Phase 6 report with the reason. The ingested files remain fully valid and
-   grep-able; only semantic retrieval is pending. Do NOT skip silently, and do
-   NOT claim the index updated.
+   There is **no** generic CLI tool-runner on this binary — `--help` advertises
+   only `--transport/--host/--port` plus `doctor` (verified 2026-09-07), so the
+   index CANNOT be driven from the shell. Do not invent a `cli <tool>` invocation.
+2. **MCP unavailable:** record `SEMANTIC-INDEX-DEFERRED` in the Phase 6 report
+   with the reason. The ingested files remain fully valid and grep-able; only
+   semantic retrieval is pending. Do NOT skip silently, and do NOT claim the
+   index updated.
 
 If the server is missing because it was DEREGISTERED (check `~/.claude.json`
-`mcpServers` vs `~/.claude.json.backup`), restore with
-`claude mcp add codebase-memory-mcp --scope user -- ~/.local/bin/codebase-memory-mcp-launch`
-(2026-08-22 incident: the registration vanished from `~/.claude.json` between
-Aug 6 and Aug 22 while the binary and launcher survived; restored the same day).
+`mcpServers`), restore with
+`claude mcp add code-search --scope user -- ~/.local/bin/code-search-mcp-keychain`.
+The `-keychain` launcher injects `VOYAGE_API_KEY` from the macOS keychain; without
+it embeddings cannot regenerate and semantic search fails with
+"No embeddings available…".
 
 ---
 
@@ -396,7 +391,7 @@ Index:        +{nodes_added} nodes (api-docs project, incremental)
 Total index:  {total_nodes} nodes across all APIs
 Graph:        +{N} nodes ({operations} ops, {scopes} scopes) — or warning if 0
 
-Search:  mcp__codebase-memory-mcp__search_code_semantic(query="...", project="Users-<user>-Documents-api-docs")
+Search:  mcp__code-search__search_code(query="...", project="Users-<user>-Documents-api-docs")
 Preflight: /api-preflight {api-name} "<use case>"
 Refresh: /api-ingest {source} --name {api-name}
 ```
@@ -449,5 +444,5 @@ invocation examples with expected timing.
   the retained `llms.txt`/`openapi.json` in the output directory
 - For large specs (>5 MB), slice before indexing
 - Firecrawl: `/map` before `/scrape`, prefer both over `/crawl` on Free
-- The sliced spec file is retained as `openapi.json`/`openapi.yaml` in output; codebase-memory-mcp only embeds parseable source/markdown, so the large JSON spec is not semantically indexed (a GraphQL `schema.json` is likewise retained-but-not-indexed)
+- The sliced spec file is retained as `openapi.json`/`openapi.yaml` in output; code-search only embeds parseable source/markdown, so the large JSON spec is not semantically indexed (a GraphQL `schema.json` is likewise retained-but-not-indexed)
 - `force=true` is REQUIRED on every api-docs index run — incremental updates the graph but NOT the Voyage embeddings, leaving new docs silently unsearchable; the full re-embed of a few small markdown files is only seconds

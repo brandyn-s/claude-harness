@@ -72,7 +72,7 @@ Two reference / context sources feed the proposer:
 
 - Existing `SKILL.md` Step 1 recon (README, CLAUDE.md, SECURITY.md,
   prior threat models). The reconnaissance pass IS the context.
-- `mcp__codebase-memory-mcp__get_architecture` + `search_graph` for indexed
+- `mcp__code-graph__get_architecture` + `search_graph` for indexed
   repos. The graph provides entry-point and module-dependency
   structure as input to the security-relevant-code discovery step.
 
@@ -84,7 +84,7 @@ boundary label.
 ### 4. Tool surface (minimal)
 
 The skill declares: `Glob`, `Grep`, `Read`, `Write`, `Bash`,
-`mcp__codebase-memory-mcp__get_architecture`, `mcp__codebase-memory-mcp__search_graph`.
+`mcp__code-graph__get_architecture`, `mcp__code-graph__search_graph`.
 No specialized linters — POSIX + the graph tools carry the verification.
 
 ### 5. Orchestration / parallelism

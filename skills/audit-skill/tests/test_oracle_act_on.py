@@ -59,7 +59,7 @@ def test_act_on_drops_stale_findings(tmp_path, monkeypatch):
             description="phantom tool reference (already resolved)",
             reproducer=Reproducer(
                 type="grep",
-                command=f"grep -q 'mcp__code-graph__index_status' {target_posix}",
+                command=f"grep -q 'mcp__code-search__index_status' {target_posix}",
             ),
         ),
         # STILL-FIRES: bug is "missing reference" and the file is indeed missing.
@@ -151,7 +151,7 @@ def test_tracker_to_yaml_roundtrip(tmp_path):
         "\n"
         "### example-skill\n"
         "- [drift] [behavior-fix] H1: cited references/missing.md does not exist\n"
-        "- [info] [doc-fix] M2: tool mcp__code-graph__index_status known-phantom\n"
+        "- [info] [doc-fix] M2: tool mcp__code-search__index_status known-phantom\n"
         "- [info] [unverified] B1: skill ships scripts/ but no tests/\n"
         "\n",
         encoding="utf-8",
